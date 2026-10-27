@@ -1,0 +1,1492 @@
+{
+ "schema": 3,
+ "kind": "manual-reading",
+ "options": {
+  "hookup_meter": "fluke33x",
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Fluke 33X ClampMeters - Calibration Information (PN 1618765, June 2001, Rev. 2, 12/03)",
+  "pages": "8-9 (printed = PDF page): Table 2 pp. 8-9; procedure and Figure 4 p. 7; equipment Table 1 p. 5; Figure 2 p. 5; Specifications p. 3",
+  "cite": "Fluke 33X ClampMeters Calibration Information, Table 2 Performance Tests, printed pp. 8-9; limits unchanged, rows flagged against the Specifications (printed p. 3)",
+  "limits": "Manufacturer limits, Table 2, as printed (one set, no interval columns)",
+  "report_note": "Limits are those of the manufacturer's Table 2 (Fluke 33X ClampMeters Calibration Information, printed pp. 8-9), unchanged. The current, inrush and frequency points are driven through a 50-turn coil (calibrator current x 50 = the reading shown); the Uncertainty of a coil point is that of the 5500A/COIL scope lines at the effective current where they cover it, otherwise the calibrator's at the sourced current x 50; the frequency points carry the calibrator's frequency specification. The four ohms limits are looser than the published accuracy of the Specifications (1 % + 5 counts) and are reported as printed.",
+  "note": "Table 2 of the 33X Calibration Information (PN 1618765, Rev. 2, 12/03): \"Performance Tests 333, 334, 335\" (14 rows, printed p. 8) and \"Performance Tests 336, 337 (cont.)\" (27 rows, printed p. 9) = 41 rows (AC volts 5, Min/Max 2, DC volts 8, continuity 2, ohms 4, AC amps 9, inrush 2, DC amps 7, frequency 2). The tables have no step numbers and no X / N/A columns: steps are numbered in table order and the number runs on across the two tables (2A-1 .. 2A-14, then 2B-15 .. 2B-41; the ref T2A #n / T2B #n is the printed row); the models of a row are the table it is printed in (p. 8: 333 334 335; p. 9: 336 337) and the tags printed in the rows (333 / 334, 335 / 337 only / 337), so the points per model are 333: 11, 334: 13, 335: 13, 336: 20, 337: 27. Table 1 (printed p. 5) names a Fluke 5520A (the program drives a Fluke 5522A, 5520A or 5560A, or you set the calibrator by hand), any Fluke DMM and the Fluke 5500A/Coil (50 turns). The \"5520A Output\" column of the amps rows lists the current the jaw sees; the calibrator drives that / 50 through the coil (the meter reads 50 x the calibrator current; an inference, as for every clamp meter), the inrush rows (5 A at 60 Hz) and the frequency rows (5 A at 10 Hz, 10 A at 300 Hz) likewise. The meter has no remote interface: you type the display reading. The manual prints one set of limits; they are used as printed. The four ohms limits (590.5 .. 609.5 and 5905 .. 6095) are looser than the printed Specifications (1 % + 5 counts; the limits are 1.5 % + 5 counts) and the 10 Hz frequency limits are the specification rounded outward: both flagged, nothing changed. High-voltage points go straight to the test value (the manual prescribes no ramp). The display, backlight and keypad checks (printed pp. 5-6) and the calibration ADJUSTMENT (printed pp. 10-12) are not part of this procedure."
+ },
+ "models": {
+  "333": {
+   "name": "Fluke 333",
+   "brand": "Fluke",
+   "model_note": "Fluke 333 clamp meter (400 A, average responding): Table 2 p. 8, 11 points (AC volts, DC volts, continuity, 600 ohm, AC amps through the 50-turn coil)"
+  },
+  "334": {
+   "name": "Fluke 334",
+   "brand": "Fluke",
+   "model_note": "Fluke 334 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points (adds the 6 kohm and inrush rows)"
+  },
+  "335": {
+   "name": "Fluke 335",
+   "brand": "Fluke",
+   "model_note": "Fluke 335 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points (same rows as the 334)"
+  },
+  "336": {
+   "name": "Fluke 336",
+   "brand": "Fluke",
+   "model_note": "Fluke 336 true-rms clamp meter (600 A AC / DC, inrush): Table 2 p. 9, 20 points (adds 400 Hz rows and DC amps)"
+  },
+  "337": {
+   "name": "Fluke 337",
+   "brand": "Fluke",
+   "model_note": "Fluke 337 true-rms clamp meter (999.9 A AC / DC, inrush, frequency): Table 2 p. 9, 27 points (adds Min/Max, 900 A and frequency rows)"
+  }
+ },
+ "groups": {
+  "COIL_AUX": {
+   "title": "Change the cables: 50-turn coil on the calibrator low-current output",
+   "summary": "Calibrator low-current output (5522A / 5520A AUX HI / AUX LO; 5560A VI AUX / OUTPUT LO) -> 50-turn coil (5500A/COIL) -> the meter jaw closed around the coil. No test leads in the meter jacks.",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Test leads",
+     "REMOVE the test leads from the VΩ and COM jacks while current is measured with the jaw (general practice; the Calibration Information does not say)."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Coil",
+     "The wired coil is 50 turns (Table 1, printed p. 5: Fluke 5500A/Coil; Figure 4, printed p. 7). Connect its two ends to the calibrator low-current output: Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current."
+    ],
+    [
+     "Jaw",
+     "Close the jaw around the coil (Figure 4 shows the conductor through the jaw), fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 50 x the calibrator current (0.4 A reads 20 A; 0.1 A reads 5 A)."
+    ],
+    [
+     "LCOMP",
+     "Fluke 5522A / 5520A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (the Calibration Information, printed p. 7 step 4, asks for LCOMP ON on the 5520A for the amp function; 5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "caution": "This point drives current through a coil. Keep the calibrator in STANDBY whenever you touch the coil or leads (the manual: \"make sure the calibrator is in standby mode (STBY)\", printed p. 6).",
+   "diagram": "diagrams/hook_fluke33x_COIL_AUX.png"
+  },
+  "COIL_20A": {
+   "title": "Change the cables: 50-turn coil on the calibrator high-current output",
+   "summary": "Calibrator high-current output (5522A / 5520A 20 A / AUX LO; 5560A 30A / OUTPUT LO) -> 50-turn coil (5500A/COIL) -> the meter jaw closed around the coil. No test leads in the meter jacks.",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Test leads",
+     "REMOVE the test leads from the VΩ and COM jacks while current is measured with the jaw (general practice; the Calibration Information does not say)."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Coil",
+     "Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A."
+    ],
+    [
+     "Jaw",
+     "The jaw stays closed around the coil (centred, fully closed, leads away from the meter body). The meter reads 50 x the calibrator current: 4 A reads 200 A, 8 A reads 400 A, 12 A reads 600 A, 18 A reads 900 A."
+    ],
+    [
+     "LCOMP",
+     "Fluke 5522A / 5520A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "caution": "Up to 18 A flows in the coil. Duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes then 8 minutes OFF; not confirmed for this coil (UNVERIFIED). Keep the calibrator in STANDBY whenever you touch the coil or leads.",
+   "diagram": "diagrams/hook_fluke33x_COIL_20A.png"
+  }
+ },
+ "steps": [
+  {
+   "table": "2A",
+   "step": 1,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "ACV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "19.3",
+   "high": "20.7",
+   "applied": {
+    "value": 20.0,
+    "frequency": 50.0
+   },
+   "nominal": 20.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 19.3 to 20.7 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±0.7 V)",
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED).",
+   "ref": "T2A #1",
+   "id": "2A-1"
+  },
+  {
+   "table": "2A",
+   "step": 2,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "ACV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "593.5",
+   "high": "606.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": 50.0
+   },
+   "nominal": 600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 593.5 to 606.5 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±6.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2A #2",
+   "id": "2A-2"
+  },
+  {
+   "table": "2A",
+   "step": 3,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "19.3",
+   "high": "20.7",
+   "applied": {
+    "value": 20.0,
+    "frequency": null
+   },
+   "nominal": 20.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 19.3 to 20.7 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±0.7 V)",
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED).",
+   "ref": "T2A #3",
+   "id": "2A-3"
+  },
+  {
+   "table": "2A",
+   "step": 4,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-20.7",
+   "high": "-19.3",
+   "applied": {
+    "value": -20.0,
+    "frequency": null
+   },
+   "nominal": -20.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): -20.7 to -19.3 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±0.7 V)",
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED).",
+   "ref": "T2A #4",
+   "id": "2A-4"
+  },
+  {
+   "table": "2A",
+   "step": 5,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "593.5",
+   "high": "606.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": null
+   },
+   "nominal": 600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 593.5 to 606.5 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±6.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2A #5",
+   "id": "2A-5"
+  },
+  {
+   "table": "2A",
+   "step": 6,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-606.5",
+   "high": "-593.5",
+   "applied": {
+    "value": -600.0,
+    "frequency": null
+   },
+   "nominal": -600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): -606.5 to -593.5 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±6.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2A #6",
+   "id": "2A-6"
+  },
+  {
+   "table": "2A",
+   "step": 7,
+   "section": "Continuity",
+   "switch": "Continuity  •)))  (the Ω position with the continuity function; how it is selected is not described in the Calibration Information: UNVERIFIED)",
+   "range": "",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "on",
+   "question": "The beeper is ON (sounding).",
+   "applied": {
+    "value": 25.0,
+    "frequency": null
+   },
+   "nominal": 25.0,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "note": "Table 2: \"25 ohm: Beeper On\" (Specifications: continuity beeper at 30 ohm or less). The calibrator outputs 25 ohm; the beeper must sound. Table 2 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "group": "VOHM",
+   "ref": "T2A #7",
+   "id": "2A-7"
+  },
+  {
+   "table": "2A",
+   "step": 8,
+   "section": "Ohms",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity; the display must show Ω, not continuity)",
+   "range": "600.0 Ω",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "OHM",
+   "test": "numeric",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "590.5",
+   "high": "609.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": null
+   },
+   "nominal": 600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 590.5 to 609.5 Ω   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 Ω) = ±6.5 Ω)",
+   "check": {
+    "verdict": "looser",
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "9.5",
+      "full_spec": "6.5"
+     },
+     {
+      "side": "high",
+      "printed": "9.5",
+      "full_spec": "6.5"
+     }
+    ],
+    "full_spec": "6.5"
+   },
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Table 2 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. CHECK - DISCREPANCY (printed limit NOT changed; Specifications (printed p. 3)): the printed limits are LOOSER than the published accuracy of 1 % + 5 counts (low limit ±9.5 from the nominal vs the published ±6.5; high limit ±9.5 from the nominal vs the published ±6.5); they are the figures of 1.5 % + 5 counts. Used as printed.",
+   "ref": "T2A #8",
+   "id": "2A-8"
+  },
+  {
+   "table": "2A",
+   "step": 9,
+   "section": "Ohms",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity; the display must show Ω, not continuity)",
+   "range": "6000 Ω",
+   "models": [
+    "334",
+    "335"
+   ],
+   "kind": "OHM",
+   "test": "numeric",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "5905",
+   "high": "6095",
+   "applied": {
+    "value": 6000.0,
+    "frequency": null
+   },
+   "nominal": 6000.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 5905 to 6095 Ω   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 1 Ω) = ±65 Ω)",
+   "check": {
+    "verdict": "looser",
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "95",
+      "full_spec": "65"
+     },
+     {
+      "side": "high",
+      "printed": "95",
+      "full_spec": "65"
+     }
+    ],
+    "full_spec": "65"
+   },
+   "group": "VOHM",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Table 2 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. 6 kohm is on the 600 - 6000 ohm range (Specifications, printed p. 3); the printed limits (5905 .. 6095) are whole ohms, so 1 ohm resolution is used (UNVERIFIED). CHECK - DISCREPANCY (printed limit NOT changed; Specifications (printed p. 3)): the printed limits are LOOSER than the published accuracy of 1 % + 5 counts (low limit ±95 from the nominal vs the published ±65; high limit ±95 from the nominal vs the published ±65); they are the figures of 1.5 % + 5 counts. Used as printed.",
+   "ref": "T2A #9",
+   "id": "2A-9"
+  },
+  {
+   "table": "2A",
+   "step": 10,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "19.1",
+   "high": "20.9",
+   "applied": {
+    "value": 0.4,
+    "frequency": 50.0
+   },
+   "nominal": 20.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 19.1 to 20.9 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.9 A)",
+   "report_desc": "Jaw, 0.4 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 20 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 20.0,
+   "group": "COIL_AUX",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.4 A in, 20 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 8) lists the 20 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 0.4 A = 20 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (20 A), not the calibrator's at 0.4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2.",
+   "ref": "T2A #10",
+   "id": "2A-10"
+  },
+  {
+   "table": "2A",
+   "step": 11,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "333",
+    "334",
+    "335"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "195.5",
+   "high": "204.5",
+   "applied": {
+    "value": 4.0,
+    "frequency": 50.0
+   },
+   "nominal": 200.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 195.5 to 204.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±4.5 A)",
+   "report_desc": "Jaw, 4 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 200 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 200.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 4 A in, 200 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 8) lists the 200 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 4 A = 200 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (200 A), not the calibrator's at 4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2.",
+   "ref": "T2A #11",
+   "id": "2A-11"
+  },
+  {
+   "table": "2A",
+   "step": 12,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "333"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "391.5",
+   "high": "408.5",
+   "applied": {
+    "value": 8.0,
+    "frequency": 50.0
+   },
+   "nominal": 400.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 391.5 to 408.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±8.5 A)",
+   "report_desc": "Jaw, 8 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 400 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 400.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 8 A in, 400 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 8) lists the 400 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 8 A = 400 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (400 A), not the calibrator's at 8 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2.",
+   "ref": "T2A #12",
+   "id": "2A-12"
+  },
+  {
+   "table": "2A",
+   "step": 13,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "334",
+    "335"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "587.5",
+   "high": "612.5",
+   "applied": {
+    "value": 12.0,
+    "frequency": 50.0
+   },
+   "nominal": 600.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 587.5 to 612.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±12.5 A)",
+   "report_desc": "Jaw, 12 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 600 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 600.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 12 A in, 600 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 8) lists the 600 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 12 A = 600 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (600 A), not the calibrator's at 12 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); 12 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil).",
+   "ref": "T2A #13",
+   "id": "2A-13"
+  },
+  {
+   "table": "2A",
+   "step": 14,
+   "section": "Inrush",
+   "switch": "A~ INRUSH  (AC amps: jaw closed around the 50-turn coil; press the INRUSH button AFTER the current is applied)",
+   "range": "",
+   "models": [
+    "334",
+    "335"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "4.4",
+   "high": "5.6",
+   "applied": {
+    "value": 0.1,
+    "frequency": 60.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (333, 334, 335): 4.4 to 5.6 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.6 A)",
+   "report_desc": "Inrush, 0.1 A x 50 turns",
+   "dsb_desc": "Inrush, jaw on the 50-turn coil: meter reads 5 A @ 60 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 5.0,
+   "group": "COIL_AUX",
+   "note": "Table 2 (333, 334, 335), printed p. 8. Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.1 A in, 5 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 8) lists the 5 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 0.1 A = 5 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (5 A), not the calibrator's at 0.1 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Table 2 footnotes: \"The INRUSH button must be pressed after current is applied to the 50-turn coil\" and \"Display should bar (- - - -), then show reading with inrush light on (334, 335)\". The program applies the output, then asks for the reading: press INRUSH once the current is on. The footnote names 334 and 335 for the barring display; the same row is printed for the 336 / 337 and the Specifications give the inrush integration time as 100 ms (NA on the 333, which has no INRUSH button and no inrush row). 5 A in the jaw = 0.1 A at 60 Hz through the coil.",
+   "ref": "T2A #14",
+   "id": "2A-14"
+  },
+  {
+   "table": "2B",
+   "step": 15,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "19.3",
+   "high": "20.7",
+   "applied": {
+    "value": 20.0,
+    "frequency": 50.0
+   },
+   "nominal": 20.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 19.3 to 20.7 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±0.7 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED).",
+   "ref": "T2B #1",
+   "id": "2B-15"
+  },
+  {
+   "table": "2B",
+   "step": 16,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "593.5",
+   "high": "606.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": 50.0
+   },
+   "nominal": 600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 593.5 to 606.5 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±6.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2B #2",
+   "id": "2B-16"
+  },
+  {
+   "table": "2B",
+   "step": 17,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "563.5",
+   "high": "636.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": 400.0
+   },
+   "nominal": 600.0,
+   "accuracy": "±(6 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 563.5 to 636.5 V   (Specifications (printed p. 3): ±(6 % of reading + 5 counts of 0.1 V) = ±36.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2B #3",
+   "id": "2B-17"
+  },
+  {
+   "table": "2B",
+   "step": 18,
+   "section": "Min/Max",
+   "switch": "V~  (AC volts, MIN/MAX mode: press the MIN/MAX button; Min/Max rows, printed p. 9)",
+   "range": "600.0 V",
+   "models": [
+    "337"
+   ],
+   "kind": "ACV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "563.5",
+   "high": "636.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": 400.0
+   },
+   "nominal": 600.0,
+   "accuracy": "±(6 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 563.5 to 636.5 V   (Specifications (printed p. 3): ±(6 % of reading + 5 counts of 0.1 V) = ±36.5 V)",
+   "report_desc": "MIN/MAX mode, 600 V 400 Hz",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Min/Max rows (337, printed p. 9): with the meter on V~ press MIN/MAX; the calibrator applies 600 V at 400 Hz and the reading is judged against the printed limits (the same figures as the plain 600 V 400 Hz row). Which of MAX / MIN the display shows after the button press is not stated (UNVERIFIED): read the value that is displayed. Press MIN/MAX again afterwards (not stated either). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2B #4",
+   "id": "2B-18"
+  },
+  {
+   "table": "2B",
+   "step": 19,
+   "section": "Min/Max",
+   "switch": "V~  (AC volts, MIN/MAX mode: press the MIN/MAX button; Min/Max rows, printed p. 9)",
+   "range": "600.0 V",
+   "models": [
+    "337"
+   ],
+   "kind": "ACV",
+   "test": "visual",
+   "title": "Min/Max: reading does not change (20 V, 400 Hz)",
+   "question": "MIN/MAX is on and the displayed reading does NOT change when the output drops to 20 V.",
+   "applied": {
+    "value": 20.0,
+    "frequency": 400.0
+   },
+   "nominal": 20.0,
+   "base_unit": "V",
+   "display_unit": "V",
+   "factor": 1.0,
+   "note": "Min/Max (337), \"Reading does not change\": the meter stays in MIN/MAX mode from the 600 V 400 Hz point; the calibrator now outputs 20 V at 400 Hz and the displayed reading must stay as it was (the Table prints no limits: a yes / no judgement; MIN/MAX holds the extreme, so a high reading must not follow the output down to 20 V). The yes / no question is the operator's; NO UNCERTAINTY applies (no numeric reading, nothing to compare).",
+   "report_desc": "Min/Max, 20 V 400 Hz: reading does not change",
+   "group": "VOHM",
+   "settle": 3,
+   "ref": "T2B #5",
+   "id": "2B-19"
+  },
+  {
+   "table": "2B",
+   "step": 20,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "19.3",
+   "high": "20.7",
+   "applied": {
+    "value": 20.0,
+    "frequency": null
+   },
+   "nominal": 20.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 19.3 to 20.7 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±0.7 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED).",
+   "ref": "T2B #6",
+   "id": "2B-20"
+  },
+  {
+   "table": "2B",
+   "step": 21,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-20.7",
+   "high": "-19.3",
+   "applied": {
+    "value": -20.0,
+    "frequency": null
+   },
+   "nominal": -20.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): -20.7 to -19.3 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±0.7 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED).",
+   "ref": "T2B #7",
+   "id": "2B-21"
+  },
+  {
+   "table": "2B",
+   "step": 22,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "593.5",
+   "high": "606.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": null
+   },
+   "nominal": 600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 593.5 to 606.5 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±6.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2B #8",
+   "id": "2B-22"
+  },
+  {
+   "table": "2B",
+   "step": 23,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCV",
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-606.5",
+   "high": "-593.5",
+   "applied": {
+    "value": -600.0,
+    "frequency": null
+   },
+   "nominal": -600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): -606.5 to -593.5 V   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 V) = ±6.5 V)",
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The 600 V point sits at the top of the 600.0 V range (the meter must not be used above 600 V or 400 Hz fundamental, Safety Information, printed p. 2). HIGH VOLTAGE confirmation is asked once per hook-up group.",
+   "ref": "T2B #9",
+   "id": "2B-23"
+  },
+  {
+   "table": "2B",
+   "step": 24,
+   "section": "Continuity",
+   "switch": "Continuity  •)))  (the Ω position with the continuity function; how it is selected is not described in the Calibration Information: UNVERIFIED)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "on",
+   "question": "The beeper is ON (sounding).",
+   "applied": {
+    "value": 25.0,
+    "frequency": null
+   },
+   "nominal": 25.0,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "note": "Table 2: \"25 ohm: Beeper On\" (Specifications: continuity beeper at 30 ohm or less). The calibrator outputs 25 ohm; the beeper must sound. Table 2 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "group": "VOHM",
+   "ref": "T2B #10",
+   "id": "2B-24"
+  },
+  {
+   "table": "2B",
+   "step": 25,
+   "section": "Ohms",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity; the display must show Ω, not continuity)",
+   "range": "600.0 Ω",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "OHM",
+   "test": "numeric",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "590.5",
+   "high": "609.5",
+   "applied": {
+    "value": 600.0,
+    "frequency": null
+   },
+   "nominal": 600.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 590.5 to 609.5 Ω   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 0.1 Ω) = ±6.5 Ω)",
+   "check": {
+    "verdict": "looser",
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "9.5",
+      "full_spec": "6.5"
+     },
+     {
+      "side": "high",
+      "printed": "9.5",
+      "full_spec": "6.5"
+     }
+    ],
+    "full_spec": "6.5"
+   },
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Table 2 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. CHECK - DISCREPANCY (printed limit NOT changed; Specifications (printed p. 3)): the printed limits are LOOSER than the published accuracy of 1 % + 5 counts (low limit ±9.5 from the nominal vs the published ±6.5; high limit ±9.5 from the nominal vs the published ±6.5); they are the figures of 1.5 % + 5 counts. Used as printed.",
+   "ref": "T2B #11",
+   "id": "2B-25"
+  },
+  {
+   "table": "2B",
+   "step": 26,
+   "section": "Ohms",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity; the display must show Ω, not continuity)",
+   "range": "6000 Ω",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "OHM",
+   "test": "numeric",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "5905",
+   "high": "6095",
+   "applied": {
+    "value": 6000.0,
+    "frequency": null
+   },
+   "nominal": 6000.0,
+   "accuracy": "±(1 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 5905 to 6095 Ω   (Specifications (printed p. 3): ±(1 % of reading + 5 counts of 1 Ω) = ±65 Ω)",
+   "check": {
+    "verdict": "looser",
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "95",
+      "full_spec": "65"
+     },
+     {
+      "side": "high",
+      "printed": "95",
+      "full_spec": "65"
+     }
+    ],
+    "full_spec": "65"
+   },
+   "group": "VOHM",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Table 2 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. 6 kohm is on the 600 - 6000 ohm range (Specifications, printed p. 3); the printed limits (5905 .. 6095) are whole ohms, so 1 ohm resolution is used (UNVERIFIED). CHECK - DISCREPANCY (printed limit NOT changed; Specifications (printed p. 3)): the printed limits are LOOSER than the published accuracy of 1 % + 5 counts (low limit ±95 from the nominal vs the published ±65; high limit ±95 from the nominal vs the published ±65); they are the figures of 1.5 % + 5 counts. Used as printed.",
+   "ref": "T2B #12",
+   "id": "2B-26"
+  },
+  {
+   "table": "2B",
+   "step": 27,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "19.1",
+   "high": "20.9",
+   "applied": {
+    "value": 0.4,
+    "frequency": 50.0
+   },
+   "nominal": 20.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 19.1 to 20.9 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.9 A)",
+   "report_desc": "Jaw, 0.4 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 20 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 20.0,
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.4 A in, 20 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 20 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 0.4 A = 20 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (20 A), not the calibrator's at 0.4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2.",
+   "ref": "T2B #13",
+   "id": "2B-27"
+  },
+  {
+   "table": "2B",
+   "step": 28,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "195.5",
+   "high": "204.5",
+   "applied": {
+    "value": 4.0,
+    "frequency": 50.0
+   },
+   "nominal": 200.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 195.5 to 204.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±4.5 A)",
+   "report_desc": "Jaw, 4 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 200 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 200.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 4 A in, 200 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 200 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 4 A = 200 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (200 A), not the calibrator's at 4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2.",
+   "ref": "T2B #14",
+   "id": "2B-28"
+  },
+  {
+   "table": "2B",
+   "step": 29,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "187.5",
+   "high": "212.5",
+   "applied": {
+    "value": 4.0,
+    "frequency": 400.0
+   },
+   "nominal": 200.0,
+   "accuracy": "±(6 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 187.5 to 212.5 A   (Specifications (printed p. 3): ±(6 % of reading + 5 counts of 0.1 A) = ±12.5 A)",
+   "report_desc": "Jaw, 4 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 200 A @ 400 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 200.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 4 A in, 200 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 200 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 4 A = 200 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (200 A), not the calibrator's at 4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. 400 Hz through the coil: the 5500A/COIL data sheet gives DC and 45-440 Hz; 4 A at 400 Hz is inside it. LCOMP is set where the calibrator allows it (below 1 kHz from 0.33 A, 5522A Operators Manual p. 6-23).",
+   "ref": "T2B #15",
+   "id": "2B-29"
+  },
+  {
+   "table": "2B",
+   "step": 30,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "587.5",
+   "high": "612.5",
+   "applied": {
+    "value": 12.0,
+    "frequency": 50.0
+   },
+   "nominal": 600.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 587.5 to 612.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±12.5 A)",
+   "report_desc": "Jaw, 12 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 600 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 600.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 12 A in, 600 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 600 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 12 A = 600 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (600 A), not the calibrator's at 12 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); 12 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil).",
+   "ref": "T2B #16",
+   "id": "2B-30"
+  },
+  {
+   "table": "2B",
+   "step": 31,
+   "section": "AC amps",
+   "switch": "A~  (AC amps: jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "881.5",
+   "high": "918.5",
+   "applied": {
+    "value": 18.0,
+    "frequency": 50.0
+   },
+   "nominal": 900.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 881.5 to 918.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±18.5 A)",
+   "report_desc": "Jaw, 18 A x 50 turns",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 900 A @ 50 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 900.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 900 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 18 A = 900 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (900 A), not the calibrator's at 18 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); 18 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil).",
+   "ref": "T2B #17",
+   "id": "2B-31"
+  },
+  {
+   "table": "2B",
+   "step": 32,
+   "section": "Inrush",
+   "switch": "A~ INRUSH  (AC amps: jaw closed around the 50-turn coil; press the INRUSH button AFTER the current is applied)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "4.4",
+   "high": "5.6",
+   "applied": {
+    "value": 0.1,
+    "frequency": 60.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 4.4 to 5.6 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.6 A)",
+   "report_desc": "Inrush, 0.1 A x 50 turns",
+   "dsb_desc": "Inrush, jaw on the 50-turn coil: meter reads 5 A @ 60 Hz",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 5.0,
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.1 A in, 5 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 5 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 0.1 A = 5 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (5 A), not the calibrator's at 0.1 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Table 2 footnotes: \"The INRUSH button must be pressed after current is applied to the 50-turn coil\" and \"Display should bar (- - - -), then show reading with inrush light on (334, 335)\". The program applies the output, then asks for the reading: press INRUSH once the current is on. The footnote names 334 and 335 for the barring display; the same row is printed for the 336 / 337 and the Specifications give the inrush integration time as 100 ms (NA on the 333, which has no INRUSH button and no inrush row). 5 A in the jaw = 0.1 A at 60 Hz through the coil.",
+   "ref": "T2B #18",
+   "id": "2B-32"
+  },
+  {
+   "table": "2B",
+   "step": 33,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-0.5",
+   "high": "0.5",
+   "applied": {
+    "value": 0.0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): -0.5 to 0.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.5 A)",
+   "report_desc": "0 A dc after ZERO",
+   "dsb_desc": "DC amps, 0 A: jaw closed on the coil, ZERO pressed",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 0.0,
+   "no_uncertainty": true,
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0 A in, 0 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 0 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 0 A = 0 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (0 A), not the calibrator's at 0 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Table 2: \"0.0 A after button push\". The calibrator outputs 0 A dc (programmed and operated as for every point) through the coil with the jaw closed round it; press the ZERO button (Figure 2) and read: limits -0.5 A to 0.5 A. How the ZERO button works on the meter (and whether the later DC amps points need it) is not described in the Calibration Information: UNVERIFIED. NO UNCERTAINTY is printed for this point (owner decision of 2026-10-26 for the 381's 0 A dc point, applied here: a zero point, the calibrator floor is not a meaningful uncertainty for the meter zero; the step carries no_uncertainty): the owner is asked to confirm. DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #19",
+   "id": "2B-33"
+  },
+  {
+   "table": "2B",
+   "step": 34,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "19.1",
+   "high": "20.9",
+   "applied": {
+    "value": 0.4,
+    "frequency": null
+   },
+   "nominal": 20.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 19.1 to 20.9 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.9 A)",
+   "report_desc": "Jaw, 0.4 A x 50 turns",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 20 A",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 20.0,
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.4 A in, 20 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 20 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 0.4 A = 20 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (20 A), not the calibrator's at 0.4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #20",
+   "id": "2B-34"
+  },
+  {
+   "table": "2B",
+   "step": 35,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-20.9",
+   "high": "-19.1",
+   "applied": {
+    "value": -0.4,
+    "frequency": null
+   },
+   "nominal": -20.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): -20.9 to -19.1 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±0.9 A)",
+   "report_desc": "Jaw, -0.4 A x 50 turns",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads -20 A",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": -20.0,
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: -0.4 A in, -20 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the -20 A the jaw sees (the limits are meter readings, centred on it); the calibrator output -0.4 A = -20 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (-20 A), not the calibrator's at -0.4 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #21",
+   "id": "2B-35"
+  },
+  {
+   "table": "2B",
+   "step": 36,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "587.5",
+   "high": "612.5",
+   "applied": {
+    "value": 12.0,
+    "frequency": null
+   },
+   "nominal": 600.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 587.5 to 612.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±12.5 A)",
+   "report_desc": "Jaw, 12 A x 50 turns",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 600 A",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 600.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 12 A in, 600 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 600 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 12 A = 600 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (600 A), not the calibrator's at 12 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); 12 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil). DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #22",
+   "id": "2B-36"
+  },
+  {
+   "table": "2B",
+   "step": 37,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "336",
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-612.5",
+   "high": "-587.5",
+   "applied": {
+    "value": -12.0,
+    "frequency": null
+   },
+   "nominal": -600.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): -612.5 to -587.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±12.5 A)",
+   "report_desc": "Jaw, -12 A x 50 turns",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads -600 A",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": -600.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: -12 A in, -600 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the -600 A the jaw sees (the limits are meter readings, centred on it); the calibrator output -12 A = -600 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (-600 A), not the calibrator's at -12 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); -12 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil). DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #23",
+   "id": "2B-37"
+  },
+  {
+   "table": "2B",
+   "step": 38,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "881.5",
+   "high": "918.5",
+   "applied": {
+    "value": 18.0,
+    "frequency": null
+   },
+   "nominal": 900.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 881.5 to 918.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±18.5 A)",
+   "report_desc": "Jaw, 18 A x 50 turns",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 900 A",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 900.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the 900 A the jaw sees (the limits are meter readings, centred on it); the calibrator output 18 A = 900 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (900 A), not the calibrator's at 18 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); 18 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil). DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #24",
+   "id": "2B-38"
+  },
+  {
+   "table": "2B",
+   "step": 39,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: jaw closed around the 50-turn coil; press ZERO with 0 A before the first DC amps point)",
+   "range": "",
+   "models": [
+    "337"
+   ],
+   "kind": "DCI",
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-918.5",
+   "high": "-881.5",
+   "applied": {
+    "value": -18.0,
+    "frequency": null
+   },
+   "nominal": -900.0,
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): -918.5 to -881.5 A   (Specifications (printed p. 3): ±(2 % of reading + 5 counts of 0.1 A) = ±18.5 A)",
+   "report_desc": "Jaw, -18 A x 50 turns",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads -900 A",
+   "settle": 5,
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": -900.0,
+   "group": "COIL_20A",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: -18 A in, -900 A on the meter. The \"5520A Output\" column of Table 2 (printed p. 9) lists the -900 A the jaw sees (the limits are meter readings, centred on it); the calibrator output -18 A = -900 / 50 is an INFERENCE (UNVERIFIED), as for every clamp meter on the 5500A/COIL. Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (-900 A), not the calibrator's at -18 A; where the coil's lines do not cover the point (AC below 20.5 A) the calibrator's uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table 2. Coil duty (5500A/COIL data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); -18 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point (UNVERIFIED for this coil). DC polarity: the manual does not describe the coil polarity for the DC amps points. A positive calibrator current must read positive on the meter and a negative one negative (the typed sign is judged): if the sign is reversed, swap the two coil leads at the calibrator (UNVERIFIED).",
+   "ref": "T2B #25",
+   "id": "2B-39"
+  },
+  {
+   "table": "2B",
+   "step": 40,
+   "section": "Frequency",
+   "switch": "Hz  (frequency: dial on Hz; jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "9.4",
+   "high": "10.6",
+   "applied": {
+    "value": 0.1,
+    "frequency": 10.0
+   },
+   "nominal": 10.0,
+   "accuracy": "±(0.5 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 9.4 to 10.6 Hz   (Specifications (printed p. 3): ±(0.5 % of reading + 5 counts of 0.1 Hz) = ±0.55 Hz)",
+   "unc_kind": "FREQ",
+   "no_freq_suffix": true,
+   "report_desc": "0.1 A x 50 turns, 10 Hz",
+   "dsb_desc": "Frequency, jaw on the 50-turn coil: calibrator 0.1 A @ 10 Hz, meter reads 10 Hz",
+   "settle": 5,
+   "check": {
+    "verdict": "rounded",
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "0.6",
+      "full_spec": "0.55"
+     },
+     {
+      "side": "high",
+      "printed": "0.6",
+      "full_spec": "0.55"
+     }
+    ],
+    "full_spec": "0.55"
+   },
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Frequency (337): \"5 A 10 Hz\" in Table 2: the current the jaw sees, 0.1 A at 10 Hz through the 50-turn coil (Figure 4 is the \"Amps/Hz Verification Setup\"); the meter shows the FREQUENCY, 10 Hz. The Specifications give the Hz trigger level as 10-100 Hz: 5 A or more, 100-400 Hz: more than 10 A. The coil assignment and the x 50 are an INFERENCE (UNVERIFIED). Uncertainty (owner decision, 2026-10-26, all handheld meters): the frequency is the calibrator's own OUTPUT frequency, so the uncertainty is the calibrator's published frequency specification (5522A / 5520A sheet or 5560A sheet, uncertainty_budget FREQ), not the lab Frequency - Measure CMC alone. CHECK (printed limit not changed; Specifications (printed p. 3)): the printed limit is the specification value rounded outward to the display step (low limit ±0.6 from the nominal vs the published ±0.55; high limit ±0.6 from the nominal vs the published ±0.55).",
+   "ref": "T2B #26",
+   "id": "2B-40"
+  },
+  {
+   "table": "2B",
+   "step": 41,
+   "section": "Frequency",
+   "switch": "Hz  (frequency: dial on Hz; jaw closed around the 50-turn coil)",
+   "range": "",
+   "models": [
+    "337"
+   ],
+   "kind": "ACI",
+   "test": "numeric",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "298.0",
+   "high": "302.0",
+   "applied": {
+    "value": 0.2,
+    "frequency": 300.0
+   },
+   "nominal": 300.0,
+   "accuracy": "±(0.5 % of reading + 5 counts)",
+   "tol_text": "Table 2 (336, 337): 298.0 to 302.0 Hz   (Specifications (printed p. 3): ±(0.5 % of reading + 5 counts of 0.1 Hz) = ±2 Hz)",
+   "unc_kind": "FREQ",
+   "no_freq_suffix": true,
+   "report_desc": "0.2 A x 50 turns, 300 Hz",
+   "dsb_desc": "Frequency, jaw on the 50-turn coil: calibrator 0.2 A @ 300 Hz, meter reads 300 Hz",
+   "settle": 5,
+   "group": "COIL_AUX",
+   "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Frequency (337): \"10 A 300 Hz\" in Table 2: the current the jaw sees, 0.2 A at 300 Hz through the 50-turn coil (Figure 4 is the \"Amps/Hz Verification Setup\"); the meter shows the FREQUENCY, 300 Hz. The Specifications give the Hz trigger level as 10-100 Hz: 5 A or more, 100-400 Hz: more than 10 A; the 300 Hz point is 10 A, exactly the trigger level printed as \"> 10 A\", so a marginal trigger may need the point repeated (UNVERIFIED). The coil assignment and the x 50 are an INFERENCE (UNVERIFIED). Uncertainty (owner decision, 2026-10-26, all handheld meters): the frequency is the calibrator's own OUTPUT frequency, so the uncertainty is the calibrator's published frequency specification (5522A / 5520A sheet or 5560A sheet, uncertainty_budget FREQ), not the lab Frequency - Measure CMC alone.",
+   "ref": "T2B #27",
+   "id": "2B-41"
+  }
+ ]
+}
