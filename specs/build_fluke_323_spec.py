@@ -14,7 +14,7 @@ The Calibration Manual prints no accuracy statement and no ranges or resolutions
 and no range is named on any point (the meter autoranges).
 
 ONE FAMILY SPEC, THREE MODELS (as the 110 / 170 / 374-376 families): every step lists the models it applies to, from the X columns of Table 4.
-  323: 16 points   324: 24 points   325: 30 points.   Registered: Procedures/Fluke_323_Verification.py, Fluke_324_Verification.py, Fluke_325_Verification.py.
+  323: 16 points   324: 22 points   325: 30 points  (Table 4 prints 24 for the 324: the 10 kohm and 30 kohm rows are removed for the 324, which cannot measure above 4000 ohm - owner decision 2026-10-27).   Registered: Procedures/Fluke_323_Verification.py, Fluke_324_Verification.py, Fluke_325_Verification.py.
 
 THE 50-TURN COIL (owner request: 'make sure the 50 turn coil test points are assigned correctly'):
   * AC Amps (with 50-Turn Coil) and DC Amps (with 50-Turn Coil): the Calibrator Output column is the current the CALIBRATOR drives through the 50-turn coil (0.004 ... 7.8 A) and the limits
@@ -51,7 +51,8 @@ MODELS = ('323', '324', '325')
 M323, M324, M325 = ('323',), ('324',), ('325',)
 M324_5, M323_4, ALL = ('324', '325'), ('323', '324'), MODELS
 TURNS = 50
-EXPECTED_COUNTS = {'323': 16, '324': 24, '325': 30}
+EXPECTED_COUNTS = {'323': 16, '324': 24, '325': 30}       # as printed in Table 4
+OWNER_REMOVED = {'324': 2}                                 # 10 kohm and 30 kohm: the 324 cannot measure above 4000 ohm (owner decision 2026-10-27)
 
 UNITS = {'V': ('1', 'V'), 'Ω': ('1', 'ohm'), 'kΩ': ('1000', 'ohm'), 'µF': ('0.000001', 'F'), 'A': ('1', 'A'), '°C': ('1', 'degC'), 'Hz': ('1', 'Hz')}
 
@@ -95,8 +96,8 @@ ROWS = [
     ('Ohms', 'ohm', 'OHM', '1000', None, 'Ω', '1000', '985', '1015', M324_5, {}),
     ('Ohms', 'ohm', 'OHM', '3000', None, 'Ω', '3000', '2965', '3035', M324_5, {}),
     ('Ohms', 'ohm', 'OHM', '3500', None, 'Ω', '3500', '3460', '3540', M323, {}),
-    ('Ohms', 'ohm', 'OHM', '10000', None, 'kΩ', '10', '9.85', '10.15', M324_5, {}),
-    ('Ohms', 'ohm', 'OHM', '30000', None, 'kΩ', '30', '29.65', '30.35', M324_5, {'printed': ('34.65', '30.35'), 'printed_units': ('kΩ', 'Ω')}),
+    ('Ohms', 'ohm', 'OHM', '10000', None, 'kΩ', '10', '9.85', '10.15', M325, {'not_324': True}),
+    ('Ohms', 'ohm', 'OHM', '30000', None, 'kΩ', '30', '29.65', '30.35', M325, {'not_324': True, 'printed': ('34.65', '30.35'), 'printed_units': ('kΩ', 'Ω')}),
     # --- Capacitance (324, 325)
     ('Capacitance', 'cap', 'CAP', '0.00001', None, 'µF', '10', '9.5', '10.5', M324_5, {'settle': 10}),
     ('Capacitance', 'cap', 'CAP', '0.0005', None, 'µF', '500', '491', '509', M324_5, {'settle': 10}),
@@ -128,6 +129,8 @@ ROWS = [
     ('DC amps', 'dca', 'DCI', '6', None, 'A', '300', '293.5', '306.5', M325, {'coil': True}),
 ]
 
+NOTE_NOT_324 = ('Fluke 324: the 324 cannot measure above 4000 ohm, so this point (printed for the 324 and 325 in Table 4) is removed for the 324 (owner decision 2026-10-27: '
+                'error in the Fluke performance verification table). It stays for the 325.')
 NOTE_OHMS = 'Table 4 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.'
 NOTE_RANGE = 'Table 4 names no range and no resolution (the Calibration Manual prints neither): the meter autoranges; the limits are shown with the decimals Table 4 prints.'
 NOTE_COIL = ('The calibrator drives the {turns}-turn coil and the meter reads {turns} x the calibrator current: {applied} A in, {nominal} A on the meter. The limits are the meter readings (Table 4, printed pp. 13-14). '
@@ -183,8 +186,9 @@ def check_rows():
             if abs((nom - lo) - (hi - nom)) > D('0.0000001'):
                 problems.append(f'row {n}: limits not symmetric about {nominal}: {low} .. {high}')
     counts = {m: sum(1 for r in ROWS if m in r[9]) for m in MODELS}
-    if counts != EXPECTED_COUNTS:
-        problems.append(f'points per model {counts} differ from the X columns of Table 4 {EXPECTED_COUNTS}')
+    want = {m: n - OWNER_REMOVED.get(m, 0) for m, n in EXPECTED_COUNTS.items()}
+    if counts != want:
+        problems.append(f'points per model {counts} differ from the X columns of Table 4 {EXPECTED_COUNTS} less the owner-removed rows {OWNER_REMOVED}')
     return problems
 
 
@@ -220,6 +224,8 @@ def build_steps():
                 notes.append(NOTE_HIGHI)
         if kind == 'OHM':
             notes.append(NOTE_OHMS)
+            if extra.get('not_324'):
+                notes.append(NOTE_NOT_324)
         if kind == 'CAP':
             notes.append(NOTE_CAP)
             step['settle'] = extra.get('settle', 10)
@@ -310,7 +316,7 @@ def build_spec():
                     limits='Manufacturer limits, Table 4, as printed',
                     report_note=REPORT_NOTE, note=note),
         models={'323': dict(name='Fluke 323', brand='Fluke', model_note='Fluke 323 true-rms clamp meter: Table 4, 16 points (AC volts, DC volts, ohms, AC amps through the 50-turn coil)'),
-                '324': dict(name='Fluke 324', brand='Fluke', model_note='Fluke 324 true-rms clamp meter: Table 4, 24 points (adds temperature and capacitance)'),
+                '324': dict(name='Fluke 324', brand='Fluke', model_note='Fluke 324 true-rms clamp meter: Table 4, 22 points (adds temperature and capacitance; the 10 kohm and 30 kohm rows are removed - the 324 cannot measure above 4000 ohm)'),
                 '325': dict(name='Fluke 325', brand='Fluke', model_note='Fluke 325 true-rms clamp meter: Table 4, 30 points (adds frequency and DC amps)')},
         groups=GROUPS,
         steps=steps)

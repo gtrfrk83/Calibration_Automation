@@ -23,7 +23,8 @@ sys.path.insert(0, str(HERE))
 h = H = Flow = SPECS = Spy = SPEC = BUILDER = None
 SPEC_NAME = 'fluke_323_pv.json'
 MODELS = ('323', '324', '325')
-COUNTS = {'323': 16, '324': 24, '325': 30}
+COUNTS = {'323': 16, '324': 22, '325': 30}      # Table 4 prints 24 for the 324: the 10 kohm and 30 kohm rows are removed (it cannot measure above 4000 ohm; owner 2026-10-27)
+OWNER_REMOVED_324 = ('10K Ω', '30K Ω')
 
 # Table 4 as read a second time: (calibrator output as printed, models as X / N/A for 323 324 325, low, high) in table order
 TABLE_4 = [
@@ -80,7 +81,17 @@ class Spec(unittest.TestCase):
     def test_every_row_matches_table_4(self):
         for step, (out, x, low, high) in zip(SPEC['steps'], TABLE_4):
             self.assertEqual((step['low'], step['high']), (low, high), out)
+            if out in OWNER_REMOVED_324:
+                x = 'NNX'
             self.assertEqual(''.join('X' if m in step['models'] else 'N' for m in MODELS), x, out)
+
+    def test_324_has_no_resistance_above_4000_ohm(self):
+        self.assertEqual(max(p['applied']['value'] for p in pts('324') if p['kind'] == 'OHM'), 3000.0)
+        self.assertEqual(sorted(p['applied']['value'] for p in pts('325') if p['kind'] == 'OHM')[-2:], [10000.0, 30000.0])
+        for s in SPEC['steps']:
+            if s['kind'] == 'OHM' and s['applied']['value'] > 4000:
+                self.assertEqual(s['models'], ['325'])
+                self.assertIn('324 cannot measure above 4000 ohm', s['note'])
 
     def test_the_30k_misprint_is_corrected_visibly(self):
         s = [s for s in SPEC['steps'] if s['display_unit'] == 'kΩ' and s['nominal'] == 30000][0]
