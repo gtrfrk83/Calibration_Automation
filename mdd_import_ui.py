@@ -82,6 +82,8 @@ class Preview:
         self.std_box = ttk.Combobox(stdf, textvariable=self.std_var, state='readonly', width=52)
         self.std_box.pack(side='left', padx=(6, 14))
         self.std_box.bind('<<ComboboxSelected>>', lambda _e: self.show_uncertainty())
+        self.drive_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(stdf, text='Drive this standard as the calibrator (you type the reading)', variable=self.drive_var).pack(side='left')
         self.std_text = ttk.Label(win, text='', style='Muted.TLabel', wraplength=1100, justify='left')
         self.std_text.pack(anchor='w', padx=16, pady=(2, 0))
         self.existing = ttk.Frame(win, padding=(16, 6, 16, 0))
@@ -135,6 +137,11 @@ class Preview:
         """The model chosen in 'Standard for the uncertainty' ('' = None: waive)."""
         return self.std.model_of(self.std_var.get()) if self.std is not None else mc.STANDARD_NONE
 
+    def drive_calibrator(self):
+        """True when 'Drive this standard as the calibrator' is ticked and a standard is chosen (None: waive can not drive anything)."""
+        var = getattr(self, 'drive_var', None)
+        return bool(var is not None and var.get() and self.selected_standard())
+
     def show_uncertainty(self):
         """The table's Uncertainty column and the sentence under the box for the chosen standard (nothing is saved)."""
         _plan, rows, text = self.std.preview(self.selected_standard())
@@ -161,7 +168,7 @@ class Preview:
                 self.choice.set('version')
         replace = self.found[0].uid if (self.found and self.choice.get() == 'version') else None
         res = mc.register(self.conv, self.parsed, who(), replace_uid=replace, registry=self.registry, root=self.spec_root, archive_to=self.archive_to,
-                          standard=self.selected_standard())
+                          standard=self.selected_standard(), drive_calibrator=self.drive_calibrator())
         if not res.ok:
             messagebox.showerror('Import failed', res.message or 'The procedure could not be created.', parent=self.win)
             return
