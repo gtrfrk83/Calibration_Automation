@@ -364,6 +364,7 @@ def run(proc: dict) -> dict:
         engine = (proc.get('engine') or [''])[0]
         if engine != 'fluke8808a_verification.py':      # the 8808A App has no virtual bench: it is built without --demo and given a simulated one
             argv.append('--demo')
+        argv += [str(a) for a in proc.get('args') or []]          # a user-built datasheet: --spec <file>
         with mock.patch.object(sys, 'argv', argv), mock.patch.object(tk, 'Tk', lambda *a, **k: (PHASE.__setitem__(0, 'run'), hn.root)[1], create=True), \
                 mock.patch.object(threading, 'excepthook', lambda a: TIMELINE.append(('dlg', 'thread-error', str(a.exc_type.__name__), str(a.exc_value)[:300]))):
             OPENED.clear()
