@@ -65,6 +65,10 @@ METERS = {
     # Fluke 323 / 324 / 325 clamp meters: Figure 4 (printed p. 11) labels two jacks 'VΩ' and 'COM'; the current and frequency points use the jaw on a 50-turn coil and the temperature
     # points their own group, so only the voltage / ohms / capacitance hook-up is described here and the other hook-ups are the spec's own groups (specs/fluke_323_pv.json)
     'fluke323': dict(name='Fluke 323 / 324 / 325', jacks={'vohm': 'VΩ', 'com': 'COM'}),
+    # Fluke 753 / 754 Documenting Process Calibrator: a 2 x 3 block of jacks (owner's photo, diagrams/fluke_753_754_terminals.png; Calibration Manual Figures 1-13, 15): top row 'VΩ RTD' (SOURCE side),
+    # 'mA / mA Ω RTD', 'V' (MEASURE side); bottom row the three commons; TC mini-jack lower left.  The hook-ups are the spec's own groups (specs/fluke_753_754_pv.json, drawn by specs/build_hookups_753.py),
+    # so there is no AVAILABLE entry; 'panels' are the owner's instrument reference pictures (front view, terminal close-up) the engine (fluke_753_754.py) shows when a group has no drawn picture
+    'fluke753': dict(name='Fluke 753 / 754', jacks={'vohm': 'VΩ RTD', 'ma': 'mA Ω RTD', 'v': 'V', 'com': 'COM'}, panels=('fluke_753_754_terminals.png', 'fluke_753_754_front.png')),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 

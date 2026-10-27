@@ -1,0 +1,59 @@
+{
+ "schema": 1,
+ "id": "Fluke_753_Verification",
+ "name": "Fluke 753 Documenting Process Calibrator Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "753",
+ "category": "Process Calibrator",
+ "version": "1",
+ "order": 64,
+ "description": "Fluke 753 / 754 Documenting Process Calibrator Performance Verification (family spec): this launcher runs the 753, 90 points",
+ "launcher": "Procedures/Fluke_753_Verification.py",
+ "engine": [
+  "handheld_dmm.py",
+  "fluke_753_754.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_753_754_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_753_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "fluke_753_754.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "hookups.py#fluke753",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_753_754_pv.json#753"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke753",
+  "diagram_prefixes": [
+   "hook_fluke753"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_753_Verification.py",
+  "Procedures/Fluke_753_Verification.procedure.json",
+  "specs/fluke_753_754_pv.json",
+  "specs/build_fluke_753_754_spec.py",
+  "specs/build_hookups_753.py",
+  "fluke_753_754.py",
+  "diagrams/README_fluke753.txt",
+  "diagrams/fluke_753_754_front.png",
+  "diagrams/fluke_753_754_terminals.png",
+  "tests/test_fluke_753_754_points.py"
+ ]
+}

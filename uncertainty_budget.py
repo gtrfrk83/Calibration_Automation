@@ -65,7 +65,7 @@ COIL_MODEL = 'A2LA-5500A-COIL'          # specs/standards/a2la_5500a_coil_standa
 
 
 def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None, type_a=(), extra=(), scope=None, range_value=None,
-          direction='output', basis=None, cmc=None, scale=1.0):
+          direction='output', basis=None, cmc=None, scale=1.0, tc='K', variant=None):
     """Budget for one applied point.  `standard` is a specmanager.StandardSpec (or model text); `resolution` overrides the sheet-derived
     calibrator resolution (SI); `type_a` / `extra` are (name, u_k1, sensitivity) tuples.
     Optional (the defaults are what every multimeter engine has always got):
@@ -73,7 +73,9 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
       basis      scope CMC basis ('generate' when None, or 'measure'): a measuring standard is checked against the laboratory's Measure CMC
       scale      factor every component and the CMC floor are multiplied by (default 1): a 50-turn-coil point below the coil's range, where the calibrator's
                  uncertainty at the sourced current is referred to the current the clamp reads (coil_rule.uncertainty_scale)
-      cmc        a CMC (SI) the caller already worked out (the oscilloscope DC lines of the scope are not in the DMM tables): used instead of the scope lookup"""
+      cmc        a CMC (SI) the caller already worked out (the oscilloscope DC lines of the scope are not in the DMM tables): used instead of the scope lookup
+      tc, variant  kind 'TEMP' only: the sensor of the simulation, as Scope.dmm(tc=) and StandardSpec.lookup_temperature(tc=, variant=) take it (default Type K: every engine so far);
+                 the Fluke 753 / 754 RTD points pass tc='Pt385-100', variant='Pt 385, 100 Ohm'"""
     if isinstance(standard, str) or isinstance(standard, int):
         key = standard
         standard = sm.standard(key)
@@ -89,10 +91,11 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
     if cmc is not None:
         b.cmc = cmc
     elif scope is not None:
-        b.cmc = (scope.dmm(kind, nominal, range_value, frequency, source=standard) if basis is None else scope.dmm(kind, nominal, range_value, frequency, basis=basis, source=standard))
+        sensor = {'tc': tc} if (kind == 'TEMP' and tc != 'K') else {}            # only a non-default sensor changes the call (every other engine calls the scope exactly as before)
+        b.cmc = (scope.dmm(kind, nominal, range_value, frequency, source=standard, **sensor) if basis is None else scope.dmm(kind, nominal, range_value, frequency, basis=basis, source=standard, **sensor))
     if standard is not None:
         if kind == 'TEMP':        # thermocouple simulation (Type K): the calibrator's degC specification, never the magnitude lookup
-            hit = standard.lookup_temperature(nominal)
+            hit = standard.lookup_temperature(nominal, tc=tc, variant=variant) if (tc != 'K' or variant) else standard.lookup_temperature(nominal)
         else:
             hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency, direction=direction)
         b.hit = hit
