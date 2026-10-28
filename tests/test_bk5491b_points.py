@@ -526,5 +526,52 @@ class SourceGuards(unittest.TestCase):
         self.assertIs(drivers.BK5491B, BK5491B)
 
 
+class RawLineReading(unittest.TestCase):
+    """Owner 2026-10-28: over VISA the first run timed out ('read failed: VI_ERROR_TMO') although the log showed the echoes and the reply. Lines now end at CR or LF, and a
+    line with no end character is returned after a short silence."""
+
+    class _Res:
+        def __init__(self, data):
+            self.d, self.timeout = bytearray(data), 20000
+
+        def read_bytes(self, n):
+            if not self.d:
+                raise OSError('VI_ERROR_TMO')
+            b = bytes(self.d[:n])
+            del self.d[:n]
+            return b
+
+    class _T:
+        timeout = 20.0
+
+        def __init__(self, data):
+            self._res = RawLineReading._Res(data)
+
+        def write(self, text):
+            pass
+
+        def clear(self):
+            pass
+
+    def ident(self, data):
+        from drivers import CommandLog
+        from drivers.bk_5491b import BK5491B
+        d = BK5491B(self._T(data), CommandLog(), label='t')
+        d.COMMAND_GAP_S, d.IDLE_END_S = 0, 0.01
+        return d.identify(), d.t._res.timeout
+
+    def test_crlf_cr_only_and_unterminated_replies_all_identify(self):
+        for data in (b'*IDN?\r\n*IDN?\r\n5491B  Multimeter,Ver1.4.14\r\n', b'*IDN?\n*IDN?\r5491B  Multimeter,Ver1.4.14\r', b'*IDN?\r\n*IDN?\r\n5491B  Multimeter,Ver1.4.14'):
+            reply, timeout = self.ident(data)
+            self.assertEqual(reply, '5491B  Multimeter,Ver1.4.14')
+            self.assertEqual(timeout, 20000)                                    # the full timeout is restored
+
+    def test_silence_raises_the_transport_error_with_the_wait(self):
+        from drivers.transport import TransportError
+        with self.assertRaises(TransportError) as cm:
+            self.ident(b'*IDN?\r\n')
+        self.assertIn('no byte at all', str(cm.exception))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -30,7 +30,7 @@ import time
 import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
-from .transport import SerialSettings
+from .transport import SerialSettings, TransportError
 
 UM = '2831E / 5491B User Manual'
 
@@ -169,7 +169,8 @@ class BK5491B(Instrument):
         MAX_REPLY_LINES lines are read. Read-only: nothing is ever written here."""
         earlier = list(self._since or [])
         self.log.add('>>', log_as or cmd, self.label)
-        line = self.t.query(cmd)
+        self.t.write(cmd)
+        line = self._read_line()
         limit = self.MAX_REPLY_LINES + len(earlier)
         for n in range(limit):
             text = line.strip()
@@ -186,9 +187,57 @@ class BK5491B(Instrument):
                 self._since = [cmd.strip()]
                 return text
             if n + 1 < limit:
-                line = self.t.read()                            # a timeout here raises the transport's own error
+                line = self._read_line()                        # a timeout here raises the transport's own error
         self._since = [cmd.strip()]
         raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r} within {limit} lines (only echoed command text was read)')
+
+    IDLE_END_S = 1.5             # a line whose end character never arrives is taken as complete after this much silence (a choice of this driver, not a manual figure)
+
+    def _read_line(self) -> str:
+        """One reply line. Over VISA or pyserial the bytes are read one at a time and a line ends at CR or LF (an empty line, the second half of CR LF, is skipped), so it does not
+        matter which end character the meter's echo and reply use. A line that stops without an end character is returned after IDLE_END_S of silence; nothing at all raises the
+        transport's timeout error WITH the bytes seen so far. Other transports (the simulator) use their own read. Read-only."""
+        res = getattr(self.t, '_res', None)
+        ser = getattr(self.t, '_ser', None)
+        if res is None and ser is None:
+            return self.t.read()
+        buf = bytearray()
+        full_timeout = getattr(self.t, 'timeout', 10.0)
+        try:
+            while True:
+                try:
+                    b = bytes(res.read_bytes(1)) if res is not None else ser.read(1)
+                except Exception as exc:
+                    if buf:                                         # silence after some characters: the line is complete
+                        self.log.add('--', f'line taken as complete after {self.IDLE_END_S:g} s of silence: {bytes(buf)!r}', self.label)
+                        return bytes(buf).decode('ascii', 'replace')
+                    raise TransportError(f'read failed: {exc} (no byte at all in {full_timeout:g} s)') from exc
+                if ser is not None and not b:
+                    if buf:
+                        return bytes(buf).decode('ascii', 'replace')
+                    raise TransportError(f'read failed: timeout (no byte at all in {full_timeout:g} s)')
+                if b in (b'\r', b'\n'):
+                    if buf:
+                        return bytes(buf).decode('ascii', 'replace')
+                    continue                                        # empty: the other half of CR LF
+                buf += b
+                if len(buf) == 1:                                   # after the first character the rest follows at once: do not wait the whole timeout for a missing end character
+                    self._set_short_timeout(res, ser)
+        finally:
+            self._set_full_timeout(res, ser, full_timeout)
+
+    def _set_short_timeout(self, res, ser):
+        if res is not None:
+            res.timeout = int(self.IDLE_END_S * 1000)
+        elif ser is not None:
+            ser.timeout = self.IDLE_END_S
+
+    @staticmethod
+    def _set_full_timeout(res, ser, seconds):
+        if res is not None:
+            res.timeout = int(seconds * 1000)
+        elif ser is not None:
+            ser.timeout = seconds
 
     def _discard_input(self, why):
         """Throw away whatever the meter has sent that nobody asked for (echo of earlier characters). Read-only on the instrument."""
