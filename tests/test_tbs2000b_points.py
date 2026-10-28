@@ -458,7 +458,10 @@ class Report(unittest.TestCase):
         f = T.tar_tur_fields(off, dict(raw={}, uncertainty=text, result='PASS'))
         self.assertEqual(f['TAR'], '')
         self.assertTrue(f['TUR'], f)
-        for kind in ('TIMEBASE', 'DCBAL', 'SPC', 'SELFTEST'):
+        p = next(p for p in T.POINTS if p['kind'] == 'TIMEBASE')          # the calibrator's Scope Out time-mark specification, in divisions
+        self.assertEqual(T.uncertainty_text(p, {}), '0.2 div')
+        self.assertEqual(T.tar_tur_fields(p, dict(raw={}, result='PASS'))['TAR'], '10.0:1')
+        for kind in ('DCBAL', 'SPC', 'SELFTEST'):
             p = next(p for p in T.POINTS if p['kind'] == kind)
             self.assertEqual(T.uncertainty_text(p, {}), 'N/A')
             self.assertEqual(T.tar_tur_fields(p, dict(raw={}, result='PASS')), dict(TAR='', TUR=''))

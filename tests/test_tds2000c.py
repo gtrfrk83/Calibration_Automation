@@ -472,7 +472,8 @@ class Report(unittest.TestCase):
             self.assertEqual(f, dict(TAR='', TUR=''))
         self.assertEqual(T.tar_tur_fields(gain, dict(raw=dict(reading=0.035), uncertainty='999 V', result='PASS'))['TUR'], '')   # stored text from elsewhere
         for p in T.POINTS:
-            self.assertEqual(T.tar_tur_fields(p, dict(raw=dict(reading=p['nominal']), result='PASS'))['TAR'], '')
+            want = '20.0:1' if p['kind'] == 'TIMEBASE' else ''          # the time base: the calibrator's time-mark specification in divisions (uncertainty_budget.marker_divisions)
+            self.assertEqual(T.tar_tur_fields(p, dict(raw=dict(reading=p['nominal']), result='PASS'))['TAR'], want)
 
     def test_no_csv_export_and_pdf_only(self):
         src = (ROOT / 'tds2000c_verification.py').read_text(encoding='utf-8')
