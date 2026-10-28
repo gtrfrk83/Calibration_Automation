@@ -29,6 +29,7 @@ from __future__ import annotations
 import math
 import re
 import time
+from typing import Any
 
 import cmdreg
 from cmdreg import Cmd, Placeholder
@@ -232,7 +233,7 @@ class HP8902A(Instrument):
         'recal_or_uncal', 'rqs'}."""
         value = serial_poll(self.t)
         self.log.add('--', f'serial poll -> {value}', self.label)
-        out = {name: bool(value & bit) for bit, name in STATUS_BITS.items()}
+        out: dict[str, Any] = {name: bool(value & bit) for bit, name in STATUS_BITS.items()}
         out['value'] = value
         return out
 
