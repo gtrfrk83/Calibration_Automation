@@ -112,13 +112,8 @@ class Contrast(unittest.TestCase):
 
 
 def no_overlap(test, win, tree, what=''):
-    """The detail box starts below the table (it used to paint over the table's last rows in a window of 1000 x 640)."""
-    boxes = [b for b in win.findChildren(DetailBox) if b.isVisible()]
-    test.assertTrue(boxes, f'{what}: no detail box')
-    t_bottom = tree.mapTo(win, tree.rect().bottomLeft()).y()
-    for b in boxes:
-        test.assertLessEqual(t_bottom, b.mapTo(win, b.rect().topLeft()).y() + 1, f'{what}: the detail text is over the table')
-        test.assertGreater(b.height(), 12, what)
+    """Owner 2026-10-27: no detail text or source note under the table any more (it used to paint over the table's last rows in a 1000 x 640 window); the table keeps its rows."""
+    test.assertFalse([b for b in win.findChildren(DetailBox) if b.isVisible()], f'{what}: a detail box is still shown')
     test.assertGreaterEqual(tree.height(), tree.minimumHeight(), what)
 
 

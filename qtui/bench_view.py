@@ -368,12 +368,8 @@ def build_results(self, sh, source_note, detail_wrap=1000):
     self.tree = S.results_table(self, body)
     S.small_window(self, self.tree, filt, picker=picker)
     self.tree.bind('<<TreeviewSelect>>', self.on_select)
-    info = H.frame(None, 'v', spacing=4)
-    il = info.layout()
-    il.addWidget(fit_wrapped(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=detail_wrap), self.detail))
-    il.addWidget(fit_wrapped(H.label_(None, source_note, 'Small.TLabel', wraplength=detail_wrap)))
-    lay.addSpacing(8)
-    lay.addWidget(DetailBox(info))
+    # owner 2026-10-27: no detail text and no source note under the table (the setup is in the cable-change dialog, the flags are in the report): the table takes the room.
+    # The engine still fills self.detail on a selection; nothing shows it.
     prev = sh.layout_hook
 
     def hook(compact):
