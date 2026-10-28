@@ -33,7 +33,9 @@ def show(label, data, t0):
 
 def run(port, baud, dtr, rts):
     print(f'\n=== {port} {baud} 8N1  DTR={dtr} RTS={rts}')
-    ser = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1, timeout=0.2, write_timeout=2, dtr=dtr, rts=rts)
+    ser = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1, timeout=0.2, write_timeout=2)
+    ser.dtr = dtr
+    ser.rts = rts
     time.sleep(1.0)
     ser.reset_input_buffer()
     t0 = time.time()
