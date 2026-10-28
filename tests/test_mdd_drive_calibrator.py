@@ -110,5 +110,15 @@ class Drive(unittest.TestCase):
         self.assertTrue(r.ok, r.message)
 
 
+class SectionNames(unittest.TestCase):
+    def test_a_function_with_a_range_n_line_keeps_it_in_the_section_name(self):
+        """Owner 2026-10-28 (Extech EA31): 'Foot-Candle~Range 20' is the section 'Foot-Candle Range 20', as the MDD shows it; 'Range 200' stands alone."""
+        rows = [('Light~Range 20', '2.00 fc', '1.84 to 2.16 fc', '', '1.84', '2.16'), ('|', '10.00 fc', '9.60 to 10.40 fc', '', '9.60', '10.40'),
+                ('Range 200', '20.0 fc', '18.4 to 21.6 fc', '', '18.4', '21.6'), ('AC Volts~600 mV Range', '1.000 V~@ 60 Hz', '[0.5% + 2] V', '', '0.990', '1.010')]
+        d = Path(tempfile.mkdtemp())
+        conv = mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'light.MDD', rows=rows)))
+        self.assertEqual([r['section'] for r in conv.rows], ['Light Range 20', 'Light Range 20', 'Range 200', 'AC Volts'])
+
+
 if __name__ == '__main__':
     unittest.main()

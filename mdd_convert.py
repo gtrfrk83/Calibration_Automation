@@ -436,6 +436,9 @@ def _candidate0(raw, n, tp, conv, prev_section=''):
     """The converted fields of one MDD point, or raises _Skip(code, reason)."""
     func_first, func_rest = cell_parts(raw.get('Text_Function', ''))
     section = section_name(func_first, prev_section)
+    if func_rest and re.match(r'^Range\s+\d[\d.,]*$', func_rest[0].strip(), re.I) and func_first.strip() not in ('', '|') and not _BARE_RANGE.match(func_first.strip()) \
+            and not re.match(r'^Range\b', func_first.strip(), re.I):
+        section = f'{section} {func_rest[0].strip()}'         # 'Foot•Candle~Range 20' is the section 'Foot•Candle Range 20', as the MDD shows it (owner 2026-10-28)
     context = ' '.join([section, func_first] + func_rest)
     repaired = False
     fixed = []
