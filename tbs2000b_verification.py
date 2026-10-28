@@ -19,6 +19,7 @@ from __future__ import annotations
 import json, math, queue, sys, threading, time
 from datetime import datetime
 from pathlib import Path
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
@@ -155,7 +156,9 @@ class IO(reset_startup.IOResetMixin):
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
         self.addrs = addrs
-        self.scope = self.cal = None
+        # both are required (always set below; None only while __init__ fails part-way)
+        self.scope: TektronixTBS2000B = cast(Any, None)
+        self.cal: drivers.Fluke5560A = cast(Any, None)
         t = transports or {}
 
         def tr(name, **kw):
@@ -170,7 +173,7 @@ class IO(reset_startup.IOResetMixin):
             self.cal.open(verify_model=True); self.cal.clear_status()
         except Exception:
             self.close(); raise
-        self.cal.RESET_SCOPE_OFF = True               # the reset leaves the calibrator in standby with its SCOPE function OFF (the procedure selects its mode per test)
+        setattr(self.cal, 'RESET_SCOPE_OFF', True)    # the reset leaves the calibrator in standby with its SCOPE function OFF (the procedure selects its mode per test)
         self.ident = self.scope.idn
         self.is_5560 = '5560' in text
 
@@ -338,6 +341,7 @@ class Runner(tds.Runner):
 class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, manual_override.ManualOverrideMixin):
     MANUAL_OVERRIDE = True            # owner request: type a reading instead of the automatic one (manual_override.py)
     PREFIX = 'TBS'
+    addr_boxes: dict[str, Any]        # type-only: set by the view (build_ui)
 
     def __init__(self, root, demo=False, fast_demo=False):
         self.root, self.demo = root, demo
@@ -510,9 +514,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         set_virtual_pace(False)
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments; a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise drivers.InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_addrs(self):
@@ -525,7 +536,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def request(self, kind, payload):
         """Called on the worker thread: ask the main thread something and wait for the answer."""
-        box = dict(ev=threading.Event(), value=None)
+        box: dict[str, Any] = dict(ev=threading.Event(), value=None)
         self.q.put((kind, payload, box))
         while not box['ev'].wait(0.1):
             if self.stop:
@@ -540,7 +551,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return False, 'This check is a pass / fail result of the instrument itself: there is no reading to type.'
         return True, ''
 
-    def mo_standby(self): self.io.all_outputs_off()
+    def mo_standby(self): self.connected_io().all_outputs_off()
 
     def mo_record(self, p, value, synthetic, extra):
         """The typed value is judged by judge() like every reading; no raw measurements are kept (the demo reading is recorded the same way)."""
@@ -621,9 +632,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         except BaseException as exc:
             error = exc
         finally:
-            try: self.io.all_outputs_off()
+            try: self.connected_io().all_outputs_off()
             except Exception: pass
-            try: self.io.save_log()
+            try: self.connected_io().save_log()
             except Exception: pass
         self.post('done', error)
 
