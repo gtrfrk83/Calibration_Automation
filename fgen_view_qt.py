@@ -66,7 +66,7 @@ def build_ui(self):
                       'GPIB0::10::INSTR   TCPIP0::192.168.1.20::INSTR   COM9')
     drawer_buttons(self, sh)
 
-    action_bar(self, sh)
+    action_bar(self, sh, manual=True)
     self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
     body = sh.content

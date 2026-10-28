@@ -89,12 +89,14 @@ def address_box(var, width=34):
     return H.combobox(None, var, [], width=width, state='normal')
 
 
-def action_bar(self, sh):
+def action_bar(self, sh, manual=False):
     """The action bar of the Tk views, same buttons, order, texts and short texts."""
     self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
     self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
     self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
     self.btn_rerun_from = sh.add_action('Rerun From Selected', self.rerun_from, short='From here')
+    if manual:
+        self.mo_add_button(sh)                              # 'Enter reading manually' (also on the point list's right-click menu)
     self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
     sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
     self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')

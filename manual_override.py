@@ -25,10 +25,36 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
 import ui_theme_core as ui                     # toolkit-free helpers only (si, si_row, si_scale); the entry window is manual_override_view_tk.py
+from drivers.base import InstrumentError, SafetyError
 from ui_port import ui as port
 
 NOT_A_NUMBER = 'Enter the number exactly as the meter shows it, without the unit.'
 OVERLOAD_LIMIT = 1.0e9          # the same overload threshold as the 8808A driver (Format 1, +/-1.0E+9): the automatic reading refuses it, so does a typed one
+
+
+class ReadingUnavailable(InstrumentError):
+    """The automatic reading of a point failed (timeout, unreadable, overload). Same message as the error it wraps; the App offers a typed reading.
+    (The 8808A and 5491B engines have their own class of the same name and meaning; any InstrumentError subclass with this name is handled alike.)"""
+
+
+def guard_read(read, *args, **kwargs):
+    """read(*args) -> the reading; a failure is re-raised as ReadingUnavailable with the same text (a SafetyError and the operator's Stop at a surprise dialog
+    are not readings that failed: they pass through unchanged)."""
+    try:
+        return read(*args, **kwargs)
+    except SafetyError:
+        raise
+    except Exception as exc:
+        if type(exc).__name__ in ('SurpriseStop', 'Stopped'):
+            raise
+        raise ReadingUnavailable(str(exc)) from exc
+
+
+class ReadGuardMixin:
+    """For an engine's IO class: `self._read()` is `self.dmm.read()` with a failure raised as ReadingUnavailable (the command sent is the same)."""
+
+    def _read(self, *args):
+        return guard_read(self.dmm.read, *args)
 
 
 @dataclass(frozen=True)
@@ -42,13 +68,26 @@ class Entered:
         return f'{self.text} {self.unit}'.strip()
 
 
+def point_limits(p):
+    """(low, high) of a point: its printed limits, or nominal -/+ error for the engines whose spec is a tolerance (display only: the engine's own judge decides)."""
+    if p.get('low') is not None and p.get('high') is not None:
+        return p['low'], p['high']
+    if p.get('error') is not None and p.get('nominal') is not None:
+        nom, err = Decimal(repr(float(p['nominal']))), Decimal(repr(abs(float(p['error']))))
+        return float(nom - err), float(nom + err)
+    low = p['low'] if p.get('low') is not None else (p.get('nominal') or 0)
+    high = p['high'] if p.get('high') is not None else (p.get('nominal') or 0)
+    return low, high
+
+
 def entry_scale(p):
     """(limit_texts, unit_text, scale) of the unit a technician types in for point p: the unit the report and the on-screen table use for the point
     (ui.si_row of nominal and limits, the way report_pdf.cert_row scales them; display only). limit_texts are the low / high limits in that unit with just
     enough decimals (the point's resolution); scale is a Decimal (1e-3 for mV)."""
     nominal = p.get('nominal') or 0
-    ref = max(abs(float(p['low'])), abs(float(p['high'])), abs(float(nominal)))
-    vals, _reads, unit = ui.si_row([nominal, p['low'], p['high']], p['unit'])
+    low, high = point_limits(p)
+    ref = max(abs(float(low)), abs(float(high)), abs(float(nominal)))
+    vals, _reads, unit = ui.si_row([nominal, low, high], p['unit'])
     scale, _unit = ui.si_scale(ref, p['unit'])
     return vals[1:3], unit, Decimal(repr(scale))
 
@@ -131,6 +170,88 @@ class ManualOverrideMixin:
     def mo_total(self) -> int:
         raise NotImplementedError
 
+    def is_manual(self, p):
+        """Points measured with a standard the technician connects (flag stored on the record); an engine that has the idea overrides this."""
+        return False
+
+    def mo_applicable(self, p):
+        """(typing allowed, why not) for point p: False for a point whose result is not a number the technician reads (a pass / fail self-test ...)."""
+        return True, ''
+
+    def mo_record(self, p, value, synthetic, extra):
+        """Record the typed value through the App's own _record (its limit logic judges it).  An engine whose _record has another shape overrides this."""
+        import inspect
+        kwargs = dict(extra=extra)
+        try:
+            if 'manual' in inspect.signature(self._record).parameters:
+                kwargs['manual'] = self.is_manual(p)
+        except (TypeError, ValueError):
+            pass
+        self._record(p, value, synthetic, **kwargs)
+
+    def mo_begin(self, p):
+        """The run loop calls this when point p starts to be measured."""
+        self._mo_current = p
+
+    def mo_end(self):
+        self._mo_current = None
+
+    def mo_reset_run(self):
+        self._mo_pending = None
+        self._mo_current = None
+
+    def mo_finish(self, p, reading, synthetic, record):
+        """The automatic reading of p arrived: the typed one armed during the measurement replaces it (logged as the auto reading), else record(reading) as always."""
+        typed = self.mo_take_pending(p)
+        self._mo_current = None
+        if typed is not None:
+            self.mo_commit(p, typed, auto=reading)
+        else:
+            record()
+
+    def mo_recover(self, p, exc) -> bool:
+        """The automatic reading failed: True when a typed reading was committed (the run goes on), False = stop the run as before."""
+        typed = self.mo_failed(p, exc)
+        self._mo_current = None
+        if typed is None:
+            return False
+        self.mo_commit(p, typed, auto=None, why=str(exc))
+        return True
+
+    def mo_standby(self):
+        """Outputs to standby / off (the standing rule) after a typed reading replaced a point: the engine's IO method."""
+        self.io.standby()
+
+    # ---- engines whose points run on one worker thread (the oscilloscopes): the same rules, the dialog is asked on the UI thread ------------------------------
+    @staticmethod
+    def mo_failed_reading(exc) -> bool:
+        """An instrument error of a point (not a safety stop, not the operator's Stop at a surprise dialog, not a Skip) that a typed reading may replace."""
+        return isinstance(exc, InstrumentError) and not isinstance(exc, SafetyError) and type(exc).__name__ != 'SurpriseStop'
+
+    def mo_worker_point(self, p, run):
+        """Worker thread: run() -> (reading, raw).  Returns (reading, raw) to be recorded as always, or None when a typed reading was recorded in its place
+        (armed while the point was measured, or typed after the automatic reading failed); a failure nobody types a reading for is re-raised unchanged."""
+        import app_settings
+        self.mo_begin(p)
+        try:
+            try:
+                reading, raw = run()
+            except Exception as exc:
+                if not (self.mo_failed_reading(exc) and app_settings.manual_override_on()):
+                    raise
+                typed = self.mo_take_pending(p) or self.request('mo_ask', dict(p=p, reason=str(exc), cancel='Stop run'))
+                if typed is None:
+                    raise
+                self.mo_commit(p, typed, auto=None, why=str(exc))
+                return None
+            typed = self.mo_take_pending(p)
+            if typed is not None:
+                self.mo_commit(p, typed, auto=reading)
+                return None
+            return reading, raw
+        finally:
+            self._mo_current = None
+
     def mo_mode_label(self) -> str:
         return getattr(self, 'mode_label', '')
 
@@ -153,8 +274,21 @@ class ManualOverrideMixin:
             ok, why = False, app_settings.OFF_TEXT
         return [('Enter reading manually...', lambda: self.mo_enter_for(p), ok, why)]
 
+    def pm_bind_tree(self, tree, resolver=None):
+        """Only reached by an App without the procedure-modification layer (ProcModsMixin has its own, which also shows these entries): the point list's right-click menu
+        holds 'Enter reading manually...'."""
+        if not self.MANUAL_OVERRIDE:
+            return
+        try:
+            port.view('manual_override_view').attach_tree_menu(self, tree, resolver)
+        except Exception:
+            pass
+
     def mo_state(self, p):
         """(enabled, why not) for point p right now."""
+        ok, why = self.mo_applicable(p)
+        if not ok:
+            return False, why
         if self.busy:
             if self._mo_current is not None and self._mo_current['id'] == p['id']:
                 return True, ''
@@ -263,9 +397,9 @@ class ManualOverrideMixin:
         """Log, then record the typed value through the App's own _record (which judges it with the procedure's own limit logic)."""
         mode = (self.mo_mode_label() + (', demo' if self.demo else '')).strip(', ')
         self.mo_log(log_text(p, entered, auto, why, mode))
-        if idle and getattr(self, 'io', None) is not None and not self.demo:
+        if idle and getattr(self, 'io', None) is not None:
             try:
-                self.io.standby()                      # nothing was output, but the standing rule is 'standby after every point': make sure
+                self.mo_standby()                      # nothing was output, but the standing rule is 'standby after every point': make sure
             except Exception:
                 pass
-        self._record(p, entered.value, bool(self.demo), manual=self.is_manual(p), extra=dict(overridden=True, auto_reading=auto))
+        self.mo_record(p, entered.value, bool(self.demo), dict(overridden=True, auto_reading=auto))

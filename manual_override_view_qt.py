@@ -72,3 +72,29 @@ def ask_reading_window(parent, p, total, vals, unit, reason, cancel_text, demo, 
     dlg = build(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit)
     dlg.run()
     return dlg.value if dlg.result_key == 'use' else None
+
+
+def attach_tree_menu(app, tree, resolver=None):
+    """Right-click menu of a point list for an App that has no procedure-modification layer (procmods_view_qt.attach_tree_menu covers the others): it holds the engine's
+    own entries (app.tree_menu_extras(pid): [(label, command, enabled, why)], i.e. 'Enter reading manually...') and nothing else.  `tree` is a qtui.table.DataTable
+    (its `context_provider` hook).  Returns the function that builds the entries of a row (for tests)."""
+    resolve = resolver or (lambda iid: iid)
+
+    def row_entries(row):
+        if row is None:
+            return []
+        try:
+            tree.select_rows([row])
+            pid = resolve(tree.row_key(row))
+            out = []
+            for label, command, ok, reason in app.tree_menu_extras(pid):
+                out.append((label, command, bool(ok)))
+                if not ok and reason:
+                    out.append((reason[:90] + ('...' if len(reason) > 90 else ''), None, False))
+            return out
+        except Exception:
+            return []
+    if hasattr(tree, 'context_provider'):
+        tree.context_provider = row_entries
+    app.__dict__.setdefault('_mo_tree_menus', []).append((tree, resolve))
+    return row_entries

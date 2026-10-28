@@ -23,6 +23,7 @@ import drivers
 import appdata
 import datamode
 import procmods_engine
+import manual_override
 import reset_startup
 import surprise
 import virtualbench
@@ -54,7 +55,7 @@ def to_visa(text):
     return f'ASRL{int(t)}::INSTR'
 
 
-class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
+class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the DMM under test and the Fluke 5560A, both through the instrument drivers."""
     SETTLE_AC = {3: 9.0, 20: 5.0, 200: 4.0}
 
@@ -143,10 +144,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         surprise.checked(self.dmm, self.dmm.check_errors, 'configuring ' + p['description'])       # no guard: exactly dmm.check_errors(...)
         if p['source'] == 'none':          # copper short / open input: the calibrator stays in STANDBY
             time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.zero', 1.5), self.virtual))
-            return self.dmm.read()
+            return self._read()
         if p['source'] == 'manual':        # e.g. a capacitance standard connected by the technician
             time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.manual', 2.0), self.virtual))
-            return self.dmm.read()
+            return self._read()
         k, v, f = p['kind'], p['nominal'], p.get('frequency')
         if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f, dc=k == 'DCV')
         elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
@@ -155,12 +156,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)   # the calibrator refuses outputs it cannot make; never operate then (so no Continue)
         self.cal.operate_unverified()
         time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
-        reading = self.dmm.read()
+        reading = self._read()
         self.standby()
         return reading
 
 
-class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE = True            # owner request: type a reading instead of the automatic one (manual_override.py)
     WIRING_TEXT = {
         'VOLT': 'Calibrator voltage output to the DMM front HI / LO input terminals.',
         'CURRENT': 'Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first.',
@@ -361,6 +363,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if selected: self.execute(self.points_from(POINTS, selected[0]))
         else: port.message('info', 'Selection', 'Select a test point first.')
 
+    def mo_point(self, iid): return POINTS[int(iid) - 1]
+    def mo_total(self): return len(POINTS)
+
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return
@@ -369,6 +374,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.confirm_found_overwrite(points): return
         if not self.fast_demo and self.io is None: self.test_connections()
         if not self.fast_demo and self.io is None: return
+        self.mo_reset_run()
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
@@ -420,11 +426,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
+        self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
         if self.virtual: virtualbench.operator_sets_up(self._vb, p, terminal=p.get('terminal'), manual=p['source'] == 'manual', nominal=p['nominal'])     # the virtual operator does what the prompt asked
         if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
-            self._record(p, reading, True); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+            self.mo_finish(p, reading, True, lambda: self._record(p, reading, True)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
             def work():
                 try:
@@ -434,19 +441,26 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     try: self.io.standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
-                    port.post(self.root, lambda err=err: self._error(err))
+                    if isinstance(err, manual_override.ReadingUnavailable): port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))     # the automatic reading failed: a typed one may replace it
+                    else: port.post(self.root, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, key):
-        self._record(p, reading, bool(self.demo)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+        self.mo_finish(p, reading, bool(self.demo), lambda: self._record(p, reading, bool(self.demo))); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+
+    def _reading_failed(self, points, i, p, key, exc):
+        """The meter could not be read (timeout, unreadable, overload). The calibrator is already in standby: a typed reading (manual_override) lets the run go on, else stop as before."""
+        if not self.mo_recover(p, exc): self._error(exc); return
+        port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
+        self.mo_reset_run()
         self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); port.message('error', 'Measurement stopped', str(exc))
 
-    def _record(self, p, reading, synthetic):
+    def _record(self, p, reading, synthetic, extra=None):
         result = 'PASS' if abs(reading - p['nominal']) <= p['error'] else 'FAIL'
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()],
-                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
+                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
 
     # ------------------------------------------------------------------ files

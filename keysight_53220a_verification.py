@@ -28,6 +28,7 @@ from drivers import keysight_53220a as k53        # not exported by drivers/__in
 import appdata
 import datamode
 import procmods_engine
+import manual_override
 import reset_startup
 import surprise
 import virtualbench
@@ -419,7 +420,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             time.sleep(virtualbench.scaled(self.settle(p, 'PULSE'), self.virtual))
         elif plan['mode'] == 'manual':
             time.sleep(virtualbench.scaled(self.settle(p, None), self.virtual))
-        res = self.ctr.measure_stats()
+        res = manual_override.guard_read(self.ctr.measure_stats)         # a failure here is offered a typed reading (same command)
         self.ctr.check_errors('reading ' + p['description'])
         self.cache = (p['ref'], res)
         return res
@@ -441,7 +442,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self.standby()
 
 
-class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE = True            # owner request: type a reading instead of the automatic one (manual_override.py)
     def __init__(self, root, demo=False, fast_demo=False):
         self.init_virtual(demo, fast_demo)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
@@ -820,6 +822,17 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             caution=f'The program restores the {MODEL} factory defaults (*RST) before the first point, then sets inputs, function, gate and trigger for every point.',
             ok='Conditions met - start', parent=self.root)
 
+    def mo_point(self, iid): return POINTS[int(iid) - 1]
+    def mo_total(self): return len(POINTS)
+
+    def mo_applicable(self, p):
+        if p.get('stat') == 'pass':          # the self-test: the counter's own pass / fail (*TST? = 0), no number is read
+            return False, 'The self-test is the counter\'s own pass / fail result: there is no reading to type.'
+        return True, ''
+
+    def mo_record(self, p, value, synthetic, extra):
+        self._record(p, value, synthetic, self.plan(p)['mode'], extra=extra)
+
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return
@@ -831,6 +844,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         points = [q for q in points if self.active(q)]                     # the options read from the counter at connect may remove points
         if not points: self.status.set('None of the selected points applies to this counter and its options.'); return
         if not self.fast_demo and not self._prompt_start(points): self.status.set('Run not started: warm-up and conditions were not confirmed.'); return
+        self.mo_reset_run()
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
@@ -885,12 +899,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.fast_demo and key != previous and not self._prompt_setup(p, plan):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
+        self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
         if self.virtual: self._virtual_operator(p)                       # the virtual operator does what the prompt asked
         if self.fast_demo:
             span = p['high'] - p['low']
             reading = (p['low'] + span * (0.5 + 0.38 * math.sin(p['id'] * 1.71))) if p['stat'] == 'mean' else (p['high'] * 0.3 if p['stat'] == 'sdev' else 0.0)   # deterministic, labelled synthetic
-            self._record(p, reading, True, plan['mode']); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+            self.mo_finish(p, reading, True, lambda: self._record(p, reading, True, plan['mode'])); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
             stim = {k: v for k, v in self.stim_state().items() if k != 'rf'}        # read on the UI thread (Tk variables); a cable loss or stimulus change made after connecting applies to this point
 
@@ -903,7 +918,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     try: self.io.standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
-                    port.post(self.root, lambda err=err: self._error(err))
+                    if isinstance(err, manual_override.ReadingUnavailable): port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))     # the automatic reading failed: a typed one may replace it
+                    else: port.post(self.root, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
 
     def _virtual_operator(self, p):
@@ -911,15 +927,21 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self._vb: self._prepare_bench(self._vb[0], p)
 
     def _done(self, points, i, p, reading, key, mode):
-        self._record(p, reading, bool(self.demo), mode); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+        self.mo_finish(p, reading, bool(self.demo), lambda: self._record(p, reading, bool(self.demo), mode)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+
+    def _reading_failed(self, points, i, p, key, exc):
+        """The meter could not be read (timeout, unreadable, overload). The calibrator is already in standby: a typed reading (manual_override) lets the run go on, else stop as before."""
+        if not self.mo_recover(p, exc): self._error(exc); return
+        port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
+        self.mo_reset_run()
         self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); port.message('error', 'Measurement stopped', str(exc))
 
-    def _record(self, p, reading, synthetic, mode='rf'):
+    def _record(self, p, reading, synthetic, mode='rf', extra=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode, atten_db=self.atten.get(p['id'], 0.0),
-                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
+                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
 
     # ------------------------------------------------------------------ files

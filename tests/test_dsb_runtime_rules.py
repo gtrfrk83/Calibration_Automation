@@ -1067,9 +1067,12 @@ class Rule13Override(Base):
         self.assertEqual(log_file(self.h), '')
 
     def test_only_the_datasheet_runtime_and_the_8808a_enable_the_override(self):
-        hits = sorted(str(p.relative_to(ROOT)) for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
+        """Superseded rule (manual entry on every two-way engine): the datasheet runtime and the 8808A still enable it, and so do the other automatic-reading
+        engines. The full list and the exclusions are pinned in test_8808a_manual_override.OnlyThe8808A and test_manual_entry_all_engines.Coverage."""
+        hits = sorted(str(p.relative_to(ROOT)).replace('\\', '/') for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
                       if re.search(r'^\s*MANUAL_OVERRIDE\s*=\s*True', p.read_text(encoding='utf-8'), re.M))
-        self.assertEqual(hits, ['dsb_override.py', 'dsb_runtime.py', 'fluke6060a_verification.py', 'fluke8808a_verification.py'])
+        for f in ('dsb_override.py', 'dsb_runtime.py', 'fluke8808a_verification.py'):
+            self.assertIn(f, hits)
 
 
 if __name__ == '__main__':

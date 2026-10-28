@@ -29,6 +29,7 @@ from ui_port import ui as port          # every dialog, variable, scheduler call
 import appdata
 import datamode
 import procmods_engine
+import manual_override
 import reset_startup
 import surprise
 import virtualbench
@@ -330,7 +331,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 raise drivers.InstrumentError(f'Counter timebase is {src}, expected {self.counter_ref}.')
             raw = dict(counter=self.counter.idn.split(',')[1].strip(), gate_s=gate_s,
                        reference=f'EXT {ref_hz / 1e6:g} MHz (checked)' if ext else 'INT')
-        f = self.counter.frequency()
+        f = manual_override.guard_read(self.counter.frequency)
         if not 1e6 < f < 1e8:
             raise drivers.InstrumentError(f'Counter reads {f:g} Hz: check the cable and the counter input (50 ohm, channel 1).')
         return f, raw
@@ -341,8 +342,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 return self.power.power()
             except surprise.SurpriseStop:
                 raise
+            except drivers.SafetyError:
+                raise
             except drivers.InstrumentError as exc:
-                raise drivers.InstrumentError(f'{exc} - check the sensor, attenuator and cable, and that the power meter is zeroed.') from exc
+                raise manual_override.ReadingUnavailable(f'{exc} - check the sensor, attenuator and cable, and that the power meter is zeroed.') from exc
         return self._manual(f'Read the power meter in dBm ({what}). Relative mode and offset OFF: type the absolute reading.', 'dBm')
 
     def _out(self, p, frequency=None):
@@ -407,8 +410,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             volts, freq = self.std.measure()
         except surprise.SurpriseStop:
             raise                                       # the operator's Stop (the dialog already said what and where), not a message to extend
+        except drivers.SafetyError:
+            raise
         except drivers.InstrumentError as exc:
-            raise drivers.InstrumentError(f'{exc} - check the cable to the 5790B {where}.') from exc
+            raise manual_override.ReadingUnavailable(f'{exc} - check the cable to the 5790B {where}.') from exc          # same message; the window offers a typed reading
         if not math.isclose(freq, expected_hz, rel_tol=0.01):
             raise drivers.InstrumentError(f'5790B measured {freq:g} Hz, expected {expected_hz:g} Hz: check the cable to the 5790B {where}.')
         return volts
@@ -628,7 +633,8 @@ def certificate_rows(results):
 # ================================================================================================================
 # application
 # ================================================================================================================
-class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE = True            # owner request: type a reading instead of the automatic one (manual_override.py)
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
@@ -903,6 +909,21 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if sel: self.execute(self.points_from(POINTS, sel[0]))
         else: port.message('info', 'Selection', 'Select a test point first.')
 
+    def mo_point(self, iid): return POINTS[int(iid) - 1]
+    def mo_total(self): return len(POINTS)
+
+    def mo_applicable(self, p):
+        if p['kind'] == 'SELFTEST':           # the generator's own *TST? pass / fail: no number is read
+            return False, 'The self-test is the generator\'s own pass / fail result: there is no reading to type.'
+        return True, ''
+
+    def mo_standby(self): self.io.all_off()
+
+    def mo_record(self, p, value, synthetic, extra):
+        """Like the demo reading (demo_reading): no raw measurements; a flatness point keeps the method it is collected with."""
+        raw = dict(method=self.method()) if p['kind'] == 'FLAT' else {}
+        self._record(p, value, raw, synthetic, extra=extra)
+
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return
@@ -918,6 +939,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 facts=[('Points to run', len(points)), ('Limits', self.period.get())], ok='Conditions met - start', parent=self.root):
             return
         self.conditions_ok = True
+        self.mo_reset_run()
         self.stop = False; self.busy = True; self.pref_cache = {}
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
@@ -965,12 +987,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             if not self._prompt_setup(p):
                 self.busy = False; self.status.set('Paused for wiring'); return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["section_title"]} - {p["desc"]}')
+        self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
         if self.virtual: virtualbench.fgen_operator_sets_up(self._vb, key)          # the virtual operator cables the output as the prompt said
         if self.fast_demo:
             reading, raw = demo_reading(p)
             if p['kind'] == 'FLAT': raw = dict(raw, method=self.method())
-            self._record(p, reading, raw, True); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+            self.mo_finish(p, reading, True, lambda: self._record(p, reading, raw, True)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
             return
 
         def work():
@@ -979,18 +1002,25 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 port.post(self.root, lambda: self._done(points, i, p, reading, raw, key))
             except Exception as exc:
                 err = exc   # 'exc' is deleted when the except block ends; capture by default arg
-                port.post(self.root, lambda err=err: self._error(err))
+                if isinstance(err, manual_override.ReadingUnavailable): port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))     # the automatic reading failed: a typed one may replace it
+                else: port.post(self.root, lambda err=err: self._error(err))
         threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, raw, key):
-        self._record(p, reading, raw, bool(self.demo)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+        self.mo_finish(p, reading, bool(self.demo), lambda: self._record(p, reading, raw, bool(self.demo))); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+
+    def _reading_failed(self, points, i, p, key, exc):
+        """The reading could not be taken (counter / power meter / 5790B failed). The generator output is already OFF (IO.measure): a typed reading lets the run go on, else stop as before."""
+        if not self.mo_recover(p, exc): self._error(exc); return
+        port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
+        self.mo_reset_run()
         self.busy = False
         title = 'SAFETY - check the front panel' if isinstance(exc, drivers.SafetyError) else 'Measurement stopped'
         self.status.set('Error - run stopped: ' + str(exc)); port.message('error', title, str(exc))
 
-    def _record(self, p, reading, raw, synthetic):
+    def _record(self, p, reading, raw, synthetic, extra=None):
         stale = []
         if p.get('ref'):
             rng = int(p['ref'].split('_')[1].rstrip('dB'))
@@ -998,7 +1028,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                      and self.results[str(q['id'])].get('raw', {}).get('method', 'POWER') == 'POWER']
         self.results[str(p['id'])] = dict(reading=reading, result=judge(p, reading), raw=raw, synthetic=synthetic,
                                           period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label,
-                                          **self.pm_result_fields())
+                                          **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
         if stale:
             port.message('warning', 'Flatness reference changed',

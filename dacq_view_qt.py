@@ -72,7 +72,7 @@ def build_ui(self):
     f.note('COM9, GPIB0::6::INSTR ...', column=1)
     B.find_and_test(sh, self, find_text, self.find_instruments)
 
-    B.action_bar(self, sh)
+    B.action_bar(self, sh, manual=True)
     B.build_results(self, sh, SPEC['source']['note'])
     self.update_shell_sections(POINTS, lambda p: p['section_title'])
 
