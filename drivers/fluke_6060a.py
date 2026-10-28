@@ -29,6 +29,7 @@ from __future__ import annotations
 import math
 import re
 import time
+from typing import Any
 
 import cmdreg
 from cmdreg import Cmd, Placeholder
@@ -572,7 +573,8 @@ class Fluke6060A(Instrument):
         if not 0 <= depth_pct <= MAX_AM_PCT:
             raise InstrumentError(f'AM depth {depth_pct:g} % is outside 0 to {MAX_AM_PCT}')
         pct = round(depth_pct)
-        writes, expect = [('am.set', {'pct': pct})], {'am_depth_pct': pct}
+        writes = [('am.set', {'pct': pct})]
+        expect: dict[str, Any] = {'am_depth_pct': pct}
         if source == 'int':
             self._rate(rate_hz, writes, expect)
             writes += [('ae.set', {'state': 0}), ('ai.set', {'state': 1})]
@@ -591,7 +593,8 @@ class Fluke6060A(Instrument):
         top = MAX_FM_KHZ_651 if self.low_rate_fm else MAX_FM_KHZ
         if not 0 <= dev_khz <= top:
             raise InstrumentError(f'FM deviation {dev_khz:g} kHz is outside 0 to {top:g} kHz')
-        writes, expect = [('fm.set', {'khz': float(f'{dev_khz:.3g}')})], {'fm_dev_hz': float(f'{dev_khz:.3g}') * 1000.0}
+        writes = [('fm.set', {'khz': float(f'{dev_khz:.3g}')})]
+        expect: dict[str, Any] = {'fm_dev_hz': float(f'{dev_khz:.3g}') * 1000.0}
         if source == 'int':
             self._rate(rate_hz, writes, expect)
             writes += [('fe.set', {'state': 0}), ('fi.set', {'state': 1})]
