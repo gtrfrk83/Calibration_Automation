@@ -89,7 +89,11 @@ class Drive(unittest.TestCase):
         self.assertTrue(app.found)                                              # every reading came from the typed value
         rows, _pts = app.certificate_rows_and_points()
         self.assertTrue(any(r['Uncertainty'] for r in rows))
-        self.assertTrue(any('[5522A]' in r['Description'] for r in rows))
+        self.assertFalse(app.demo)
+        self.assertFalse(any('[5522A]' in r['Description'] for r in rows))       # owner 2026-10-28: no calibrator tag on an imported .MDD's rows
+        labels = [h[0] for h in app.report_header(app.spec['source'])]
+        self.assertFalse({'Datasheet', 'Make / model', 'Period', 'Standards', 'By hand', 'Unverified'} & set(labels))
+        self.assertIn('Instrument', labels)
 
     def test_an_ac_point_with_no_frequency_stays_hand_done_and_does_not_block_the_driven_sheet(self):
         """Owner 2026-10-28 (Fluke 29 II .MDD): a '0.0 mV' AC zero check has no frequency; it used to make the whole driven import a draft, so nothing was automated."""

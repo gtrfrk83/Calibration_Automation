@@ -38,7 +38,7 @@ import dsb_coil
 from datasheet_builder import D, DsError, DsProblem, KINDS, fmt
 
 DSB_SCHEMA = 'dsb-1'
-ENGINE_OPTIONS = ('function_prompt', 'auto_ramp', 'hv_threshold_v', 'hookup_meter', 'manual_entry')
+ENGINE_OPTIONS = ('function_prompt', 'auto_ramp', 'hv_threshold_v', 'hookup_meter', 'manual_entry', 'drive_calibrator')
 DEFAULT_OPTIONS = {'function_prompt': True, 'auto_ramp': False, 'hv_threshold_v': 60}
 ENGINE_BASE_UNIT = {'degC': 'C', 'ohm': 'ohm'}
 STOCK_READY = {'DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'FREQ', 'PERIOD', 'TEMP', 'DIODE', 'CONT', 'SCOPE_GAIN', 'SCOPE_OFFSET'}

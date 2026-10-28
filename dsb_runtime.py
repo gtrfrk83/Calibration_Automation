@@ -693,6 +693,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
     MANUAL_OVERRIDE = True             # rule 13: right-click a point > Enter reading manually (dsb_override.py; the 8808A's mixin)
 
     def __init__(self, root, spec, demo=False, io_factory=None, period=None, fast_demo=False):
+        self.mdd_import = str((spec.get('source') or {}).get('document') or '').startswith('Cal Processor datasheet')     # an imported .MDD: a lean report (no standard tags, shorter header)
         self.manual_entry = bool((spec.get('options') or {}).get('manual_entry'))      # a manual calibration (see the module docstring)
         self.section_mode = {}                                                          # rule 12: {section: auto | hand | skip}
         self.unc_choice = {}                                                            # a manual calibration: {point id: the standard the technician picked for its uncertainty}
@@ -1780,6 +1781,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         manual_std = (self.manual_values(p, std) or {}).get('unc_standard') if row.get('Uncertainty') else None
         if manual_std:                                                # a manual calibration's row says which standard its uncertainty is from
             row['Description'] = f'{row["Description"]}  [{"demo, " if self.demo else ""}{manual_std}]'
+        elif self.mdd_import and not self.demo and not coil_tag and std not in ('', 'manual', 'demo'):
+            pass                                                      # owner 2026-10-28: no '[5560A]' on an imported .MDD's rows; '[manual]' on the hand-done ones stays
         elif not (self.manual_entry and std in ('', 'manual')):         # a manual calibration's rows carry no '[manual]' tag (all of it is by hand)
             row['Description'] = f'{row["Description"]}  [{std}{coil_tag}]'
         return row
@@ -1992,6 +1995,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         st = self.generated_state()
         if st.generated:                                               # a procedure from the Procedure Generator: its approval state is part of the record
             header.append(('Procedure status', st.text + (f' (project {st.project_id})' if st.project_id else '')))
+        if self.mdd_import and not self.demo:                           # owner 2026-10-28: an imported .MDD's report header keeps the instrument lines only
+            header = [h for h in header if h[0] not in ('Datasheet', 'Make / model', 'Period', 'Standards', 'By hand', 'Unverified')]
         if self.demo:
             header.append(('Mode', 'DEMO - synthetic data, not calibration evidence'))
         return header
