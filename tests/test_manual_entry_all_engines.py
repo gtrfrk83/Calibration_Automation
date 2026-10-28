@@ -891,7 +891,7 @@ class BK5491B(unittest.TestCase):
 
 # ====================================================================================================== coverage: no engine escapes a decision
 FLAGGED = {          # engine file :: class -> sets MANUAL_OVERRIDE = True
-    'agilent34410a_verification.py::App', 'bk5491b_verification.py::App', 'dacq_verification.py::App', 'dsb_runtime.py::DsbApp', 'fgen_verification.py::App',
+    'agilent34410a_verification.py::App', 'bk5491b_verification.py::App', 'dacq_verification.py::App', 'fluke6060a_verification.py::App', 'dsb_runtime.py::DsbApp', 'fgen_verification.py::App',
     'fluke8808a_verification.py::App', 'i400_verification.py::App', 'keithley2000_verification.py::App', 'keysight_53220a_verification.py::App',
     'mdo3_verification.py::App', 'mdo4000c_verification.py::App', 'tbs2000b_verification.py::App', 'tds2000c_verification.py::App', 'truevolt_verification.py::App',
     'Procedures/Agilent_34401A.py::App', 'Procedures/Fluke_8846A_Verification.py::App',

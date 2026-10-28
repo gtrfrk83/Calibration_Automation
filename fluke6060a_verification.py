@@ -208,7 +208,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         try:
             if 'gen' not in tr:
                 n = gpib_number(addrs['uut'], '6060A')
-                tr['gen'] = drivers.open_visa(f'GPIB0::{n}::INSTR', timeout=20)
+                tr['gen'] = drivers.open_visa(to_visa(addrs['uut']), timeout=20)   # the box keeps its GPIB board: 'GPIB1::2::INSTR' is not turned into GPIB0
             self.gen = drivers.Fluke6060A(tr['gen'], self.log, label='6060A', address=gpib_number(addrs['uut'], '6060A') if not transports else None)
             self.gen.connect()
             for key, cls, label, what in (('rx', drivers.HP8902A, '8902A', '8902A'), ('sa', drivers.HP8563E, '8563E', '8563E')):
@@ -217,7 +217,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                     continue
                 if key not in tr:
                     n = gpib_number(text, what)
-                    tr[key] = drivers.open_visa(f'GPIB0::{n}::INSTR', timeout=40)
+                    tr[key] = drivers.open_visa(to_visa(text), timeout=40)
                 inst = cls(tr[key], self.log, label=label, address=gpib_number(text, what) if (text and not transports) else None)
                 inst.connect()
                 setattr(self, key, inst)
