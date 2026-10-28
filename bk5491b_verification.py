@@ -15,6 +15,7 @@ import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Any, Callable, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
@@ -34,7 +35,8 @@ from drivers.bk_5491b import BK5491B, range_value
 
 MODEL = '5491B'
 SPEC_PATH = HERE / 'specs' / 'bk_5491b_pv.json'
-SPEC = POINTS = None
+SPEC: dict[str, Any] = {}           # set by configure()
+POINTS: list[dict[str, Any]] = []
 PERIODS = {'Lab datasheet (MDD)': 'mdd', 'Manufacturer specification': 'mfr'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 CALIBRATORS = {'Fluke 5522A': ('5522A', drivers.Fluke5522A), 'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
@@ -211,7 +213,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def __init__(self, dmm_address, cal_address, cal_model='Fluke 5522A', cal_baud=9600, dmm_serial=None, transports=None, mods=None, meter_optional=False):
         self.log = drivers.CommandLog()
         cal_name, cal_cls = CALIBRATORS[cal_model]
-        self.is_manual = lambda p: False        # the App sets this: points measured with a standard the technician connects
+        self.is_manual: Callable[[Any], bool] = lambda p: False        # the App sets this: points measured with a standard the technician connects
         if transports:
             dmm_t, cal_t = transports
         else:
@@ -221,7 +223,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 if not meter_optional: raise
                 dmm_t = None; self.dmm_down = str(exc)
             cal_t = drivers.open_visa(to_visa(cal_address), timeout=20, baud=cal_baud)
-        self.dmm = BK5491B(dmm_t, self.log, label=MODEL)
+        self.dmm = BK5491B(cast(Any, dmm_t), self.log, label=MODEL)       # dmm_t is None only in typed-readings mode (dmm_down): the meter is then never addressed
         self.cal = cal_cls(cal_t, self.log, label=cal_name)
         try:
             self.cal.open(verify_model=True)
@@ -568,7 +570,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return False
-        if hasattr(self, 'conn_pill'): self.conn_pill.set('Meter not connected - typed readings', 'neutral')
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None: pill.set('Meter not connected - typed readings', 'neutral')
         self.status.set(f'{MODEL} not connected: the calibrator is driven and you type each reading.')
         return True
 
@@ -594,9 +597,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if self.io: self.io.close(); self.io = None
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -642,7 +652,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Specification', p['page'])]
         if image is None:
             facts.append(('Diagram', f'not installed (expected diagrams/hook_{MODEL}_{self.cal_key}_{group}.png)'))
-        self.io.standby()
+        self.connected_io().standby()
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p))]
         if p['kind'] in ('ACV', 'ACI', 'FREQ'):
             steps.append(('Rate', 'The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds.'))
@@ -654,7 +664,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         f = f' at {procspec._fmt(p["frequency"], "Hz")}' if p.get('frequency') else ''
         value = (f'{procspec._fmt(p["amplitude"], "V")} rms at {procspec._fmt(p["nominal"], "Hz")}' if p['kind'] == 'FREQ'
                  else f'{procspec._fmt(p["nominal"], p["unit"])}{f}')
-        self.io.standby()
+        self.connected_io().standby()
         steps = [('Why', self.manual_reason(p)),
                  ('Standard', f'Disconnect the calibrator. Connect your own standard to the meter as for {GROUP_TITLE[p["group"]]} and apply {value}. '
                               'Use a standard with enough accuracy for the limits.'),
@@ -694,14 +704,14 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         else:
             def work():
                 try:
-                    reading = self.io.measure(p)
+                    reading = self.connected_io().measure(p)
                     port.post(self.root, lambda: self._done(points, i, p, reading, key, manual))
                 except Exception as exc:
-                    if not (self.io.dmm_down and isinstance(exc, ReadingUnavailable)):       # typed-readings mode: the output stays on until the reading is typed (App._reading_failed)
-                        try: self.io.standby()
+                    if not (self.connected_io().dmm_down and isinstance(exc, ReadingUnavailable)):       # typed-readings mode: the output stays on until the reading is typed (App._reading_failed)
+                        try: self.connected_io().standby()
                         except Exception: pass
                     if isinstance(exc, ReadingUnavailable):
-                        try: self.io.after_read_failure(p, exc)
+                        try: self.connected_io().after_read_failure(p, exc)
                         except Exception: pass
                         err = exc
                         port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, manual, err))

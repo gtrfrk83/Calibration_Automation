@@ -16,6 +16,7 @@ import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Any, Callable, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
@@ -35,7 +36,9 @@ from drivers.fluke_8808a import Fluke8808A, range_number
 
 MODEL = '8808A'
 SPEC_PATH = HERE / 'specs' / 'fluke_8808a_pv.json'
-SPEC = POINTS = None
+# None until configure() runs (a test checks `POINTS is None`), so the value stays None; typed as the loaded spec / point list.
+SPEC: dict[str, Any] = cast(Any, None)
+POINTS: list[dict[str, Any]] = cast(Any, None)
 PERIODS = {'90 days': '90d', '1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 CALIBRATORS = {'Fluke 5522A': ('5522A', drivers.Fluke5522A), 'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
@@ -205,7 +208,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def __init__(self, dmm_address, cal_address, cal_model='Fluke 5522A', cal_baud=9600, dmm_serial=None, transports=None, mods=None):
         self.log = drivers.CommandLog()
         cal_name, cal_cls = CALIBRATORS[cal_model]
-        self.is_manual = lambda p: False        # the App sets this: points measured with a standard the technician connects
+        self.is_manual: Callable[[Any], bool] = lambda p: False        # the App sets this: points measured with a standard the technician connects
         if transports:
             dmm_t, cal_t = transports
         else:
@@ -551,7 +554,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         port.message('info', 'Connected', f'{MODEL}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}\nCalibrator output is not enabled.')
 
     def reset_skip_run(self):
-        self.io.session_check()
+        self.connected_io().session_check()
 
     def _reset_failed(self, msg, skipped=False):
         if self.io is not None:
@@ -563,9 +566,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if self.io: self.io.close(); self.io = None
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -611,7 +621,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Manual page', p['page'])]
         if image is None:
             facts.append(('Diagram', f'not installed (expected diagrams/hook_{MODEL}_{self.cal_key}_{group}.png)'))
-        self.io.standby()
+        self.connected_io().standby()
         if p['source'] == 'none':
             return port.operator_prompt('Zero offset: physical setup required', f'Setup: {GROUP_TITLE[group]}',
                 [('Set up the input', self.setup_text(p))], facts=facts,
@@ -620,7 +630,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if p['kind'] in ('OHM2', 'OHM4'):
             wire = '4W' if p['kind'] == 'OHM4' else '2W'
             try:
-                self.io.dmm.configure_point(p)          # the meter has no query for the wire mode: set it now so the operator can see the annunciator
+                self.connected_io().dmm.configure_point(p)          # the meter has no query for the wire mode: set it now so the operator can see the annunciator
             except Exception as exc:
                 self._error(exc); return False
             steps.append(('Annunciator', f'The program has selected the ohms function with {wire}. Confirm the {wire} annunciator is lit on the meter display '
@@ -635,7 +645,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         f = f' at {procspec._fmt(p["frequency"], "Hz")}' if p.get('frequency') else ''
         value = (f'{procspec._fmt(p["amplitude"], "V")} rms at {procspec._fmt(p["nominal"], "Hz")}' if p['kind'] == 'FREQ'
                  else f'{procspec._fmt(p["nominal"], p["unit"])}{f}')
-        self.io.standby()
+        self.connected_io().standby()
         steps = [('Why', self.manual_reason(p)),
                  ('Standard', f'Disconnect the calibrator. Connect your own standard to the meter as for {GROUP_TITLE[p["group"]]} (Calibration Manual Table 3-1 names a 5725A '
                               f'amplifier for 750 V and a Fluke 271 function generator for frequency) and apply {value}. Use a standard with enough accuracy for the limits.'),
@@ -675,13 +685,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         else:
             def work():
                 try:
-                    reading = self.io.measure(p)
+                    reading = self.connected_io().measure(p)
                     port.post(self.root, lambda: self._done(points, i, p, reading, key, manual))
                 except Exception as exc:
-                    try: self.io.standby()
+                    try: self.connected_io().standby()
                     except Exception: pass
                     if isinstance(exc, ReadingUnavailable):
-                        try: self.io.after_read_failure(p, exc)
+                        try: self.connected_io().after_read_failure(p, exc)
                         except Exception: pass
                         err = exc
                         port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, manual, err))
