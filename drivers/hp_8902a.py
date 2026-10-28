@@ -163,6 +163,7 @@ class RecalRequired(InstrumentError):
 class HP8902A(Instrument):
     MODEL = 'HP 8902A'
     IDN_MATCH = ()                       # the ID reply is not printed in the manual: kept as read, see connect()
+    ID_TIMEOUT_S = 3.0
     ID_WORDS = ('8902', '8901')          # only used to log a warning
     DEFAULT_ADDRESS = 14                 # factory HP-IB address (p. 3-20 / 70); the rear switch can change it
     DEFAULT_TIMEOUT = 40.0               # a tuned-RF-level read can take up to ~10 s at -127 dBm, a 0.1 Hz frequency read ~20 s, a 6-dash search ~20 s (the manual gives no bound): 30 s minimum
@@ -260,11 +261,30 @@ class HP8902A(Instrument):
         try:
             self.t.clear()
             time.sleep(self.RESET_SETTLE_S)
-            self.idn = self.id_reply = self.query_retry('id', attempts=2).strip()
-            if not self.idn:
+            # ID is only a courtesy: the manual shows the code but not any reply (owner bench, 2026-10-28: the 8902A does not answer ID). One short try (read-only, no
+            # retries: every miss costs a full timeout); no reply is NOT an error as long as the receiver answers a serial poll (it is there and listening).
+            prev = getattr(self.t, 'timeout', None)
+            self.t.set_timeout(self.ID_TIMEOUT_S)
+            try:
+                self.idn = self.id_reply = self.ask('id').strip()
+                no_reply = False
+            except (InstrumentError, TransportError) as exc:
+                self.idn = self.id_reply = ''
+                no_reply = True
+                self.log.add('!!', f'no reply to ID within {self.ID_TIMEOUT_S:g} s ({exc}); continuing: the receiver is checked with a serial poll instead', self.label)
+            finally:
+                if prev:
+                    self.t.set_timeout(prev)
+            if no_reply:
+                try:
+                    value = serial_poll(self.t)
+                except InstrumentError as exc:
+                    raise InstrumentError(f'{self.MODEL}: nothing answers at HP-IB address {self.address}: no reply to ID and the serial poll failed ({exc})') from exc
+                self.log.add('--', f'serial poll -> {value} (the receiver is present)', self.label)
+            elif not self.idn:
                 raise InstrumentError(f'{self.MODEL}: empty ID reply (is the receiver at HP-IB address {self.address}?)')
             self.id_matches = any(w in self.idn for w in self.ID_WORDS)
-            if not self.id_matches:
+            if self.idn and not self.id_matches:
                 self.log.add('!!', f'ID reply {self.idn!r} does not mention 8902 / 8901 (the reply text is not in the manual: UNVERIFIED)', self.label)
             self.status()                                                 # clear anything pending
         except Exception:

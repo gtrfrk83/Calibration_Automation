@@ -557,6 +557,39 @@ class EightNineOhTwo(_NoSleep):
         with self.assertRaises(InstrumentError):
             HP8902A(t).connect()
 
+    def test_a_receiver_that_does_not_answer_id_still_connects_when_it_answers_a_serial_poll(self):
+        """Owner bench 2026-10-28: the 8902A does not reply to ID. One short read-only try, a logged warning, a serial poll proves it is there."""
+        from drivers.transport import TransportError
+        bench = SimBench()
+        t = Sim8902ATransport(bench)
+        real = t.handle
+
+        def handle(text):
+            if text == 'ID':
+                raise TransportError('read failed: VI_ERROR_TMO')
+            return real(text)
+        t.handle = handle
+        t.read_stb = lambda: 0
+        rx = HP8902A(t)
+        rx.connect()
+        self.assertEqual(rx.id_reply, '')
+        self.assertEqual(t.sent.count('ID'), 1, 'no retry of ID')
+
+    def test_nothing_at_the_address_is_still_an_error(self):
+        from drivers.transport import TransportError
+        bench = SimBench()
+        t = Sim8902ATransport(bench)
+
+        def handle(text):
+            raise TransportError('read failed: VI_ERROR_TMO')
+
+        def poll():
+            raise TransportError('no device')
+        t.handle = handle
+        t.read_stb = poll
+        with self.assertRaises(InstrumentError):
+            HP8902A(t).connect()
+
     def test_frequency_command_order_and_value(self):
         bench, src, rx, t = connected_8902a(mhz=111.1111)
         f = rx.measure_frequency_hz(111.1111, 10)
