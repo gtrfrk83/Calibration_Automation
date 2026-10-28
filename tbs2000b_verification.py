@@ -101,6 +101,10 @@ def uncertainty_parts(p, raw):
             v, _u, _n = sc.oscilloscope('bandwidth', volts_pp=raw.get('src_vpp', 3.0), frequency=raw.get('freq', 50e6))
             if v is not None:
                 return (10 ** (v / 20) - 1) * raw.get('reading', 2.12), 'V', 'bwv'
+        if p['kind'] == 'TIMEBASE':
+            m = tds.marker_parts(p)          # the calibrator's Scope Out time-mark specification, in divisions (shared with the TDS2000C engine)
+            if m is not None:
+                return m
     except Exception:
         return None
     return None
@@ -133,7 +137,8 @@ def tar_tur_fields(p, r):
         if parts is not None and text != 'N/A' and format_uncertainty(parts) == text:
             import uncertainty
             u, uu = uncertainty.round_up(parts[0]), parts[1]
-        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], None, None, u, uu))
+        acc = tds.marker_accuracy(p) if (p['kind'] == 'TIMEBASE' and u is not None) else None
+        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], acc, 'div' if acc else None, u, uu))
     except Exception:
         return dict(TAR='', TUR='')
 

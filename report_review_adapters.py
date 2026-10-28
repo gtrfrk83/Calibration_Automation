@@ -201,6 +201,15 @@ def _read_only_calc(app, p, mod, row, default_ratio, expects, sc):
     vunit = parts[1] if parts else unit
     style = parts[2] if parts else ''
     cmc = value if (parts and style in ('si', 'bw', 'bwv')) else None   # a scope CMC (not the editable reference file)
+    if style == 'div':
+        # TDS / TBS time base: the calibrator's Scope Out time-mark specification (uncertainty_budget.marker_divisions), in divisions; the scope has no CMC line for it,
+        # so it is 'As budgeted' (no scope floor), not 'Not in scope'
+        def marker_calc(standard):
+            e = _fixed(unit, None, printed, default_ratio[0], default_ratio[1], cmc=None, value=value, expects=expects, vunit=vunit)
+            if e.reported:
+                e.status = M.AS_BUDGETED
+            return e
+        return marker_calc
     return lambda standard: _fixed(unit, None, printed, default_ratio[0], default_ratio[1], cmc=cmc, value=value, expects=expects, vunit=vunit)
 
 

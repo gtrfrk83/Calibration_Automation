@@ -2144,7 +2144,14 @@ Owner decision: the Tk build is gone; the suite is Qt only.
 - Do this before the bench re-verification: any later edit to an engine file flips its procedures again.
 
 ## Procedure window bottom (detail) area  (owner rule 2026-10-27, all procedures)
+- LATER DECISION (same day): the whole detail area (and the source note under the point table) is REMOVED from every procedure window; the point table takes the space. Everything it said is in the setup instructions; limits are in the point table. New procedures must not add it back. (The older lines below describe the trimmed state it replaced.)
 - The text under the point table shows only what the table does not: test, function (range named once), setup, operator notes, As Found / As Left. NO limits ('Acceptable reading', 'Limit:', 'Limits:', printed-limit text): the limits are in the point table. Yes/no and annunciator checks still say what must be seen.
 - Setup text is calibrator-neutral (the calibrator is chosen in the window). Never say 'rotary switch' / 'knob' / 'dial' for an instrument that has none (753/754).
 - The source note at the bottom is short: manual + pages, how readings are collected, flagged items only (corrected misprints with both values, UNVERIFIED). Done for the 753/754; the other specs' source notes (specs/*_pv.json source.note) are still the longer ones and carry flags: trim them one procedure at a time with the owner.
 - New procedures follow this (also written into the new-calibration-procedure skill, section 3a).
+
+
+## Scope time-base uncertainty (TDS2000C / TBS1000 / TBS1000C / TBS2000B; owner request 2026-10-27)
+- The time-base point (marker edge at centre screen, divisions) takes its uncertainty from the calibrator's "Time [Scope Out Time Mark Mode]" specification (Fluke 5522A sheet, Operators Manual p. 47: +/-2.5 ppm I.V. for 2 ns - 0.02 s, 25 ppm for 0.05 - 500 s), via `uncertainty_budget.marker_divisions`: relative row x edge time (`delay`) / time per division of the measurement (`hscale_meas`) = divisions. Printed as e.g. `0.08 div` (never SI-prefixed); TAR / TUR are tolerance / specification and tolerance / uncertainty in divisions. Review window: 'As budgeted' (the scope has no CMC line for it).
+- UNVERIFIED: the 5522A sheet is used for the 5560A and 5520A as well (their standard sheets have no marker row); the conversion to divisions is this suite's, not the manual's; the lab scope has no time-marker CMC, so there is no floor.
+- Light meters: FC / lux / La / uW/cm2 points of an MDD import take their uncertainty from `A2LA-LIGHT` (the lab's Light - Measure CMC, 2.9 % white / 5.0 % at 365 nm, of reading, k = 2) or the T-10A working-standard sheet; `datasheet_builder_rules.LIGHT_KINDS`, `datasheet_builder_match.stimulus`; light units are never SI-prefixed (`uncertainty.NO_PREFIX_UNITS`).

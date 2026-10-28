@@ -234,3 +234,24 @@ def reported_text(b):
     if b.reported is None:
         return ''
     return uncertainty.format_value(b.reported, 'ohm' if b.kind.startswith('OHM') else b.unit)
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------- scope time marker
+MARKER_STANDARD = '5522A'          # the only calibrator sheet with a 'Time [Scope Out Time Mark Mode]' row (Operators Manual p. 47); also used for the 5560A / 5520A (UNVERIFIED)
+
+
+def marker_divisions(p, standard=MARKER_STANDARD):
+    """Time-base point of the TDS / TBS scopes (the marker edge's position at the centre screen, in divisions): (Budget in seconds, uncertainty in divisions) or None.
+    The calibrator's scope-output time-mark specification (relative, ppm of the marker period, I.V.) applied to the time of the edge on the screen (`delay`, the
+    marker period when absent) gives the error of the edge in seconds; that error / the time per division of the measurement (`hscale_meas`) is the edge's displacement in
+    divisions, the unit of the point.  Budget as every other calibrator point (specification row, k = 2, rounded up by the caller)."""
+    period = p.get('period')
+    hs = p.get('hscale_meas')
+    if not period or not hs:
+        return None
+    t = float(p.get('delay') or period)
+    b = build('TIME', float(period), 's', standard=standard)
+    if b is None or b.hit is None or not b.reported:
+        return None
+    ppm = float(b.reported) / float(period)                      # the row is relative: its absolute figure is proportional to the marker period
+    return b, ppm * t / float(hs), (float(b.hit.limit) / float(period)) * t / float(hs)

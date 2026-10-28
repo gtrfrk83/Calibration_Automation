@@ -100,7 +100,7 @@ class Adapters(unittest.TestCase):
     def test_not_in_scope_and_no_uncertainty_counts_per_engine(self):
         """Owner audit: a point with no stimulus from a calibrator or measuring standard (WaveSurfer RMS noise) is 'No uncertainty required' (grey, locked, not
         in Needs attention); 'Not in scope' stays only for points that use a standard but have no scope entry."""
-        want = {'ws': (0, 36), 'mdo': (19, 21), 'fgen': (42, 1), 'tds': (1, 3)}
+        want = {'ws': (0, 36), 'mdo': (19, 21), 'fgen': (42, 1), 'tds': (0, 3)}      # tds: the time base now takes the calibrator's time-mark specification
         for name, (nis, nou) in want.items():
             app, _m = built(name)
             specs, d = M.specs_for(app)
@@ -216,7 +216,7 @@ class Adapters(unittest.TestCase):
                 self.assertEqual([c for c in model.changes() if c['manual']], [])
                 found += 1
                 break
-        self.assertGreater(found, 2, 'fgen, TDS (or MDO) and WaveSurfer all have not-in-scope rows')
+        self.assertGreater(found, 1, 'fgen, MDO and WaveSurfer have not-in-scope rows (the TDS time base now takes the calibrator time-mark specification)')
 
 
 @unittest.skipUnless(HAVE, 'reportlab, pypdf and pdftotext are needed')
@@ -329,7 +329,7 @@ class Report(unittest.TestCase):
                     touched += 1
                 elif r.status == M.NOT_IN_SCOPE and model.set_typed(i, '0.5')[0]:
                     touched += 1
-            self.assertTrue(touched, name)
+            self.assertTrue(touched or name == 'tds', name)           # the TDS has no not-in-scope row left: nothing to change, the report still reprints
             out, again = self.dir / f'{name}_o.pdf', self.dir / f'{name}_again.pdf'
             export(name, app, mod, out, dict(R.DETAILS, uncertainty_review=M.review_block([model], 'Tech', '2026-01-01T00:00:00')))
             rid = R.last_run_id(ASSET[name])

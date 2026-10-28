@@ -243,14 +243,35 @@ def uncertainty_parts(p, raw):
             v, u, _ = sc.oscilloscope('bandwidth', volts_pp=raw.get('src_vpp', 3.0), frequency=raw.get('freq', 50e6))
             if v is not None:
                 return (10 ** (v / 20) - 1) * raw.get('reading', 2.12), 'V', 'bwv'
+        if p['kind'] == 'TIMEBASE':
+            m = marker_parts(p)
+            if m is not None:
+                return m
     except Exception:
         return None
     return None
 
 
+def marker_parts(p):
+    """The time-base point (marker edge position, divisions): the calibrator's Scope Out time-mark specification (uncertainty_budget.marker_divisions) as (value, 'div', 'div').
+    The scope's own CMC table has no time-marker line; the 5522A sheet is used for every calibrator choice (the 5560A / 5520A sheets have no marker row: UNVERIFIED)."""
+    import uncertainty_budget as ub
+    m = ub.marker_divisions(p)
+    return (m[1], 'div', 'div') if m is not None else None
+
+
+def marker_accuracy(p):
+    """The calibrator's marker specification in divisions (for TAR), or None."""
+    import uncertainty_budget as ub
+    m = ub.marker_divisions(p)
+    return m[2] if m is not None else None
+
+
 def format_uncertainty(parts):
     import uncertainty
     value, unit, style = parts
+    if style == 'div':               # divisions are never SI-prefixed
+        return f'{uncertainty.round_up(value):.2g} div'
     if style == 'si':
         return uncertainty.format_value(value, unit)
     return f'{value:.2g} {unit}'
@@ -284,7 +305,8 @@ def tar_tur_fields(p, r):
         if parts is not None and text != 'N/A' and format_uncertainty(parts) == text:
             import uncertainty
             u, uu = uncertainty.round_up(parts[0]), parts[1]
-        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], None, None, u, uu))
+        acc = marker_accuracy(p) if (p['kind'] == 'TIMEBASE' and u is not None) else None
+        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], acc, 'div' if acc else None, u, uu))
     except Exception:
         return dict(TAR='', TUR='')
 
