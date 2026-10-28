@@ -95,7 +95,7 @@ def parse_firmware(idn: str):
     return rev, ('A20+' if int(m.group(2)) >= 20 else 'A19-')
 
 
-def step_number(step: dict, fw_class: str) -> int:
+def step_number(step: dict, fw_class: str | None) -> int:
     """The :STEP<n> number of a spec step for the firmware class. DC only differs (p. 3-4). Raises InstrumentError for a step the firmware does not have."""
     if fw_class not in ('A20+', 'A19-'):
         raise InstrumentError('The firmware numbering (A19 and earlier / A20 and later) has not been established; no calibration step can be sent.')
@@ -153,7 +153,7 @@ class Keithley2000Cal(Keithley2000):
             problem = str(exc).replace(code, '********')
         if problem is not None:                               # raised outside the except block: no chained exception keeps the original text
             raise InstrumentError('The calibration code could not be sent: ' + problem)
-        code = None                                           # drop the only reference held here
+        del code                                              # drop the only reference held here
         self._unlocked = self.lock_state()
         if not self._unlocked:
             self.drain_errors()
