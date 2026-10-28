@@ -1,0 +1,2195 @@
+{
+ "schema": 1,
+ "kind": "bench-dmm-band",
+ "model": "5491B",
+ "periods": [
+  "mdd",
+  "mfr"
+ ],
+ "default_period": "mdd",
+ "interface": "rs232",
+ "options": {
+  "hv_threshold_v": 100,
+  "report_title": "Calibration Data",
+  "warm_up_minutes": 30
+ },
+ "source": {
+  "document": "B&K Precision 5491B 5-1/2 digit multimeter: the lab datasheet B_K_Precision_5491B_Digital_Multimeter__365_Days_.MDD (ATS-1042), cross-checked against the 2831E / 5491B User Manual",
+  "pages": "User Manual v1.10.2024, Chapter 7 (5491B specifications), printed pp. 67 to 72; remote commands Chapters 5 and 6, pp. 41 to 64",
+  "cite": "Lab datasheet ATS-1042 (365-day interval); manufacturer specification: B&K 5491B User Manual, Chapter 7, pp. 67 to 72",
+  "limits": "Lab datasheet limits as the MDD prints them (default), or the manufacturer specification of the manual (the two differ only at the points listed in the point flags)",
+  "report_note": "Limits are those of the lab datasheet ATS-1042 (365-day interval) unless the report header says the manufacturer specification was applied (B&K 5491B User Manual, Chapter 7, pp. 67 to 72). Each limit is nominal +/- (% of reading + % of range + resolution floor), as the datasheet prints it.",
+  "note": "55 points: DC volts 5, AC volts 16, Frequency 4, Resistance 6, Continuity 1, DC current, 500 mA terminal 3, AC current, 500 mA terminal 11, DC current, 20 A terminal 3, AC current, 20 A terminal 6. Limits: the lab datasheet (default) or the manufacturer specification; they differ at 6 points (see the point details). The meter must be warmed up for half an hour; the specification is valid in the slow rate only (NPLC 10), which the program selects."
+ },
+ "models": {
+  "5491B": {
+   "name": "B&K Precision 5491B",
+   "brand": "B&K Precision",
+   "model_note": "B&K Precision 5491B 5-1/2 digit bench multimeter, RS-232 and USB (virtual COM)"
+  }
+ },
+ "sections": [
+  {
+   "id": "DCV",
+   "title": "DC volts",
+   "group": "VOLT",
+   "page": "p. 68",
+   "setup": "Calibrator voltage output to the meter V / ohm and COM terminals.",
+   "points": [
+    {
+     "ref": "MDD #1",
+     "row": 1,
+     "page": "p. 68",
+     "kind": "DCV",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 0.48982,
+       "high": 0.49018
+      },
+      "mfr": {
+       "low": 0.48982,
+       "high": 0.49018
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.02",
+       "0.016"
+      ],
+      "mfr": [
+       "0.02",
+       "0.016"
+      ]
+     },
+     "floor": 1e-05,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #2",
+     "row": 2,
+     "page": "p. 68",
+     "kind": "DCV",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 4.895,
+       "high": 4.905
+      },
+      "mfr": {
+       "low": 4.8986,
+       "high": 4.9014
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.02",
+       "0.08"
+      ],
+      "mfr": [
+       "0.02",
+       "0.008"
+      ]
+     },
+     "floor": 0.0001,
+     "flags": [
+      {
+       "code": "pct_range",
+       "why": "MDD: 0.08 % of range (5 V); the manual (p. 68) prints 0.008 %",
+       "mdd": [
+        "0.02",
+        "0.08",
+        "5"
+       ],
+       "manual": [
+        "0.02",
+        "0.008",
+        "5"
+       ]
+      }
+     ],
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #3",
+     "row": 3,
+     "page": "p. 68",
+     "kind": "DCV",
+     "nominal": 49.0,
+     "range": 50.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 48.95,
+       "high": 49.05
+      },
+      "mfr": {
+       "low": 48.986,
+       "high": 49.014
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.02",
+       "0.08"
+      ],
+      "mfr": [
+       "0.02",
+       "0.008"
+      ]
+     },
+     "floor": 0.001,
+     "flags": [
+      {
+       "code": "pct_range",
+       "why": "MDD: 0.08 % of range (50 V); the manual (p. 68) prints 0.008 %",
+       "mdd": [
+        "0.02",
+        "0.08",
+        "50"
+       ],
+       "manual": [
+        "0.02",
+        "0.008",
+        "50"
+       ]
+      }
+     ],
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #4",
+     "row": 4,
+     "page": "p. 68",
+     "kind": "DCV",
+     "nominal": 490.0,
+     "range": 500.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 489.5,
+       "high": 490.5
+      },
+      "mfr": {
+       "low": 489.86,
+       "high": 490.14
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.02",
+       "0.08"
+      ],
+      "mfr": [
+       "0.02",
+       "0.008"
+      ]
+     },
+     "floor": 0.01,
+     "flags": [
+      {
+       "code": "pct_range",
+       "why": "MDD: 0.08 % of range (500 V); the manual (p. 68) prints 0.008 %",
+       "mdd": [
+        "0.02",
+        "0.08",
+        "500"
+       ],
+       "manual": [
+        "0.02",
+        "0.008",
+        "500"
+       ]
+      }
+     ],
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #5",
+     "row": 5,
+     "page": "p. 68",
+     "kind": "DCV",
+     "nominal": 900.0,
+     "range": 1000.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 899.0,
+       "high": 901.0
+      },
+      "mfr": {
+       "low": 899.7,
+       "high": 900.3
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.02",
+       "0.08"
+      ],
+      "mfr": [
+       "0.02",
+       "0.008"
+      ]
+     },
+     "floor": 0.1,
+     "flags": [
+      {
+       "code": "pct_range",
+       "why": "MDD: 0.08 % of range (1000 V); the manual (p. 68) prints 0.008 %",
+       "mdd": [
+        "0.02",
+        "0.08",
+        "1000"
+       ],
+       "manual": [
+        "0.02",
+        "0.008",
+        "1000"
+       ]
+      }
+     ],
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "ACV",
+   "title": "AC volts",
+   "group": "VOLT",
+   "page": "p. 69",
+   "setup": "Calibrator voltage output to the meter V / ohm and COM terminals.",
+   "points": [
+    {
+     "ref": "MDD #6",
+     "row": 6,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "V",
+     "frequency": 20.0,
+     "limits": {
+      "mdd": {
+       "low": 0.4847,
+       "high": 0.4953
+      },
+      "mfr": {
+       "low": 0.4847,
+       "high": 0.4953
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.08"
+      ],
+      "mfr": [
+       "1.0",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #7",
+     "row": 7,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 0.4847,
+       "high": 0.4953
+      },
+      "mfr": {
+       "low": 0.4847,
+       "high": 0.4953
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.08"
+      ],
+      "mfr": [
+       "1.0",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #8",
+     "row": 8,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.4868,
+       "high": 0.4932
+      },
+      "mfr": {
+       "low": 0.48725,
+       "high": 0.49275
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.15"
+      ],
+      "mfr": [
+       "0.5",
+       "0.06"
+      ]
+     },
+     "floor": 0.0,
+     "flags": [
+      {
+       "code": "pct_range",
+       "why": "MDD: 0.15 % of range (500 mV, 50 Hz - 20 kHz); the manual (p. 69) prints 0.06 %",
+       "mdd": [
+        "0.5",
+        "0.15",
+        "0.500"
+       ],
+       "manual": [
+        "0.5",
+        "0.06",
+        "0.500"
+       ]
+      }
+     ],
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #9",
+     "row": 9,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.48215,
+       "high": 0.49785
+      },
+      "mfr": {
+       "low": 0.48215,
+       "high": 0.49785
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1.5",
+       "0.1"
+      ],
+      "mfr": [
+       "1.5",
+       "0.1"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #10",
+     "row": 10,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.4738,
+       "high": 0.5062
+      },
+      "mfr": {
+       "low": 0.4738,
+       "high": 0.5062
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "3",
+       "0.3"
+      ],
+      "mfr": [
+       "3.0",
+       "0.3"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #11",
+     "row": 11,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "V",
+     "frequency": 20.0,
+     "limits": {
+      "mdd": {
+       "low": 4.847,
+       "high": 4.953
+      },
+      "mfr": {
+       "low": 4.847,
+       "high": 4.953
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.08"
+      ],
+      "mfr": [
+       "1.0",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #12",
+     "row": 12,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 4.847,
+       "high": 4.953
+      },
+      "mfr": {
+       "low": 4.847,
+       "high": 4.953
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.08"
+      ],
+      "mfr": [
+       "1.0",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #13",
+     "row": 13,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "mdd": {
+       "low": 4.8819,
+       "high": 4.9181
+      },
+      "mfr": {
+       "low": 4.8819,
+       "high": 4.9181
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.35",
+       "0.02"
+      ],
+      "mfr": [
+       "0.35",
+       "0.02"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #14",
+     "row": 14,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "mdd": {
+       "low": 4.849,
+       "high": 4.951
+      },
+      "mfr": {
+       "low": 4.849,
+       "high": 4.951
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.04"
+      ],
+      "mfr": [
+       "1",
+       "0.04"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #15",
+     "row": 15,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "mdd": {
+       "low": 4.748,
+       "high": 5.052
+      },
+      "mfr": {
+       "low": 4.748,
+       "high": 5.052
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "3",
+       "0.1"
+      ],
+      "mfr": [
+       "3.0",
+       "0.1"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #16",
+     "row": 16,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 49.0,
+     "range": 50.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 48.47,
+       "high": 49.53
+      },
+      "mfr": {
+       "low": 48.47,
+       "high": 49.53
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.08"
+      ],
+      "mfr": [
+       "1.0",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #17",
+     "row": 17,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 49.0,
+     "range": 50.0,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "mdd": {
+       "low": 48.819,
+       "high": 49.181
+      },
+      "mfr": {
+       "low": 48.819,
+       "high": 49.181
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.35",
+       "0.02"
+      ],
+      "mfr": [
+       "0.35",
+       "0.02"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #18",
+     "row": 18,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 49.0,
+     "range": 50.0,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "mdd": {
+       "low": 48.49,
+       "high": 49.51
+      },
+      "mfr": {
+       "low": 48.49,
+       "high": 49.51
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1",
+       "0.04"
+      ],
+      "mfr": [
+       "1",
+       "0.04"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #19",
+     "row": 19,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 49.0,
+     "range": 50.0,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "mdd": {
+       "low": 47.48,
+       "high": 50.52
+      },
+      "mfr": {
+       "low": 47.48,
+       "high": 50.52
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "3",
+       "0.1"
+      ],
+      "mfr": [
+       "3.0",
+       "0.1"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #20",
+     "row": 20,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 490.0,
+     "range": 500.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 487.4,
+       "high": 492.6
+      },
+      "mfr": {
+       "low": 487.4,
+       "high": 492.6
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.03"
+      ],
+      "mfr": [
+       "0.5",
+       "0.03"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #21",
+     "row": 21,
+     "page": "p. 69",
+     "kind": "ACV",
+     "nominal": 700.0,
+     "range": 750.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 696.3,
+       "high": 703.7
+      },
+      "mfr": {
+       "low": 696.2,
+       "high": 703.8
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.03"
+      ],
+      "mfr": [
+       "0.5",
+       "0.03"
+      ]
+     },
+     "floor": 0.1,
+     "flags": [
+      {
+       "code": "range",
+       "why": "MDD: the 500 V range (full scale 500 V); 700 V is on the 750 V range, whose full scale is 750 V (p. 69)",
+       "mdd": [
+        "0.5",
+        "0.03",
+        "500"
+       ],
+       "manual": [
+        "0.5",
+        "0.03",
+        "750"
+       ]
+      }
+     ],
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "FREQ",
+   "title": "Frequency",
+   "group": "VOLT",
+   "page": "p. 71",
+   "setup": "Calibrator AC voltage output (0.5 V rms) to the meter V / ohm and COM terminals.",
+   "points": [
+    {
+     "ref": "MDD #29",
+     "row": 29,
+     "page": "p. 71",
+     "kind": "FREQ",
+     "nominal": 9.0,
+     "range": 10.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.5,
+     "limits": {
+      "mdd": {
+       "low": 8.9935,
+       "high": 9.0065
+      },
+      "mfr": {
+       "low": 8.9935,
+       "high": 9.0065
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.05",
+       "0.02"
+      ],
+      "mfr": [
+       "0.05",
+       "0.02"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #30",
+     "row": 30,
+     "page": "p. 71",
+     "kind": "FREQ",
+     "nominal": 90.0,
+     "range": 100.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.5,
+     "limits": {
+      "mdd": {
+       "low": 89.971,
+       "high": 90.029
+      },
+      "mfr": {
+       "low": 89.971,
+       "high": 90.029
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.01",
+       "0.02"
+      ],
+      "mfr": [
+       "0.01",
+       "0.02"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #31",
+     "row": 31,
+     "page": "p. 71",
+     "kind": "FREQ",
+     "nominal": 90000.0,
+     "range": 100000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.5,
+     "limits": {
+      "mdd": {
+       "low": 89983.0,
+       "high": 90017.0
+      },
+      "mfr": {
+       "low": 89983.0,
+       "high": 90017.0
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.01",
+       "0.008"
+      ],
+      "mfr": [
+       "0.01",
+       "0.008"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #32",
+     "row": 32,
+     "page": "p. 71",
+     "kind": "FREQ",
+     "nominal": 900000.0,
+     "range": 1000000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.5,
+     "limits": {
+      "mdd": {
+       "low": 899830.0,
+       "high": 900170.0
+      },
+      "mfr": {
+       "low": 899830.0,
+       "high": 900170.0
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.01",
+       "0.008"
+      ],
+      "mfr": [
+       "0.01",
+       "0.008"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "OHM2",
+   "title": "Resistance",
+   "group": "OHM2",
+   "page": "p. 71",
+   "setup": "Calibrator resistance output to the meter V / ohm and COM terminals (2-wire).",
+   "points": [
+    {
+     "ref": "MDD #22",
+     "row": 22,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 490.0,
+     "range": 500.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 489.46,
+       "high": 490.54
+      },
+      "mfr": {
+       "low": 489.46,
+       "high": 490.54
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.1",
+       "0.01"
+      ],
+      "mfr": [
+       "0.10",
+       "0.01"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #23",
+     "row": 23,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 4900.0,
+     "range": 5000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 4894.7,
+       "high": 4905.3
+      },
+      "mfr": {
+       "low": 4894.7,
+       "high": 4905.3
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.1",
+       "0.008"
+      ],
+      "mfr": [
+       "0.10",
+       "0.008"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #24",
+     "row": 24,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 49000.0,
+     "range": 50000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 48947.0,
+       "high": 49053.0
+      },
+      "mfr": {
+       "low": 48947.0,
+       "high": 49053.0
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.1",
+       "0.008"
+      ],
+      "mfr": [
+       "0.10",
+       "0.008"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #25",
+     "row": 25,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 490000.0,
+     "range": 500000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 489470.0,
+       "high": 490530.0
+      },
+      "mfr": {
+       "low": 489470.0,
+       "high": 490530.0
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.1",
+       "0.008"
+      ],
+      "mfr": [
+       "0.10",
+       "0.008"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #26",
+     "row": 26,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 4900000.0,
+     "range": 5000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 4892300.0,
+       "high": 4907700.0
+      },
+      "mfr": {
+       "low": 4892300.0,
+       "high": 4907700.0
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.15",
+       "0.008"
+      ],
+      "mfr": [
+       "0.15",
+       "0.008"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    },
+    {
+     "ref": "MDD #27",
+     "row": 27,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 49000000.0,
+     "range": 50000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 48848000.0,
+       "high": 49152000.0
+      },
+      "mfr": {
+       "low": 48848000.0,
+       "high": 49152000.0
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.3",
+       "0.01"
+      ],
+      "mfr": [
+       "0.3",
+       "0.01"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "CONT",
+   "title": "Continuity",
+   "group": "OHM2",
+   "page": "p. 71",
+   "setup": "Calibrator resistance output to the meter V / ohm and COM terminals (2-wire).",
+   "points": [
+    {
+     "ref": "MDD #28",
+     "row": 28,
+     "page": "p. 71",
+     "kind": "OHM2",
+     "nominal": 490.0,
+     "range": 500.0,
+     "unit": "ohm",
+     "frequency": null,
+     "function": "CONT",
+     "limits": {
+      "mdd": {
+       "low": 489.31,
+       "high": 490.69
+      },
+      "mfr": {
+       "low": 489.31,
+       "high": 490.69
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.1",
+       "0.04"
+      ],
+      "mfr": [
+       "0.1",
+       "0.04"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "DCI_MA",
+   "title": "DC current, 500 mA terminal",
+   "group": "IMA",
+   "page": "p. 70",
+   "setup": "Calibrator current output to the meter 500 mA terminal and COM.",
+   "points": [
+    {
+     "ref": "MDD #33",
+     "row": 33,
+     "page": "p. 70",
+     "kind": "DCI",
+     "nominal": 0.0049,
+     "range": 0.005,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 0.004897,
+       "high": 0.004903
+      },
+      "mfr": {
+       "low": 0.004897,
+       "high": 0.004903
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.05",
+       "0.01"
+      ],
+      "mfr": [
+       "0.05",
+       "0.01"
+      ]
+     },
+     "floor": 1e-07,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #34",
+     "row": 34,
+     "page": "p. 70",
+     "kind": "DCI",
+     "nominal": 0.049,
+     "range": 0.05,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 0.048971,
+       "high": 0.049029
+      },
+      "mfr": {
+       "low": 0.048971,
+       "high": 0.049029
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.05",
+       "0.008"
+      ],
+      "mfr": [
+       "0.05",
+       "0.008"
+      ]
+     },
+     "floor": 1e-06,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #35",
+     "row": 35,
+     "page": "p. 70",
+     "kind": "DCI",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 0.48971,
+       "high": 0.49029
+      },
+      "mfr": {
+       "low": 0.48971,
+       "high": 0.49029
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.05",
+       "0.008"
+      ],
+      "mfr": [
+       "0.05",
+       "0.008"
+      ]
+     },
+     "floor": 1e-05,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "ACI_MA",
+   "title": "AC current, 500 mA terminal",
+   "group": "IMA",
+   "page": "p. 70",
+   "setup": "Calibrator current output to the meter 500 mA terminal and COM.",
+   "points": [
+    {
+     "ref": "MDD #39",
+     "row": 39,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.0049,
+     "range": 0.005,
+     "unit": "A",
+     "frequency": 20.0,
+     "limits": {
+      "mdd": {
+       "low": 0.0048185,
+       "high": 0.0049815
+      },
+      "mfr": {
+       "low": 0.0048185,
+       "high": 0.0049815
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1.5",
+       "0.16"
+      ],
+      "mfr": [
+       "1.5",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #40",
+     "row": 40,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.0049,
+     "range": 0.005,
+     "unit": "A",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 0.0048185,
+       "high": 0.0049815
+      },
+      "mfr": {
+       "low": 0.0048185,
+       "high": 0.0049815
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1.5",
+       "0.16"
+      ],
+      "mfr": [
+       "1.5",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #41",
+     "row": 41,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.0049,
+     "range": 0.005,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.0048715,
+       "high": 0.0049285
+      },
+      "mfr": {
+       "low": 0.0048715,
+       "high": 0.0049285
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.08"
+      ],
+      "mfr": [
+       "0.5",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #42",
+     "row": 42,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.0049,
+     "range": 0.005,
+     "unit": "A",
+     "frequency": 20000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.0047695,
+       "high": 0.0050305
+      },
+      "mfr": {
+       "low": 0.0047695,
+       "high": 0.0050305
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "2.5",
+       "0.16"
+      ],
+      "mfr": [
+       "2.5",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #43",
+     "row": 43,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.049,
+     "range": 0.05,
+     "unit": "A",
+     "frequency": 20.0,
+     "limits": {
+      "mdd": {
+       "low": 0.048185,
+       "high": 0.049815
+      },
+      "mfr": {
+       "low": 0.048185,
+       "high": 0.049815
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1.5",
+       "0.16"
+      ],
+      "mfr": [
+       "1.5",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #44",
+     "row": 44,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.049,
+     "range": 0.05,
+     "unit": "A",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 0.048185,
+       "high": 0.049815
+      },
+      "mfr": {
+       "low": 0.048185,
+       "high": 0.049815
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1.5",
+       "0.16"
+      ],
+      "mfr": [
+       "1.5",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #45",
+     "row": 45,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.049,
+     "range": 0.05,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.048715,
+       "high": 0.049285
+      },
+      "mfr": {
+       "low": 0.048715,
+       "high": 0.049285
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.08"
+      ],
+      "mfr": [
+       "0.5",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #46",
+     "row": 46,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.049,
+     "range": 0.05,
+     "unit": "A",
+     "frequency": 20000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.04796,
+       "high": 0.05004
+      },
+      "mfr": {
+       "low": 0.04796,
+       "high": 0.05004
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "2",
+       "0.12"
+      ],
+      "mfr": [
+       "2",
+       "0.12"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #47",
+     "row": 47,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "A",
+     "frequency": 20.0,
+     "limits": {
+      "mdd": {
+       "low": 0.48185,
+       "high": 0.49815
+      },
+      "mfr": {
+       "low": 0.48185,
+       "high": 0.49815
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "1.5",
+       "0.16"
+      ],
+      "mfr": [
+       "1.5",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #48",
+     "row": 48,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.48715,
+       "high": 0.49285
+      },
+      "mfr": {
+       "low": 0.48715,
+       "high": 0.49285
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.08"
+      ],
+      "mfr": [
+       "0.5",
+       "0.08"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    },
+    {
+     "ref": "MDD #49",
+     "row": 49,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 0.49,
+     "range": 0.5,
+     "unit": "A",
+     "frequency": 20000.0,
+     "limits": {
+      "mdd": {
+       "low": 0.4796,
+       "high": 0.5004
+      },
+      "mfr": {
+       "low": 0.4796,
+       "high": 0.5004
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "2",
+       "0.12"
+      ],
+      "mfr": [
+       "2",
+       "0.12"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "IMA",
+     "terminal": "500MA",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "DCI_A",
+   "title": "DC current, 20 A terminal",
+   "group": "I20A",
+   "page": "p. 70",
+   "setup": "Calibrator current output (20 A) to the meter 20 A terminal and COM.",
+   "points": [
+    {
+     "ref": "MDD #36",
+     "row": 36,
+     "page": "p. 70",
+     "kind": "DCI",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 4.8872,
+       "high": 4.9128
+      },
+      "mfr": {
+       "low": 4.8872,
+       "high": 4.9128
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.25",
+       "0.01"
+      ],
+      "mfr": [
+       "0.25",
+       "0.01"
+      ]
+     },
+     "floor": 0.0001,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #37",
+     "row": 37,
+     "page": "p. 70",
+     "kind": "DCI",
+     "nominal": 10.0,
+     "range": 20.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 9.972,
+       "high": 10.028
+      },
+      "mfr": {
+       "low": 9.972,
+       "high": 10.028
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.25",
+       "0.01"
+      ],
+      "mfr": [
+       "0.25",
+       "0.01"
+      ]
+     },
+     "floor": 0.001,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #38",
+     "row": 38,
+     "page": "p. 70",
+     "kind": "DCI",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "mdd": {
+       "low": 18.95,
+       "high": 19.05
+      },
+      "mfr": {
+       "low": 18.95,
+       "high": 19.05
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.25",
+       "0.01"
+      ],
+      "mfr": [
+       "0.25",
+       "0.01"
+      ]
+     },
+     "floor": 0.001,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "ACI_A",
+   "title": "AC current, 20 A terminal",
+   "group": "I20A",
+   "page": "p. 70",
+   "setup": "Calibrator current output (20 A) to the meter 20 A terminal and COM.",
+   "points": [
+    {
+     "ref": "MDD #50",
+     "row": 50,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "A",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 4.794,
+       "high": 5.006
+      },
+      "mfr": {
+       "low": 4.794,
+       "high": 5.006
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "2",
+       "0.16"
+      ],
+      "mfr": [
+       "2.0",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #51",
+     "row": 51,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 4.9,
+     "range": 5.0,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "mdd": {
+       "low": 4.8705,
+       "high": 4.9295
+      },
+      "mfr": {
+       "low": 4.8705,
+       "high": 4.9295
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.1"
+      ],
+      "mfr": [
+       "0.5",
+       "0.1"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #52",
+     "row": 52,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 10.0,
+     "range": 20.0,
+     "unit": "A",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 9.768,
+       "high": 10.232
+      },
+      "mfr": {
+       "low": 9.768,
+       "high": 10.232
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "2",
+       "0.16"
+      ],
+      "mfr": [
+       "2.0",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #53",
+     "row": 53,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 10.0,
+     "range": 20.0,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "mdd": {
+       "low": 9.93,
+       "high": 10.07
+      },
+      "mfr": {
+       "low": 9.93,
+       "high": 10.07
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.1"
+      ],
+      "mfr": [
+       "0.5",
+       "0.1"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #54",
+     "row": 54,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "A",
+     "frequency": 50.0,
+     "limits": {
+      "mdd": {
+       "low": 18.588,
+       "high": 19.412
+      },
+      "mfr": {
+       "low": 18.588,
+       "high": 19.412
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "2",
+       "0.16"
+      ],
+      "mfr": [
+       "2.0",
+       "0.16"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    },
+    {
+     "ref": "MDD #55",
+     "row": 55,
+     "page": "p. 70",
+     "kind": "ACI",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "mdd": {
+       "low": 18.885,
+       "high": 19.115
+      },
+      "mfr": {
+       "low": 18.885,
+       "high": 19.115
+      }
+     },
+     "accuracy": {
+      "mdd": [
+       "0.5",
+       "0.1"
+      ],
+      "mfr": [
+       "0.5",
+       "0.1"
+      ]
+     },
+     "floor": 0.0,
+     "std_relative": false,
+     "source": "calibrator",
+     "group": "I20A",
+     "terminal": "20A",
+     "input": null
+    }
+   ]
+  }
+ ]
+}

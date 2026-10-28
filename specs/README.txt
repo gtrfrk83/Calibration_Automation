@@ -253,3 +253,6 @@ keysight_53220a_pv.json (kind 'counter-pv', written by build_53220a_spec.py)
     stimulus                  group LH (96270A Leveling Head, up to 4.024 GHz) | MW (above that: Microwave O/P) | PULSE | BURST | NONE, frequency, level_dbm, width_s, period_s, delay_s, vpp, burst_width_s, pri_s
     limits                    per model {low, high, printed} (Mean) or {max, printed} (Std Dev, a strict '<'); Test 1: limits[model][std|010][1y|gt1y] with limits_by = 'timebase_option'
     quick, page, flags, text_limit    the Q mark, the manual pages, discrepancies noted on the point, the limit as written in the test text where it differs
+
+  bk_5491b_pv.json          B&K Precision 5491B: the lab datasheet (Mudcats MDD, ATS-1042, 365 days, 55 points) reconciled with the 2831E / 5491B manual tables;
+                            two selectable limit sets ('mdd' default, 'mfr'); six points (MDD #2, #3, #4, #5, #8, #21) differ and are flagged; written by build_bk_5491b_spec.py

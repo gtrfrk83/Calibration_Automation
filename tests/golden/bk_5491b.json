@@ -1,0 +1,1002 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "BK5491B.connect[echo None]",
+   "log": [
+    "5491B|>>|*IDN?",
+    "5491B|<<|5491B Multimeter,Ver1.0.SIM,SIM0001"
+   ],
+   "method": "BK5491B.connect",
+   "result": "returned <BK5491B>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "5491B Multimeter,Ver1.0.SIM,SIM0001"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "BK5491B.identify[echo None]",
+   "log": [
+    "5491B|>>|*IDN?",
+    "5491B|<<|5491B Multimeter,Ver1.0.SIM,SIM0001"
+   ],
+   "method": "BK5491B.identify",
+   "result": "returned '5491B Multimeter,Ver1.0.SIM,SIM0001'",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "5491B Multimeter,Ver1.0.SIM,SIM0001"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "BK5491B.cleanup[echo None]",
+   "log": [],
+   "method": "BK5491B.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "BK5491B.connect[echo line]",
+   "log": [
+    "5491B|>>|*IDN?",
+    "5491B|<<|*IDN?  [echo of a command, skipped]",
+    "5491B|<<|5491B Multimeter,Ver1.0.SIM,SIM0001"
+   ],
+   "method": "BK5491B.connect",
+   "result": "returned <BK5491B>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "*IDN?"
+    ],
+    [
+     "R",
+     "5491B Multimeter,Ver1.0.SIM,SIM0001"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "BK5491B.identify[echo line]",
+   "log": [
+    "5491B|>>|*IDN?",
+    "5491B|<<|*IDN?  [echo of a command, skipped]",
+    "5491B|<<|5491B Multimeter,Ver1.0.SIM,SIM0001"
+   ],
+   "method": "BK5491B.identify",
+   "result": "returned '5491B Multimeter,Ver1.0.SIM,SIM0001'",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "*IDN?"
+    ],
+    [
+     "R",
+     "5491B Multimeter,Ver1.0.SIM,SIM0001"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "BK5491B.cleanup[echo line]",
+   "log": [],
+   "method": "BK5491B.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "BK5491B.reset_to_defaults",
+   "log": [
+    "5491B|>>|*RST",
+    "5491B|--|input buffer cleared after the *RST settle: left-over echo is not read as a reply",
+    "5491B|>>|SYST:ERR?",
+    "5491B|<<|NO ERROR!",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5491B', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty (NO ERROR!)'), ResetStep(name='internal trigger (TRIG:SOUR IMM, read back)', ok=True, detail='IMM')], warnings=[])",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "NO ERROR!"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "BK5491B.ensure_run_state",
+   "log": [
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.ensure_run_state",
+   "result": "returned 'trigger source already IMMediate'",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "BK5491B.session_check",
+   "log": [
+    "5491B|>>|*IDN?",
+    "5491B|<<|5491B Multimeter,Ver1.0.SIM,SIM0001",
+    "5491B|>>|SYST:ERR?",
+    "5491B|<<|NO ERROR!"
+   ],
+   "method": "BK5491B.session_check",
+   "result": "returned []",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "5491B Multimeter,Ver1.0.SIM,SIM0001"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "NO ERROR!"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'nominal': 4.9, 'range': 5.0}",
+   "case": "BK5491B.configure_point[DCV 5 V]",
+   "log": [
+    "5491B|>>|FUNC VOLT:DC",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"VOLT:DC\"",
+    "5491B|>>|VOLT:DC:RANG:AUTO OFF",
+    "5491B|>>|VOLT:DC:RANG:AUTO?",
+    "5491B|<<|0",
+    "5491B|>>|VOLT:DC:RANG 4.9",
+    "5491B|>>|VOLT:DC:RANG?",
+    "5491B|<<|5.000000E+00",
+    "5491B|>>|VOLT:DC:NPLC 10",
+    "5491B|>>|VOLT:DC:NPLC?",
+    "5491B|<<|10",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC VOLT:DC"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "VOLT:DC:RANG:AUTO OFF"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "VOLT:DC:RANG 4.9"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "VOLT:DC:RANG?",
+     "5.000000E+00"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "VOLT:DC:NPLC?",
+     "10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'frequency': 1000.0, 'kind': 'ACV', 'nominal': 4.9, 'range': 5.0}",
+   "case": "BK5491B.configure_point[ACV 5 V 1 kHz]",
+   "log": [
+    "5491B|>>|FUNC VOLT:AC",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"VOLT:AC\"",
+    "5491B|>>|VOLT:AC:RANG:AUTO OFF",
+    "5491B|>>|VOLT:AC:RANG:AUTO?",
+    "5491B|<<|0",
+    "5491B|>>|VOLT:AC:RANG 4.9",
+    "5491B|>>|VOLT:AC:RANG?",
+    "5491B|<<|5.000000E+00",
+    "5491B|>>|VOLT:AC:NPLC 10",
+    "5491B|>>|VOLT:AC:NPLC?",
+    "5491B|<<|10",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC VOLT:AC"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"VOLT:AC\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "VOLT:AC:RANG:AUTO OFF"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "VOLT:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "VOLT:AC:RANG 4.9"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "VOLT:AC:RANG?",
+     "5.000000E+00"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "VOLT:AC:NPLC 10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "VOLT:AC:NPLC?",
+     "10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'amplitude': 1.0, 'kind': 'FREQ', 'nominal': 1000.0, 'range': 10000.0}",
+   "case": "BK5491B.configure_point[FREQ 1 kHz]",
+   "log": [
+    "5491B|>>|FUNC FREQ",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"FREQ\"",
+    "5491B|>>|FREQ:THR:VOLT:RANG 1.0",
+    "5491B|>>|FREQ:THR:VOLT:RANG?",
+    "5491B|<<|1.000000E+00",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC FREQ"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"FREQ\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FREQ:THR:VOLT:RANG 1.0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FREQ:THR:VOLT:RANG?",
+     "1.000000E+00"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM2', 'nominal': 4900.0, 'range': 5000.0}",
+   "case": "BK5491B.configure_point[OHM2 5 kOhm]",
+   "log": [
+    "5491B|>>|FUNC RES",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"RES\"",
+    "5491B|>>|RES:RANG:AUTO OFF",
+    "5491B|>>|RES:RANG:AUTO?",
+    "5491B|<<|0",
+    "5491B|>>|RES:RANG 4900.0",
+    "5491B|>>|RES:RANG?",
+    "5491B|<<|5.000000E+03",
+    "5491B|>>|RES:NPLC 10",
+    "5491B|>>|RES:NPLC?",
+    "5491B|<<|10",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC RES"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"RES\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "RES:RANG:AUTO OFF"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "RES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "RES:RANG 4900.0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "RES:RANG?",
+     "5.000000E+03"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "RES:NPLC 10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "RES:NPLC?",
+     "10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCI', 'nominal': 0.0049, 'range': 0.005}",
+   "case": "BK5491B.configure_point[DCI 5 mA]",
+   "log": [
+    "5491B|>>|FUNC CURR:DC",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"CURR:DC\"",
+    "5491B|>>|CURR:DC:RANG:AUTO OFF",
+    "5491B|>>|CURR:DC:RANG:AUTO?",
+    "5491B|<<|0",
+    "5491B|>>|CURR:DC:RANG 0.0049",
+    "5491B|>>|CURR:DC:RANG?",
+    "5491B|<<|5.000000E-03",
+    "5491B|>>|CURR:DC:NPLC 10",
+    "5491B|>>|CURR:DC:NPLC?",
+    "5491B|<<|10",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC CURR:DC"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"CURR:DC\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "CURR:DC:RANG:AUTO OFF"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "CURR:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "CURR:DC:RANG 0.0049"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "CURR:DC:RANG?",
+     "5.000000E-03"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "CURR:DC:NPLC?",
+     "10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'frequency': 1000.0, 'kind': 'ACI', 'nominal': 0.049, 'range': 0.05}",
+   "case": "BK5491B.configure_point[ACI 50 mA]",
+   "log": [
+    "5491B|>>|FUNC CURR:AC",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"CURR:AC\"",
+    "5491B|>>|CURR:AC:RANG:AUTO OFF",
+    "5491B|>>|CURR:AC:RANG:AUTO?",
+    "5491B|<<|0",
+    "5491B|>>|CURR:AC:RANG 0.049",
+    "5491B|>>|CURR:AC:RANG?",
+    "5491B|<<|5.000000E-02",
+    "5491B|>>|CURR:AC:NPLC 10",
+    "5491B|>>|CURR:AC:NPLC?",
+    "5491B|<<|10",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC CURR:AC"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"CURR:AC\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "CURR:AC:RANG:AUTO OFF"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "CURR:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "CURR:AC:RANG 0.049"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "CURR:AC:RANG?",
+     "5.000000E-02"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "CURR:AC:NPLC 10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "CURR:AC:NPLC?",
+     "10"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'function': 'CONT', 'kind': 'OHM2', 'nominal': 490.0, 'range': 500.0}",
+   "case": "BK5491B.configure_point[CONT]",
+   "log": [
+    "5491B|>>|FUNC CONT",
+    "5491B|>>|FUNC?",
+    "5491B|<<|\"CONT\"",
+    "5491B|>>|TRIG:SOUR IMM",
+    "5491B|>>|TRIG:SOUR?",
+    "5491B|<<|IMM"
+   ],
+   "method": "BK5491B.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "FUNC CONT"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "\"CONT\""
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'nominal': 4.9, 'range': 5.0}",
+   "case": "BK5491B.read[no signal]",
+   "log": [
+    "5491B|>>|FETC?",
+    "5491B|<<|+0.000000E+00",
+    "5491B|>>|FETC?",
+    "5491B|<<|+0.000000E+00"
+   ],
+   "method": "BK5491B.read",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FETC?",
+     "+0.000000E+00"
+    ],
+    [
+     "sleep",
+     0.6
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "FETC?",
+     "+0.000000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "BK5491B.check_errors[ok]",
+   "log": [
+    "5491B|>>|SYST:ERR?",
+    "5491B|<<|NO ERROR!"
+   ],
+   "method": "BK5491B.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "NO ERROR!"
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "BK5491B.check_errors[one error]",
+   "log": [
+    "5491B|>>|SYST:ERR?",
+    "5491B|<<|BUS:BAD COMMAND."
+   ],
+   "method": "BK5491B.check_errors",
+   "result": "raised InstrumentError: B&K 5491B reported an error after configuring: BUS:BAD COMMAND.",
+   "wire": [
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "BUS:BAD COMMAND."
+    ]
+   ]
+  }
+ ],
+ "name": "bk_5491b",
+ "schema": 1
+}

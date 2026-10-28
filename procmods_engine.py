@@ -56,6 +56,7 @@ MODEL_IDS = {
     'a34401': '34401A',
     'f8846a': '8846A',
     'f8808a': '8808A',
+    'bk5491b': '5491B',
     'mdo': 'MDO4000C',
     'ws': 'WS4104HD',
     'k2000': '2000',
@@ -102,6 +103,10 @@ for _key, _default, _what in (('zero', 2.0, 'settle before a zero-offset reading
     _t('f8808a', 'settle.' + _key, _default, 0.2, 120.0, f'8808A: {_what}')
 _t('f8808a', 'settle.dci_10a', 8.0, 0.2, 120.0, '8808A: settle, 10 A DC current range (UNVERIFIED estimate)')
 _t('f8808a', 'settle.dci_low', 6.0, 0.2, 120.0, '8808A: settle, 200 uA and 2000 uA DC current ranges (UNVERIFIED estimate)')
+for _key, _default, _what in (('default', 2.0, 'settle, DC volts, DC current, resistance'), ('ac', 4.0, 'settle, AC volts and AC current (UNVERIFIED estimate)'),
+                              ('freq', 3.0, 'settle, frequency points (UNVERIFIED estimate)'), ('ohm_high', 4.0, 'settle, resistance ranges of 5 Mohm and above (UNVERIFIED estimate)'),
+                              ('i20a', 6.0, 'settle, current points on the 20 A terminal (5 A and 20 A ranges; UNVERIFIED estimate)')):
+    _t('bk5491b', 'settle.' + _key, _default, 0.2, 120.0, f'B&K 5491B: {_what}')
 _t('k2000', 'settle.default', 2.0, 0.2, 120.0, 'Keithley 2000: settle, DC volts and other points')
 _t('k2000', 'settle.ac', 20.0, 0.2, 120.0, 'Keithley 2000: settle, AC volts and AC current (3 Hz detector bandwidth; UNVERIFIED estimate)')
 _t('k2000', 'settle.dci', 3.0, 0.2, 120.0, 'Keithley 2000: settle, DC current')

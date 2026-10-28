@@ -799,6 +799,10 @@ def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, a
     try:                                   # fail closed: if this cannot be worked out the sheet has no waiver, rule 5 blocks it and it is saved as a draft, never published unchecked
         import datasheet_builder_rules as _rules
         _rules.apply_manual_standard(ds, standard or '', who=f'import ({who})' if who else 'import', matcher=matcher)
+        if drive_calibrator:                 # an AC point with no frequency in the MDD (a 0 mV zero check, say) cannot be sourced and no frequency is invented: it stays hand-done
+            for fn, p in ds.all_points():
+                if fn.kind in ('ACV', 'ACI') and (p.frequency is None or p.frequency <= 0):
+                    ds.assignments[p.id] = 'MANUAL'
         if drive_calibrator:                 # frequency / period uncertainties come from the lab CMC only in a manual calibration: here each gets its own recorded waiver (printed N/A), never a blank
             skip = [p.id for fn, p in ds.all_points() if fn.kind not in _rules.RESOLVABLE_KINDS and _rules.should_have(fn, p) and not _rules.waiver_for(ds, p.id)]
             if skip:

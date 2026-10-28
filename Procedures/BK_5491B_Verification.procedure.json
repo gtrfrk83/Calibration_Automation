@@ -1,0 +1,54 @@
+{
+ "schema": 1,
+ "id": "BK_5491B_Verification",
+ "name": "B&K Precision 5491B Performance Verification (RS-232 / USB)",
+ "manufacturer": "B&K Precision",
+ "model": "5491B",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 76,
+ "description": "Automated performance verification of the B&K Precision 5491B bench multimeter (55 points from the lab datasheet ATS-1042, cross-checked against the User Manual). Limits: lab datasheet (default) or manufacturer specification. Fluke 5522A / 5560A / 5520A as the source. Remote commands are only partly verified on a real meter.",
+ "launcher": "Procedures/BK_5491B_Verification.py",
+ "engine": [
+  "bk5491b_verification.py"
+ ],
+ "drivers": [
+  "bk_5491b",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/bk_5491b_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/BK_5491B_Verification.py",
+   "bk5491b_verification.py",
+   "bk5491b_view_qt.py",
+   "qtui/bench_view.py",
+   "ui_port.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/bk_5491b.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/bk_5491b_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_5491B"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/BK_5491B_Verification.py",
+  "Procedures/BK_5491B_Verification.procedure.json",
+  "specs/bk_5491b_pv.json",
+  "drivers/bk_5491b.py",
+  "drivers/simulated_5491b.py",
+  "tests/test_bk5491b_points.py"
+ ]
+}

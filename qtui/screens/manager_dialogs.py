@@ -457,8 +457,9 @@ class MddPreview:
         self.std_box.setMinimumWidth(420)
         self.std_box.currentIndexChanged.connect(lambda _i: self.show_uncertainty())
         stdrow.addWidget(self.std_box, 1)
-        self.drive_box = QCheckBox('Drive this standard as the calibrator (you type the reading)')
-        self.drive_box.setToolTip('Off: a manual calibration, nothing is sourced. On: the program sets the chosen calibrator for every point it covers; you type the reading.')
+        self.drive_box = QCheckBox('Automate the calibrator (the program sets it; you type the reading)')
+        self.drive_box.setToolTip('On (the default when a 5522A / 5520A / 5560A fits): the program sets the chosen calibrator for every point it can make; you type the reading. '
+                                  'Off: a manual calibration, nothing is sourced.')
         stdrow.addWidget(self.drive_box)
         dlg.body.addLayout(stdrow)
         self.std_text = label('', 'sub')
@@ -511,6 +512,8 @@ class MddPreview:
             self.std_box.addItems(self.std.labels)
             self.std_box.setCurrentIndex(self.std.models.index(prior if prior in self.std.models else self.std.default))
             self.std_box.blockSignals(False)
+            if prior is None:                                     # first conversion: a calibrator as the best fit means the program drives it (the person can untick)
+                self.drive_box.setChecked(self.selected_standard() in self.DRIVABLE)
         self.show_uncertainty()
         self._clear(self.existing)
         for b in list(self.group.buttons()):
@@ -539,6 +542,8 @@ class MddPreview:
         if self.std is None or self.std_box.currentIndex() < 0:
             return ''
         return self.std.models[self.std_box.currentIndex()]
+
+    DRIVABLE = ('5560A', '5522A', '5520A')                   # calibrators the suite can drive; others only give the uncertainty
 
     def drive_calibrator(self) -> bool:
         box = getattr(self, 'drive_box', None)

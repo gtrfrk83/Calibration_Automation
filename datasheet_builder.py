@@ -1517,7 +1517,8 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
             add('range_resolution', f'Point {p.id}: the resolution must be above zero and not larger than the full scale.', where=pw)
         manual = bool(ds.options.get('manual_entry')) and info['family'] == 'dmm'      # a manual calibration: nothing is sourced, so a missing frequency / amplitude is only a warning
         if info.get('ac') and (p.frequency is None or p.frequency <= 0):
-            add('no_frequency', f'Point {p.id}: {fn.kind} needs a frequency above zero.', 'warn' if manual else 'error', pw)
+            hand_done = bool(ds.options.get('drive_calibrator')) and (ds.assignments or {}).get(p.id) == 'MANUAL'      # a driven .MDD sheet: this point is done by hand, nothing is sourced
+            add('no_frequency', f'Point {p.id}: {fn.kind} needs a frequency above zero.', 'warn' if manual or hand_done else 'error', pw)
         if not info.get('ac') and p.frequency is not None and not info.get('value') and info['family'] != 'generator':
             add('freq_not_allowed', f'Point {p.id}: {fn.kind} has no frequency, but one is set.', 'warn', pw)
         if info.get('amplitude') and (p.amplitude is None or p.amplitude <= 0) and fn.kind not in ('SCOPE_TIMEBASE', 'GEN_FREQ'):

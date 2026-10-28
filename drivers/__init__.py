@@ -19,6 +19,7 @@ from .keysight_dacq import Keysight34970A, Keysight34972A, KeysightDacq, channel
 from .scpi_dmm import Agilent34401A, Fluke8846A, ScpiDmm
 from .fluke_8808a import Fluke8808A
 from .fluke_8808a_cal import Fluke8808ACal
+from .bk_5491b import BK5491B
 from .tektronix_mdo4000c import TektronixMDO4000C
 from .tektronix_mdo3 import TektronixMDO3
 from .tektronix_tds2000c import TektronixTDS2000C
