@@ -23,9 +23,15 @@ def say(text=''):
 
 rm = pyvisa.ResourceManager()
 say('pyvisa ' + pyvisa.__version__ + ', backend: ' + str(rm))
-found = list(rm.list_resources())
+found = list(rm.list_resources('?*'))
 say('Resources VISA can see: ' + repr(found))
 args = sys.argv[1:]
+import platform
+say('Python ' + platform.python_version() + ', ' + platform.architecture()[0])
+if not any(r.upper().startswith(('GPIB', 'TCPIP', 'USB')) for r in found):
+    say('NOTE: this VISA library lists no GPIB / LAN / USB instrument at all, only serial ports. The suite uses the same library, so it cannot see the')
+    say('instruments either. In Keysight Connection Expert, right-click each instrument > Copy VISA address, and run this script again with those addresses:')
+    say('    python probe_gpib_6060.py "<6060A address>" "<8902A address>" "<8563E address>"')
 if not args:
     boards = sorted({r.split('::')[0] for r in found if r.upper().startswith('GPIB')}) or ['GPIB0']
     args = [f'{b}::{a}::INSTR' for b in boards for a in (2, 14, 18)]
