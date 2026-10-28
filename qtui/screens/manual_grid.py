@@ -20,9 +20,12 @@ Nothing is typed while a run is in progress (Run All Pending asks for the readin
 """
 from __future__ import annotations
 
-from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtCore import QEvent, QObject, QRect, Qt
+from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import QLineEdit
 
+from qtui import theme
+from qtui.table import CellDelegate
 from qtui.widgets import set_prop
 
 FOUND, LEFT = 'found', 'left'
@@ -78,6 +81,54 @@ class _EntryVar:
             self.grid.entry.setText('' if value is None else str(value))
 
 
+class _EntryCue(CellDelegate):
+    """Paints an empty reading cell (the As Found column, or As Left while it is collected) of a typeable row like an input field: an outlined box with a faint hint, so it
+    is obvious that the reading is typed there.  Display only; the click / key handling is the grid's."""
+    HINT = 'type reading'
+
+    def __init__(self, table, grid):
+        super().__init__(table)
+        self.grid = grid
+
+    def paint(self, painter, opt, index):
+        super().paint(painter, opt, index)
+        try:
+            if not self.cue_wanted(index):
+                return
+        except Exception:
+            return
+        t = theme.tokens()
+        r = opt.rect.adjusted(6, 4, -6, -4)
+        if r.width() < 24 or r.height() < 10:
+            return
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QColor(theme.blend(t['field'], t['text'], 0.04)))
+        painter.setPen(QColor(t['border_strong']))
+        painter.drawRoundedRect(QRect(r), 4, 4)
+        f = QFont(opt.font)
+        f.setItalic(True)
+        painter.setFont(f)
+        painter.setPen(QColor(t['faint']))
+        painter.drawText(r, Qt.AlignmentFlag.AlignCenter, painter.fontMetrics().elidedText(self.HINT, Qt.TextElideMode.ElideRight, r.width() - 8))
+        painter.restore()
+
+    def cue_wanted(self, index) -> bool:
+        g, v = self.grid, self.grid.view
+        if getattr(g.app, 'busy', False) or index.data(Qt.ItemDataRole.DisplayRole):
+            return False
+        if index.column() != v.column_index(g.columns[g.column]):
+            return False
+        iid = v.row_key(v.source_model.row_at(v.proxy.mapToSource(index).row()))
+        if g.is_open() and g.iid == iid:
+            return False                                       # the real entry box is over this cell
+        p = g.point(iid)
+        if p is None or p.get('test') != 'numeric':
+            return False
+        allows = getattr(g.app, 'grid_allows', None)
+        return allows is None or bool(allows(p)[0])
+
+
 class GridEntry(QObject):
     def __init__(self, app, view, columns=None):
         super().__init__(view)
@@ -87,6 +138,12 @@ class GridEntry(QObject):
         self.iid = None
         self.var = _EntryVar(self)
         self._armed = None                      # the row clicked last: a click on an already clicked row opens the box
+        self._cue = _EntryCue(view, self)
+        for key in set(self.columns.values()):
+            try:
+                view.setItemDelegateForColumn(view.column_index(key), self._cue)
+            except KeyError:
+                pass
         view.installEventFilter(self)
         view.viewport().installEventFilter(self)
         view.verticalScrollBar().valueChanged.connect(lambda _v: self.close())
@@ -187,6 +244,7 @@ class GridEntry(QObject):
         if e is not None:
             e.hide()
             e.deleteLater()
+        self.view.viewport().update()                          # the empty-cell cue comes back under a closed box
 
     def cancel(self):
         self.close()
