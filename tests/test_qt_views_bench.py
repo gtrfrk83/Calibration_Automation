@@ -268,7 +268,7 @@ class Interaction(unittest.TestCase):
         tree.selection_set(first)
         QTest.qWait(5)
         text = app.detail.get()
-        self.assertIn('Acceptable reading', text)
+        self.assertNotIn('Acceptable reading', text)                          # owner 2026-10-27: the limits are in the point table only
         self.assertIn('Setup:', text)
         n = len(tree.get_children())
         combo = app.status_filter

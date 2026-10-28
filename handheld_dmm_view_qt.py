@@ -234,17 +234,7 @@ def build_ui(self):
     small_window(self, self.tree, filt, picker=picker)
     self.tree.setMinimumHeight(theme.M.header_h + 3 * theme.M.row_h)          # the table gives way first when the window is small
     share_columns(self.tree, sh, nominal=150)
-    info = H.frame(None, 'v', spacing=4)
-    detail = H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1000)
-    detail.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-    note = H.label_(None, src['note'], 'Small.TLabel', wraplength=1000)
-    note.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-    info.layout().addWidget(fit_wrapped(detail, self.detail))
-    info.layout().addWidget(fit_wrapped(note))
-    box = DetailBox(info)                                         # the long 376 note scrolls inside its own box: at the 1000 x 640 minimum it can no longer paint over the table
-    box.setAccessibleName('Procedure note')
-    body.layout().addSpacing(8)
-    body.layout().addWidget(box)
+    # owner 2026-10-27: no detail text and no source note under the table (setup is in the cable-change dialog, flags are in the report); the table takes the room.
     self.tree.bind('<<TreeviewSelect>>', self.on_select)
     self.refresh()
     H.polish(root)

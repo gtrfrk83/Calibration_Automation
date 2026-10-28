@@ -118,14 +118,9 @@ def filter_bar(self, body: QWidget, statuses):
 
 def detail_panel(self, body: QWidget, note: str | None = None):
     """The detail text under the table (self.detail), and the source note below it when the engine shows one."""
-    body.layout().addSpacing(8)
-    info = H.frame(None, 'v', spacing=4)
-    lay = info.layout()
-    lay.addWidget(fit_wrapped(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1100), self.detail))
-    if note is not None:
-        lay.addWidget(fit_wrapped(H.label_(None, note, 'Small.TLabel', wraplength=1100)))
-    body.layout().addWidget(DetailBox(info))                   # a long note scrolls in its box instead of painting over the table in a small window
-    return info
+    # owner 2026-10-27: nothing is shown under the table any more (setup is in the cable-change dialog, flags are in the report); the table takes the room.
+    # The engine still fills self.detail on a selection.
+    return None
 
 
 def follow_prefixed(combo, var, prefix: str) -> None:
