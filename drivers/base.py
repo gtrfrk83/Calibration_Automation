@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import dataclasses
 import time
+from typing import Any, Callable
 
 import math
 
@@ -312,7 +313,7 @@ class Instrument:
         table = (self._cmd_pt or {}).get(self._pt_key) if self._pt_key is not None else None
         src = table if table and key in table else self._cmd_ov if self._cmd_ov and key in self._cmd_ov else None     # the point's own first
         ov = src[key] if src is not None else None
-        if ov is not None:
+        if ov is not None and src is not None:
             text, uid = ov
             ok, why = cmdreg.is_overridable(cmd)
             probs = cmdreg.validate(text, cmd, type(self).__name__) if ok else [cmdreg.Problem('locked', f'{key} is not editable: {why}')]
@@ -375,7 +376,7 @@ class Instrument:
             rep.ok = False
             rep.steps.append(ResetStep('reset', False, 'driver declares no reset command and no documented exemption'))
             return rep
-        plan = [(f'reset ({reg["reset"].template})', lambda: self.send('reset'))]
+        plan: list[tuple[str, Callable[[], Any]]] = [(f'reset ({reg["reset"].template})', lambda: self.send('reset'))]
         if 'status.clear' in reg:
             plan.append((f'clear status ({reg["status.clear"].template})', lambda: self.send('status.clear')))
         if 'opc.query' in reg:
