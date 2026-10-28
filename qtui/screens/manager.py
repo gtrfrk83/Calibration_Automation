@@ -215,6 +215,13 @@ class ManagerWindow(QMainWindow):
             self.driver_verify_window.close()
         super().closeEvent(ev)
 
+    def apply_settings(self):
+        """File > Settings: the demo buttons are shown unless the person switched them off."""
+        import app_settings
+        show = app_settings.get(app_settings.SHOW_DEMO)
+        self.btn_demo.setVisible(show)
+        self.fast_demo_box.setVisible(show)
+
     # ------------------------------------------------------------------ menus
     def build_menus(self):
         bar = self.menuBar()
@@ -472,6 +479,7 @@ class ManagerWindow(QMainWindow):
         pinned.addLayout(run_row)
         self.fast_demo_box = QCheckBox('Fast demo (no windows)')                # demo without windows or commands (the old quick demo)
         pinned.addWidget(self.fast_demo_box)
+        self.apply_settings()
         pinned.addWidget(label(mm.RUN_HINT, 'hint', wrap=True))
         ver_btns = QHBoxLayout()
         ver_btns.setSpacing(M.sm)

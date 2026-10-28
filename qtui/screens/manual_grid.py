@@ -268,6 +268,10 @@ class GridEntry(QObject):
         iid, text = self.iid, self.entry.text()
         p = self.point(iid)
         if not text.strip() and p is not None and getattr(self, '_had', False):
+            if not self._confirm_delete(p):
+                self.close()
+                self.say(f'Point {p["n"]}: the reading was kept.')
+                return 'break'
             try:
                 self.app.clear_reading(p)
                 saved = f'Point {p["n"]}: reading deleted'
@@ -320,12 +324,25 @@ class GridEntry(QObject):
         keys = self.view.selected_keys()
         return keys[0] if keys else None
 
+    def _confirm_delete(self, p) -> bool:
+        """File > Settings > 'Ask before deleting a typed reading' (on by default)."""
+        try:
+            import app_settings
+            if not app_settings.get(app_settings.CONFIRM_DELETE):
+                return True
+        except Exception:
+            return True
+        from qtui.screens import manager_dialogs as dialogs
+        return bool(dialogs.ask_yes_no(self.view, 'Delete reading', f'Delete the reading of point {p["n"]}?'))
+
     def delete_selected(self):
         """Delete / Backspace on a selected point (no box open): delete its recorded reading (As Found or As Left, whichever is being collected)."""
         sel = self.selected_iid()
         p = self.point(sel) if sel is not None else None
         if p is None or self.entry is not None:
             return None
+        if p['id'] in self.app.results and not self._confirm_delete(p):
+            return 'break'
         try:
             gone = self.app.clear_reading(p)
         except RuntimeError as exc:

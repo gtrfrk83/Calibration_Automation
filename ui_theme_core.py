@@ -210,6 +210,7 @@ def status_kind(text):
 # ----------------------------------------------------------------------------- widgets
 
 
+ADDRESS_KEYS = ('cal_addr', 'cal', 'cal_baud', 'std', 'counter', 'rf_addr', 'rf1', 'rf2', 'gen_addr', 'gen')      # app_settings.address_for decides which apply
 _NO_ADDRESS_DEFAULTS = ('settings', 'appearance', 'report_details', 'packages')      # stores that are not a procedure's
 
 
@@ -225,10 +226,10 @@ class Settings:
             self.data = {}
 
     def get(self, key, default=None):
-        if self.name_ not in _NO_ADDRESS_DEFAULTS and (key.startswith('addr_') or key in ('cal_addr', 'cal')):
+        if self.name_ not in _NO_ADDRESS_DEFAULTS and (key.startswith('addr_') or key in ADDRESS_KEYS):
             try:                                               # File > Settings > Instrument addresses: the default address of a standard (app_settings.address_for)
                 import app_settings
-                hit = app_settings.address_for(key, self.data)
+                hit = app_settings.address_for(key, self.data, self.name_)
                 if hit and (key not in self.data or app_settings.address_first()):
                     return hit
             except Exception:

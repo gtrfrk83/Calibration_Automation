@@ -1,7 +1,7 @@
 """File > Settings...: the person's program settings (app_settings.py).  Today: manual data entry.  OK saves, Cancel changes nothing.  No Tk import."""
 from __future__ import annotations
 
-from PySide6.QtWidgets import QCheckBox, QFormLayout, QLineEdit, QMainWindow, QTabWidget, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QLineEdit, QMainWindow, QPushButton, QTabWidget, QWidget, QVBoxLayout
 
 import app_settings
 from qtui.widgets import ModalDialog, label
@@ -15,6 +15,8 @@ class SettingsDialog(ModalDialog):
         self.body.addWidget(self.tabs)
         self.tabs.addTab(self._general_tab(), 'General')
         self.tabs.addTab(self._addresses_tab(), 'Instrument addresses')
+        self.tabs.addTab(self._reports_tab(), 'Reports')
+        self.tabs.addTab(self._appearance_tab(), 'Appearance')
         self.add_button('Cancel', cancel=True)
         self.add_button('OK', role='primary', result='ok', default=True, callback=self.save, close=True)
 
@@ -23,6 +25,8 @@ class SettingsDialog(ModalDialog):
         lay = QVBoxLayout(page)
         group = None
         for key, grp, text, why, _default in app_settings.OPTIONS:
+            if grp == 'Reports':
+                continue                                           # the Reports tab
             if grp != group:
                 group = grp
                 lay.addWidget(label(grp, 'section'))
@@ -52,6 +56,15 @@ class SettingsDialog(ModalDialog):
             self.addr_edits[model] = e
             form.addRow(model, e)
         lay.addLayout(form)
+        baud_form = QFormLayout()
+        self.baud_box = QComboBox()
+        self.baud_box.addItem('not set (each procedure keeps its own)', '')
+        for b in app_settings.BAUDS:
+            self.baud_box.addItem(b, b)
+        self.baud_box.setCurrentIndex(max(0, self.baud_box.findData(str(app_settings.get(app_settings.CAL_BAUD) or ''))))
+        self.baud_box.setAccessibleName('Calibrator baud rate')
+        baud_form.addRow('Calibrator serial baud rate', self.baud_box)
+        lay.addLayout(baud_form)
         self.first_box = QCheckBox('Use these every time a procedure opens (replace the address a procedure remembered)')
         self.first_box.setChecked(app_settings.address_first())
         lay.addWidget(self.first_box)
@@ -60,14 +73,76 @@ class SettingsDialog(ModalDialog):
         lay.addStretch(1)
         return page
 
+    def _reports_tab(self):
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        lay.addWidget(label('Reports', 'section'))
+        for key, grp, text, why, _default in app_settings.OPTIONS:
+            if grp != 'Reports':
+                continue
+            box = QCheckBox(text)
+            box.setChecked(app_settings.get(key))
+            box.setAccessibleName(text)
+            self.boxes[key] = box
+            lay.addWidget(box)
+            lay.addWidget(label(why, 'sub', wrap=True))
+        lay.addWidget(label('Folder the report Save window opens in', 'section'))
+        row = QHBoxLayout()
+        self.folder_edit = QLineEdit(str(app_settings.get(app_settings.REPORT_FOLDER) or ''))
+        self.folder_edit.setPlaceholderText("not set: the Save window's own choice")
+        self.folder_edit.setAccessibleName('Report folder')
+        row.addWidget(self.folder_edit, 1)
+        browse = QPushButton('Browse...')
+        browse.clicked.connect(self._browse_folder)
+        row.addWidget(browse)
+        lay.addLayout(row)
+        lay.addStretch(1)
+        return page
+
+    def _browse_folder(self):
+        from qtui import prompts
+        path = prompts.choose_dir(self, title='Folder for reports')
+        if path:
+            self.folder_edit.setText(path)
+
+    def _appearance_tab(self):
+        from qtui import theme
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        lay.addWidget(label('Appearance', 'section'))
+        lay.addWidget(label('These take effect at once and are remembered (the same as the Appearance menu).', 'sub', wrap=True))
+        form = QFormLayout()
+        self.theme_box = QComboBox()
+        for key in theme.ENABLED_THEMES:
+            self.theme_box.addItem(key.title(), key)
+        self.theme_box.setCurrentIndex(max(0, self.theme_box.findData(theme.name())))
+        self.theme_box.currentIndexChanged.connect(lambda _i: theme.set_theme(self.theme_box.currentData(), save=True))
+        form.addRow('Theme', self.theme_box)
+        lay.addLayout(form)
+        size = QPushButton('Text size...')
+        size.clicked.connect(self._text_size)
+        lay.addWidget(size)
+        lay.addStretch(1)
+        return page
+
+    def _text_size(self):
+        from qtui.screens.help_menu import TextSizeDialog
+        TextSizeDialog(self).exec()
+
     def save(self):
-        app_settings.set_many({k: b.isChecked() for k, b in self.boxes.items()})
+        values = {k: b.isChecked() for k, b in self.boxes.items()}
+        values[app_settings.REPORT_FOLDER] = self.folder_edit.text()
+        values[app_settings.CAL_BAUD] = self.baud_box.currentData() or ''
+        app_settings.set_many(values)
         app_settings.set_addresses({m: e.text() for m, e in self.addr_edits.items()}, self.first_box.isChecked())
 
 
 def open_settings(window=None):
     dlg = SettingsDialog(window)
-    return dlg.run()
+    out = dlg.run()
+    if out == 'ok' and hasattr(window, 'apply_settings'):
+        window.apply_settings()                                    # the Manager shows or hides its demo buttons
+    return out
 
 
 def add_settings_action(window: QMainWindow):

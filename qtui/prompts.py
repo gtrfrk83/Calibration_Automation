@@ -451,6 +451,15 @@ def open_file(parent, **opts):
 
 
 def save_file(parent, **opts) -> str:
+    name = str(opts.get('initialfile') or '')
+    if not opts.get('initialdir') and (name.lower().endswith('.pdf') or str(opts.get('defaultextension') or '').lower() in ('.pdf', 'pdf')):
+        try:
+            import app_settings                                   # File > Settings > Reports: the folder a report starts in
+            folder = app_settings.report_folder()
+            if folder:
+                opts = dict(opts, initialdir=folder)
+        except Exception:
+            pass
     files = _run_file_dialog(_file_dialog(parent, opts, save=True))
     return files[0] if files else ''
 

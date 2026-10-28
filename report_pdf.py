@@ -63,6 +63,13 @@ def remembered_show_tar_tur(path=None) -> TarTur:
     """The last choice of the two checkboxes; both off on first run or if the file is missing or unreadable. Never raises.
     An old file with the single key show_tar_tur: true means both on."""
     import json
+    if path is None:
+        try:
+            import app_settings                                  # File > Settings > Reports: the defaults (off) unless the person wants the last choice back
+            if not app_settings.get(app_settings.REPORT_LAST):
+                return TarTur(app_settings.get(app_settings.REPORT_TAR), app_settings.get(app_settings.REPORT_TUR))
+        except Exception:
+            pass
     try:
         from pathlib import Path
         data = json.loads(Path(path or settings_path()).read_text(encoding='utf-8'))

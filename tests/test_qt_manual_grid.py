@@ -6,6 +6,7 @@ run app with the real DataTable.  Skipped when PySide6 is not importable.
 import os
 import sys
 import unittest
+import unittest.mock
 from pathlib import Path
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
@@ -102,6 +103,11 @@ class ManualGrid(unittest.TestCase):
         self.assertIn('Point 2 saved: 2.0000 V PASS', st)
 
     def test_a_reading_is_deleted_by_clearing_the_box_or_with_the_delete_key(self):
+        import app_settings
+        real = app_settings.get
+        patcher = unittest.mock.patch.object(app_settings, 'get', lambda k, d=None: False if k == app_settings.CONFIRM_DELETE else real(k, d))
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.app.results['p2'] = dict(entered='2.0000', result='PASS', source='typed')
         self.app.results['p3'] = dict(entered='3.0000', result='PASS', source='typed')
         self.ge.open('p2')
