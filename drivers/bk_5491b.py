@@ -149,7 +149,8 @@ class BK5491B(Instrument):
     # ---- wire access: pacing, echo-tolerant replies -------------------------------------------------------------------------------------------------
     def write(self, cmd, log_as=None):
         time.sleep(self.COMMAND_GAP_S)
-        super().write(cmd, log_as)
+        self.log.add('>>', log_as or cmd, self.label)
+        self._send_text(cmd)
         self._since = (self._since or [])[-19:] + [cmd.strip()]
 
     def query(self, cmd, log_as=None):
@@ -169,7 +170,7 @@ class BK5491B(Instrument):
         MAX_REPLY_LINES lines are read. Read-only: nothing is ever written here."""
         earlier = list(self._since or [])
         self.log.add('>>', log_as or cmd, self.label)
-        self.t.write(cmd)
+        self._send_text(cmd)
         seen = []                                                # every line read for this query (shown in the error when the reply never comes)
         try:
             line = self._read_line()
@@ -198,6 +199,61 @@ class BK5491B(Instrument):
                     raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r}: {exc}. Lines received before the silence: {seen}') from exc
         self._since = [cmd.strip()]
         raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r} within {limit} lines (only echoed command text was read)')
+
+    ECHO_WAIT_S = 1.0            # wait for the echo of ONE character (Section 5.2.4 item 3); a choice of this driver, the manual gives no time
+    ECHO_RESENDS = 3             # a character whose echo does not come was not received (item 3): that ONE character is sent again, at most this many times
+
+    def _terminator(self) -> str:
+        s = getattr(self.t, 'serial', None) or getattr(self.t, 'settings', None)
+        return getattr(s, 'write_termination', '\n') if s is not None else '\n'
+
+    def _send_text(self, cmd: str):
+        """Send a command the way Section 5.2.4 item 3 requires: ONE character at a time, the next only after the meter has echoed the last (a busy meter ignores characters,
+        and it is busy echoing). The end character is sent last and not waited for. A character whose echo does not come was not received (item 3 says to send it again): only
+        that character is repeated, at most ECHO_RESENDS times, then the send fails. Transports with no raw access (the simulator) send the whole line."""
+        res, ser = getattr(self.t, '_res', None), getattr(self.t, '_ser', None)
+        if res is None and ser is None:
+            self.t.write(cmd)
+            return
+        full = getattr(self.t, 'timeout', 10.0)
+        try:
+            self._set_short(res, ser, self.ECHO_WAIT_S)
+            for ch in cmd.strip():
+                for attempt in range(self.ECHO_RESENDS + 1):
+                    self._raw_write(res, ser, ch.encode('ascii'))
+                    echo = self._raw_read1(res, ser)
+                    if echo == ch.encode('ascii'):
+                        break
+                    self.log.add('--', f'echo of {ch!r} was {echo!r}' + ('; sent again' if attempt < self.ECHO_RESENDS else '; giving up'), self.label)
+                    self.echo_seen += 1
+                else:
+                    raise InstrumentError(f'{self.MODEL}: the meter did not echo {ch!r} of {cmd!r} after {self.ECHO_RESENDS + 1} tries (Section 5.2.4 item 3: check the baud rate and the cable)')
+            self._raw_write(res, ser, self._terminator().encode('ascii'))
+        finally:
+            self._set_short(res, ser, full)
+
+    @staticmethod
+    def _set_short(res, ser, seconds):
+        if res is not None:
+            res.timeout = int(seconds * 1000)
+        elif ser is not None:
+            ser.timeout = seconds
+
+    @staticmethod
+    def _raw_write(res, ser, data: bytes):
+        if res is not None:
+            res.write_raw(data)
+        else:
+            ser.write(data)
+            ser.flush()
+
+    @staticmethod
+    def _raw_read1(res, ser):
+        """One byte, or b'' after the timeout (no exception for silence)."""
+        try:
+            return bytes(res.read_bytes(1)) if res is not None else ser.read(1)
+        except Exception:
+            return b''
 
     IDLE_END_S = 1.5             # a line whose end character never arrives is taken as complete after this much silence (a choice of this driver, not a manual figure)
 

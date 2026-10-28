@@ -532,9 +532,17 @@ class RawLineReading(unittest.TestCase):
 
     class _Res:
         def __init__(self, data):
-            self.d, self.timeout = bytearray(data), 20000
+            self.d, self.timeout, self.echo = bytearray(data), 20000, bytearray()
+
+        def write_raw(self, b):
+            if b != b'\n':
+                self.echo += b                                      # the meter echoes each character it receives
 
         def read_bytes(self, n):
+            if self.echo:
+                b = bytes(self.echo[:n])
+                del self.echo[:n]
+                return b
             if not self.d:
                 raise OSError('VI_ERROR_TMO')
             b = bytes(self.d[:n])
@@ -572,6 +580,75 @@ class RawLineReading(unittest.TestCase):
             self.ident(b'*IDN?\r\n')
         self.assertIn('no byte at all', str(cm.exception))
         self.assertIn("['*IDN?']", str(cm.exception))                            # the lines that did arrive are named
+
+
+class CharacterHandshake(unittest.TestCase):
+    """Owner 2026-10-28, real meter: sending '*IDN?' in one piece got only the echo and no reply. Manual 5.2.4 item 3: the next character is sent only after the last was echoed."""
+
+    class _Res:
+        def __init__(self, drop=None, silent=False):
+            self.out, self.sent, self.timeout, self.drop, self.silent = bytearray(), [], 20000, drop, silent
+
+        def write_raw(self, b):
+            self.sent.append(b)
+            if self.silent:
+                return
+            if b == b'\n':
+                self.out += b'\r\n*IDN?\r\n5491B  Multimeter,Ver1\r\n'
+                return
+            if self.drop and b == self.drop:
+                self.drop = None                                    # this copy of the character is lost: no echo
+                return
+            self.out += b
+
+        def read_bytes(self, n):
+            if not self.out:
+                raise OSError('VI_ERROR_TMO')
+            b = bytes(self.out[:n])
+            del self.out[:n]
+            return b
+
+    class _T:
+        timeout = 20.0
+
+        class serial:
+            write_termination = '\n'
+
+        def __init__(self, res):
+            self._res = res
+
+        def write(self, text):
+            raise AssertionError('the whole line must not be sent in one piece')
+
+        def clear(self):
+            pass
+
+    def make(self, res):
+        from drivers import CommandLog
+        from drivers.bk_5491b import BK5491B
+        d = BK5491B(self._T(res), CommandLog(), label='t')
+        d.COMMAND_GAP_S = 0
+        d.ECHO_WAIT_S = 0.01
+        return d
+
+    def test_one_character_at_a_time_then_the_end_character(self):
+        res = self._Res()
+        self.assertEqual(self.make(res).identify(), '5491B  Multimeter,Ver1')
+        self.assertEqual(res.sent, [b'*', b'I', b'D', b'N', b'?', b'\n'])
+        self.assertEqual(res.timeout, 20000)
+
+    def test_a_character_without_an_echo_is_sent_again_and_only_that_one(self):
+        res = self._Res(drop=b'D')
+        self.assertEqual(self.make(res).identify(), '5491B  Multimeter,Ver1')
+        self.assertEqual(res.sent, [b'*', b'I', b'D', b'D', b'N', b'?', b'\n'])
+
+    def test_a_meter_that_never_echoes_fails_after_the_bounded_resends(self):
+        from drivers.base import InstrumentError
+        res = self._Res(silent=True)
+        with self.assertRaises(InstrumentError) as cm:
+            self.make(res).identify()
+        self.assertEqual(len(res.sent), 4)                                      # the first character, three more tries
+        self.assertIn('did not echo', str(cm.exception))
 
 
 if __name__ == '__main__':
