@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
+from typing import Any
 
 import run_queue as RQ
 import ui_theme_core as ui                     # toolkit-free helpers only (Settings, report_filename); the windows are run_queue_view_qt.py / run_queue_ui.py
@@ -28,16 +29,72 @@ class QueueRun:
 
     def __init__(self, units, mode, points, force=False):
         self.units, self.mode, self.points, self.force = list(units), mode, points, force
-        self.unit = None
-        self.active = []                 # meters read at the current point
-        self.current = None
-        self.progress = None             # the QueueProgress window (or None)
+        self.unit: Any = None
+        self.active: list[Any] = []      # meters read at the current point
+        self.current: Any = None
+        self.progress: Any = None        # the QueueProgress window (or None)
         self.total_units = len(units)
 
 
 class QueueMixin:
+    # Supplied by the procedure window this mixin is combined with (declared for the type checker only: these lines create nothing).
+    _checkpoint_path: Any
+    _next: Any
+    _out_note: Any
+    _record_demo: Any
+    _safe_standby: Any
+    _store: Any
+    _update_row: Any
+    _visible: Any
+    accept_text: Any
+    any_synthetic: Any
+    asset: Any
+    brand: Any
+    calibrator_model: Any
+    certificate_fields: Any
+    certificate_rows_and_points: Any
+    checkpoint_problem: Any
+    confirm_found_overwrite: Any
+    demo: Any
+    fast_demo: Any
+    info: Any
+    io: Any
+    ir: Any
+    is_left: Any
+    manual_cal: Any
+    meter: Any
+    model: Any
+    pm_begin_run: Any
+    pm_on_checkpoint: Any
+    pm_state: Any
+    points: Any
+    read_mode: Any
+    reading_labels: Any
+    refresh: Any
+    report_details: Any
+    report_header: Any
+    report_title: Any
+    reset_then: Any
+    root: Any
+    run_all: Any
+    save: Any
+    serial: Any
+    show_section: Any
+    show_status: Any
+    source_note: Any
+    spec: Any
+    status: Any
+    temperature_note: Any
+    test_connection: Any
+    test_ir: Any
+    use_ir: Any
+    virtual: Any
+    virtual_failures: Any
+
     QUEUE_SUPPORTED = True
-    queue_progress_factory = staticmethod(lambda *a, **k: port.view('run_queue_view').queue_progress(*a, **k))        # the progress window (run_queue_ui.QueueProgress on Tk)
+    @staticmethod
+    def queue_progress_factory(*a, **k):        # the progress window (run_queue_ui.QueueProgress on Tk)
+        return port.view('run_queue_view').queue_progress(*a, **k)
 
     # ------------------------------------------------------------------ state
     @property
@@ -47,7 +104,8 @@ class QueueMixin:
         return self._queue
 
     @property
-    def _q(self):
+    def _q(self) -> Any:
+        """The active QueueRun, or None between runs."""
         return self.__dict__.get('_q_run')
 
     @_q.setter
@@ -209,7 +267,7 @@ class QueueMixin:
                 pass
         self.queue_prepare_meters(q.meters)
         use_ir = self.use_ir and bool(self.ir)
-        info = RQ.summary(self.points, q, self.queue_options(), mode=mode, use_ir=use_ir)
+        info: dict[str, Any] = RQ.summary(self.points, q, self.queue_options(), mode=mode, use_ir=use_ir)
         n = len(q.meters)
         warnings = []
         ok = True
@@ -310,7 +368,7 @@ class QueueMixin:
 
     def queue_chip_text(self):
         q = self.queue
-        return f'Run queue: {len(q.meters)} meters ({RQ.MODE_NAMES[q.mode].lower()})' if q.active() else ''
+        return f'Run queue: {len(q.meters)} meters ({RQ.MODE_NAMES[str(q.mode)].lower()})' if q.active() else ''
 
     def _queue_update_chip(self):
         chip = getattr(self, 'queue_pill', None)
@@ -349,7 +407,7 @@ class QueueMixin:
 
     def shown_pending(self, points):
         if not self.queue_wants_run():
-            return super().shown_pending(points)
+            return super().shown_pending(points)  # pyright: ignore[reportAttributeAccessIssue]  (the procedure class after this mixin provides it)
         if self.show_section.get() == 'All sections' and self.show_status.get() == 'All points':
             return None
         return [p for p in points if self._visible(p) and self.queue_lacking(p)]
@@ -599,7 +657,7 @@ class QueueMixin:
         try:
             from decimal import Decimal
             want = Decimal(str(p['nominal'])) / Decimal(str(p['factor']))
-            places = max(0, max(-Decimal(p[k]).as_tuple().exponent for k in ('low', 'high')))
+            places = max(0, max(-int(Decimal(p[k]).as_tuple().exponent) for k in ('low', 'high')))
             d = Decimal(padded) - want
             return f'{d:+.{places}f} {p["display_unit"]} from nominal'
         except Exception:
@@ -620,7 +678,7 @@ class QueueMixin:
                 padded = H.pad_reading(p, text)
                 state, _base = H.judge_numeric(p, padded)
                 return state, padded, self._delta_text(p, padded)
-            fill = {}
+            fill: dict[str, Any] = {}
             if self.virtual:
                 fill = dict(demo_fill=lambda idx: virtualbench.plausible_text(p['low'], p['high'], p['n'] + 5 * idx, self.virtual_failures()))
             r = H.ask_readings(self.root, p, total, H.output_text(p), self._out_note(p, True), self.accept_text(p),
@@ -680,7 +738,7 @@ class QueueMixin:
                     question, phase = chk['question'], f'check {n} of {len(phases)}  -  asset {m.asset}'
                 else:
                     note, question, phase = self._out_note(p, True), p['question'], f'asset {m.asset}'
-                fill = {}
+                fill: dict[str, Any] = {}
                 if self.virtual:
                     fill = dict(demo_fill=lambda n=n, idx=idx: virtualbench.plausible_answer(p['n'] + (n if chk is not None else 0) + 3 * idx, self.virtual_failures()))
                 r = H.ask_reading(self.root, p, total, H.output_text(p), note, question, 'yesno', question=question, phase=phase, **self.reading_labels(p), **fill)
