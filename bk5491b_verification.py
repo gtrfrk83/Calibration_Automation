@@ -206,28 +206,42 @@ I20A_SETTLE_S = 6.0
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the 5491B and the calibrator, both through the instrument drivers."""
 
-    def __init__(self, dmm_address, cal_address, cal_model='Fluke 5522A', cal_baud=9600, dmm_serial=None, transports=None, mods=None):
+    dmm_down = ''          # not empty = typed-readings mode: the meter could not be reached at connect time, the calibrator is driven and the technician types each reading
+
+    def __init__(self, dmm_address, cal_address, cal_model='Fluke 5522A', cal_baud=9600, dmm_serial=None, transports=None, mods=None, meter_optional=False):
         self.log = drivers.CommandLog()
         cal_name, cal_cls = CALIBRATORS[cal_model]
         self.is_manual = lambda p: False        # the App sets this: points measured with a standard the technician connects
         if transports:
             dmm_t, cal_t = transports
         else:
-            dmm_t = open_meter_port(dmm_address, dmm_serial)
+            try:
+                dmm_t = open_meter_port(dmm_address, dmm_serial)
+            except Exception as exc:
+                if not meter_optional: raise
+                dmm_t = None; self.dmm_down = str(exc)
             cal_t = drivers.open_visa(to_visa(cal_address), timeout=20, baud=cal_baud)
         self.dmm = BK5491B(dmm_t, self.log, label=MODEL)
         self.cal = cal_cls(cal_t, self.log, label=cal_name)
         try:
             self.cal.open(verify_model=True)
             self.cal.clear_status()
-            self.dmm.connect()
+            if self.dmm_down:
+                pass                                  # the port itself could not be opened above: no connect attempt
+            elif meter_optional:
+                try: self.dmm.connect()
+                except Exception as exc: self.dmm_down = str(exc)        # one connect attempt only (connect() already allowed its single read-only *IDN? retry)
+            else:
+                self.dmm.connect()
+            if self.dmm_down:
+                self.log.add('!!', f'5491B not connected ({self.dmm_down}); typed-readings mode: the calibrator is driven, the technician types each reading', MODEL)
             self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
-        self.ident = self.dmm.idn
+        self.ident = self.dmm.idn if not self.dmm_down else 'meter not connected'
 
     def reset_roles(self):
-        return [self.cal], [self.dmm]
+        return [self.cal], ([] if self.dmm_down else [self.dmm])
 
     def pm_drivers(self):
         return (self.dmm, self.cal)
@@ -243,6 +257,9 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         ident = self.cal.query_retry('*IDN?').strip()
         if self.cal.IDN_MATCH and not any(m.upper() in ident.upper() for m in self.cal.IDN_MATCH):
             raise InstrumentError(f'Unexpected calibrator identification: {ident}')
+        if self.dmm_down:
+            self.log.add('--', 'session check: calibrator in STANDBY and answers; meter not connected (typed readings)', 'RESET')
+            return 'meter not connected'
         state = self.dmm.ensure_run_state()
         flags = self.dmm.session_check()
         reply = self.cal.read_error()
@@ -299,6 +316,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """After a failed automatic reading, so the run can go on with a typed one: calibrator to STANDBY, unsolicited meter output thrown away (read-only),
         the meter's error status read ONCE so a leftover bit does not stop the next point (not when the meter did not answer at all; never retried)."""
         self.log.add('!!', f'reading failed ({exc}); a manually entered reading may replace it', MODEL)
+        if self.dmm_down: return                           # typed-readings mode: the output stays on until the reading is typed (App._reading_failed), nothing to clear on the meter
         try: self.standby()
         except Exception: pass
         cause = exc.__cause__
@@ -308,11 +326,18 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             try: self.dmm.check_errors('the failed reading of ' + p['description'])
             except Exception as err: self.log.add('!!', f'error status after the failed reading: {err}', MODEL)
 
+    def _meter_down_error(self):
+        return ReadingUnavailable(f'{MODEL} not connected ({self.dmm_down}): read the meter display and type the reading')
+
     @procmods_engine.point_commands()
     def measure(self, p):
         self.standby()
-        self.dmm.configure_point(p)
-        self.dmm.check_errors('configuring ' + p['description'])
+        if self.dmm_down and self.is_manual(p):
+            raise self._meter_down_error()                     # your own standard is on the meter: nothing for the program to set, the technician reads and types
+        if not self.dmm_down:
+            self.dmm.configure_point(p)
+        if not self.dmm_down:
+            self.dmm.check_errors('configuring ' + p['description'])
         if self.is_manual(p):              # the technician has connected a standard: the calibrator stays in STANDBY, the meter is read
             time.sleep(self.settle(p))
             reading = self._read(p)
@@ -326,6 +351,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
         self.cal.operate_unverified()
         time.sleep(self.settle(p))
+        if self.dmm_down:
+            raise self._meter_down_error()                     # the output stays ON for the technician to read the meter; the App sends STANDBY once the reading is typed (or the run is stopped)
         reading = self._read(p)
         self.standby()
         self.dmm.check_errors('reading ' + p['description'])
@@ -333,6 +360,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
 
 class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE = True            # the owner's request: type a reading instead of the automatic one (manual_override.py); the 5491B also carries on with typed readings when the meter will not connect
     _hv_confirmed = None              # the hook-up key for which the high-voltage question was answered Yes in this run
 
     def __init__(self, root, model=MODEL, demo=False):
@@ -521,10 +549,28 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.status.set(f'{len(ports)} serial port(s) found: ' + (', '.join(ports) if ports else 'none') + '. Pick the 5491B port.' if ports
                         else 'No serial ports found (pip install pyserial, or enter the port name by hand).')
 
-    def _make_io(self):
-        io = IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), dmm_serial=self._serial_kwargs(), mods=self.pm_state)
+    def _make_io(self, meter_optional=False):
+        io = IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), dmm_serial=self._serial_kwargs(), mods=self.pm_state,
+                meter_optional=meter_optional)
         io.is_manual = self.is_manual
         return io
+
+    def _typed_readings_only(self):
+        """The meter could not be connected (the error was already shown). When File > Settings allows typed readings, offer to carry on with the calibrator driven and every
+        reading typed by the technician; returns True when self.io is now such a connection."""
+        import app_settings
+        if not (self.MANUAL_OVERRIDE and app_settings.manual_override_on()): return False
+        if not port.ask_yes_no('Meter not connected', f'The {MODEL} could not be connected.\n\nContinue with typed readings? The calibrator is still driven (and put in STANDBY after each point); '
+                               'the output stays on while you read the meter display, then type the reading. Pass / fail is judged with the same limits.'):
+            return False
+        try:
+            self.io = self._make_io(meter_optional=True)
+        except Exception as exc:
+            self.disconnect(); self._set_conn(False)
+            self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return False
+        if hasattr(self, 'conn_pill'): self.conn_pill.set('Meter not connected - typed readings', 'neutral')
+        self.status.set(f'{MODEL} not connected: the calibrator is driven and you type each reading.')
+        return True
 
     def test_connections(self):
         if self.demo: port.message('info', 'Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
@@ -584,7 +630,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             if not port.ask_yes_no('Warm-up', WARM_UP + '\n\nHas the meter been on for at least half an hour?'): return
             self.warm_confirmed = True
         if not self.demo and self.io is None: self.test_connections()
-        if not self.demo and self.io is None: return
+        if not self.demo and self.io is None and not self._typed_readings_only(): return
         self._mo_pending = None; self._mo_current = None
         self.stop = False; self.busy = True; self._hv_confirmed = None     # every Run (first, re-run, resume after Stop) asks the high-voltage question again
         self.reset_then(lambda: self._next(points, 0, None))     # the first Run of a session resets to defaults; later runs (re-run, resume) skip the *RST but still run session_check
@@ -651,8 +697,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                     reading = self.io.measure(p)
                     port.post(self.root, lambda: self._done(points, i, p, reading, key, manual))
                 except Exception as exc:
-                    try: self.io.standby()
-                    except Exception: pass
+                    if not (self.io.dmm_down and isinstance(exc, ReadingUnavailable)):       # typed-readings mode: the output stays on until the reading is typed (App._reading_failed)
+                        try: self.io.standby()
+                        except Exception: pass
                     if isinstance(exc, ReadingUnavailable):
                         try: self.io.after_read_failure(p, exc)
                         except Exception: pass
@@ -677,6 +724,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """The meter could not be read (timeout, unreadable, overload). The calibrator is already in standby: ask for the reading and carry on, or stop as before."""
         typed = self.mo_failed(p, exc)
         self._mo_current = None
+        if self.io is not None and self.io.dmm_down:
+            try: self.io.standby()                          # typed-readings mode: the output was left on for the technician to read the meter; off now (typed, cancelled or stopped)
+            except Exception: pass
         if typed is None: self._error(exc); return
         self.mo_commit(p, typed, auto=None, why=str(exc))
         port.after(self.root,30, lambda: self._next(points, i + 1, key))

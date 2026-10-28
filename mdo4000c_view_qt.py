@@ -76,7 +76,7 @@ def build_ui(self):
     drawer_note(d, 1 + len(rows), 'Leave an address blank if that instrument is not used. Without a reference DMM / counter the AFG readings are typed in.')
     drawer_buttons(self, sh)
 
-    action_bar(self, sh)
+    action_bar(self, sh, manual=True)
     self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
     body = sh.content

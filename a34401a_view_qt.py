@@ -51,7 +51,7 @@ def build_ui(self):
     self.btn_test = H.button(None, 'Test connections', self.test_connections, style='Accent.TButton')
     B.drawer_footer(sh, self.btn_refresh_ports, self.btn_test)
 
-    B.action_bar(self, sh)
+    B.action_bar(self, sh, manual=True)
     B.build_results(self, sh, 'Zero offsets are verified on BOTH the FRONT and REAR terminals. Optional AC tests are not included.', detail_wrap=900)
     self.update_shell_sections(POINTS, self._section)
 

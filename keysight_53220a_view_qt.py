@@ -64,7 +64,7 @@ def build_ui(self):
     f.note('The Agilent 33250A pulse generator (used when "Agilent 33250A" is chosen above). Leave empty to set the pulse by hand.')
     B.find_and_test(sh, self, 'Find instruments', self.find_instruments)
 
-    B.action_bar(self, sh)
+    B.action_bar(self, sh, manual=True)
     B.build_results(self, sh, SPEC['source']['note'])
     self.update_shell_sections(POINTS, lambda p: p['section_title'])
 

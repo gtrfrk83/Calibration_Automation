@@ -52,7 +52,7 @@ def build_ui(self):
     B.drawer_footer(sh, self.btn_refresh_ports, self.btn_test)
     f.note('Match the meter RS-232 settings and SCPI language.')
 
-    B.action_bar(self, sh, excel=True)
+    B.action_bar(self, sh, excel=True, manual=True)
     sections = []
     for p in POINTS:
         s = self._section(p)

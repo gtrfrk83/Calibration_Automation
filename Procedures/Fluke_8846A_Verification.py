@@ -14,6 +14,7 @@ from ui_port import ui as port          # every dialog, variable, scheduler call
 import appdata
 import datamode
 import procmods_engine
+import manual_override
 import reset_startup
 import virtualbench
 import hookups
@@ -48,7 +49,7 @@ for kind, block in TEST_TABLES.items():
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
 
-class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
+class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O for this procedure: the DMM and the Fluke 5560A, both through the instrument drivers."""
     def __init__(self, dmm_port, fluke_port, baud, parity, bits, mods=None, transports=None, virtual=False):
         self.log=drivers.CommandLog()
@@ -101,7 +102,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             # input. The 5560A must remain in STBY and is never used as a zero source.
             self.dmm.configure(k,r)
             time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('f8846a.settle.zero',1.5),self.virtual))
-            return self.dmm.read()
+            return self._read()
         if k in ('CAP','FREQ'):
             raise RuntimeError(f'{k} source/measurement commands must be verified at the lab before enabling hardware automation. Point is retained for guided review.')
         if k in ('DCV','ACV','DCI','ACI'):
@@ -118,11 +119,12 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self.fluke.set_output_volts(p["amplitude"],f)
         self.fluke.operate_unverified()
         time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('f8846a.settle.ac',3.5) if k.startswith('AC') else self.pm_param('f8846a.settle.default',2),self.virtual))
-        reading=self.dmm.read()
+        reading=self._read()
         self.standby()
         return reading
 
-class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataModeMixin,procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataModeMixin,procmods_engine.ProcModsMixin,manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE=True            # owner request: type a reading instead of the automatic one (manual_override.py)
     SETUP_TEXT = {
         'VOLTAGE': '5560A voltage output to the meter HI / LO terminals',
         'CURRENT': '5560A current output to the meter current (A) input and LO',
@@ -298,6 +300,8 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         selected=self.ui_view.table_selection(self)
         if selected:self.execute(self.points_from(POINTS,selected[0]))
         else:port.message('info', 'Selection','Select a test point first.')
+    def mo_point(self,iid):return POINTS[int(iid)-1]
+    def mo_total(self):return len(POINTS)
     def execute(self,points):
         if not self.confirm_found_overwrite(points):return
         if self.busy or not points:return
@@ -306,6 +310,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         if not points:self.status.set('Every selected point is skipped by a procedure modification.');return
         if not self.fast_demo and self.io is None:self.test_connections()
         if not self.fast_demo and self.io is None:return
+        self.mo_reset_run()
         self.stop=False;self.busy=True
         self.reset_then(lambda:self._next(points,0,None))   # every run (first, re-run, resume): reset to defaults before the first point
     def _next(self,points,i,previous):
@@ -348,13 +353,14 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
             if not port.ask_yes_no('HIGH VOLTAGE — 750 V AC','Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.'):
                 self.busy=False;return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
+        self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         
         if self.ui_view.table_has(self,str(p['id'])):self.ui_view.table_select(self,str(p['id']),see=True)
         if self.virtual:virtualbench.operator_sets_up(self._vb,p,terminal=p.get('terminal') if p.get('zero_offset') else None)     # the virtual operator does what the prompt asked
         if self.fast_demo:
             # Synthetic reading explicitly labeled; deterministic for reproducibility.
             reading=(p['low']+p['high'])/2+(p['high']-p['low'])/2*math.sin(p['id']*1.71)*0.38
-            self._record(p,reading,True);port.after(self.root,50,lambda:self._next(points,i+1,p['wiring']))
+            self.mo_finish(p,reading,True,lambda:self._record(p,reading,True));port.after(self.root,50,lambda:self._next(points,i+1,p['wiring']))
         else:
             def work():
                 try:
@@ -364,15 +370,20 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                     try:self.io.standby()
                     except Exception:pass
                     err=exc   # 'exc' is deleted when the except block ends; capture by default arg
-                    port.post(self.root,lambda err=err:self._error(err))
+                    if isinstance(err,manual_override.ReadingUnavailable):port.post(self.root,lambda err=err:self._reading_failed(points,i,p,err))     # the automatic reading failed: a typed one may replace it
+                    else:port.post(self.root,lambda err=err:self._error(err))
             threading.Thread(target=work,daemon=True).start()
     def _done(self,points,i,p,reading):
-        self._record(p,reading,bool(self.demo))
+        self.mo_finish(p,reading,bool(self.demo),lambda:self._record(p,reading,bool(self.demo)))
         port.after(self.root,50,lambda:self._next(points,i+1,p['wiring']))
-    def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));port.message('error', 'Measurement stopped',str(exc))
-    def _record(self,p,reading,synthetic):
+    def _reading_failed(self,points,i,p,exc):
+        """The meter could not be read. The calibrator is already in standby: a typed reading (manual_override) lets the run go on, else stop as before."""
+        if not self.mo_recover(p,exc):self._error(exc);return
+        port.after(self.root,50,lambda:self._next(points,i+1,p['wiring']))
+    def _error(self,exc):self.mo_reset_run();self.busy=False;self.status.set('Error - run stopped: '+str(exc));port.message('error', 'Measurement stopped',str(exc))
+    def _record(self,p,reading,synthetic,extra=None):
         result='PASS' if p['low']<=reading<=p['high'] else 'FAIL'
-        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label,**self.pm_result_fields())
+        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label,**self.pm_result_fields(),**(extra or {}))
         self._update_row(p);self.save(silent=True)
     def save(self,silent=False):
         path=appdata.progress_path(f'8846A_{"".join(c if c.isalnum() or c in "-_" else "_" for c in self.asset.get()) or "UNASSIGNED"}_checkpoint.json')

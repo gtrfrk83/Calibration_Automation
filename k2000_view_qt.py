@@ -57,7 +57,7 @@ def build_ui(self):
     f.row('Calibrator baud (RS-232 only)', f.combo(self.cal_baud, ['9600', '19200', '4800', '2400', '1200'], 9))
     B.find_and_test(sh, self, 'Find instruments', self.find_instruments)
 
-    B.action_bar(self, sh)
+    B.action_bar(self, sh, manual=True)
     B.build_results(self, sh, SPEC['source']['note'])
     self.update_shell_sections(POINTS, lambda p: p['section_title'])
 

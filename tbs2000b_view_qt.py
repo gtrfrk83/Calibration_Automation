@@ -60,7 +60,7 @@ def build_ui(self):
     drawer_note(d, 7, 'The oscilloscope is connected by USB. All outputs (DC volts, leveled sine, time marker) come from the calibrator scope option.')
     drawer_buttons(self, sh)
 
-    action_bar(self, sh)
+    action_bar(self, sh, manual=True)
 
     body = sh.content
     filt = filter_bar(self, body, datamode.STATUS_FILTERS + ['Skipped'])

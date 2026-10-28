@@ -356,6 +356,8 @@ class ZeroFlips(unittest.TestCase):
 
     EDITED_LATER += ('Procedures/Keysight_53220A_Verification.py', 'Procedures/Keysight_53220A_Verification.procedure.json', 'Procedures/Keysight_53230A_Verification.py', 'Procedures/Keysight_53230A_Verification.procedure.json', 'Procedures/Keysight_53210A_Verification.py', 'Procedures/Keysight_53210A_Verification.procedure.json', 'keysight_53220a_verification.py')      # the Keysight 53210A / 53220A / 53230A procedures (branch keysight-53220a), not phase 2
 
+    EDITED_LATER += ('bk5491b_verification.py', 'truevolt_verification.py', 'agilent34410a_verification.py', 'keithley2000_verification.py', 'dacq_verification.py', 'fgen_verification.py', 'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'tds2000c_verification.py', 'tbs2000b_verification.py')      # manual entry on every two-way engine (branch manual-entry-all), not phase 2
+
     def test_no_engine_or_launcher_file_is_changed(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
         engines = [f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.endswith('.procedure.json'))

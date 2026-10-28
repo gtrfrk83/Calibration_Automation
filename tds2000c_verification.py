@@ -27,6 +27,7 @@ import ui_theme_core as ui                   # only its toolkit-free helpers her
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import datamode
+import manual_override
 import reset_startup
 import virtualbench
 import drivers
@@ -747,7 +748,8 @@ class Runner:
 # ======================================================================================================================
 # the application window
 # ======================================================================================================================
-class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE = True            # owner request: type a reading instead of the automatic one (manual_override.py)
     FAMILY = TDS_FAMILY                            # the oscilloscope family this window runs (tbs1000_verification.py subclasses with its own)
 
     @property
@@ -945,6 +947,21 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 raise Stopped()
         return box['value']
 
+    def mo_point(self, iid): return self.fam.points[int(iid) - 1]
+    def mo_total(self): return len(self.fam.points)
+
+    def mo_applicable(self, p):
+        if p.get('passfail'):                 # a pass / fail check (self-test, signal path compensation): the instrument's own verdict, there is no reading to type
+            return False, 'This check is a pass / fail result of the instrument itself: there is no reading to type.'
+        return True, ''
+
+    def mo_standby(self): self.io.all_outputs_off()
+
+    def mo_record(self, p, value, synthetic, extra):
+        """The typed value is judged by judge() like every reading; no raw measurements are kept (the demo reading is recorded the same way)."""
+        if threading.current_thread() is threading.main_thread(): self._record(p, value, {}, synthetic, extra=extra)
+        else: self._record_threadsafe(p, value, {}, synthetic, extra=extra)
+
     def _pump(self):
         try:
             while True:
@@ -954,6 +971,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     if self.ui_view.table_has(self, payload): self.ui_view.table_select(self, payload, see=True)
                 elif kind == 'row': self._update_row(self.fam.points[payload - 1])
                 elif kind == 'done': self._finished(payload)
+                elif kind == 'mo_ask':                          # a typed reading (manual_override) asked for by the worker thread
+                    box['value'] = self.mo_ask(payload['p'], reason=payload['reason'], cancel_text=payload['cancel']); box['ev'].set()
                 elif kind == 'ask':
                     box['value'] = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'],
                                                          caution=payload['caution'], ok=payload['ok'], image=payload.get('image'), parent=self.root)
@@ -989,6 +1008,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self.status.set('Demo run complete.'); self.save(silent=True); return
         if self.io is None: self.test_connections()
         if self.io is None: return
+        self.mo_reset_run()
         self.stop = False; self.busy = True
         if not self.reset_notice_ok(): return                  # unit-under-test notice, before any instrument is touched
         threading.Thread(target=self._worker, args=(points,), daemon=True).start()
@@ -1004,8 +1024,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 self.post('status', f'Running {i}/{len(points)}: {p["desc"]}')
                 self.post('select', str(p['id']))                       # the highlighted row follows the point being tested
                 try:
-                    reading, raw = runner.run_point(p)
-                    self._record_threadsafe(p, reading, raw, bool(self.demo))
+                    got = self.mo_worker_point(p, lambda: runner.run_point(p))       # None: a typed reading (manual_override) was recorded in its place
+                    if got is not None:
+                        reading, raw = got
+                        self._record_threadsafe(p, reading, raw, bool(self.demo))
                 except Skip as s:
                     self.results[str(p['id'])] = dict(result='SKIP', reason=str(s), synthetic=bool(self.demo), timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
                     self.post('row', p['id'])
@@ -1021,21 +1043,22 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.post('done', error)
 
     def _finished(self, error):
+        self.mo_reset_run()
         self.busy = False; self.save(silent=True)
         if error == 'stopped': self.status.set('Run stopped. Progress is saved.')
         elif error is not None:
             self.status.set('Error - run stopped: ' + str(error)); port.message('error', 'Measurement stopped', str(error))
         else: self.status.set('Run complete. Save progress or export a report.')
 
-    def _record_threadsafe(self, p, reading, raw, synthetic):
+    def _record_threadsafe(self, p, reading, raw, synthetic, extra=None):
         raw = dict(raw, reading=reading)
         self.results[str(p['id'])] = dict(reading=reading, raw=raw, result=judge(p, reading), synthetic=synthetic,
-                                          uncertainty=uncertainty_text(p, raw), timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
+                                          uncertainty=uncertainty_text(p, raw), timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **(extra or {}))
         self.post('row', p['id'])
         self.save(silent=True)
 
-    def _record(self, p, reading, raw, synthetic):
-        self._record_threadsafe(p, reading, raw, synthetic)
+    def _record(self, p, reading, raw, synthetic, extra=None):
+        self._record_threadsafe(p, reading, raw, synthetic, extra=extra)
         self._update_row(p)
 
     # ---- files ----------------------------------------------------------------------------------------------------------------------------------------------

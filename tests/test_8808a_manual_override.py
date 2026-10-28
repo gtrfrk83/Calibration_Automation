@@ -429,12 +429,18 @@ class Demo(Base):
 
 
 class OnlyThe8808A(unittest.TestCase):
-    def test_default_is_off_and_only_the_8808a_app_and_the_datasheet_runtime_turn_it_on(self):
+    def test_default_is_off_and_only_the_listed_engines_turn_it_on(self):
+        """Rule (manual entry on every two-way engine): the engines below set MANUAL_OVERRIDE = True. Every other App class must be in the documented
+        exclusion list of tests/test_manual_entry_all_engines.py (Coverage), which also checks that no App escapes a decision."""
         self.assertIs(MO.ManualOverrideMixin.MANUAL_OVERRIDE, False)
         self.assertIs(E.App.MANUAL_OVERRIDE, True)
-        hits = sorted(str(p.relative_to(ROOT)) for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
+        hits = sorted(str(p.relative_to(ROOT)).replace('\\', '/') for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
                       if re.search(r'^\s*MANUAL_OVERRIDE\s*=\s*True', p.read_text(encoding='utf-8'), re.M))
-        self.assertEqual(hits, ['dsb_override.py', 'dsb_runtime.py', 'fluke8808a_verification.py'], 'the 8808A and the user-built datasheet runtime (dsb_*) only')
+        self.assertEqual(hits, sorted([
+            'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'agilent34410a_verification.py', 'bk5491b_verification.py',
+            'dacq_verification.py', 'dsb_override.py', 'dsb_runtime.py', 'fgen_verification.py', 'fluke8808a_verification.py', 'i400_verification.py',
+            'keithley2000_verification.py', 'keysight_53220a_verification.py', 'mdo3_verification.py', 'mdo4000c_verification.py',
+            'tbs2000b_verification.py', 'tds2000c_verification.py', 'truevolt_verification.py']))
 
     def test_an_app_without_the_flag_adds_no_button_and_no_menu_entry(self):
         class Plain(MO.ManualOverrideMixin):
