@@ -125,9 +125,21 @@ def decimals_of(text):
     return len(m.group(1).partition('.')[2])
 
 
+# light-meter units: shown as printed, never converted or prefixed (datasheet_builder KINDS FC / LUX / LAMBERT / UVIRR).  The micro and square signs of 'µW/cm²' are
+# often lost in an MDD (U+FFFD); '�W/cm�' is then read as µW/cm² and the point is marked (check the unit).
+_LIGHT = {'fc': 'FC', 'FC': 'FC', 'lux': 'lux', 'Lux': 'lux', 'lx': 'lux', 'La': 'La', 'uW/cm2': 'uW/cm2', 'µW/cm²': 'uW/cm2', 'μW/cm²': 'uW/cm2', 'µW/cm2': 'uW/cm2',
+          'uW/cm²': 'uW/cm2'}
+_LOST_UVIRR = re.compile('^' + '\ufffd' + r'W/cm' + '\ufffd' + '$')
+_LOST_UVIRR_ANY = re.compile('\ufffd' + r'W/cm' + '\ufffd', re.I)
+
+
 def parse_unit(text):
     """(prefix symbol, SI base unit, prefix exponent, note) of a printed unit ('kOhm' -> ('k', 'ohm', 3, '')), or None when it is not a unit this import knows."""
     t = clean(text).replace(' ', '').replace('deg', '°').replace('Deg', '°')
+    if t in _LIGHT:
+        return '', _LIGHT[t], 0, ''
+    if _LOST_UVIRR.match(t):
+        return '', 'uW/cm2', 0, 'lost characters read as uW/cm2'
     if t in ('Ohm', 'Ohms', 'ohm', 'ohms'):
         t = 'ohm'
     m = _UNIT.match(t)
@@ -276,7 +288,8 @@ def infer_kind(base, func_text, cond_lines, has_frequency, unit_note):
         if re.search(r'4[ -]?wire|four[ -]?wire|\b4w\b|4-w', text):
             return 'OHM4', ''
         return 'OHM2', ''
-    simple = {'F': 'CAP', 'Hz': 'FREQ', 's': 'PERIOD', 'degC': 'TEMP', 'degF': 'TEMPF', '%': 'PCT', 'S': 'COND'}
+    simple = {'F': 'CAP', 'Hz': 'FREQ', 's': 'PERIOD', 'degC': 'TEMP', 'degF': 'TEMPF', '%': 'PCT', 'S': 'COND',
+              'FC': 'FC', 'lux': 'LUX', 'La': 'LAMBERT', 'uW/cm2': 'UVIRR'}
     return simple.get(base), ''
 
 
@@ -413,6 +426,9 @@ class _Skip(Exception):
 def _candidate(raw, n, tp, conv, prev_section=''):
     out = _candidate0(raw, n, tp, conv, prev_section)
     out['shown'] = out.pop('_shown', '')
+    for key in ('label', 'note', 'section', 'shown', 'unit_text'):                  # the lost micro / square signs of a light unit, shown as the unit they stand for
+        if isinstance(out.get(key), str):
+            out[key] = _LOST_UVIRR_ANY.sub('\u00b5W/cm\u00b2', out[key])
     return out
 
 
@@ -526,7 +542,8 @@ def _candidate0(raw, n, tp, conv, prev_section=''):
     if guess:
         notes.append(('warn', 'kind_guessed', guess[0].upper() + guess[1:] + '.'))
     if unote and unote != 'rms':
-        notes.append(('info', 'unit_note', f'The printed unit is {prefix}{base} ({unote}); it is shown as {prefix}{db.unit_symbol(base)}.'))
+        notes.append(('warn' if unote.startswith('lost') else 'info', 'unit_note',
+                      f'The printed unit is {prefix}{base} ({unote}); it is shown as {prefix}{db.unit_symbol(base)}.' + (' Check the unit.' if unote.startswith('lost') else '')))
     if not (lo_si <= value_si <= hi_si) and not (isinstance(nominal and nominal[0], tuple)):
         notes.append(('warn', 'nominal_outside_limits', 'The nominal is outside its own limits as printed (limits kept as printed).'))
     decimals = max(decimals_of(low_raw), decimals_of(high_raw), decimals_of(nominal[2]) if nominal and not isinstance(nominal[0], tuple) else 0)

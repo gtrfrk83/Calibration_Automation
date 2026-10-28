@@ -1,0 +1,253 @@
+</Data Sheet Header>
+App_Version	App_Name	FileType	DS_PUI	DS_DUI	DS_ID	DS_IsActive	DS_IsGroupRec	Source_FileType	Source_PUI	Source_DUI	Source_Date	Source_FileName	IsLocked	IsHistory	TestNo	TestNo_Seq	MTE_ID	Model	Manufacturer	Description	Procedure_Name	Procedure_ID	Procedure_AttachNo	Procedure_RevNo	Procedure_ECNNo	DocLib_DocPUI	CustomSpecsUsed	SpecReference	CalInterval	CustomerID	Confidence	AddPagesToFront	AddPagesToBack	Author	RevEditor	LIMS_WidgetCode	LIMS_EquipClass	LIMS_MTE	LIMS_TestNo	ApprovedEmpID	ApprovedBy	ApprovedDate	QCApprovedEmpID	QCApprovedBy	QCApprovedDate	IsQCApproved	CatalogNotes	SpecTrack_Inst_PUI	SpecTrack_Inst_DUI	SpecTrack_Inst_AssetNum	SpecTrack_Inst_CalInt	Stat_InTolProb	Stat_CvrgFactor	Stat_TARMethod	FormatName	MinTAR	DisplayFormat	ApplyGuardBand	ZFactorPct	UseLocalZFactor	UseLocalTRMethod	UseDataGraphics	IncludeTAR	IncludeMU	MemMapFile	RevisionNotes	ATE_DispayActiveCmnd	ATE_HideCmndsOnRun	ATE_AutoSortVarList	ATE_GPIBWriteDelay	ATE_RS232WriteDelay	Rpt_Default	Rpt_DefaultType	RoundingRulePUI	RoundingRuleDUI	RoundingRule
+String	String	String	Guid	Guid	Integer	Boolean	Boolean	String	Guid	Guid	DateTime	String	Boolean	Boolean	String	Integer	String	String	String	String	String	String	String	String	String	Guid	Boolean	String	Float	Integer	Float	Integer	Integer	String	String	Integer	Integer	String	Integer	Guid	String	DateTime	Guid	String	DateTime	Boolean	String	Guid	Guid	String	Float	Float	Float	String	String	Float	String	String	Float	Boolean	Boolean	Boolean	Boolean	Boolean	String	String	Boolean	Boolean	Boolean	String	String	Guid	String	Guid	Guid	String
+2.5.2.180	Cal Processor	DataSheet	{EA417D5D-EF7C-43DA-AAAA-A335BD9D4433}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	1	0	DataSheet	{EA417D5D-EF7C-43DA-AAAA-A335BD9D4433}	{828C47B3-08D9-47C5-9169-966C0CCF6001}	01/16/2025 10:47:26		0	0		0		DLM-1000 (above SN: 188XXX)	Gould-Bass	Radiometer Set	ATS-1071					{00000000-0000-0000-0000-000000000000}	0	http://www.gouldbass.net/index2.html	365		95	1	0	J. Myers	M. West	0	0		0	{4FAC9EC3-8AF2-42CD-961D-AE658154C243}	TCOLBERT	01/16/2025 10:47:26	{00000000-0000-0000-0000-000000000000}		12/30/1899 00:00:00	0		{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0.9545	2	SelectedUElements	[Custom]	4	Simple	Automatic	30	0	0	0	0	1			1	0	1	0	0	{00000000-0000-0000-0000-000000000000}	None	{E2D4C4CF-D38D-4F24-996F-E4D1744F7240}	{F2060B18-437E-4B75-A2BF-23A02E750969}	
+<Data Sheet Header/>
+</Remarks>
+DS_ID	Remark_Seq	RemarkType	RemarkSymbol	Body
+Integer	String	String	String	String
+-1	0	Specific	*	mV readings for any radiometer with SN greater than 188XXXX
+<Remarks/>
+</Document Revision Notes>
+Edited to match current capability. Changed 1850 �W/cm� to 2000 �W/cm�  8/25/2011
+<Document Revision Notes/>
+</Rounding Rule>
+</Rounding Rule Header>
+SysVersion=1.0
+Name=MudCats (Inside)
+PUI={E2D4C4CF-D38D-4F24-996F-E4D1744F7240}
+DUI={F2060B18-437E-4B75-A2BF-23A02E750969}
+OwnerType=System
+BriefDescription=MudCats (Inside Rounding)
+Normal=HalfEven
+Up=RndPos
+Down=RndNeg
+SafetyFactor=2
+LockToDouble=1
+<Rounding Rule Header/>
+</Rounding Rule Description>
+Tolerance limits specified are rounded to the resolution of the Unit Under Test (UUT).  High and low tolerance limits are rounded using "Inside Rounding".  Low tolerances are rounded toward positive and High tolerances are rounded toward negative.  Conformance with these limits is determined using the significant digits recorded as measured values.
+<Rounding Rule Description/>
+</Rounding Rule Items>
+</Rounding Rule Item>
+RuleType=General
+DisplayRounded=1
+DisplaySigDigitsOnly=0
+CompareRounded=0
+<Rounding Rule Item/>
+</Rounding Rule Item>
+RuleType=Measure
+DisplayRounded=0
+DisplaySigDigitsOnly=0
+CompareRounded=0
+<Rounding Rule Item/>
+</Rounding Rule Item>
+RuleType=Nominal
+DisplayRounded=1
+DisplaySigDigitsOnly=0
+CompareRounded=0
+<Rounding Rule Item/>
+</Rounding Rule Item>
+RuleType=Tolerance
+DisplayRounded=1
+DisplaySigDigitsOnly=0
+CompareRounded=1
+<Rounding Rule Item/>
+<Rounding Rule Items/>
+
+<Rounding Rule/>
+</Command Groups>
+DS_ID	CommandGrp_Seq	IDNo	Name	Owner	Action	KeyPress
+Integer	Integer	Integer	String	String	String	String
+-1	0	1003	Execute Step	System	None	8
+-1	1	2	Display Manual	User	None	7
+-1	2	3	Display Manual Execute	User	None	9
+<Command Groups/>
+</UserVars>
+DS_ID	Var_Seq	Var_Name	Var_Content
+Integer	Integer	String	String
+-1	0	STD_READING	0
+-1	1	TP_Nominal	0
+-1	2	TP_Places	0
+-1	3	TP_Units	
+-1	4	UUT_READING	0
+<UserVars/>
+</Default Standards>
+DS_DUI	DS_ID	Stds_Seq	AssetNo	Model	Manufacturer	Description	CalDate	DueDate	LIMS_MTE_ID	LIMS_TestNo	SpecTrack_Inst_PUI	SpecTrack_Inst_DUI	SpecTrack_Inst_AssetNum	SpecTrack_Inst_CalInt
+Guid	Integer	Integer	String	String	String	String	DateTime	DateTime	String	Integer	Guid	Guid	String	Float
+{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	0	Unassigned	5520A-SC600	Fluke	Calibrator	12/30/1899 00:00:00	12/30/1899 00:00:00		-1	{79E44086-E2F2-4E9E-8F56-C9B1732F3E42}	{1E60BFF7-EA08-4815-AF8C-FF31395547E8}	Unassigned	365
+{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	1	ATS-04959	T-10A	Minolta	Illumination meter	12/30/1899 00:00:00	12/30/1899 00:00:00		-1	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	ATS-04959	365
+{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	2	Unassigned	ILT5000	International Light	Black Light Meter A2LA	12/30/1899 00:00:00	12/30/1899 00:00:00		-1	{66E94286-B73F-418D-8869-AC087BD5CAEE}	{34C7C9DB-D699-45CF-A323-07B3B38BEFA3}	Unassigned	365
+<Default Standards/>
+</ATE Procedures>
+DS_ID	Proc_ID	Proc_Seq	Name
+Integer	Integer	Integer	String
+-1	0	0	GET_TP_VALUES
+<ATE Procedures/>
+</Script Procedure Commands>
+0	NS_ReadValue	207	1003	zHFEMz:0	NameSpace=TPEquipSpec.Nominal	ResultVar={TP_Nominal}
+0	NS_ReadValue	207	1003	zHFEMz:0	NameSpace=TPEquipSpec.NumDecimals	ResultVar={TP_Places}
+0	NS_ReadValue	207	1003	zHFEMz:0	NameSpace=TPEquipSpec.UnitsOfMeas	ResultVar={TP_Units}
+0	Sys_ExitProc	97	1003	zHFEMz:0
+<Script Procedure Commands/>
+</Test Points>
+TP_ID	TP_Seq	DS_PageNo	DS_LineNo	Text_StepNum	Text_Function	Text_Nominal	Text_AsFound	Text_AsLeft	Text_OutOfTol	Text_Tolerance	Text_SpecStatement	Meas_UsesStaticNom	Meas_StaticNominal	Meas_Nominal_Val	Meas_AsFound_Val	Meas_AsFound_Err	Meas_AsFound_OOT	Meas_AsLeft_Val	Meas_AsLeft_Err	Meas_AsLeft_OOT	Meas_AsFound_HasRaw	Meas_AsFound_Raw	Meas_AsLeft_HasRaw	Meas_AsLeft_Raw	Meas_Tol_Source	Meas_Tol_Criteria	Meas_Tol_OpCmnd	Meas_Tol_Nominal	Meas_Tol_Low	Meas_Tol_High	Meas_Text_Tolerance	Tol_Low	Tol_High	Stat_HasRawTolData	Stat_RawTol_Low	Stat_RawTol_High	Stat_ActualTAR	Stat_BestTolPct	Stat_BestTolUofM	Stat_StdsAccuracyPct	Stat_StdsAccuracyUofM	Stat_MeasUnctyPct	Stat_MeasUnctyUofM	Stat_4to1ReqPct	Stat_DeclaredTAR	Stat_DeclaredMU	IncludeTAR	IncludeMU	DS_DUI	DS_ID	TP_PUI	TP_DUI	IsPageBreak	IsHeaderRow	IsLocked	SpecTrack_Inst_PUI	SpecTrack_Inst_DUI	SpecTrack_Range_PUI	SpecTrack_Range_DUI	SpecTrack_Inst_AssetNum	SpecTrack_Inst_CalInt	UsesCustomUncty	WasAdjusted	TolCalcVersion	TP_RefID
+Integer	Integer	Integer	Integer	String	String	String	String	String	String	String	String	Boolean	Float	Float	Float	Float	Boolean	Float	Float	Boolean	Boolean	Float	Boolean	Float	String	String	String	Float	Float	Float	String	Float	Float	Boolean	Float	Float	Float	Float	Float	Float	Float	Float	Float	Float	String	String	Integer	Integer	Guid	Integer	Guid	Guid	Boolean	Boolean	Boolean	Guid	Guid	Guid	Guid	String	Float	Boolean	Boolean	String	Guid
+0	0	1	0	STEP~NUM	FUNCTION~TESTED	NOMINAL~VALUE	AS FOUND	AS LEFT	Out~of~Tol	CALIBRATION~TOLERANCE	Specifications	0	0	0	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		0	0	0	0	0	0	0	0	0	0	0	0	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{11E9E88E-F110-4DB4-AFA9-06630312C709}	{B6F2367E-A9E4-4D68-A0FE-FCDD39CBE5E0}	0	1	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{11E9E88E-F110-4DB4-AFA9-06630312C709}
+1	1	1	1	0mV	Radiometer~mV	0 mV				Zero Reference		0	0	0	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		0	0	0	0	0	0	0	0	0	0.001	0	0	0			0	1	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{0C4A4A87-5ED8-4CCE-805A-A1966ADFEAA3}	{577D60D4-F431-4994-9773-BAA50917B7A5}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{0C4A4A87-5ED8-4CCE-805A-A1966ADFEAA3}
+2	2	1	2	5mV	|	50 mV				48 to 52 mV~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	50	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		48	52	1	47.5	52.5	4.3301010384574	5	2.5	0.004	0.002	1.16	0.58	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{E86E1456-7719-4637-95E6-185348D8D00E}	{7B8EA283-C774-42BA-8199-35CADA1354C3}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{E86E1456-7719-4637-95E6-185348D8D00E}
+3	3	1	3	10mV	|	100 mV				95 to 105 mV~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	100	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		95	105	1	95	105	8.66013712706803	5	5	0.003	0.003	0.58	0.58	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{330A2E54-F231-49F6-9609-786CD8F8532B}	{8D50DDB8-15F8-4226-8DD2-ADEEED56CF1A}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{330A2E54-F231-49F6-9609-786CD8F8532B}
+4	4	1	4	15mV	|	150 mV				143 to 157 mV~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	150	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		143	157	1	142.5	157.5	12.9900692996063	5	7.5	0.00266666666666667	0.004	0.386666666666667	0.58	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{1F4FF1D5-63A4-4FD6-8053-2A6E06A37BB2}	{ECE22D80-3662-44CB-B8D2-0BC0960CE0C1}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{1F4FF1D5-63A4-4FD6-8053-2A6E06A37BB2}
+5	5	1	5	20mV	|	200 mV				190 to 210 mV~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	200	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		190	210	1	190	210	17.3198585947563	5	10	0.0025	0.005	0.29	0.58	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{09282ACC-C2D7-4F13-873B-DE7AA618CE39}	{67B25999-7B59-40C9-8235-3AA456B3023C}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{09282ACC-C2D7-4F13-873B-DE7AA618CE39}
+6	6	1	6		White Light Sensor	10 fc				9 to 11 fc~[EMU           ]	4:1 Req.: [ �3.75000000% ]    Spec: [ � (5% I.V. + 1 fc) ]	0	0	10	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		9	11	1	8.5	11.5	2.45372785026237	15	1.5	2.00929030435966	0.200929030435966	6.1	0.61	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{DA92B124-6DE0-425A-838B-6519DBF50E1A}	{C60C0EF7-1D1B-4D71-8688-0E06A03D879B}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{0B6ABA1F-1461-41D1-84B1-64B4F46FE29E}
+7	7	1	7		|	30 fc				29 to 31 fc~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	30	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		29	31	1	28.5	31.5	1.66313186589328	5	1.5	2.3096768119887	0.692903043596611	3	0.9	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{2809AEB7-B56C-42FF-819A-8955DCD6B777}	{1C8EFABC-8B0C-4DF5-B74F-404692CB1802}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{2809AEB7-B56C-42FF-819A-8955DCD6B777}
+8	8	1	8		|	70 fc				67 to 73 fc~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	70	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		67	73	1	66.5	73.5	2.18660871833054	5	3.5	2.13271863370945	1.49290304359661	2.28571428571429	1.6	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{2EAE1B54-EF10-4ED7-A501-321772EC8DAD}	{C85E292A-736E-46FA-9F66-4F7846A3D857}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{2EAE1B54-EF10-4ED7-A501-321772EC8DAD}
+9	9	1	9		|	100 fc				95 to 105 fc~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	100	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		95	105	1	95	105	2.3030067893922	5	5	2.09290304359661	2.09290304359661	2.2	2.2	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{EAFE355C-DFEF-4964-B76C-427AE8DDED2D}	{B9CF42C1-5E20-4B96-AC12-F870665A7B46}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{EAFE355C-DFEF-4964-B76C-427AE8DDED2D}
+10	10	1	10		|	150 fc				143 to 157 fc~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	150	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		143	157	1	142.5	157.5	2.38373362161349	5	7.5	2.06193536239774	3.09290304359661	2.06666666666667	3.1	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{B9005CDD-6985-4F74-BD6A-D2BEF8139C88}	{C1E38B79-9F02-454C-88B4-22CACFF41F09}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{B9005CDD-6985-4F74-BD6A-D2BEF8139C88}
+11	11	1	11		|	200 fc				190 to 210 fc~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	200	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		190	210	1	190	210	2.4193050444256	5	10	2.04645152179831	4.09290304359661	2.05	4.1	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{CDD6AD89-AE8E-4B1A-906B-F48F290D018B}	{2E8F0080-B69D-4858-B426-DA49173B1118}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{CDD6AD89-AE8E-4B1A-906B-F48F290D018B}
+12	12	1	12		Black Light Sensor	100 �W/cm�				95 to 105 �W/cm�~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	100	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		95	105	1	95	105	0.993400465710633	5	5	5	5	5	5	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{C5793356-F583-4677-8676-462724C6803A}	{1BCFB100-687C-4840-B4EA-2AA7F07D3BBE}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{C5793356-F583-4677-8676-462724C6803A}
+13	13	1	13		10x - �W/CM�	500 �W/cm�				475 to 525 �W/cm�~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	500	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		475	525	1	475	525	0.999734660925506	5	25	5	25	5	25	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{4872092F-D802-471C-A4C9-FCE9AAC51944}	{E5369F8F-2DE2-49A6-B02F-558FBF4B2DC7}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{4872092F-D802-471C-A4C9-FCE9AAC51944}
+14	14	1	14		|	1000 �W/cm�				950 to 1050 �W/cm�~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	1000	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		950	1050	1	950	1050	0.999934561704711	5	50	5	50	5	50	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{1C6BFE43-EF68-42C2-85BC-74B43E37991D}	{0CF26943-062E-4756-9C2B-43E34C80A0FB}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{1C6BFE43-EF68-42C2-85BC-74B43E37991D}
+15	15	1	15		|	1500 �W/cm�				1425 to 1575 �W/cm�~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	1500	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		1425	1575	1	1425	1575	0.999971593528369	5	75	5	75	5	75	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{4A73D1BE-7018-4F6A-8BC3-6D6CA1C854C5}	{3F306533-F0A7-483C-8429-11F1312B36D1}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{4A73D1BE-7018-4F6A-8BC3-6D6CA1C854C5}
+16	16	1	16		|	2000 �W/cm�				1900 to 2100 �W/cm�~[EMU           ]	4:1 Req.: [ �1.25000000% ]    Spec: [ � 5% I.V. ]	0	0	2000	0	0	0	0	0	0	0	0	0	0	NotSet	NotSet	None	0	0	0		1900	2100	1	1900	2100	0.999984555638694	5	100	5	100	5	100	0			0	0	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	-1	{E076E0BE-BCB1-4FD4-9968-0D764B966A13}	{87CD61BC-BEC5-43A7-AD8C-4E1F604A937A}	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}		0	0	0	2.0	{E076E0BE-BCB1-4FD4-9968-0D764B966A13}
+<Test Points/>
+</Equipment Spec>
+TP_ID	DS_ID	Nominal	FulllScale	UnitsOfMeas	IV_Pct	IV_Pct_Hi	FS_Pct	FS_Pct_Hi	Floor	Floor_Hi	Db	DbType	CustCalc_Name	Operand	IsAsymetrical	ToleranceType	PassFailType	Exponent	NumDecimals	Resolution	AutoResolution	CustCalc_LocalPUI	CustCalc_PUI	CustCalc_DUI	DS_DUI	TP_DUI	Spec_ID	Spec_Seq
+Integer	Integer	Float	Float	String	Float	Float	Float	Float	Float	Float	Float	String	String	String	Boolean	String	String	String	Integer	Float	Boolean	Guid	Guid	Guid	Guid	Guid	Integer	Integer
+0	-1	0	0	NOMINAL	0	0	0	0	0	0	0	btVoltOrAmp		None	0	Lo2Hi	NotATestPoint	Z	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{B6F2367E-A9E4-4D68-A0FE-FCDD39CBE5E0}	0	0
+1	-1	0	0	mV	0	0	0	0	0	0	0	btVoltOrAmp		None	0	Lo2Hi	NotATestPoint	Z	0	0	0	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{577D60D4-F431-4994-9773-BAA50917B7A5}	1	1
+2	-1	50	0	mV	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{7B8EA283-C774-42BA-8199-35CADA1354C3}	2	2
+3	-1	100	0	mV	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{8D50DDB8-15F8-4226-8DD2-ADEEED56CF1A}	3	3
+4	-1	150	0	mV	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{ECE22D80-3662-44CB-B8D2-0BC0960CE0C1}	4	4
+5	-1	200	0	mV	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{67B25999-7B59-40C9-8235-3AA456B3023C}	5	5
+6	-1	10	0	fc	5	0	0	0	1	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{C60C0EF7-1D1B-4D71-8688-0E06A03D879B}	6	6
+7	-1	30	0	fc	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{1C8EFABC-8B0C-4DF5-B74F-404692CB1802}	7	7
+8	-1	70	0	fc	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{C85E292A-736E-46FA-9F66-4F7846A3D857}	8	8
+9	-1	100	0	fc	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{B9CF42C1-5E20-4B96-AC12-F870665A7B46}	9	9
+10	-1	150	0	fc	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{C1E38B79-9F02-454C-88B4-22CACFF41F09}	10	10
+11	-1	200	0	fc	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{2E8F0080-B69D-4858-B426-DA49173B1118}	11	11
+12	-1	100	0	�W/cm�	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{1BCFB100-687C-4840-B4EA-2AA7F07D3BBE}	12	12
+13	-1	500	0	�W/cm�	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{E5369F8F-2DE2-49A6-B02F-558FBF4B2DC7}	13	13
+14	-1	1000	0	�W/cm�	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{0CF26943-062E-4756-9C2B-43E34C80A0FB}	14	14
+15	-1	1500	0	�W/cm�	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{3F306533-F0A7-483C-8429-11F1312B36D1}	15	15
+16	-1	2000	0	�W/cm�	5	0	0	0	0	0	0	btVoltOrAmp		PlusMinus	0	Lo2Hi	Numeric	Z	0	1	1	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{00000000-0000-0000-0000-000000000000}	{65FEFC43-71F7-4BEA-8F10-1D1BF616E868}	{87CD61BC-BEC5-43A7-AD8C-4E1F604A937A}	16	16
+<Equipment Spec/>
+</Commands>
+1	DataSht_StepGroupParent	6	3	zHFEMz:0	StepGrpName=Display Manual Execute Step
+1	Sys_ShellExecute	61	3	zHFEMz:0	Operation=Open	File=I:\Manuals\Gould Bass\Digital Radiometer DLM-1000.mht	Parameters=	DefaultDir=	ShowCmd=SW_SHOWNORMAL	FileMustExist=False	DefDirMustExist=False
+1	Sys_ExecCommandGroup	185	3	zHFEMz:0	CmndGroupType=[Local]	GroupName=Execute Step	OldNameVar=	GotoBookmark=	LocalSearch=False	HaltScript=False
+1	DataSht_StepGroupParent	6	2	zHFEMz:0	StepGrpName=Display_Manual
+1	Sys_ShellExecute	61	2	zHFEMz:0	Operation=Open	File=I:\Manuals\Gould Bass\Digital Radiometer DLM-1000.mht	Parameters=	DefaultDir=	ShowCmd=SW_SHOWNORMAL	FileMustExist=False	DefDirMustExist=False
+1	Sys_ExitProc	97	2	zHFEMz:0
+1	DataSht_StepGroupParent	6	1003	zHFEMz:0	StepGrpName=Calibration
+1	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+1	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="UUT READING"	Variables="{UUT_READING}"	DefValues=""	Tails="{TP_Units}"	VarIsDefValues="0"	UseValidationRules="1"	PropDataTypes="Float"	PropMinValues=""	PropMaxValues=""
+1	DataSht_VarToMeasure	16	1003	zHFEMz:0	UserVar={UUT_READING}	NumDecimals={TP_Places}	ExponentLetter=Z
+1	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+2	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+2	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="UUT READING"	Variables="{UUT_READING}"	DefValues=""	Tails="{TP_Units}"	VarIsDefValues="0"	UseValidationRules="1"	PropDataTypes="Float"	PropMinValues=""	PropMaxValues=""
+2	DataSht_VarToMeasure	16	1003	zHFEMz:0	UserVar={UUT_READING}	NumDecimals={TP_Places}	ExponentLetter=Z
+2	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+3	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+3	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="UUT READING"	Variables="{UUT_READING}"	DefValues=""	Tails="{TP_Units}"	VarIsDefValues="0"	UseValidationRules="1"	PropDataTypes="Float"	PropMinValues=""	PropMaxValues=""
+3	DataSht_VarToMeasure	16	1003	zHFEMz:0	UserVar={UUT_READING}	NumDecimals={TP_Places}	ExponentLetter=Z
+3	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+4	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+4	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="UUT READING"	Variables="{UUT_READING}"	DefValues=""	Tails="{TP_Units}"	VarIsDefValues="0"	UseValidationRules="1"	PropDataTypes="Float"	PropMinValues=""	PropMaxValues=""
+4	DataSht_VarToMeasure	16	1003	zHFEMz:0	UserVar={UUT_READING}	NumDecimals={TP_Places}	ExponentLetter=Z
+4	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+5	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+5	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="UUT READING"	Variables="{UUT_READING}"	DefValues=""	Tails="{TP_Units}"	VarIsDefValues="0"	UseValidationRules="1"	PropDataTypes="Float"	PropMinValues=""	PropMaxValues=""
+5	DataSht_VarToMeasure	16	1003	zHFEMz:0	UserVar={UUT_READING}	NumDecimals={TP_Places}	ExponentLetter=Z
+5	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+6	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+6	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+6	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+6	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+7	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+7	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+7	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+7	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+8	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+8	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+8	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+8	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+9	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+9	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+9	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+9	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+10	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+10	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+10	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+10	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+11	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+11	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+11	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+11	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+12	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+12	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+12	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+12	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+13	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+13	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+13	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+13	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+14	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+14	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+14	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+14	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+15	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+15	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+15	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+15	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+16	Sys_ExecSubProc	80	1003	zHFEMz:0	ProcName=GET_TP_VALUES
+16	Sys_QueryUser	15	1003	zHFEMz:0	Title=UUT READING	InstName=	MaxInstHeight=-1	Captions="STD READING", "UUT READING"	Variables="{STD_READING}", "{UUT_READING}"	DefValues="", ""	Tails="{TP_Units}", "{TP_Units}"	VarIsDefValues="0", "0"	UseValidationRules="1", "1"	PropDataTypes="Float", "Float"	PropMinValues="", ""	PropMaxValues="", ""
+16	DataSht_NormalizeMeasure	12	1003	zHFEMz:0	NominalVal={TP_Nominal}	ReferenceVal={STD_READING}	MeasuredVal={UUT_READING}	ExponentLetter=Z	NumDecimals={TP_Places}
+16	Sys_AutoExecNextRow	17	1003	zHFEMz:0
+<Commands/>
+</Std Range Search Criteria>
+TP_ID	UnitOfMeasure	UnitSymbol	Value	DS_ID	Criteria_Seq	DataType	IsCritical	IsOutput
+Integer	String	String	Float	Integer	Integer	String	Boolean	Boolean
+1	millivolt	mV	0	-1	0		1	1
+2	millivolt	mV	50	-1	0		1	1
+3	millivolt	mV	100	-1	0		1	1
+4	millivolt	mV	150	-1	0		1	1
+5	millivolt	mV	200	-1	0		1	1
+6	footcandle	fc	10	-1	0		1	1
+7	footcandle	fc	30	-1	0		1	1
+8	footcandle	fc	70	-1	0		1	1
+9	footcandle	fc	100	-1	0		1	1
+10	footcandle	fc	150	-1	0		1	1
+11	footcandle	fc	200	-1	0		1	1
+12	microwatts per centimeter squared	�W/cm�	100	-1	0		1	1
+13	microwatts per centimeter squared	�W/cm�	500	-1	0		1	1
+14	microwatts per centimeter squared	�W/cm�	1000	-1	0		1	1
+15	microwatts per centimeter squared	�W/cm�	1500	-1	0		1	1
+16	microwatts per centimeter squared	�W/cm�	2000	-1	0		1	1
+<Std Range Search Criteria/>
+</Default Std Ranges>
+TP_ID	DS_ID	Stds_Seq	AssetNo	AutoCalcAccuracyUUTUofM	UserDefRangeTPValue	UserDefRangeUnitsValue	UserDefAccuracyUUTUofM	UseUserDefAccuracy	AccuracyPct	UncertaintyPct	AccuracyUUTUofM	UncertaintyUUTUofM	SpecTrack_Inst_PUI	SpecTrack_Inst_DUI	SpecTrack_Range_PUI	SpecTrack_Range_DUI	SpecTrack_Inst_AssetNum	SpecTrack_Inst_CalInt
+Integer	Integer	Integer	String	Float	Float	Float	Float	Boolean	Float	Float	Float	Float	Guid	Guid	Guid	Guid	String	Float
+1	-1	0	Unassigned	0.001	0	0	0	0	0	0	0.001	0.001	{79E44086-E2F2-4E9E-8F56-C9B1732F3E42}	{1E60BFF7-EA08-4815-AF8C-FF31395547E8}	{BD517820-1DD1-4E52-BF62-451FC7E6FF39}	{FD8312E9-2603-4493-876F-9385BFCE22F2}	Unassigned	365
+2	-1	0	Unassigned	0.002	0	0	0	0	0.004	0.00199999755610338	0.002	0.002	{79E44086-E2F2-4E9E-8F56-C9B1732F3E42}	{1E60BFF7-EA08-4815-AF8C-FF31395547E8}	{BD517820-1DD1-4E52-BF62-451FC7E6FF39}	{FD8312E9-2603-4493-876F-9385BFCE22F2}	Unassigned	365
+3	-1	0	Unassigned	0.003	0	0	0	0	0.003	0.00149999816707754	0.003	0.003	{79E44086-E2F2-4E9E-8F56-C9B1732F3E42}	{1E60BFF7-EA08-4815-AF8C-FF31395547E8}	{BD517820-1DD1-4E52-BF62-451FC7E6FF39}	{FD8312E9-2603-4493-876F-9385BFCE22F2}	Unassigned	365
+4	-1	0	Unassigned	0.004	0	0	0	0	0.00266666666666667	0.00133333170406892	0.004	0.004	{79E44086-E2F2-4E9E-8F56-C9B1732F3E42}	{1E60BFF7-EA08-4815-AF8C-FF31395547E8}	{BD517820-1DD1-4E52-BF62-451FC7E6FF39}	{FD8312E9-2603-4493-876F-9385BFCE22F2}	Unassigned	365
+5	-1	0	Unassigned	0.005	0	0	0	0	0.0025	0.00124999847256462	0.005	0.005	{79E44086-E2F2-4E9E-8F56-C9B1732F3E42}	{1E60BFF7-EA08-4815-AF8C-FF31395547E8}	{BD517820-1DD1-4E52-BF62-451FC7E6FF39}	{FD8312E9-2603-4493-876F-9385BFCE22F2}	Unassigned	365
+6	-1	0	ATS-04959	0.200929030435966	0	0	0	0	2.00929030435966	1.00464392455539	0.200929030435966	0.200929030435966	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	{50EBFCFD-75D3-4259-A776-F55AAB250445}	{27AD1272-909A-4AC3-885E-E7E10D215134}	ATS-04959	365
+7	-1	0	ATS-04959	0.692903043596611	0	0	0	0	2.3096768119887	1.15483699484152	0.692903043596611	0.692903043596611	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	{D4B656B9-966A-4D39-92BE-4733C7069FD5}	{1CE6F56C-F26B-4789-87D8-2A894E09E484}	ATS-04959	365
+8	-1	0	ATS-04959	1.49290304359661	0	0	0	0	2.13271863370945	1.06635801381876	1.49290304359661	1.49290304359661	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	{D4B656B9-966A-4D39-92BE-4733C7069FD5}	{1CE6F56C-F26B-4789-87D8-2A894E09E484}	ATS-04959	365
+9	-1	0	ATS-04959	2.09290304359661	0	0	0	0	2.09290304359661	1.04645024308864	2.09290304359661	2.09290304359661	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	{D4B656B9-966A-4D39-92BE-4733C7069FD5}	{1CE6F56C-F26B-4789-87D8-2A894E09E484}	ATS-04959	365
+10	-1	0	ATS-04959	3.09290304359661	0	0	0	0	2.06193536239774	1.03096642140966	3.09290304359661	3.09290304359661	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	{D4B656B9-966A-4D39-92BE-4733C7069FD5}	{1CE6F56C-F26B-4789-87D8-2A894E09E484}	ATS-04959	365
+11	-1	0	ATS-04959	4.09290304359661	0	0	0	0	2.04645152179831	1.02322451057017	4.09290304359661	4.09290304359661	{36D59305-666C-4BA8-A4E5-DC2A917AB003}	{00F400A3-4926-48E2-BA6A-8E94A972B748}	{D4B656B9-966A-4D39-92BE-4733C7069FD5}	{1CE6F56C-F26B-4789-87D8-2A894E09E484}	ATS-04959	365
+12	-1	0	Unassigned	5	0	0	0	0	5	2.49999694512923	5	5	{66E94286-B73F-418D-8869-AC087BD5CAEE}	{34C7C9DB-D699-45CF-A323-07B3B38BEFA3}	{5525E874-9AB8-4AE2-AF1A-F999C4784C9C}	{1826278D-7EF9-4D18-9478-2345DF44C60E}	Unassigned	365
+13	-1	0	Unassigned	25	0	0	0	0	5	2.49999694512923	25	25	{66E94286-B73F-418D-8869-AC087BD5CAEE}	{34C7C9DB-D699-45CF-A323-07B3B38BEFA3}	{5525E874-9AB8-4AE2-AF1A-F999C4784C9C}	{1826278D-7EF9-4D18-9478-2345DF44C60E}	Unassigned	365
+14	-1	0	Unassigned	50	0	0	0	0	5	2.49999694512923	50	50	{66E94286-B73F-418D-8869-AC087BD5CAEE}	{34C7C9DB-D699-45CF-A323-07B3B38BEFA3}	{5525E874-9AB8-4AE2-AF1A-F999C4784C9C}	{1826278D-7EF9-4D18-9478-2345DF44C60E}	Unassigned	365
+15	-1	0	Unassigned	75	0	0	0	0	5	2.49999694512923	75	75	{66E94286-B73F-418D-8869-AC087BD5CAEE}	{34C7C9DB-D699-45CF-A323-07B3B38BEFA3}	{5525E874-9AB8-4AE2-AF1A-F999C4784C9C}	{1826278D-7EF9-4D18-9478-2345DF44C60E}	Unassigned	365
+16	-1	0	Unassigned	100	0	0	0	0	5	2.49999694512923	100	100	{66E94286-B73F-418D-8869-AC087BD5CAEE}	{34C7C9DB-D699-45CF-A323-07B3B38BEFA3}	{5525E874-9AB8-4AE2-AF1A-F999C4784C9C}	{1826278D-7EF9-4D18-9478-2345DF44C60E}	Unassigned	365
+<Default Std Ranges/>
+</Secure Data>
+</Security Properties>
+ATE_DisplayOnLoad=0
+ATE_AllowScriptViewing=1
+<Security Properties/>
+<Secure Data/>

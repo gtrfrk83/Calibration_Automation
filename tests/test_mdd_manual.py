@@ -689,3 +689,24 @@ class StandardUncertainty(Fix):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class LightMeterUnits(unittest.TestCase):
+    """Gould-Bass DLM-1000 radiometer set: foot-candle and uW/cm2 points are light-meter points in their own units, not pass / fail checks
+    (the file lost the micro and square signs of 'uW/cm2': U+FFFD, read as uW/cm2 and flagged)."""
+
+    def setUp(self):
+        import mdd_importer_v49 as imp
+        self.conv = mc.convert(imp.parse_mdd(Path(__file__).resolve().parent / 'fixtures' / 'mdd_dlm1000_light_meter.mdd'))
+
+    def test_units_are_kept_not_pass_fail(self):
+        kinds = {}
+        for f in self.conv.sheet.functions:
+            kinds[f.kind] = kinds.get(f.kind, 0) + len(f.points)
+        self.assertEqual(kinds, {'CHECK': 1, 'DCV': 4, 'FC': 6, 'UVIRR': 5})
+        self.assertEqual([i.point for i in self.conv.issues if i.code == 'limit_unit_unknown'], [1])      # only the 'Zero Reference' point stays a check
+
+    def test_the_lost_characters_are_flagged_and_shown_as_the_unit(self):
+        self.assertTrue(any(i.code == 'unit_note' and 'Check the unit' in i.message for i in self.conv.issues))
+        labels = [p.label for f in self.conv.sheet.functions if f.kind == 'UVIRR' for p in f.points]
+        self.assertTrue(labels and all('�' not in x and 'µW/cm²' in x for x in labels))
