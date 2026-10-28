@@ -1,7 +1,7 @@
 {
   "include": ["."],
-  "exclude": ["**/__pycache__", "_backup*", "Backups", "diagrams", ".git"],
-  "extraPaths": ["."],
+  "exclude": ["**/__pycache__", "_backup*", "Backups", "diagrams", ".git", "tests"],
+  "extraPaths": [".", "Procedures"],
   "typeCheckingMode": "basic",
   "reportMissingModuleSource": "warning"
 }
