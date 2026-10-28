@@ -36,5 +36,19 @@ class MarkerUncertainty(unittest.TestCase):
                 self.assertEqual(T.uncertainty_text(p, {}), 'N/A')
 
 
+class FamilyReview(unittest.TestCase):
+    """TBS1000 / TBS1000C apps subclass the TDS2000C App in their own module: the review window must still find the engine (it fell back to the plain popup)."""
+
+    def test_engine_module_of_a_family_app(self):
+        import report_review_adapters as A
+        import tbs1000_verification as F
+
+        class Probe(F.TBS1000App):
+            pass
+        for cls in (F.TBS1000App, F.TBS1000CApp, Probe):
+            obj = object.__new__(cls)
+            self.assertIs(A._mod(obj), T, cls.__name__)
+
+
 if __name__ == '__main__':
     unittest.main()

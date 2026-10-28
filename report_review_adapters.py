@@ -23,7 +23,14 @@ SOURCE_FOR_DC = M.SOURCE_STANDARDS
 
 
 def _mod(app):
-    return sys.modules[type(app).__module__]
+    """The engine module behind `app`.  A family procedure that subclasses a shared engine's App in its own module (TBS1000 / TBS1000C on tds2000c_verification) has no
+    uncertainty functions of its own: the first module on the class's MRO that does is the engine."""
+    own = sys.modules[type(app).__module__]
+    for cls in type(app).__mro__:
+        m = sys.modules.get(cls.__module__)
+        if m is not None and any(hasattr(m, a) for a in ('uncertainty_parts', 'measure_budget', 'CAL_MODEL')):
+            return m
+    return own
 
 
 def _round_up(v):
