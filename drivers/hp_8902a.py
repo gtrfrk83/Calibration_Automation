@@ -172,6 +172,7 @@ class HP8902A(Instrument):
     CAL_WAIT_S = 20.0                    # AM / FM calibration: ~20 s to the first value, ~17 s per update (p. 3-51 / 103, 3-167 / 211)
     ZERO_WAIT_S = 15.0                   # ZR: dashes for ~15 s (p. 3-77 / 126)
     RESET_NO_OPC = 'The 8902A has no *OPC? (code language): after IP the driver waits RESET_SETTLE_S and reads the status byte instead.'
+    SETUP_SETTLE_S = 1.0                 # after the mode / tune / resolution codes, before the first status read (a choice of this driver: UNVERIFIED, tune on the bench)
     RESET_SETTLE_S = 3.0                 # after IP: a choice of this driver, the manual gives no figure
     COMMAND_GAP_S = 0.05
     COMMANDS = COMMANDS
@@ -319,7 +320,15 @@ class HP8902A(Instrument):
     def _setup(self, steps, context):
         for key, vals in steps:
             self.send(key, **vals)                                        # each once, never retried
-        self.check_status(context)
+        # Owner bench 2026-10-28: a serial poll straight after the setup read status byte 60 (instrument error, limit, offset, RECAL): the receiver is still tuning / settling and
+        # briefly shows an error. Wait, then read (and so clear) the byte; only an HP-IB CODE error (a command it did not understand) is fatal here. A real measurement problem
+        # arrives as an error word in the reading itself (decode_reading raises it) and the status byte is checked again after the reading.
+        time.sleep(self.SETUP_SETTLE_S)
+        st = self.status()
+        if st['code_error']:
+            raise InstrumentError(f'{self.MODEL} reports an HP-IB code error after {context} (status byte {st["value"]}): a command was not understood')
+        if st['instrument_error']:
+            self.log.add('!!', f'status byte {st["value"]} after {context}: an error was displayed while the receiver settled; it is read again with the measurement', self.label)
 
     def _tune(self, carrier_mhz):
         return ('tune.mhz', {'mhz': float(carrier_mhz)}) if carrier_mhz else ('tune.auto', {})
