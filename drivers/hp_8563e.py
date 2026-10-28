@@ -27,6 +27,7 @@ from __future__ import annotations
 import math
 import re
 import time
+from typing import Any
 
 import cmdreg
 from cmdreg import Cmd, Placeholder
@@ -387,7 +388,7 @@ class HP8563E(Instrument):
         out = []
         for n in range(2, n_max + 1):
             target = n * f1
-            row = dict(n=n, target_hz=target, freq_hz=None, level_dbm=None, dbc=None, found=False, at_floor=False)
+            row: dict[str, Any] = dict(n=n, target_hz=target, freq_hz=None, level_dbm=None, dbc=None, found=False, at_floor=False)
             if target > MAX_HZ:
                 out.append(row)
                 continue
