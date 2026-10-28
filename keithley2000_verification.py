@@ -443,9 +443,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.io: self.io.close(); self.io = None
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise drivers.InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -503,7 +510,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Manual page', p['page'])]
         if image is None:
             facts.append(('Diagram', f'not installed (expected diagrams/hook_k2000_{self.cal_key}_{group}.png)'))
-        self.io.standby()
+        self.connected_io().standby()
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p))]
         if group == 'DCV':
             steps.append(('REL zero', 'With the calibrator at 0.00000 mV DC the program enables REL on the 100 mV range and leaves it on for the DC volts points (p. 1-7).'))
@@ -536,10 +543,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         else:
             def work():
                 try:
-                    reading = self.io.measure(p)
+                    reading = self.connected_io().measure(p)
                     port.post(self.root, lambda: self._done(points, i, p, reading, key))
                 except Exception as exc:
-                    try: self.io.standby()
+                    try: self.connected_io().standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
                     if isinstance(err, manual_override.ReadingUnavailable): port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))     # the automatic reading failed: a typed one may replace it
