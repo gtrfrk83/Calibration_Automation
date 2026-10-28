@@ -20,6 +20,7 @@ Hardware I/O is off in demo mode, and demo results are labelled as demo data eve
 import json, math, sys, threading, time
 from datetime import datetime
 from pathlib import Path
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, report and drivers sit next to the Manager
@@ -35,7 +36,11 @@ import surprise
 import virtualbench
 import drivers
 
-MODEL = SPEC_PATH = SPEC = POINTS = None
+# set by configure(); MODEL and SPEC_PATH stay None until then (typed as set, for the type checker)
+MODEL: str = cast(Any, None)
+SPEC_PATH: Path = cast(Any, None)
+SPEC: dict[str, Any] = {}
+POINTS: list[dict[str, Any]] = []
 PERIODS = {'90 days': '90d', '1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 KINDS = ('SELFTEST', 'TIMEBASE', 'ACAMP', 'LFFLAT', 'FLAT')
@@ -195,7 +200,12 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.flat_method = flat_method
         self.wideband = None
         self.counter_ref = counter_ref
-        self.uut = self.std = self.counter = self.power = None
+        # uut and std are required (always set below; None only while __init__ fails part-way). counter / power are optional and
+        # checked for None where they are used; the counter is a Keysight5313x or a generic ReferenceMeter.
+        self.uut: Any = None
+        self.std: drivers.Fluke5790B = cast(Any, None)
+        self.counter: Any = None
+        self.power: drivers.ReferenceMeter | None = None
         t = transports or {}
 
         def tr(key, **kw):
@@ -235,7 +245,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                                    for o in (self.uut, self.std, self.counter, self.power) if o is not None) if g]
         return self.guards
 
-    def _checked(self, inst, call, *args, errq_continue=False, readback='the value that was set', **kw):
+    def _checked(self, inst, call, *args, errq_continue=False, readback='the value that was set', **kw) -> Any:      # the driver call's own result
         """A driver call that sets something, reads it back and compares, then reads the error queue (all inside the one driver method).  With no guard it
         is exactly `call(*args)`.  With one, a failure after an exchange with the instrument is the surprise it was: the read-back that did not match
         (Stop only: the driver call stopped part-way, the rest of the settings were never sent) or the error-queue entry (Stop only, or Stop / Continue
@@ -507,7 +517,7 @@ def flat_budget(p, sc=None):
                 sm.seed()
                 std = sm.standard(STD_MODEL)
             hit = std.lookup('FLAT', level, frequency=p['frequency'], direction='input') if std is not None else None
-            if hit is not None:
+            if hit is not None and std is not None:          # (hit is only set when std is not None)
                 emu_rel = hit.limit / std.divisor()[0] * 2.0 / level
         except Exception:
             emu_rel = None
@@ -537,7 +547,7 @@ def uncertainty_value(p, method=None):
             scope_value = sc.dmm(kind, p['nominal'], None, None if kind == 'FREQ' else p['frequency'], basis='measure')
             scope_unit = 'Hz' if kind == 'FREQ' else 'V'
             b = measure_budget(p, sc) if scope_value is not None else None
-            if b is not None:
+            if b is not None and scope_value is not None:          # (b is only set when scope_value is not None)
                 scope_value, scope_src = max(scope_value, b.value), 'budget'
     entry = _ref_cmc().get(p['kind']) or {}
     if entry.get('rel') is not None or entry.get('abs') is not None:
@@ -874,9 +884,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.io: self.io.close(); self.io = None
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise drivers.InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -917,7 +934,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return False, 'The self-test is the generator\'s own pass / fail result: there is no reading to type.'
         return True, ''
 
-    def mo_standby(self): self.io.all_off()
+    def mo_standby(self): self.connected_io().all_off()
 
     def mo_record(self, p, value, synthetic, extra):
         """Like the demo reading (demo_reading): no raw measurements; a flatness point keeps the method it is collected with."""
@@ -982,7 +999,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if p is None: port.after(self.root, 30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = point_group(p, self.method())
         if not self.fast_demo and key != previous:
-            try: self.io.all_off()
+            try: self.connected_io().all_off()
             except Exception as exc: self._error(exc); return
             if not self._prompt_setup(p):
                 self.busy = False; self.status.set('Paused for wiring'); return
@@ -998,7 +1015,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
         def work():
             try:
-                reading, raw = self.io.measure(p, self.results, self.pref_cache)
+                reading, raw = self.connected_io().measure(p, self.results, self.pref_cache)
                 port.post(self.root, lambda: self._done(points, i, p, reading, raw, key))
             except Exception as exc:
                 err = exc   # 'exc' is deleted when the except block ends; capture by default arg

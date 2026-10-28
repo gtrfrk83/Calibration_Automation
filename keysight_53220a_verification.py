@@ -18,6 +18,7 @@ import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
@@ -239,7 +240,7 @@ def pulse_shortfalls(st, gen=GEN_33250A):
     return out
 
 
-def plan_stimulus(p, stim):
+def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
     """How a point is stimulated.  stim: dict(mode 'auto' | 'manual', rf True/False (a 96270A is connected), loss_db, ext_low, pulse_gen '81134A' | '33250A').
     Returns dict(mode 'rf' | 'manual' | 'none', route 'LH' | 'MW' | None, level_set, atten_db, reason).  atten_db: the external attenuation the technician must fit after the 96270A
     Microwave O/P when the level at the counter is below what that output can make (the level is kept as printed).  Raises ValueError when the level would exceed the input guard."""
@@ -267,7 +268,7 @@ def plan_stimulus(p, stim):
     if stim.get('mode') != 'auto' or not stim.get('rf'):
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason='The selected stimulus is another standard' if stim.get('mode') != 'auto' else 'No 96270A is connected')
     f, loss = st['frequency'], float(stim.get('loss_db') or 0.0)
-    level = target + loss
+    level = cast(float, target) + loss          # (type only) every RF stimulus has a level_dbm; None here would raise TypeError as before
     if g == 'LH' and f <= LH_MAX_HZ:
         if LH_MIN_DBM <= level <= RF_MAX_DBM:
             return dict(mode='rf', route='LH', level_set=level, atten_db=0.0, reason='')
@@ -309,10 +310,11 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
-        self.stim = dict(stim or {}, rf=False, gen=False)
+        self.stim: dict[str, Any] = dict(stim or {}, rf=False, gen=False)
         self.cache = None                  # (ref, stats) of the last Mean point: the Std Dev point of the same measurement reuses the same 100 readings
-        self.rf = None
-        self.gen = None                    # the Agilent 33250A as the pulse generator (Tests 4a / 4b at 8 ns), when its address was given
+        # rf / gen are optional; a point only drives one when its plan says so (stim['rf'] / stim['gen']), which the type checker cannot follow: typed Any
+        self.rf: Any = None
+        self.gen: Any = None               # the Agilent 33250A as the pulse generator (Tests 4a / 4b at 8 ns), when its address was given
         if transports:
             ctr_t, rf_t = transports[0], transports[1]
             gen_transport = gen_transport or (transports[2] if len(transports) > 2 else None)
@@ -507,7 +509,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def timebase_opt(self):
         return '010' if '010' in self.option_codes() else 'std'
 
-    def stim_state(self):
+    def stim_state(self) -> dict[str, Any]:
         try: loss = float(str(self.loss.get()).replace(',', '.') or 0)
         except ValueError: loss = 0.0
         rf = (self.io.rf is not None) if self.io is not None else (bool(self.rf_addr.get().strip()) or self.virtual)         # once connected, what is really connected
@@ -515,7 +517,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return dict(mode='auto' if self.stim_mode.get() == STIM_CHOICES[0] else 'manual', rf=rf, gen=gen, loss_db=loss, ext_low=bool(self.ext_low.get()),
                     pulse_gen='33250A' if self.pulse_gen.get() == PULSE_GEN_CHOICES[1] else '81134A')
 
-    def plan(self, p):
+    def plan(self, p) -> dict[str, Any]:
         try: return plan_stimulus(p, self.stim_state())
         except ValueError as exc: return dict(mode='manual', route=None, level_set=None, reason=str(exc), blocked=True)
 
@@ -722,7 +724,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def apply_detected_options(self):
         """*OPT? pre-fills the option selectors, unless the technician already declared them: then a difference is only WARNED and the technician's selection decides.
         Returns the text for the connect message."""
-        o = self.io.ctr.options or {}
+        o = self.connected_io().ctr.options or {}
         want = (TB_CHOICES[1] if o.get('timebase') == '010' else TB_CHOICES[0],
                 {None: CH3_CHOICES[0], '106': CH3_CHOICES[1], '115': CH3_CHOICES[2]}.get(o.get('ch3'), CH3_CHOICES[0]), bool(o.get('pulse')))
         had = (self.tb_opt.get(), self.ch3_opt.get(), bool(self.pulse_opt.get()))
@@ -757,9 +759,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.io: self.io.close(); self.io = None
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise drivers.InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -856,7 +865,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Manual page', p['page'])]
         if image is None and group != 'NONE':
             facts.append(('Diagram', f'not installed (expected diagrams/hook_53220a_{src}_{group}.png)'))
-        self.io.standby()
+        self.connected_io().standby()
         if group == 'NONE':
             return port.operator_prompt('Self-test', 'Operational verification', [('Self-test', 'Disconnect all signals from the inputs. The self-test takes more than 5 seconds; the counter then resets to factory settings.')],
                                         facts=facts, caution='Nothing is connected.', ok='Start the self-test', image=image, parent=self.root)
@@ -911,11 +920,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
             def work():
                 try:
-                    self.io.stim.update(stim)
-                    reading = self.io.measure(p)
+                    self.connected_io().stim.update(stim)
+                    reading = self.connected_io().measure(p)
                     port.post(self.root, lambda: self._done(points, i, p, reading, key, plan['mode']))
                 except Exception as exc:
-                    try: self.io.standby()
+                    try: self.connected_io().standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
                     if isinstance(err, manual_override.ReadingUnavailable): port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))     # the automatic reading failed: a typed one may replace it
