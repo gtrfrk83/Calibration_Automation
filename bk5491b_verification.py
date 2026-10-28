@@ -153,6 +153,22 @@ def find_diagram(cal, group):
     return None
 
 
+def open_meter_port(address, dmm_serial):
+    """The 5491B's COM port (RS-232 or the USB virtual COM port) is opened with pyserial, NOT through VISA: the meter's character-by-character echo handshake (manual
+    5.2.4 item 3) worked at once with pyserial (owner's probe, 2026-10-28) and got no reply through VISA's ASRL driver. A VISA-style resource ('ASRL12::INSTR') is
+    turned back into its COM port. Returns an unopened transport."""
+    t = address.strip()
+    up = t.upper()
+    if up.startswith('ASRL') and '::' in up:
+        t = 'COM' + up[4:].split('::')[0]
+    elif up.isdigit():
+        t = 'COM' + up
+    if not t.upper().startswith('COM'):
+        return drivers.open_visa(to_visa(address), timeout=30, **(dmm_serial or {}))
+    from drivers.transport import SerialSettings, SerialTransport
+    return SerialTransport(t, SerialSettings(**(dmm_serial or {})), timeout=30)
+
+
 def to_visa(text):
     """'COM9' / '9' -> 'ASRL9::INSTR'; anything that already looks like a VISA resource passes through."""
     t = text.strip()
@@ -197,7 +213,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if transports:
             dmm_t, cal_t = transports
         else:
-            dmm_t = drivers.open_visa(to_visa(dmm_address), timeout=30, **(dmm_serial or {}))
+            dmm_t = open_meter_port(dmm_address, dmm_serial)
             cal_t = drivers.open_visa(to_visa(cal_address), timeout=20, baud=cal_baud)
         self.dmm = BK5491B(dmm_t, self.log, label=MODEL)
         self.cal = cal_cls(cal_t, self.log, label=cal_name)

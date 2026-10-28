@@ -661,5 +661,97 @@ class EchoFragments(unittest.TestCase):
         self.assertFalse(BK5491B._is_echo('NO ERROR!', 'SYST:ERR?', []))
 
 
+def _serial_shim():
+    """pyserial is not installed in every test environment: a minimal stand-in (read / write / flush / timeout over a file descriptor) lets the pyserial branch of the driver run."""
+    import os
+    import select
+    import types
+
+    class Serial:
+        def __init__(self, port, baudrate=9600, timeout=None, write_timeout=None, **kw):
+            self.fd, self.timeout, self.dtr, self.rts = os.open(port, os.O_RDWR | os.O_NOCTTY), timeout, None, None
+
+        def read(self, n=1):
+            out = b''
+            while len(out) < n:
+                if not select.select([self.fd], [], [], self.timeout)[0]:
+                    break
+                out += os.read(self.fd, n - len(out))
+            return out
+
+        def write(self, data):
+            os.write(self.fd, data)
+
+        def flush(self):
+            pass
+
+        def reset_input_buffer(self):
+            while select.select([self.fd], [], [], 0)[0]:
+                os.read(self.fd, 256)
+
+        def close(self):
+            os.close(self.fd)
+    mod = types.ModuleType('serial')
+    mod.Serial = Serial
+    return mod
+
+
+@unittest.skipUnless(sys.platform.startswith('linux'), 'needs a pseudo-terminal')
+class RealSerialPort(unittest.TestCase):
+    """The driver over a real pyserial port (a pseudo-terminal) against a thread that behaves like the 5491B in the owner's probe: every character echoed, the end character
+    echoed, then the reply ending in LF."""
+
+    def test_identify_and_a_query_over_pyserial(self):
+        import os
+        import pty
+        import threading
+        from drivers import CommandLog
+        from drivers.bk_5491b import BK5491B
+        from drivers.transport import SerialSettings, SerialTransport
+        import tty
+        master, slave = pty.openpty()
+        tty.setraw(slave)
+        tty.setraw(master)
+        saved = sys.modules.get('serial')
+        try:
+            import serial  # noqa: F401
+        except ImportError:
+            sys.modules['serial'] = _serial_shim()
+        stop = threading.Event()
+
+        def meter():
+            line = b''
+            while not stop.is_set():
+                import select
+                if not select.select([master], [], [], 0.05)[0]:
+                    continue
+                for b in os.read(master, 1):
+                    os.write(master, bytes([b]))
+                    if bytes([b]) == b'\n':
+                        cmd = line.decode()
+                        line = b''
+                        if cmd == '*IDN?':
+                            os.write(master, b'5491B  Multimeter,Ver1.4.14.06.18,124J23117\n')
+                        elif cmd == 'SYST:ERR?':
+                            os.write(master, b'NO ERROR!\n')
+                    else:
+                        line += bytes([b])
+        th = threading.Thread(target=meter, daemon=True)
+        th.start()
+        try:
+            t = SerialTransport(os.ttyname(slave), SerialSettings(baud=9600, write_termination='\n', read_termination='\n'), timeout=3)
+            d = BK5491B(t, CommandLog(), label='pty')
+            d.COMMAND_GAP_S, d.OPEN_SETTLE_S = 0, 0
+            d.connect()
+            self.assertIn('5491B', d.idn)
+            self.assertEqual(d.query('SYST:ERR?').strip(), 'NO ERROR!')
+            d.close()
+        finally:
+            stop.set()
+            th.join(1)
+            if saved is None and 'serial' in sys.modules and getattr(sys.modules['serial'], '__file__', None) is None:
+                del sys.modules['serial']
+
+
 if __name__ == '__main__':
     unittest.main()
