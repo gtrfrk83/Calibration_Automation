@@ -914,6 +914,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             return (True, '') if not self.is_skipped(p) else (False, f'Section "{p["section"]}" is set to Not tested.')
         m = self.mode_of(p)
         if m == rules.HAND:
+            import app_settings
+            if not app_settings.hand_sections_on():
+                return False, f'Section "{p["section"]}" is set to Typed by hand, and manual data entry for such sections is switched off (File > Settings).'
             return True, ''
         if m == rules.SKIP:
             return False, f'Section "{p["section"]}" is set to Not tested. Change its mode to type readings.'

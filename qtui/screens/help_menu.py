@@ -202,6 +202,8 @@ def install_hooks():
 
 def dress(window: QMainWindow, where: str = ''):
     window.setWindowTitle(window.windowTitle() if window.windowTitle().startswith(suite_info.NAME) else suite_info.window_title(window.windowTitle()))
+    from qtui.screens import settings_window
+    settings_window.add_settings_action(window)                  # File > Settings... (a File menu is made when the window has none)
     add_appearance_menu(window)
     add_help_menu(window)
     return window

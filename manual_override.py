@@ -148,6 +148,9 @@ class ManualOverrideMixin:
             return []
         p = self.mo_point(pid)
         ok, why = self.mo_state(p)
+        import app_settings
+        if not app_settings.manual_override_on():                   # File > Settings
+            ok, why = False, app_settings.OFF_TEXT
         return [('Enter reading manually...', lambda: self.mo_enter_for(p), ok, why)]
 
     def mo_state(self, p):
@@ -173,6 +176,10 @@ class ManualOverrideMixin:
         self.mo_enter_for(p)
 
     def mo_enter_for(self, p):
+        import app_settings
+        if not app_settings.manual_override_on():                   # File > Settings
+            port.message('info', 'Enter reading manually', app_settings.OFF_TEXT, parent=self.root)
+            return
         ok, why = self.mo_state(p)
         if not ok:
             port.message('info', 'Enter reading manually', why, parent=self.root)
@@ -203,6 +210,9 @@ class ManualOverrideMixin:
 
     def mo_failed(self, p, exc):
         """The automatic reading failed: the typed one (armed earlier, or asked for now) or None = stop the run as before."""
+        import app_settings
+        if not app_settings.manual_override_on():            # File > Settings: no typed replacement is offered, the run stops as it always did
+            return None
         armed = self.mo_take_pending(p)
         if armed is not None:
             return armed

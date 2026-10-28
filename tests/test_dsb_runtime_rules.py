@@ -818,6 +818,19 @@ class Rule12Sections(Base):
         self.assertTrue(app.grid_allows(a)[0])
         self.assertIsNotNone(app.grid_entry, 'the grid entry is attached to every sheet')
 
+    def test_settings_switch_the_typed_by_hand_sections_off(self):
+        import app_settings
+        app, io = self.dmm()
+        a = next(q for q in app.points if q['section'] == self.SEC)
+        app.set_section_mode(self.SEC, rules.HAND)
+        self.assertTrue(app.grid_allows(a)[0])
+        with mock.patch.object(app_settings, 'get', lambda key, default=None: False if key == app_settings.HAND_SECTIONS else default):
+            ok, why = app.grid_allows(a)
+            self.assertFalse(ok)
+            self.assertIn('File > Settings', why)
+            with self.assertRaises(RuntimeError):
+                app.type_reading(a, '1')
+
     def test_changing_the_setting_after_readings_exist_never_discards_points(self):
         app, io = self.dmm()
         self.assertTrue(self.h.run_all())
@@ -948,6 +961,23 @@ class Rule13Override(Base):
         self.assertRegex(line[0], rf'MANUAL OVERRIDE point {re.escape(p["id"])}: auto reading 10 V, entered {re.escape(same)} V = 10 V')
         self.assertIn('MANUAL OVERRIDE', log_file(self.h), 'saved at once')
         self.assertEqual(json.loads(app._checkpoint_path().read_text())['results'][p['id']]['overridden'], True)
+
+    def test_settings_switch_manual_override_off(self):
+        import app_settings
+        app, io = self.dmm()
+        p = app.points[5]
+        self.assertTrue(app.mo_state(p)[0])
+        with mock.patch.object(app_settings, 'get', lambda key, default=None: False if key == app_settings.MANUAL_OVERRIDE else default):
+            self.assertIsNone(app.mo_failed(p, RuntimeError('timeout')), 'a failed automatic reading is not offered a typed one: the run stops as before')
+            label, _cmd, enabled, why = app.tree_menu_extras(p['id'])[0]
+            self.assertFalse(enabled)
+            self.assertIn('File > Settings', why)
+            said = []
+            with mock.patch.object(ov.port, 'message', lambda *a, **k: said.append(a)), self.typed('10'):
+                app.mo_enter_for(p)
+            self.assertTrue(said and 'File > Settings' in said[0][2])
+            self.assertNotIn(p['id'], app.found)
+        self.assertTrue(app.mo_state(p)[0])
 
     def test_idle_override_of_a_point_not_measured_yet_and_a_failing_value(self):
         app, io = self.dmm()
