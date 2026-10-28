@@ -240,6 +240,17 @@ class ManualRun(Fix):
         self.assertEqual(a.found[p['id']]['result'], 'FAIL')
         self.assertEqual(a.left[p['id']]['data'], 'As Left')
 
+    def test_a_typed_reading_can_be_deleted(self):
+        a = self.app
+        p = next(p for p in a.points if p['test'] == 'numeric')
+        a.type_reading(p, H.typed_nominal(p))
+        self.assertIn(p['id'], a.found)
+        self.assertTrue(a.clear_reading(p))
+        self.assertNotIn(p['id'], a.found)
+        self.assertFalse(a.clear_reading(p))                            # nothing left to delete
+        self.assertIn(p['id'], [q['id'] for q in a.points if q['id'] not in a.found])      # back to pending: a run measures it again
+        a.type_reading(p, H.typed_nominal(p))                           # and it can be typed again
+
     def test_run_all_pending_uses_the_same_path(self):
         self.h.default_reading = H.typed_nominal
         self.assertTrue(self.h.run_all())

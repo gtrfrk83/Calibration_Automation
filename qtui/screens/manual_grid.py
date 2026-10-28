@@ -215,6 +215,7 @@ class GridEntry(QObject):
         self.entry = _CellEdit(self, self.view.viewport())
         self.entry.setGeometry(rect)
         rec = self.app.results.get(iid) or {}
+        self._had = bool(rec) and not first                          # opened on an existing reading: emptying the box and pressing Enter deletes it
         self.entry.setText(first or '')
         if not first and rec.get('entered') not in (None, '') and p['test'] == 'numeric':
             self.entry.setText(str(rec['entered']))                  # an existing reading: shown selected, typing over it replaces it
@@ -235,6 +236,8 @@ class GridEntry(QObject):
         else:
             text = f'Point {n}/{total} ({mode}): type Y (pass) or N (fail).'
         text += ' Enter = save and next, Esc = close.'
+        if p['id'] in self.app.results:
+            text += ' To delete this reading: clear the box and press Enter (or press Delete on the selected point).'
         if getattr(self.app, 'virtual', False):
             text += ' DEMO: F9 fills a simulated reading.'
         return text
@@ -264,7 +267,15 @@ class GridEntry(QObject):
             return 'break'
         iid, text = self.iid, self.entry.text()
         p = self.point(iid)
-        if text.strip() and p is not None:
+        if not text.strip() and p is not None and getattr(self, '_had', False):
+            try:
+                self.app.clear_reading(p)
+                saved = f'Point {p["n"]}: reading deleted'
+            except RuntimeError as exc:
+                self.close()
+                self.say(str(exc))
+                return 'break'
+        elif text.strip() and p is not None:
             try:
                 self.app.type_reading(p, text)
             except ValueError as exc:                               # not a reading: the box stays, the reason is shown
@@ -308,6 +319,20 @@ class GridEntry(QObject):
     def selected_iid(self):
         keys = self.view.selected_keys()
         return keys[0] if keys else None
+
+    def delete_selected(self):
+        """Delete / Backspace on a selected point (no box open): delete its recorded reading (As Found or As Left, whichever is being collected)."""
+        sel = self.selected_iid()
+        p = self.point(sel) if sel is not None else None
+        if p is None or self.entry is not None:
+            return None
+        try:
+            gone = self.app.clear_reading(p)
+        except RuntimeError as exc:
+            self.say(str(exc))
+            return 'break'
+        self.say(f'Point {p["n"]}: reading deleted.' if gone else f'Point {p["n"]} has no reading to delete.')
+        return 'break'
 
     def on_return(self):
         sel = self.selected_iid()
@@ -358,6 +383,9 @@ class GridEntry(QObject):
                 if k in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_F2):
                     self.on_return()
                     return True
+                if k in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
+                    if self.delete_selected() == 'break':
+                        return True
                 if self.on_key(ev.text(), ev.modifiers()) == 'break':
                     return True
             elif t in (QEvent.Type.Resize, QEvent.Type.Wheel):

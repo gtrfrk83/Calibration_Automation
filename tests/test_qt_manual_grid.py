@@ -64,6 +64,11 @@ class FakeApp:
         store[p['id']] = dict(entered=entered, result='PASS' if float(p['low']) <= v <= float(p['high']) else 'FAIL', source='typed')
 
 
+    def clear_reading(self, p):
+        store = self.left if self.is_left else self.results
+        return store.pop(p['id'], None) is not None
+
+
 @unittest.skipUnless(HAVE_QT, 'PySide6 is not installed')
 class ManualGrid(unittest.TestCase):
     def setUp(self):
@@ -95,6 +100,27 @@ class ManualGrid(unittest.TestCase):
         st = self.app.status.get()
         self.assertIn('accept 2.9970 to 3.0030 V', st)
         self.assertIn('Point 2 saved: 2.0000 V PASS', st)
+
+    def test_a_reading_is_deleted_by_clearing_the_box_or_with_the_delete_key(self):
+        self.app.results['p2'] = dict(entered='2.0000', result='PASS', source='typed')
+        self.app.results['p3'] = dict(entered='3.0000', result='PASS', source='typed')
+        self.ge.open('p2')
+        self.assertIn('To delete this reading', self.app.status.get())
+        self.ge.var.set('')
+        QTest.keyClick(self.ge.entry, Qt.Key.Key_Return)
+        self.assertNotIn('p2', self.app.results)
+        self.assertIn('Point 2: reading deleted', self.app.status.get())
+        self.ge.close()
+        self.select('p3')
+        self.view.setFocus()
+        QTest.keyClick(self.view, Qt.Key.Key_Delete)
+        self.assertNotIn('p3', self.app.results)
+
+    def test_enter_through_an_empty_box_on_a_point_without_a_reading_deletes_nothing(self):
+        self.app.results['p4'] = dict(entered='4.0000', result='PASS', source='typed')
+        self.ge.open('p3')
+        QTest.keyClick(self.ge.entry, Qt.Key.Key_Return)              # p3 empty, moves on to p4
+        self.assertIn('p4', self.app.results)
 
     def test_nan_is_refused_and_the_box_stays(self):
         self.ge.open('p3')

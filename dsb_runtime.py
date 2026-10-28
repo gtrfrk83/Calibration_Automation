@@ -1082,6 +1082,18 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                         reading=None, result='PASS' if ok else 'FAIL', source='typed')
         return self.results[p['id']]
 
+    def clear_reading(self, p):
+        """Delete the reading recorded for point p in the data mode on screen (As Found / As Left): the point goes back to pending and the checkpoint is saved.  True when
+        there was one.  Raises RuntimeError while a run is in progress."""
+        if self.busy:
+            raise RuntimeError('A run is in progress: finish or stop it before deleting readings.')
+        if p['id'] not in self.results:
+            return False
+        del self.results[p['id']]
+        self._update_row(p)
+        self.save(silent=True)
+        return True
+
     def _row(self, p):
         values, tags = super()._row(p)
         if self.manual_entry:
