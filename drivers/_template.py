@@ -7,6 +7,9 @@ and add a simulator to simulated.py so procedures can be tested without hardware
 Every command is declared once in COMMANDS (cmdreg.Cmd: template, name, kind, read-back pairing, risk, verified, manual page) and sent with
 self.send(key, ...) / self.ask(key, ...); never build command text with an f-string inside a method (the lint test in
 tests/test_golden_commands.py fails on that). Output enables, calibration, reset and error-queue commands are risk 'output' / 'locked'.
+
+Bench first (NOTES.md 'Bench-first driver workflow'): write the driver, then meet the real instrument BEFORE any procedure uses it. verified=True only with a manual
+page in ref + a recorded real reply + a driver_verify pass. Commands that cannot be triggered safely stay verified=False and are listed in the final summary.
 """
 from __future__ import annotations
 
