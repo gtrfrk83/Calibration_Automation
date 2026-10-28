@@ -753,6 +753,14 @@ class LightMeterReport(Fix):
         a = self.h.make_app(spec)
         for p in a.points:
             a.type_reading(p, 'y') if p['test'] != 'numeric' else a.type_reading(p, H.typed_nominal(p))
+        import report_review_model as RM
+        specs, default = RM.specs_for(a)                            # the review window: the light rows are covered by the lab's light CMC, not 'Not in scope'
+        model = RM.ReviewModel(specs, default, asset='A-100')
+        light = [r for r in model.rows if r.spec.unit in ('FC', 'uW/cm2', '\u00b5W/cm\u00b2')]
+        self.assertEqual(len(light), 11)
+        for r in light:
+            self.assertNotEqual(r.status, RM.NOT_IN_SCOPE, r.spec.description)
+            self.assertIsNotNone(r.cur.cmc, r.spec.description)
         out = str(Path(tempfile.mkdtemp()) / 'A-100-2026-10-27.pdf')
         d = {'technician': 'T', 'temperature': '23', 'humidity': '45', 'standards': [], 'procedure': '', 'show_tar_tur': True}
         with mock.patch.object(report_dialog, 'ask_details', lambda parent, proc='': d), mock.patch.object(rt.hh.filedialog, 'asksaveasfilename', lambda **k: out):

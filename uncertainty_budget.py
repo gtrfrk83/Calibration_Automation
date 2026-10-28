@@ -93,6 +93,8 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
     elif scope is not None:
         sensor = {'tc': tc} if (kind == 'TEMP' and tc != 'K') else {}            # only a non-default sensor changes the call (every other engine calls the scope exactly as before)
         b.cmc = (scope.dmm(kind, nominal, range_value, frequency, source=standard, **sensor) if basis is None else scope.dmm(kind, nominal, range_value, frequency, basis=basis, source=standard, **sensor))
+    if b.cmc is None and kind in LIGHT_KINDS:        # the lab's Light - Measure CMC is the A2LA-LIGHT standards sheet (no entry in the DMM tables): it is the floor of every light standard
+        b.cmc = light_cmc(kind, nominal)
     if standard is not None:
         if kind == 'TEMP':        # thermocouple simulation (Type K): the calibrator's degC specification, never the magnitude lookup
             hit = standard.lookup_temperature(nominal, tc=tc, variant=variant) if (tc != 'K' or variant) else standard.lookup_temperature(nominal)
@@ -128,6 +130,23 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
     elif b.cmc is not None:
         b.reported = ceil_sig(b.cmc)
     return b
+
+
+LIGHT_KINDS = ('FC', 'LUX', 'LAMBERT', 'UVIRR')
+LIGHT_MODEL = 'A2LA-LIGHT'
+
+
+def light_cmc(kind, nominal):
+    """The laboratory's CMC (absolute, in the point's own unit) of Light - Measure at `nominal` (the A2LA-LIGHT sheet's row: 2.9 % white, 5.0 % at 365 nm, of reading), or None."""
+    try:
+        std = sm.standard(LIGHT_MODEL)
+        if std is None:
+            sm.seed()
+            std = sm.standard(LIGHT_MODEL)
+        hit = std.lookup(kind, nominal, direction='output') if std is not None else None
+        return float(hit.limit) if hit is not None else None
+    except Exception:
+        return None
 
 
 def osc_dc(volts, impedance='1M', standard='5560A', scope=None):
