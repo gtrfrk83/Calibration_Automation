@@ -170,8 +170,11 @@ class Sim5491BTransport(_SimBase):
             if rest == 'RANG:AUTO?':
                 return '1' if self.auto else '0'
             m = re.fullmatch(r'RANG ([-+0-9.E]+)', rest)
-            if m:
-                self.range_no, self.auto = self._pick_range(abs(float(m.group(1)))), False
+            if m:                                            # the real meter takes only an exact range value (owner probe 2026-10-28), refusing others with BUS:ERROR PARAMETER.
+                want = float(m.group(1))
+                if not re.fullmatch(r'\d+(\.\d+)?', m.group(1)) or m.group(1).endswith('.0') or want not in self._table():
+                    return self._error('BUS:ERROR PARAMETER.')
+                self.range_no, self.auto = self._table().index(want) + 1, False
                 return None
             if rest == 'RANG?':
                 return f'{self._table()[self.range_no - 1]:.6E}'

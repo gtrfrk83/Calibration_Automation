@@ -293,7 +293,7 @@
     "5491B|>>|VOLT:DC:RANG:AUTO OFF",
     "5491B|>>|VOLT:DC:RANG:AUTO?",
     "5491B|<<|0",
-    "5491B|>>|VOLT:DC:RANG 4.9",
+    "5491B|>>|VOLT:DC:RANG 5",
     "5491B|>>|VOLT:DC:RANG?",
     "5491B|<<|5.000000E+00",
     "5491B|>>|VOLT:DC:NPLC 10",
@@ -352,7 +352,7 @@
     ],
     [
      "W",
-     "VOLT:DC:RANG 4.9"
+     "VOLT:DC:RANG 5"
     ],
     [
      "sleep",
@@ -418,7 +418,7 @@
     "5491B|>>|VOLT:AC:RANG:AUTO OFF",
     "5491B|>>|VOLT:AC:RANG:AUTO?",
     "5491B|<<|0",
-    "5491B|>>|VOLT:AC:RANG 4.9",
+    "5491B|>>|VOLT:AC:RANG 5",
     "5491B|>>|VOLT:AC:RANG?",
     "5491B|<<|5.000000E+00",
     "5491B|>>|VOLT:AC:NPLC 10",
@@ -477,7 +477,7 @@
     ],
     [
      "W",
-     "VOLT:AC:RANG 4.9"
+     "VOLT:AC:RANG 5"
     ],
     [
      "sleep",
@@ -622,7 +622,7 @@
     "5491B|>>|RES:RANG:AUTO OFF",
     "5491B|>>|RES:RANG:AUTO?",
     "5491B|<<|0",
-    "5491B|>>|RES:RANG 4900.0",
+    "5491B|>>|RES:RANG 5000",
     "5491B|>>|RES:RANG?",
     "5491B|<<|5.000000E+03",
     "5491B|>>|RES:NPLC 10",
@@ -681,7 +681,7 @@
     ],
     [
      "W",
-     "RES:RANG 4900.0"
+     "RES:RANG 5000"
     ],
     [
      "sleep",
@@ -747,7 +747,7 @@
     "5491B|>>|CURR:DC:RANG:AUTO OFF",
     "5491B|>>|CURR:DC:RANG:AUTO?",
     "5491B|<<|0",
-    "5491B|>>|CURR:DC:RANG 0.0049",
+    "5491B|>>|CURR:DC:RANG 0.005",
     "5491B|>>|CURR:DC:RANG?",
     "5491B|<<|5.000000E-03",
     "5491B|>>|CURR:DC:NPLC 10",
@@ -806,7 +806,7 @@
     ],
     [
      "W",
-     "CURR:DC:RANG 0.0049"
+     "CURR:DC:RANG 0.005"
     ],
     [
      "sleep",
@@ -872,7 +872,7 @@
     "5491B|>>|CURR:AC:RANG:AUTO OFF",
     "5491B|>>|CURR:AC:RANG:AUTO?",
     "5491B|<<|0",
-    "5491B|>>|CURR:AC:RANG 0.049",
+    "5491B|>>|CURR:AC:RANG 0.05",
     "5491B|>>|CURR:AC:RANG?",
     "5491B|<<|5.000000E-02",
     "5491B|>>|CURR:AC:NPLC 10",
@@ -931,7 +931,7 @@
     ],
     [
      "W",
-     "CURR:AC:RANG 0.049"
+     "CURR:AC:RANG 0.05"
     ],
     [
      "sleep",

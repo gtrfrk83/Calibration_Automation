@@ -53,6 +53,12 @@ OVERLOAD = 9.0e37               # a reading at or above this is taken as an over
 NO_ERROR = 'NO ERROR'
 
 
+def range_text(value: float) -> str:
+    """A range as the meter takes it: plain decimal digits, no exponent and no trailing .0 (owner probe, 2026-10-28: 5.0 and +5E+00 were refused, 5 and 0.5 accepted)."""
+    from decimal import Decimal
+    return format(Decimal(repr(float(value))).normalize(), 'f')
+
+
 def range_value(kind: str, range_v: float) -> float:
     """The 5491B range (base units) a spec range value stands for; raises when the meter has no such range."""
     table = RANGES.get(kind)
@@ -109,10 +115,10 @@ for _k, _p in PATH.items():
                                        ref=f'{UM}, Section 6.3.3 to 6.3.5, {_pg}')
     COMMANDS[f'range.auto.query.{_k}'] = Cmd(f'{_p}:RANG:AUTO?', f'Autorange, {_name}', 'Autorange state (0 = off, 1 = on, Section 6.3.3). A reply "ON" / "OFF" is accepted too',
                                              kind='query', verified=True, ref=f'{UM}, Section 6.3.3 to 6.3.5, {_pg}')
-    COMMANDS[f'range.set.{_k}'] = Cmd(f'{_p}:RANG {{expected}}', f'Range, {_name}', 'The EXPECTED reading in base units: the meter goes to the most sensitive range that holds it '
-                                      '(Section 6.3.3 / 6.3.4 / 6.3.5 descriptions, with the examples "10 mA selects the 20 mA range", "50 ohm selects the 500 ohm range (5491B)")',
-                                      placeholders={'expected': Placeholder('float', '.9g', 1.0)}, kind='set', readback=f'range.query.{_k}', verified=True,
-                                      ref=f'{UM}, Section 6.3.3 to 6.3.5, {_pg}')
+    COMMANDS[f'range.set.{_k}'] = Cmd(f'{_p}:RANG {{range}}', f'Range, {_name}', 'The EXACT range value in base units, written as the meter lists it (0.5, 5, 50 ...). A value that is not one of the ranges, '
+                                      'or one written 5.0 / 5E+00, is refused with BUS:ERROR PARAMETER / BAD COMMAND (owner probe, 2026-10-28: 0.49, 4.9, 2 and 0.2 refused; 0.5, 5, 50, 1000 accepted)',
+                                      placeholders={'range': Placeholder('enum', '', None, enum=tuple(range_text(v) for v in RANGES[_k]))}, kind='set', readback=f'range.query.{_k}', verified=True,
+                                      ref=f'{UM}, Section 6.3.3 to 6.3.5, {_pg}; owner probe 2026-10-28')
     COMMANDS[f'range.query.{_k}'] = Cmd(f'{_p}:RANG?', f'Range, {_name}', 'Query the range. The reply text is not shown in the manual: the first number in it is compared with the range '
                                         'full scale, tolerance 1 %', kind='query', verified=False, ref=f'{UM}, Section 6.3.3 to 6.3.5, {_pg}')
     COMMANDS[f'nplc.set.{_k}'] = Cmd(f'{_p}:NPLC {{nplc}}', f'Integration time, {_name}', 'Power line cycles 0.1 (fast), 1 (medium), 10 (slow). The specifications are for the slow rate',
@@ -445,7 +451,7 @@ class BK5491B(Instrument):
         return point.get('function') or point['kind']
 
     def configure_point(self, point: dict):
-        """Function, fixed range (the expected reading, read back), slow rate; each set once and read back."""
+        """Function, fixed range (the exact range value, read back), slow rate; each set once and read back."""
         fk = self.function_of(point)
         if fk not in FUNC:
             raise InstrumentError(f'{self.MODEL} driver does not support {fk}')
@@ -457,8 +463,7 @@ class BK5491B(Instrument):
             reply = self.ask(f'range.auto.query.{fk}').strip()
             if reply.upper() not in ('0', 'OFF', '+0') and _num(reply) != 0:
                 raise InstrumentError(f'{self.MODEL}: autorange OFF was not accepted: read back {reply!r}')
-            expected = float(point['nominal']) if point.get('nominal') else full
-            self._set_check(f'range.set.{fk}', f'range.query.{fk}', self._is_number(full), f'range {full:g}', expected=abs(expected))
+            self._set_check(f'range.set.{fk}', f'range.query.{fk}', self._is_number(full), f'range {full:g}', range=range_text(full))
             self._set_check(f'nplc.set.{fk}', f'nplc.query.{fk}', self._is_number(NPLC_SLOW, 1e-6), f'NPLC {NPLC_SLOW}', nplc=NPLC_SLOW)
         elif fk == 'FREQ':
             level = float(point.get('amplitude') or 0.5)

@@ -199,7 +199,7 @@ class DriverTests(unittest.TestCase):
             dt.sent.clear()
             d.configure_point(p)
             d.check_errors('test')
-        self.assertEqual(dt.sent, ['FUNC CURR:AC', 'FUNC?', 'CURR:AC:RANG:AUTO OFF', 'CURR:AC:RANG:AUTO?', 'CURR:AC:RANG 0.049', 'CURR:AC:RANG?',
+        self.assertEqual(dt.sent, ['FUNC CURR:AC', 'FUNC?', 'CURR:AC:RANG:AUTO OFF', 'CURR:AC:RANG:AUTO?', 'CURR:AC:RANG 0.05', 'CURR:AC:RANG?',
                                    'CURR:AC:NPLC 10', 'CURR:AC:NPLC?', 'TRIG:SOUR IMM', 'TRIG:SOUR?', 'SYST:ERR?'])
         self.assertEqual((dt.func, dt.range_no, dt.nplc), ('ACI', 2, 10.0))
 
@@ -227,7 +227,7 @@ class DriverTests(unittest.TestCase):
             mark = len(self.logged(log))
             with self.assertRaisesRegex(InstrumentError, 'range 5 was not accepted'):
                 d.configure_point(dict(kind='DCV', range=5.0, nominal=4.9))
-        self.assertEqual(self.logged(log)[mark:].count('VOLT:DC:RANG 4.9'), 1)
+        self.assertEqual(self.logged(log)[mark:].count('VOLT:DC:RANG 5'), 1)
 
     def test_a_write_that_times_out_is_not_retried(self):
         _b, _ct, dt, d, log = self.make()
@@ -240,7 +240,7 @@ class DriverTests(unittest.TestCase):
                 d.configure_point(dict(kind='DCV', range=5.0, nominal=4.9))
         sent = self.logged(log)[mark:]
         self.assertEqual(sum('RANG:AUTO' in c for c in sent), 1)
-        self.assertFalse(any(c.startswith('VOLT:DC:RANG 4.9') for c in sent))
+        self.assertFalse(any(c.startswith('VOLT:DC:RANG 5') for c in sent))
 
     def test_the_error_queue_is_read_once_and_a_message_raises(self):
         _b, _ct, dt, d, _log = self.make()
@@ -755,6 +755,25 @@ class RealSerialPort(unittest.TestCase):
             th.join(1)
             if saved is None and 'serial' in sys.modules and getattr(sys.modules['serial'], '__file__', None) is None:
                 del sys.modules['serial']
+
+
+class RangeText(unittest.TestCase):
+    def test_ranges_are_written_as_the_meter_takes_them(self):
+        """Owner probe 2026-10-28: 0.5 / 5 / 50 / 1000 accepted; 0.49, 4.9, 5.0 and 5E+00 refused."""
+        from drivers.bk_5491b import RANGES, range_text
+        self.assertEqual([range_text(v) for v in RANGES['DCV']], ['0.5', '5', '50', '500', '1000'])
+        self.assertEqual([range_text(v) for v in RANGES['DCI']], ['0.005', '0.05', '0.5', '5', '20'])
+        self.assertEqual(range_text(50000000.0), '50000000')
+        self.assertEqual(range_text(750), '750')
+
+    def test_the_simulated_meter_refuses_what_the_real_one_refused(self):
+        from drivers.simulated_5491b import make_5491b_bench
+        _b, _c, m = make_5491b_bench()
+        for bad in ('VOLT:DC:RANG 0.49', 'VOLT:DC:RANG 5.0', 'VOLT:DC:RANG 2'):
+            m.handle(bad)
+        self.assertEqual(m.errors, ['BUS:ERROR PARAMETER.'] * 3)
+        m.handle('VOLT:DC:RANG 5')
+        self.assertEqual(m.handle('VOLT:DC:RANG?'), '5.000000E+00')
 
 
 if __name__ == '__main__':
