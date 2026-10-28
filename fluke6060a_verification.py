@@ -426,10 +426,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         f = p['gen']['freq_mhz']
         r = p.get('rx') or {}
         if kind == 'freq_count':
-            if not self._tb_checked:
-                if not rx.time_base_is_external():
-                    raise ReadingUnavailable('The 8902A is not using the 6060A 10 MHz as its time base (15.1SP reads 0): connect the 6060A rear 10 MHz IN/OUT to the 8902A 10 MHz reference input.')
-                self._tb_checked = True
+            # No automatic 15.1SP time-base check: owner bench 2026-10-28, sending 15.1SP left the 8902A showing '1' (the special-function display) and locked until a preset.
+            # The reference connection is the operator's hook-up step (see the group notice); the 8902A switches to the external 10 MHz by itself.
             return rx.measure_frequency_hz(f, resolution_hz=r['resolution_hz'])
         if kind == 'level_pm':
             return self.pm.read_dbm()
@@ -635,7 +633,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """Hook-up instruction for a point's wiring group."""
         g = p['group']
         rx_in = ('6060A RF OUTPUT to the 8902A RF INPUT (50 ohm cable; the 8902A input is limited to +27 dBm). 6060A rear panel 10 MHz IN/OUT to the 8902A rear 10 MHz reference input, '
-                 'REF INT/EXT switch as 4A-4 says. The 8902A takes the external reference by itself; the program checks it before the first frequency point (special function 15.1, UNVERIFIED).')
+                 'REF INT/EXT switch as 4A-4 says. The 8902A takes the external reference by itself; check on the 8902A that it shows the external reference (the program does not send special function 15.1: it locked the receiver on the bench).')
         if g == 'POWERON':
             return 'No connections. Switch the 6060A POWER off and on and watch the self test (every indicator on for about 5 seconds; the failure codes show in the four display fields if it fails).'
         if g == 'RX':

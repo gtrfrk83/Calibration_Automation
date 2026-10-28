@@ -356,7 +356,7 @@ class HP8902A(Instrument):
 
     def time_base_is_external(self) -> bool:
         """15.1SP: 1 when the rear-panel 10 MHz reference is in use, 0 for the internal one (there is no command to choose; the receiver switches by itself)."""
-        return self.read_special('15.1') >= 0.5
+        return self.read_special('15.1') >= 0.5     # NOT used by the procedure: on the owner's 8902A (2026-10-28) 15.1SP left the display showing 1 and locked the receiver until a preset
 
     def tuned_rf_level_dbm(self, carrier_mhz: float, detector: str = 'sync') -> float:
         """Tuned RF level in dBm (0 to -127 dBm): manual tune to the source frequency (within 50 kHz at 10 MHz and above), S4, LG, detector synchronous or average. The value is the LG
