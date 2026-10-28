@@ -170,10 +170,15 @@ class BK5491B(Instrument):
         earlier = list(self._since or [])
         self.log.add('>>', log_as or cmd, self.label)
         self.t.write(cmd)
-        line = self._read_line()
+        seen = []                                                # every line read for this query (shown in the error when the reply never comes)
+        try:
+            line = self._read_line()
+        except TransportError as exc:
+            raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r}: {exc}. Lines received before the silence: {seen or "none"}') from exc
         limit = self.MAX_REPLY_LINES + len(earlier)
         for n in range(limit):
             text = line.strip()
+            seen.append(text)
             if self._is_echo(text, cmd, earlier):
                 self.echo_seen += 1
                 self.log.add('<<', f'{text}  [echo of a command, skipped]', self.label)
@@ -187,7 +192,10 @@ class BK5491B(Instrument):
                 self._since = [cmd.strip()]
                 return text
             if n + 1 < limit:
-                line = self._read_line()                        # a timeout here raises the transport's own error
+                try:
+                    line = self._read_line()
+                except TransportError as exc:
+                    raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r}: {exc}. Lines received before the silence: {seen}') from exc
         self._since = [cmd.strip()]
         raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r} within {limit} lines (only echoed command text was read)')
 
@@ -239,6 +247,25 @@ class BK5491B(Instrument):
         elif ser is not None:
             ser.timeout = seconds
 
+    OPEN_SETTLE_S = 1.0          # after opening the port (a USB virtual COM port can reset the meter's interface when it opens): a choice of this driver, not a manual figure
+
+    def _assert_control_lines(self):
+        """Assert DTR and RTS (a USB virtual COM port often stays silent until the host does). Best effort; the result is logged. Not a command to the meter."""
+        res, ser = getattr(self.t, '_res', None), getattr(self.t, '_ser', None)
+        try:
+            if res is not None:
+                import pyvisa.constants as c
+                for attr in (c.ResourceAttribute.asrl_dtr_state, c.ResourceAttribute.asrl_rts_state):
+                    res.set_visa_attribute(attr, c.LineState.asserted)
+            elif ser is not None:
+                ser.dtr = True
+                ser.rts = True
+            else:
+                return
+            self.log.add('--', 'DTR and RTS asserted', self.label)
+        except Exception as exc:
+            self.log.add('--', f'DTR / RTS could not be set ({exc}); continuing', self.label)
+
     def _discard_input(self, why):
         """Throw away whatever the meter has sent that nobody asked for (echo of earlier characters). Read-only on the instrument."""
         self.t.clear()
@@ -263,8 +290,16 @@ class BK5491B(Instrument):
         """Open, flush and confirm the model. There is no remote command (the serial / USB port is always the remote interface, Section 5.1)."""
         self.open(verify_model=False)
         try:
+            self._assert_control_lines()
+            time.sleep(self.OPEN_SETTLE_S)
             self.t.clear()
-            self.idn = self.identify()
+            try:
+                self.idn = self.identify()
+            except InstrumentError as exc:                       # *IDN? is a read-only query: ONE more try is allowed (the first characters may have gone while the port was still settling)
+                self.log.add('!!', f'no reply to the first *IDN? ({exc}); one more try (read-only query)', self.label)
+                self.t.clear()
+                self._since = []
+                self.idn = self.identify()
             if self.IDN_MATCH and not any(m.upper() in self.idn.upper() for m in self.IDN_MATCH):
                 raise InstrumentError(f'Unexpected DMM identification: {self.idn}')
         except Exception:

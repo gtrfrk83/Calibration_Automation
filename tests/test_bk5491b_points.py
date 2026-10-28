@@ -567,10 +567,11 @@ class RawLineReading(unittest.TestCase):
             self.assertEqual(timeout, 20000)                                    # the full timeout is restored
 
     def test_silence_raises_the_transport_error_with_the_wait(self):
-        from drivers.transport import TransportError
-        with self.assertRaises(TransportError) as cm:
+        from drivers.base import InstrumentError
+        with self.assertRaises(InstrumentError) as cm:
             self.ident(b'*IDN?\r\n')
         self.assertIn('no byte at all', str(cm.exception))
+        self.assertIn("['*IDN?']", str(cm.exception))                            # the lines that did arrive are named
 
 
 if __name__ == '__main__':
