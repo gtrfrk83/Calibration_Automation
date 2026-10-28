@@ -434,7 +434,7 @@ class OnlyThe8808A(unittest.TestCase):
         self.assertIs(E.App.MANUAL_OVERRIDE, True)
         hits = sorted(str(p.relative_to(ROOT)) for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
                       if re.search(r'^\s*MANUAL_OVERRIDE\s*=\s*True', p.read_text(encoding='utf-8'), re.M))
-        self.assertEqual(hits, ['dsb_override.py', 'dsb_runtime.py', 'fluke8808a_verification.py'], 'the 8808A and the user-built datasheet runtime (dsb_*) only')
+        self.assertEqual(hits, ['dsb_override.py', 'dsb_runtime.py', 'fluke6060a_verification.py', 'fluke8808a_verification.py'], 'the 8808A, the 6060A and the user-built datasheet runtime (dsb_*) only')
 
     def test_an_app_without_the_flag_adds_no_button_and_no_menu_entry(self):
         class Plain(MO.ManualOverrideMixin):

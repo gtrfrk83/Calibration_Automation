@@ -56,6 +56,14 @@
    "query_retry_f": 0,
    "write_f": 0
   },
+  "fluke_6060a": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
   "fluke_8808a": {
    "concat_f": 0,
    "format_f": 0,
@@ -65,6 +73,30 @@
    "write_f": 0
   },
   "fluke_8808a_cal": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "gpib_address": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "hp_8563e": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "hp_8902a": {
    "concat_f": 0,
    "format_f": 0,
    "helper_f": 0,

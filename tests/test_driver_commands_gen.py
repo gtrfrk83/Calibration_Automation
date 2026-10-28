@@ -25,7 +25,7 @@ EXPECTED = {
     'Keysight332xx': {('normal', False): 16, ('output', False): 3, ('locked', False): 5},
     'Keysight5313x': {('normal', False): 22, ('locked', False): 3, ('locked', True): 2},
     'Fluke5790B': {('normal', False): 11, ('locked', False): 2, ('locked', True): 2},
-    'Fluke96270A': {('normal', False): 11, ('output', False): 3, ('locked', False): 3, ('locked', True): 1},
+    'Fluke96270A': {('normal', False): 11, ('normal', True): 10, ('output', False): 3, ('locked', False): 3, ('locked', True): 2},      # + the 11 power-meter commands the owner asked for (PMETer subset, each read on its page; PMET:ZERO? is locked)
     'AgilentAFG': {('normal', False): 4, ('output', False): 5, ('locked', False): 4},
     'ReferenceMeter': {('normal', False): 6, ('locked', False): 3},
 }

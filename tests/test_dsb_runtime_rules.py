@@ -1069,7 +1069,7 @@ class Rule13Override(Base):
     def test_only_the_datasheet_runtime_and_the_8808a_enable_the_override(self):
         hits = sorted(str(p.relative_to(ROOT)) for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
                       if re.search(r'^\s*MANUAL_OVERRIDE\s*=\s*True', p.read_text(encoding='utf-8'), re.M))
-        self.assertEqual(hits, ['dsb_override.py', 'dsb_runtime.py', 'fluke8808a_verification.py'])
+        self.assertEqual(hits, ['dsb_override.py', 'dsb_runtime.py', 'fluke6060a_verification.py', 'fluke8808a_verification.py'])
 
 
 if __name__ == '__main__':

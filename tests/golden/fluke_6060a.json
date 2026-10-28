@@ -1,0 +1,6933 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke6060A.connect",
+   "log": [
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|--|device clear sent; RF output is switched off at once",
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC",
+    "6060A|>>|RC98",
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC",
+    "6060A|>>|CE",
+    "6060A|>>|@4",
+    "6060A|>>|II",
+    "6060A|<<|00004",
+    "6060A|>>|IO",
+    "6060A|<<|3,1,0",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000"
+   ],
+   "method": "Fluke6060A.connect",
+   "result": "returned <Fluke6060A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RC98"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "@4"
+    ],
+    [
+     "Q",
+     "II",
+     "00004"
+    ],
+    [
+     "Q",
+     "IO",
+     "3,1,0"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.identify",
+   "log": [
+    "6060A|>>|ID",
+    "6060A|<<|6060A"
+   ],
+   "method": "Fluke6060A.identify",
+   "result": "returned '6060A'",
+   "wire": [
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.read_options",
+   "log": [
+    "6060A|>>|IO",
+    "6060A|<<|3,1,0"
+   ],
+   "method": "Fluke6060A.read_options",
+   "result": "returned {'field1': 3, 'field2': 1, 'field3': 0, 'high_stability_ref': False, 'low_rate_fm': False, 'nv_memory': True, 'raw': '3,1,0', 'rear_output': False, 'rpp': False, 'sub_harmonic_ref': False}",
+   "wire": [
+    [
+     "Q",
+     "IO",
+     "3,1,0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.learn",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+   ],
+   "method": "Fluke6060A.learn",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 300000000, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.wait_valid",
+   "log": [
+    "6060A|>>|ID",
+    "6060A|<<|6060A"
+   ],
+   "method": "Fluke6060A.wait_valid",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.rejected_entries",
+   "log": [
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000"
+   ],
+   "method": "Fluke6060A.rejected_entries",
+   "result": "returned (False, 'none (000,000,000)')",
+   "wire": [
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke6060A.check_rejected",
+   "log": [
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000"
+   ],
+   "method": "Fluke6060A.check_rejected",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.uncal",
+   "log": [
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.uncal",
+   "result": "returned ((0, 0, 0), 'none (000,000,400)')",
+   "wire": [
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke6060A.check_uncal",
+   "log": [
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.check_uncal",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "rf_on=False",
+   "case": "Fluke6060A.verify[ok]",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+   ],
+   "method": "Fluke6060A.verify",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 300000000, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+    ]
+   ]
+  },
+  {
+   "call": "rf_on=True",
+   "case": "Fluke6060A.verify[mismatch]",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+   ],
+   "method": "Fluke6060A.verify",
+   "result": "raised InstrumentError: Fluke 6060A read-back refused: rf_on: asked True, learn string says False",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+    ]
+   ]
+  },
+  {
+   "call": "111.1111",
+   "case": "Fluke6060A.set_frequency",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|FR111.11110MZ",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC"
+   ],
+   "method": "Fluke6060A.set_frequency",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FR111.11110MZ"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC"
+    ]
+   ]
+  },
+  {
+   "call": "1200.0",
+   "case": "Fluke6060A.set_frequency[above range]",
+   "log": [],
+   "method": "Fluke6060A.set_frequency",
+   "result": "raised InstrumentError: 1200 MHz is outside the 6060A range 0.1 to 1050 MHz",
+   "wire": []
+  },
+  {
+   "call": "-10.0",
+   "case": "Fluke6060A.set_level",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|AP-10.0DB",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.set_level",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AP-10.0DB"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "14.0",
+   "case": "Fluke6060A.set_level[above range]",
+   "log": [],
+   "method": "Fluke6060A.set_level",
+   "result": "raised InstrumentError: 14 dBm is outside -137 to 13 dBm",
+   "wire": []
+  },
+  {
+   "call": "15.0, allow_uncal=True",
+   "case": "Fluke6060A.set_level[uncal allowed]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|AP15.0DB",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC"
+   ],
+   "method": "Fluke6060A.set_level",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 15.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AP15.0DB"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC"
+    ]
+   ]
+  },
+  {
+   "call": "'on'",
+   "case": "Fluke6060A.rf[on]",
+   "log": [
+    "6060A|>>|RO1",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC"
+   ],
+   "method": "Fluke6060A.rf",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO1"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Fluke6060A.rf[off]",
+   "log": [
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
+   ],
+   "method": "Fluke6060A.rf",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
+    ]
+   ]
+  },
+  {
+   "call": "'maybe'",
+   "case": "Fluke6060A.rf[bad text]",
+   "log": [],
+   "method": "Fluke6060A.rf",
+   "result": "raised InstrumentError: RF state 'maybe' is not on / off",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.end_point",
+   "log": [
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
+   ],
+   "method": "Fluke6060A.end_point",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
+    ]
+   ]
+  },
+  {
+   "call": "30, 'int', 400",
+   "case": "Fluke6060A.am[internal]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|MR0",
+    "6060A|>>|AM30PC",
+    "6060A|>>|AE0",
+    "6060A|>>|AI1",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.am",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12452, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': True, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "MR0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AM30PC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AE0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AI1"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "70, 'ext'",
+   "case": "Fluke6060A.am[external]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|AM70PC",
+    "6060A|>>|AI0",
+    "6060A|>>|AE1",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.am",
+   "result": "returned {'am_depth_pct': 70, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AM70PC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AI0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AE1"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "30, 'ext', input_applied=False",
+   "case": "Fluke6060A.am[external, no input applied]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|AM30PC",
+    "6060A|>>|AI0",
+    "6060A|>>|AE1",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.am",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AM30PC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AI0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AE1"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "95, 'int'",
+   "case": "Fluke6060A.am[above 90 percent]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|MR1",
+    "6060A|>>|AM95PC",
+    "6060A|>>|AE0",
+    "6060A|>>|AI1",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAMEBBAGBLKKHCAC",
+    "6060A|>>|IU",
+    "6060A|<<|020,000,400"
+   ],
+   "method": "Fluke6060A.am",
+   "result": "raised InstrumentError: Fluke 6060A output is UNCAL (AM 95 % int): 020,000,400: AM depth above 90 %",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "MR1"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AM95PC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AE0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AI1"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAMEBBAGBLKKHCAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "020,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "30, 'int', 500",
+   "case": "Fluke6060A.am[bad rate]",
+   "log": [],
+   "method": "Fluke6060A.am",
+   "result": "raised InstrumentError: The 6060A internal modulation rate is 400 or 1000 Hz, not 500",
+   "wire": []
+  },
+  {
+   "call": "5.0, 'int', 1000",
+   "case": "Fluke6060A.fm[internal]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|MR1",
+    "6060A|>>|FM5KZ",
+    "6060A|>>|FE0",
+    "6060A|>>|FI1",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.fm",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12868, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': True, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "MR1"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FM5KZ"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FE0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FI1"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "99.9, 'ext'",
+   "case": "Fluke6060A.fm[external]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|FM99.9KZ",
+    "6060A|>>|FI0",
+    "6060A|>>|FE1",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.fm",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 1092, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': True, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FM99.9KZ"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FI0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FE1"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "120.0, 'ext'",
+   "case": "Fluke6060A.fm[above range]",
+   "log": [],
+   "method": "Fluke6060A.fm",
+   "result": "raised InstrumentError: FM deviation 120 kHz is outside 0 to 99.9 kHz",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.mod_off",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|AI0",
+    "6060A|>>|AE0",
+    "6060A|>>|FI0",
+    "6060A|>>|FE0",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC"
+   ],
+   "method": "Fluke6060A.mod_off",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AI0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AE0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FI0"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FE0"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC"
+    ]
+   ]
+  },
+  {
+   "call": "3",
+   "case": "Fluke6060A.select_section[3]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|AP-12.0DB",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400"
+   ],
+   "method": "Fluke6060A.select_section",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AP-12.0DB"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ]
+   ]
+  },
+  {
+   "call": "5",
+   "case": "Fluke6060A.select_section[5]",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|>>|CE",
+    "6060A|>>|AP-12.0DB",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400",
+    "6060A|>>|CE",
+    "6060A|>>|SP84",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC",
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+   ],
+   "method": "Fluke6060A.select_section",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AP-12.0DB"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "SP84"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    ]
+   ]
+  },
+  {
+   "call": "6, rf_on=True",
+   "case": "Fluke6060A.select_section[5, RF on]",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|>>|CE",
+    "6060A|>>|AP-12.0DB",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|>>|IU",
+    "6060A|<<|000,000,400",
+    "6060A|>>|CE",
+    "6060A|>>|SP85",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
+   ],
+   "method": "Fluke6060A.select_section",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "AP-12.0DB"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    ],
+    [
+     "Q",
+     "IU",
+     "000,000,400"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "SP85"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
+    ]
+   ]
+  },
+  {
+   "call": "9",
+   "case": "Fluke6060A.select_section[bad]",
+   "log": [],
+   "method": "Fluke6060A.select_section",
+   "result": "raised InstrumentError: attenuator section 9 is not 0 to 7",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.hardware_attenuation",
+   "log": [
+    "6060A|>>|XA",
+    "6060A|<<|4"
+   ],
+   "method": "Fluke6060A.hardware_attenuation",
+   "result": "returned 4",
+   "wire": [
+    [
+     "Q",
+     "XA",
+     "4"
+    ]
+   ]
+  },
+  {
+   "call": "'freq', 1.5",
+   "case": "Fluke6060A.set_step[freq]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|FS1.50000MZ",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC"
+   ],
+   "method": "Fluke6060A.set_step",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FS1.50000MZ"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC"
+    ]
+   ]
+  },
+  {
+   "call": "'level', 2.0",
+   "case": "Fluke6060A.set_step[level]",
+   "log": [
+    "6060A|>>|CE",
+    "6060A|>>|LS2.0DB",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
+   ],
+   "method": "Fluke6060A.set_step",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "LS2.0DB"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
+    ]
+   ]
+  },
+  {
+   "call": "'freq', 2",
+   "case": "Fluke6060A.step[freq up]",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC",
+    "6060A|>>|CE",
+    "6060A|>>|FU",
+    "6060A|>>|FU",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
+   ],
+   "method": "Fluke6060A.step",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 114111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FU"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FU"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
+    ]
+   ]
+  },
+  {
+   "call": "'level', -1",
+   "case": "Fluke6060A.step[level down]",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC",
+    "6060A|>>|CE",
+    "6060A|>>|LD",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
+   ],
+   "method": "Fluke6060A.step",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -14.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28744, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 114111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'ampl'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "LD"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
+    ]
+   ]
+  },
+  {
+   "call": "'freq', 0",
+   "case": "Fluke6060A.step[zero count]",
+   "log": [],
+   "method": "Fluke6060A.step",
+   "result": "raised InstrumentError: step count must not be zero",
+   "wire": []
+  },
+  {
+   "call": "-1",
+   "case": "Fluke6060A.step_frequency",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC",
+    "6060A|>>|CE",
+    "6060A|>>|FD",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
+   ],
+   "method": "Fluke6060A.step_frequency",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -14.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 112611100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "FD"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
+    ]
+   ]
+  },
+  {
+   "call": "1",
+   "case": "Fluke6060A.step_level",
+   "log": [
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC",
+    "6060A|>>|CE",
+    "6060A|>>|LU",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC"
+   ],
+   "method": "Fluke6060A.step_level",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28744, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 112611100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'ampl'}",
+   "wire": [
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "LU"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.cleanup",
+   "log": [
+    "6060A|>>|RO0",
+    "6060A|>>|LM99",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABDAEIBBAGBLKKACAC"
+   ],
+   "method": "Fluke6060A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "LM99",
+     "FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABDAEIBBAGBLKKACAC"
+    ],
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Fluke6060A.rf[off not confirmed]",
+   "log": [
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|FLUKE 6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABHAEEBBAGBLKKIPAC"
+   ],
+   "method": "Fluke6060A.rf",
+   "result": "raised SafetyError: Fluke 6060A did not confirm RF output OFF (learn string RF bit True); check the front panel",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "FLUKE 6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABHAEEBBAGBLKKIPAC"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.end_point[off not confirmed]",
+   "log": [
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|FLUKE 6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABHAEEBBAGBLKKIPAC"
+   ],
+   "method": "Fluke6060A.end_point",
+   "result": "raised SafetyError: Fluke 6060A did not confirm RF output OFF (learn string RF bit True); check the front panel",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "FLUKE 6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABHAEEBBAGBLKKIPAC"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.cleanup[off not confirmed]",
+   "log": [
+    "6060A|>>|RO0",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABHAEEBBAGBLKKIPAC"
+   ],
+   "method": "Fluke6060A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABHAEEBBAGBLKKIPAC"
+    ],
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.reset_to_defaults",
+   "log": [
+    "6060A|>>|RC98",
+    "6060A|>>|CE",
+    "6060A|>>|IR",
+    "6060A|<<|000,000,000",
+    "6060A|>>|RO0",
+    "6060A|>>|ID",
+    "6060A|<<|6060A",
+    "6060A|>>|LM99",
+    "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC",
+    "6060A|>>|@4",
+    "6060A|>>|II",
+    "6060A|<<|00004",
+    "6060A|>>|IO",
+    "6060A|<<|3,1,0"
+   ],
+   "method": "Fluke6060A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='6060A', ok=True, exempt=False, steps=[ResetStep(name='reset (RC98)', ok=True, detail=''), ResetStep(name='clear status (CE)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='no rejected entries'), ResetStep(name='RF output OFF (RO0, read back with LM99)', ok=True, detail='RF output OFF confirmed'), ResetStep(name='interface modes (read back with II)', ok=True, detail='interface modes @4'), ResetStep(name='options (IO)', ok=True, detail=\"options '3,1,0'\")], warnings=[])",
+   "wire": [
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RC98"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "CE"
+    ],
+    [
+     "Q",
+     "IR",
+     "000,000,000"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "RO0"
+    ],
+    [
+     "Q",
+     "ID",
+     "6060A"
+    ],
+    [
+     "Q",
+     "LM99",
+     "BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
+    ],
+    [
+     "sleep",
+     0.025
+    ],
+    [
+     "W",
+     "@4"
+    ],
+    [
+     "Q",
+     "II",
+     "00004"
+    ],
+    [
+     "Q",
+     "IO",
+     "3,1,0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke6060A.connect[wrong model]",
+   "log": [
+    "6060A|>>|ID",
+    "6060A|<<|FLUKE 9999"
+   ],
+   "method": "Fluke6060A.connect",
+   "result": "raised InstrumentError: Expected Fluke 6060A but the instrument identifies as: 'FLUKE 9999'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "ID",
+     "FLUKE 9999"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.connect",
+   "log": [
+    "8902A|>>|ID",
+    "8902A|<<|HP8902A",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.connect",
+   "result": "returned <HP8902A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "ID",
+     "HP8902A"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.identify",
+   "log": [
+    "8902A|>>|ID",
+    "8902A|<<|HP8902A"
+   ],
+   "method": "HP8902A.identify",
+   "result": "returned 'HP8902A'",
+   "wire": [
+    [
+     "Q",
+     "ID",
+     "HP8902A"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.remote",
+   "log": [
+    "8902A|>>|T1"
+   ],
+   "method": "HP8902A.remote",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.status",
+   "log": [
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.status",
+   "result": "returned {'code_error': False, 'data_ready': False, 'freq_offset_change': False, 'instrument_error': False, 'limit_exceeded': False, 'recal_or_uncal': False, 'rqs': False, 'value': 0}",
+   "wire": [
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "HP8902A.check_status",
+   "log": [
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.check_status",
+   "result": "returned {'code_error': False, 'data_ready': False, 'freq_offset_change': False, 'instrument_error': False, 'limit_exceeded': False, 'recal_or_uncal': False, 'rqs': False, 'value': 0}",
+   "wire": [
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "2",
+   "case": "HP8902A.set_srq_mask",
+   "log": [
+    "8902A|>>|22.2SP",
+    "8902A|>>|22.64SP",
+    "8902A|<<|+0020000000E-07"
+   ],
+   "method": "HP8902A.set_srq_mask",
+   "result": "returned 2",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.2SP"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.64SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.measure_frequency_hz[no signal]",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M5",
+    "8902A|>>|7.1SP",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+9000009600E+01",
+    "8902A|--|serial poll -> 4"
+   ],
+   "method": "HP8902A.measure_frequency_hz",
+   "result": "raised InstrumentError: 8902A error 96: no input signal sensed (HP-IB only) (reading +9000009600E+01)",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M5"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "7.1SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+9000009600E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     4
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.measure_frequency_hz",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M5",
+    "8902A|>>|7.1SP",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0025000001E+01",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_frequency_hz",
+   "result": "returned 250000010.0",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M5"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "7.1SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0025000001E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 100",
+   "case": "HP8902A.measure_frequency_hz[100 Hz resolution]",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M5",
+    "8902A|>>|7.2SP",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0025000000E+01",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_frequency_hz",
+   "result": "returned 250000000.0",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M5"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "7.2SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0025000000E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 7",
+   "case": "HP8902A.measure_frequency_hz[bad resolution]",
+   "log": [],
+   "method": "HP8902A.measure_frequency_hz",
+   "result": "raised InstrumentError: frequency resolution 7 is not one of [None, 10, 100, 1000, 0.1]",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "HP8902A.time_base_is_external[internal]",
+   "log": [
+    "8902A|>>|15.1SP",
+    "8902A|<<|+0000000000E+00"
+   ],
+   "method": "HP8902A.time_base_is_external",
+   "result": "returned False",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "15.1SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0000000000E+00"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.time_base_is_external[external]",
+   "log": [
+    "8902A|>>|15.1SP",
+    "8902A|<<|+0010000000E-07"
+   ],
+   "method": "HP8902A.time_base_is_external",
+   "result": "returned True",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "15.1SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "'42.0'",
+   "case": "HP8902A.read_special",
+   "log": [
+    "8902A|>>|42.0SP",
+    "8902A|<<|+0023519850E-05"
+   ],
+   "method": "HP8902A.read_special",
+   "result": "returned 235.19850000000002",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "42.0SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0023519850E-05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.tuned_rf_level_dbm[recal required]",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|S4",
+    "8902A|>>|LG",
+    "8902A|>>|4.0SP",
+    "8902A|--|serial poll -> 32",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|-0049800000E-07",
+    "8902A|--|serial poll -> 32"
+   ],
+   "method": "HP8902A.tuned_rf_level_dbm",
+   "result": "raised RecalRequired: HP 8902A: RECAL / UNCAL after the tuned level reading -4.98: calibrate_tuned_level(250) at this level, then measure again",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "S4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LG"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "4.0SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     32
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     45.0
+    ],
+    [
+     "R",
+     "-0049800000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     32
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.calibrate_tuned_level",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|S4",
+    "8902A|>>|LG",
+    "8902A|>>|4.0SP",
+    "8902A|--|serial poll -> 32",
+    "8902A|>>|C1",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|-0049800000E-07",
+    "8902A|>>|C0",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.calibrate_tuned_level",
+   "result": "returned -4.9799999999999995",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "S4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LG"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "4.0SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     32
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     45.0
+    ],
+    [
+     "R",
+     "-0049800000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.tuned_rf_level_dbm",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|S4",
+    "8902A|>>|LG",
+    "8902A|>>|4.0SP",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|-0049800000E-07",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.tuned_rf_level_dbm",
+   "result": "returned -4.9799999999999995",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "S4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LG"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "4.0SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     45.0
+    ],
+    [
+     "R",
+     "-0049800000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 'peak'",
+   "case": "HP8902A.tuned_rf_level_dbm[bad detector]",
+   "log": [],
+   "method": "HP8902A.tuned_rf_level_dbm",
+   "result": "raised InstrumentError: tuned-level detector 'peak' is not one of ['sync', 'average']",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "HP8902A.zero_power_sensor",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|LN",
+    "8902A|>>|WT",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|ZR",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0010000000E-14",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.zero_power_sensor",
+   "result": "returned 1e-07",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "WT"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "ZR"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     55.0
+    ],
+    [
+     "R",
+     "+0010000000E-14"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.calibrate_power_sensor",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|LN",
+    "8902A|>>|WT",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|C1T3SC",
+    "8902A|>>|C0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0099950000E-11",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.calibrate_power_sensor",
+   "result": "returned 0.0009995",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "WT"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C1T3SC"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0099950000E-11"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.calibrate_power_sensor[sensor not on the calibrator]",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|LN",
+    "8902A|>>|WT",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|C1T3SC",
+    "8902A|>>|C0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0010000000E-14",
+    "8902A|--|serial poll -> 4"
+   ],
+   "method": "HP8902A.calibrate_power_sensor",
+   "result": "raised InstrumentError: HP 8902A reports an instrument error after power calibration (status byte 4)",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "WT"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C1T3SC"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-14"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     4
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.rf_power_dbm",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M4",
+    "8902A|>>|LG",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|-0049800000E-07",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.rf_power_dbm",
+   "result": "returned -4.9799999999999995",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LG"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "-0049800000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "98.5",
+   "case": "HP8902A.enter_reference_cal_factor",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.3SP 98.5 CF",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|37.5SP CF",
+    "8902A|<<|+0098500000E-06"
+   ],
+   "method": "HP8902A.enter_reference_cal_factor",
+   "result": "returned 98.5",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.3SP 98.5 CF"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.5SP CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0098500000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.cal_factor_count",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0010000000E-07"
+   ],
+   "method": "HP8902A.cal_factor_count",
+   "result": "returned 1",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 98.0",
+   "case": "HP8902A.enter_cal_factor",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0010000000E-07",
+    "8902A|>>|37.3SP 250 MZ 98 CF",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0020000000E-07"
+   ],
+   "method": "HP8902A.enter_cal_factor",
+   "result": "returned 2",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.3SP 250 MZ 98 CF"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.measure_am_percent",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M1",
+    "8902A|>>|D1",
+    "8902A|>>|H1",
+    "8902A|>>|L2",
+    "8902A|>>|LN",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0030050000E-06",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_am_percent",
+   "result": "returned 30.049999999999997",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "D1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "H1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "L2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0030050000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 9, 1, 2",
+   "case": "HP8902A.measure_am_percent[detector 9]",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M1",
+    "8902A|>>|D9",
+    "8902A|>>|H1",
+    "8902A|>>|L2",
+    "8902A|>>|LN",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0030050000E-06",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_am_percent",
+   "result": "returned 30.049999999999997",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "D9"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "H1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "L2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0030050000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 12",
+   "case": "HP8902A.measure_am_percent[bad detector]",
+   "log": [],
+   "method": "HP8902A.measure_am_percent",
+   "result": "raised InstrumentError: detector D12 is not one of [1, 2, 3, 4, 8, 9]",
+   "wire": []
+  },
+  {
+   "call": "250.0, 1000, 'am'",
+   "case": "HP8902A.measure_distortion[1 kHz]",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M1",
+    "8902A|>>|S2",
+    "8902A|>>|D5",
+    "8902A|>>|LN",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0050000000E-09",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_distortion",
+   "result": "returned 0.05",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "S2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "D5"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0050000000E-09"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 10000, 'am'",
+   "case": "HP8902A.measure_distortion[10 kHz refused]",
+   "log": [],
+   "method": "HP8902A.measure_distortion",
+   "result": "raised InstrumentError: distortion needs tone_hz 400 or 1000 and source 'am' or 'fm'",
+   "wire": []
+  },
+  {
+   "call": "250.0, 'am'",
+   "case": "HP8902A.measure_modulation_rate_hz",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M1",
+    "8902A|>>|S1",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0010000000E-04",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_modulation_rate_hz",
+   "result": "returned 1000.0",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "S1"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-04"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'am'",
+   "case": "HP8902A.calibrate_modulation[am]",
+   "log": [
+    "8902A|>>|M1",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|C1",
+    "8902A|>>|CF",
+    "8902A|<<|+0010002000E-05",
+    "8902A|>>|C0",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.calibrate_modulation",
+   "result": "returned 100.02000000000001",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M1"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C1"
+    ],
+    [
+     "sleep",
+     20.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "R",
+     "+0010002000E-05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.measure_fm_deviation_hz",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M2",
+    "8902A|>>|D1",
+    "8902A|>>|P0",
+    "8902A|>>|H1",
+    "8902A|>>|L2",
+    "8902A|>>|LN",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0050050000E-04",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_fm_deviation_hz",
+   "result": "returned 5005.0",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "D1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "P0"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "H1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "L2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0050050000E-04"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0, 1, 1, 2, 75",
+   "case": "HP8902A.measure_fm_deviation_hz[75 us de-emphasis]",
+   "log": [
+    "8902A|>>|250MZ",
+    "8902A|>>|M2",
+    "8902A|>>|D1",
+    "8902A|>>|P1",
+    "8902A|>>|P4",
+    "8902A|>>|H1",
+    "8902A|>>|L2",
+    "8902A|>>|LN",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|T1",
+    "8902A|>>|T3",
+    "8902A|<<|+0045275000E-04",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.measure_fm_deviation_hz",
+   "result": "returned 4527.5",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "250MZ"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "D1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "P1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "P4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "H1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "L2"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "LN"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T1"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "T3"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0045275000E-04"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'fm'",
+   "case": "HP8902A.calibrate_modulation[fm]",
+   "log": [
+    "8902A|>>|M2",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|C1",
+    "8902A|>>|CF",
+    "8902A|<<|+0010002000E-05",
+    "8902A|>>|C0",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.calibrate_modulation",
+   "result": "returned 100.02000000000001",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M2"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C1"
+    ],
+    [
+     "sleep",
+     20.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "R",
+     "+0010002000E-05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'pm'",
+   "case": "HP8902A.calibrate_modulation[bad kind]",
+   "log": [],
+   "method": "HP8902A.calibrate_modulation",
+   "result": "raised InstrumentError: calibration kind must be 'am' or 'fm'",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "HP8902A.go_local",
+   "log": [],
+   "method": "HP8902A.go_local",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.cleanup",
+   "log": [],
+   "method": "HP8902A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.reset_to_defaults",
+   "log": [
+    "8902A|>>|IP",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8902A', ok=True, exempt=False, steps=[ResetStep(name='reset (IP)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='status byte clean')], warnings=[])",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "IP"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.connect",
+   "log": [
+    "8563E|>>|ID?;",
+    "8563E|<<|HP8563E",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.connect",
+   "result": "returned <HP8563E>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "ID?;",
+     "HP8563E"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.identify",
+   "log": [
+    "8563E|>>|ID?;",
+    "8563E|<<|HP8563E"
+   ],
+   "method": "HP8563E.identify",
+   "result": "returned 'HP8563E'",
+   "wire": [
+    [
+     "Q",
+     "ID?;",
+     "HP8563E"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.read_errors",
+   "log": [
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.read_errors",
+   "result": "returned []",
+   "wire": [
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "HP8563E.check_errors",
+   "log": [
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.set_units_dbm",
+   "log": [
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM"
+   ],
+   "method": "HP8563E.set_units_dbm",
+   "result": "returned 'dBm'",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0",
+   "case": "HP8563E.set_center_hz",
+   "log": [
+    "8563E|>>|CF 250000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|250000000"
+   ],
+   "method": "HP8563E.set_center_hz",
+   "result": "returned 250000000.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 250000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "250000000"
+    ]
+   ]
+  },
+  {
+   "call": "30000000000.0",
+   "case": "HP8563E.set_center_hz[above range]",
+   "log": [],
+   "method": "HP8563E.set_center_hz",
+   "result": "raised InstrumentError: center frequency 3e+10 Hz is outside 0 to 2.65e+10 Hz (8563E)",
+   "wire": []
+  },
+  {
+   "call": "1000000.0",
+   "case": "HP8563E.set_span_hz",
+   "log": [
+    "8563E|>>|SP 1000000HZ;",
+    "8563E|>>|SP?;",
+    "8563E|<<|1000000"
+   ],
+   "method": "HP8563E.set_span_hz",
+   "result": "returned 1000000.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SP 1000000HZ;"
+    ],
+    [
+     "Q",
+     "SP?;",
+     "1000000"
+    ]
+   ]
+  },
+  {
+   "call": "200000000.0",
+   "case": "HP8563E.set_start_hz",
+   "log": [
+    "8563E|>>|FA 200000000HZ;",
+    "8563E|>>|FA?;",
+    "8563E|<<|200000000"
+   ],
+   "method": "HP8563E.set_start_hz",
+   "result": "returned 200000000.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "FA 200000000HZ;"
+    ],
+    [
+     "Q",
+     "FA?;",
+     "200000000"
+    ]
+   ]
+  },
+  {
+   "call": "300000000.0",
+   "case": "HP8563E.set_stop_hz",
+   "log": [
+    "8563E|>>|FB 300000000HZ;",
+    "8563E|>>|FB?;",
+    "8563E|<<|300000000"
+   ],
+   "method": "HP8563E.set_stop_hz",
+   "result": "returned 300000000.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "FB 300000000HZ;"
+    ],
+    [
+     "Q",
+     "FB?;",
+     "300000000"
+    ]
+   ]
+  },
+  {
+   "call": "30000.0",
+   "case": "HP8563E.set_rbw_hz",
+   "log": [
+    "8563E|>>|RB 30000HZ;",
+    "8563E|>>|RB?;",
+    "8563E|<<|30000"
+   ],
+   "method": "HP8563E.set_rbw_hz",
+   "result": "returned 30000.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RB 30000HZ;"
+    ],
+    [
+     "Q",
+     "RB?;",
+     "30000"
+    ]
+   ]
+  },
+  {
+   "call": "30000.0",
+   "case": "HP8563E.set_vbw_hz",
+   "log": [
+    "8563E|>>|VB 30000HZ;",
+    "8563E|>>|VB?;",
+    "8563E|<<|30000"
+   ],
+   "method": "HP8563E.set_vbw_hz",
+   "result": "returned 30000.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "VB 30000HZ;"
+    ],
+    [
+     "Q",
+     "VB?;",
+     "30000"
+    ]
+   ]
+  },
+  {
+   "call": "10.0",
+   "case": "HP8563E.set_reference_level_dbm",
+   "log": [
+    "8563E|>>|RL 10.00DBM;",
+    "8563E|>>|RL?;",
+    "8563E|<<|10"
+   ],
+   "method": "HP8563E.set_reference_level_dbm",
+   "result": "returned 10.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RL 10.00DBM;"
+    ],
+    [
+     "Q",
+     "RL?;",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "20",
+   "case": "HP8563E.set_attenuation_db",
+   "log": [
+    "8563E|>>|AT 20DB;",
+    "8563E|>>|AT?;",
+    "8563E|<<|20"
+   ],
+   "method": "HP8563E.set_attenuation_db",
+   "result": "returned 20.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AT 20DB;"
+    ],
+    [
+     "Q",
+     "AT?;",
+     "20"
+    ]
+   ]
+  },
+  {
+   "call": "90",
+   "case": "HP8563E.set_attenuation_db[out of range]",
+   "log": [],
+   "method": "HP8563E.set_attenuation_db",
+   "result": "raised InstrumentError: attenuation 90 dB is outside 0 to 70",
+   "wire": []
+  },
+  {
+   "call": "'POS'",
+   "case": "HP8563E.set_detector",
+   "log": [
+    "8563E|>>|DET POS;",
+    "8563E|>>|DET?;",
+    "8563E|<<|POS"
+   ],
+   "method": "HP8563E.set_detector",
+   "result": "returned 'POS'",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "DET POS;"
+    ],
+    [
+     "Q",
+     "DET?;",
+     "POS"
+    ]
+   ]
+  },
+  {
+   "call": "-90.0",
+   "case": "HP8563E.set_marker_threshold",
+   "log": [
+    "8563E|>>|MKPT -90.0DBM;",
+    "8563E|>>|MKPT?;",
+    "8563E|<<|-90"
+   ],
+   "method": "HP8563E.set_marker_threshold",
+   "result": "returned -90.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPT -90.0DBM;"
+    ],
+    [
+     "Q",
+     "MKPT?;",
+     "-90"
+    ]
+   ]
+  },
+  {
+   "call": "6.0",
+   "case": "HP8563E.set_marker_excursion",
+   "log": [
+    "8563E|>>|MKPX 6.0DB;",
+    "8563E|>>|MKPX?;",
+    "8563E|<<|6"
+   ],
+   "method": "HP8563E.set_marker_excursion",
+   "result": "returned 6.0",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPX 6.0DB;"
+    ],
+    [
+     "Q",
+     "MKPX?;",
+     "6"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.sweep_time_s",
+   "log": [
+    "8563E|>>|ST?;",
+    "8563E|<<|0.222222222"
+   ],
+   "method": "HP8563E.sweep_time_s",
+   "result": "returned 0.222222222",
+   "wire": [
+    [
+     "Q",
+     "ST?;",
+     "0.222222222"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.single_sweep",
+   "log": [
+    "8563E|>>|SNGLS;"
+   ],
+   "method": "HP8563E.single_sweep",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SNGLS;"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.take_sweep",
+   "log": [
+    "8563E|>>|ST?;",
+    "8563E|<<|0.222222222",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1"
+   ],
+   "method": "HP8563E.take_sweep",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     "ST?;",
+     "0.222222222"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.marker_to_peak",
+   "log": [
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-9.900"
+   ],
+   "method": "HP8563E.marker_to_peak",
+   "result": "returned (250000000.0, -9.9)",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "250000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-9.900"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.delta_to_next_peak",
+   "log": [
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKD;",
+    "8563E|>>|MKPK NH;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|0",
+    "8563E|>>|MKA?;",
+    "8563E|<<|0.000",
+    "8563E|>>|MKOFF ALL;"
+   ],
+   "method": "HP8563E.delta_to_next_peak",
+   "result": "returned (0.0, 0.0)",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKD;"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK NH;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "0"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "0.000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKOFF ALL;"
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0, 1000000.0, 30000.0, 30000.0, 10.0, 20, 'POS'",
+   "case": "HP8563E.configure",
+   "log": [
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM",
+    "8563E|>>|CF 250000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|SP 1000000HZ;",
+    "8563E|>>|SP?;",
+    "8563E|<<|1000000",
+    "8563E|>>|RL 10.00DBM;",
+    "8563E|>>|RL?;",
+    "8563E|<<|10",
+    "8563E|>>|AT 20DB;",
+    "8563E|>>|AT?;",
+    "8563E|<<|20",
+    "8563E|>>|RB 30000HZ;",
+    "8563E|>>|RB?;",
+    "8563E|<<|30000",
+    "8563E|>>|VB 30000HZ;",
+    "8563E|>>|VB?;",
+    "8563E|<<|30000",
+    "8563E|>>|DET POS;",
+    "8563E|>>|DET?;",
+    "8563E|<<|POS",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.configure",
+   "result": "returned {'atten_db': 20.0, 'center_hz': 250000000.0, 'rbw_hz': 30000.0, 'ref_level_dbm': 10.0, 'span_hz': 1000000.0, 'vbw_hz': 30000.0}",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 250000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "250000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SP 1000000HZ;"
+    ],
+    [
+     "Q",
+     "SP?;",
+     "1000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RL 10.00DBM;"
+    ],
+    [
+     "Q",
+     "RL?;",
+     "10"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AT 20DB;"
+    ],
+    [
+     "Q",
+     "AT?;",
+     "20"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RB 30000HZ;"
+    ],
+    [
+     "Q",
+     "RB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "VB 30000HZ;"
+    ],
+    [
+     "Q",
+     "VB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "DET POS;"
+    ],
+    [
+     "Q",
+     "DET?;",
+     "POS"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0",
+   "case": "HP8563E.measure_fundamental",
+   "log": [
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM",
+    "8563E|>>|CF 250000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|SP 1000000HZ;",
+    "8563E|>>|SP?;",
+    "8563E|<<|1000000",
+    "8563E|>>|RL 10.00DBM;",
+    "8563E|>>|RL?;",
+    "8563E|<<|10",
+    "8563E|>>|AT 20DB;",
+    "8563E|>>|AT?;",
+    "8563E|<<|20",
+    "8563E|>>|RB 30000HZ;",
+    "8563E|>>|RB?;",
+    "8563E|<<|30000",
+    "8563E|>>|VB 30000HZ;",
+    "8563E|>>|VB?;",
+    "8563E|<<|30000",
+    "8563E|>>|DET POS;",
+    "8563E|>>|DET?;",
+    "8563E|<<|POS",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0",
+    "8563E|>>|SNGLS;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-9.900",
+    "8563E|>>|MKCF;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-9.900",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.measure_fundamental",
+   "result": "returned {'freq_hz': 250000000.0, 'level_dbm': -9.9, 'settings': {'atten_db': 20.0, 'center_hz': 250000000.0, 'rbw_hz': 30000.0, 'ref_level_dbm': 10.0, 'span_hz': 1000000.0, 'vbw_hz': 30000.0}}",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 250000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "250000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SP 1000000HZ;"
+    ],
+    [
+     "Q",
+     "SP?;",
+     "1000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RL 10.00DBM;"
+    ],
+    [
+     "Q",
+     "RL?;",
+     "10"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AT 20DB;"
+    ],
+    [
+     "Q",
+     "AT?;",
+     "20"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RB 30000HZ;"
+    ],
+    [
+     "Q",
+     "RB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "VB 30000HZ;"
+    ],
+    [
+     "Q",
+     "VB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "DET POS;"
+    ],
+    [
+     "Q",
+     "DET?;",
+     "POS"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SNGLS;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "250000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-9.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKCF;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "250000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-9.900"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "400000000.0, 1000000.0",
+   "case": "HP8563E.measure_fundamental[no carrier]",
+   "log": [
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM",
+    "8563E|>>|CF 400000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|400000000",
+    "8563E|>>|SP 1000000HZ;",
+    "8563E|>>|SP?;",
+    "8563E|<<|1000000",
+    "8563E|>>|RL 10.00DBM;",
+    "8563E|>>|RL?;",
+    "8563E|<<|10",
+    "8563E|>>|AT 20DB;",
+    "8563E|>>|AT?;",
+    "8563E|<<|20",
+    "8563E|>>|RB 30000HZ;",
+    "8563E|>>|RB?;",
+    "8563E|<<|30000",
+    "8563E|>>|VB 30000HZ;",
+    "8563E|>>|VB?;",
+    "8563E|<<|30000",
+    "8563E|>>|DET POS;",
+    "8563E|>>|DET?;",
+    "8563E|<<|POS",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0",
+    "8563E|>>|SNGLS;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|400000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-110.000",
+    "8563E|>>|MKCF;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|400000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-110.000",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.measure_fundamental",
+   "result": "returned {'freq_hz': 400000000.0, 'level_dbm': -110.0, 'settings': {'atten_db': 20.0, 'center_hz': 400000000.0, 'rbw_hz': 30000.0, 'ref_level_dbm': 10.0, 'span_hz': 1000000.0, 'vbw_hz': 30000.0}}",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 400000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "400000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SP 1000000HZ;"
+    ],
+    [
+     "Q",
+     "SP?;",
+     "1000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RL 10.00DBM;"
+    ],
+    [
+     "Q",
+     "RL?;",
+     "10"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AT 20DB;"
+    ],
+    [
+     "Q",
+     "AT?;",
+     "20"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RB 30000HZ;"
+    ],
+    [
+     "Q",
+     "RB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "VB 30000HZ;"
+    ],
+    [
+     "Q",
+     "VB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "DET POS;"
+    ],
+    [
+     "Q",
+     "DET?;",
+     "POS"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SNGLS;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "400000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-110.000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKCF;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "400000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-110.000"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0, 4",
+   "case": "HP8563E.measure_harmonics",
+   "log": [
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM",
+    "8563E|>>|CF 250000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|SP 1000000HZ;",
+    "8563E|>>|SP?;",
+    "8563E|<<|1000000",
+    "8563E|>>|RL 10.00DBM;",
+    "8563E|>>|RL?;",
+    "8563E|<<|10",
+    "8563E|>>|AT 20DB;",
+    "8563E|>>|AT?;",
+    "8563E|<<|20",
+    "8563E|>>|RB 30000HZ;",
+    "8563E|>>|RB?;",
+    "8563E|<<|30000",
+    "8563E|>>|VB 30000HZ;",
+    "8563E|>>|VB?;",
+    "8563E|<<|30000",
+    "8563E|>>|DET POS;",
+    "8563E|>>|DET?;",
+    "8563E|<<|POS",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0",
+    "8563E|>>|SNGLS;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-9.900",
+    "8563E|>>|MKCF;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|250000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-9.900",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0",
+    "8563E|>>|CF 500000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|500000000",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|500000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-49.900",
+    "8563E|>>|CF 750000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|750000000",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|750000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-59.900",
+    "8563E|>>|CF 1000000000HZ;",
+    "8563E|>>|CF?;",
+    "8563E|<<|1e+09",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.05",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|1e+09",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-69.900",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.measure_harmonics",
+   "result": "returned {'dbc': [-40.0, -50.0, -60.00000000000001], 'fundamental_dbm': -9.9, 'fundamental_hz': 250000000.0, 'harmonics': [{'at_floor': False, 'dbc': -40.0, 'found': True, 'freq_hz': 500000000.0, 'level_dbm': -49.9, 'n': 2, 'target_hz': 500000000.0}, {'at_floor': False, 'dbc': -50.0, 'found': True, 'freq_hz': 750000000.0, 'level_dbm': -59.9, 'n': 3, 'target_hz': 750000000.0}, {'at_floor': False, 'dbc': -60.00000000000001, 'found': True, 'freq_hz': 1000000000.0, 'level_dbm': -69.9, 'n': 4, 'target_hz': 1000000000.0}]}",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 250000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "250000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SP 1000000HZ;"
+    ],
+    [
+     "Q",
+     "SP?;",
+     "1000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RL 10.00DBM;"
+    ],
+    [
+     "Q",
+     "RL?;",
+     "10"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AT 20DB;"
+    ],
+    [
+     "Q",
+     "AT?;",
+     "20"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RB 30000HZ;"
+    ],
+    [
+     "Q",
+     "RB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "VB 30000HZ;"
+    ],
+    [
+     "Q",
+     "VB?;",
+     "30000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "DET POS;"
+    ],
+    [
+     "Q",
+     "DET?;",
+     "POS"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SNGLS;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "250000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-9.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKCF;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "250000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-9.900"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 500000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "500000000"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "500000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-49.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 750000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "750000000"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "750000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-59.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CF 1000000000HZ;"
+    ],
+    [
+     "Q",
+     "CF?;",
+     "1e+09"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.05"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "1e+09"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-69.900"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "100000000.0, 900000000.0, 250000000.0, 3",
+   "case": "HP8563E.scan_spurs",
+   "log": [
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM",
+    "8563E|>>|RL 10.00DBM;",
+    "8563E|>>|RL?;",
+    "8563E|<<|10",
+    "8563E|>>|AT 20DB;",
+    "8563E|>>|AT?;",
+    "8563E|<<|20",
+    "8563E|>>|RB 100000HZ;",
+    "8563E|>>|RB?;",
+    "8563E|<<|100000",
+    "8563E|>>|VB 100000HZ;",
+    "8563E|>>|VB?;",
+    "8563E|<<|100000",
+    "8563E|>>|DET POS;",
+    "8563E|>>|DET?;",
+    "8563E|<<|POS",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0",
+    "8563E|>>|FA 100000000HZ;",
+    "8563E|>>|FA?;",
+    "8563E|<<|100000000",
+    "8563E|>>|FB 900000000HZ;",
+    "8563E|>>|FB?;",
+    "8563E|<<|900000000",
+    "8563E|>>|MKPT -90.0DBM;",
+    "8563E|>>|MKPT?;",
+    "8563E|<<|-90",
+    "8563E|>>|MKPX 6.0DB;",
+    "8563E|>>|MKPX?;",
+    "8563E|<<|6",
+    "8563E|>>|SNGLS;",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.16",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|MKPK HI;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|249333333",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-9.900",
+    "8563E|>>|MKPK NH;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|500000000",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-49.900",
+    "8563E|>>|MKPK NH;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|750666667",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-59.900",
+    "8563E|>>|MKPK NH;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|125333333",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-74.900",
+    "8563E|>>|MKPK NH;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|374666667",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-81.900",
+    "8563E|>>|MKPK NH;",
+    "8563E|>>|MKF?;",
+    "8563E|<<|374666667",
+    "8563E|>>|MKA?;",
+    "8563E|<<|-81.900",
+    "8563E|>>|MKOFF ALL;",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0"
+   ],
+   "method": "HP8563E.scan_spurs",
+   "result": "returned {'carrier_dbm': -9.9, 'peaks_visited': 5, 'spurs': [{'dbc': -65.0, 'freq_hz': 125333333.0, 'level_dbm': -74.9}, {'dbc': -72.0, 'freq_hz': 374666667.0, 'level_dbm': -81.9}], 'stopped': 'marker did not move to a new peak'}",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RL 10.00DBM;"
+    ],
+    [
+     "Q",
+     "RL?;",
+     "10"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AT 20DB;"
+    ],
+    [
+     "Q",
+     "AT?;",
+     "20"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "RB 100000HZ;"
+    ],
+    [
+     "Q",
+     "RB?;",
+     "100000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "VB 100000HZ;"
+    ],
+    [
+     "Q",
+     "VB?;",
+     "100000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "DET POS;"
+    ],
+    [
+     "Q",
+     "DET?;",
+     "POS"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "FA 100000000HZ;"
+    ],
+    [
+     "Q",
+     "FA?;",
+     "100000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "FB 900000000HZ;"
+    ],
+    [
+     "Q",
+     "FB?;",
+     "900000000"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPT -90.0DBM;"
+    ],
+    [
+     "Q",
+     "MKPT?;",
+     "-90"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPX 6.0DB;"
+    ],
+    [
+     "Q",
+     "MKPX?;",
+     "6"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "SNGLS;"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.16"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK HI;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "249333333"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-9.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK NH;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "500000000"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-49.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK NH;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "750666667"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-59.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK NH;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "125333333"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-74.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK NH;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "374666667"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-81.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKPK NH;"
+    ],
+    [
+     "Q",
+     "MKF?;",
+     "374666667"
+    ],
+    [
+     "Q",
+     "MKA?;",
+     "-81.900"
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "MKOFF ALL;"
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.cleanup",
+   "log": [
+    "8563E|>>|CONTS;"
+   ],
+   "method": "HP8563E.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "CONTS;"
+    ],
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8563E.reset_to_defaults",
+   "log": [
+    "8563E|>>|IP;",
+    "8563E|>>|DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|ERR?;",
+    "8563E|<<|0",
+    "8563E|>>|ST?;",
+    "8563E|<<|0.53",
+    "8563E|>>|TS;DONE?;",
+    "8563E|<<|1",
+    "8563E|>>|AUNITS DBM;",
+    "8563E|>>|AUNITS?;",
+    "8563E|<<|DBM"
+   ],
+   "method": "HP8563E.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8563E', ok=True, exempt=False, steps=[ResetStep(name='reset (IP;)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='error list empty'), ResetStep(name='sweep after IP (TS;DONE?;)', ok=True, detail='one sweep done'), ResetStep(name='amplitude units dBm (read back)', ok=True, detail='dBm')], warnings=[])",
+   "wire": [
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "IP;"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?;",
+     "0"
+    ],
+    [
+     "Q",
+     "ST?;",
+     "0.53"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "TS;DONE?;",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.02
+    ],
+    [
+     "W",
+     "AUNITS DBM;"
+    ],
+    [
+     "Q",
+     "AUNITS?;",
+     "DBM"
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0",
+   "case": "Fluke96270A.select_power_meter",
+   "log": [
+    "96270A|>>|INST PMET",
+    "96270A|>>|INST?",
+    "96270A|<<|PMETER",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|PMET:TRIG SING",
+    "96270A|>>|PMET:TRIG?",
+    "96270A|<<|SING",
+    "96270A|>>|PMET:AVER AUTO",
+    "96270A|>>|PMET:AVER?",
+    "96270A|<<|AUTO",
+    "96270A|>>|PMET:FREQ 250000000",
+    "96270A|>>|PMET:FREQ?",
+    "96270A|<<|250000000",
+    "96270A|>>|PMET:IDN?",
+    "96270A|<<|R&S,NRP40T,SIM100001,1.0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.select_power_meter",
+   "result": "returned 'R&S,NRP40T,SIM100001,1.0'",
+   "wire": [
+    [
+     "W",
+     "INST PMET"
+    ],
+    [
+     "Q",
+     "INST?",
+     "PMETER"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "W",
+     "PMET:TRIG SING"
+    ],
+    [
+     "Q",
+     "PMET:TRIG?",
+     "SING"
+    ],
+    [
+     "W",
+     "PMET:AVER AUTO"
+    ],
+    [
+     "Q",
+     "PMET:AVER?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "PMET:FREQ 250000000"
+    ],
+    [
+     "Q",
+     "PMET:FREQ?",
+     "250000000"
+    ],
+    [
+     "Q",
+     "PMET:IDN?",
+     "R&S,NRP40T,SIM100001,1.0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "1000000000.0, '8', False",
+   "case": "Fluke96270A.select_power_meter[continuous, 8 averages]",
+   "log": [
+    "96270A|>>|INST PMET",
+    "96270A|>>|INST?",
+    "96270A|<<|PMETER",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|PMET:TRIG CONT",
+    "96270A|>>|PMET:TRIG?",
+    "96270A|<<|CONT",
+    "96270A|>>|PMET:AVER 8",
+    "96270A|>>|PMET:AVER?",
+    "96270A|<<|8",
+    "96270A|>>|PMET:FREQ 1000000000",
+    "96270A|>>|PMET:FREQ?",
+    "96270A|<<|1000000000",
+    "96270A|>>|PMET:IDN?",
+    "96270A|<<|R&S,NRP40T,SIM100001,1.0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.select_power_meter",
+   "result": "returned 'R&S,NRP40T,SIM100001,1.0'",
+   "wire": [
+    [
+     "W",
+     "INST PMET"
+    ],
+    [
+     "Q",
+     "INST?",
+     "PMETER"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "W",
+     "PMET:TRIG CONT"
+    ],
+    [
+     "Q",
+     "PMET:TRIG?",
+     "CONT"
+    ],
+    [
+     "W",
+     "PMET:AVER 8"
+    ],
+    [
+     "Q",
+     "PMET:AVER?",
+     "8"
+    ],
+    [
+     "W",
+     "PMET:FREQ 1000000000"
+    ],
+    [
+     "Q",
+     "PMET:FREQ?",
+     "1000000000"
+    ],
+    [
+     "Q",
+     "PMET:IDN?",
+     "R&S,NRP40T,SIM100001,1.0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.zero",
+   "log": [
+    "96270A|>>|PMET:ZERO?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.zero",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "PMET:ZERO?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.read_dbm",
+   "log": [
+    "96270A|>>|PMET:READ?",
+    "96270A|<<|-9.9800E+00"
+   ],
+   "method": "Fluke96270A.read_dbm",
+   "result": "returned -9.98",
+   "wire": [
+    [
+     "Q",
+     "PMET:READ?",
+     "-9.9800E+00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.read_dbm[RF off]",
+   "log": [
+    "96270A|>>|PMET:READ?",
+    "96270A|<<|-9.0000E+01"
+   ],
+   "method": "Fluke96270A.read_dbm",
+   "result": "returned -90.0",
+   "wire": [
+    [
+     "Q",
+     "PMET:READ?",
+     "-9.0000E+01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.zero[failed]",
+   "log": [
+    "96270A|>>|PMET:ZERO?",
+    "96270A|<<|1",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|-221,\"Settings conflict: sensor not zeroed\""
+   ],
+   "method": "Fluke96270A.zero",
+   "result": "raised InstrumentError: 96270A power sensor zero failed: PMET:ZERO? answered '1'; error queue: -221,\"Settings conflict: sensor not zeroed\"",
+   "wire": [
+    [
+     "Q",
+     "PMET:ZERO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "-221,\"Settings conflict: sensor not zeroed\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.select_sine",
+   "log": [
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.select_sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0",
+   "case": "Fluke96270A.select_power_meter[no sensor]",
+   "log": [
+    "96270A|>>|INST PMET",
+    "96270A|>>|INST?",
+    "96270A|<<|PMETER",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|PMET:TRIG SING",
+    "96270A|>>|PMET:TRIG?",
+    "96270A|<<|SING",
+    "96270A|>>|PMET:AVER AUTO",
+    "96270A|>>|PMET:AVER?",
+    "96270A|<<|AUTO",
+    "96270A|>>|PMET:FREQ 250000000",
+    "96270A|>>|PMET:FREQ?",
+    "96270A|<<|250000000",
+    "96270A|>>|PMET:IDN?",
+    "96270A|<<|NONE,NONE,NONE,NONE"
+   ],
+   "method": "Fluke96270A.select_power_meter",
+   "result": "raised InstrumentError: 96270A has no power sensor fitted (PMET:IDN? answered 'NONE,NONE,NONE,NONE')",
+   "wire": [
+    [
+     "W",
+     "INST PMET"
+    ],
+    [
+     "Q",
+     "INST?",
+     "PMETER"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "W",
+     "PMET:TRIG SING"
+    ],
+    [
+     "Q",
+     "PMET:TRIG?",
+     "SING"
+    ],
+    [
+     "W",
+     "PMET:AVER AUTO"
+    ],
+    [
+     "Q",
+     "PMET:AVER?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "PMET:FREQ 250000000"
+    ],
+    [
+     "Q",
+     "PMET:FREQ?",
+     "250000000"
+    ],
+    [
+     "Q",
+     "PMET:IDN?",
+     "NONE,NONE,NONE,NONE"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.read_dbm[no reading]",
+   "log": [
+    "96270A|>>|PMET:READ?",
+    "96270A|<<|9.91E+37"
+   ],
+   "method": "Fluke96270A.read_dbm",
+   "result": "raised InstrumentError: 96270A has no power-meter reading (9.91E+37)",
+   "wire": [
+    [
+     "Q",
+     "PMET:READ?",
+     "9.91E+37"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.read_dbm[not plausible as dBm]",
+   "log": [
+    "96270A|>>|PMET:READ?",
+    "96270A|<<|1.0E-4"
+   ],
+   "method": "Fluke96270A.read_dbm",
+   "result": "returned 0.0001",
+   "wire": [
+    [
+     "Q",
+     "PMET:READ?",
+     "1.0E-4"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.read_dbm[below the floor]",
+   "log": [
+    "96270A|>>|PMET:READ?",
+    "96270A|<<|-300"
+   ],
+   "method": "Fluke96270A.read_dbm",
+   "result": "raised InstrumentError: 96270A power-meter reading -300 is not plausible in dBm (is the unit W? UNVERIFIED that READ? follows UNIT:POW)",
+   "wire": [
+    [
+     "Q",
+     "PMET:READ?",
+     "-300"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_6060a",
+ "schema": 1
+}

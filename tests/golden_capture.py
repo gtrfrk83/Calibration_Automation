@@ -206,7 +206,7 @@ COVERAGE = {
                              no_command=['reading_timeout', 'acal_timeout', 'acal_info']),      # pure arithmetic / tables
     },
     'reference_instruments': {
-        'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup'], no_command=[]),
+        'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup', 'select_power_meter', 'zero', 'read_dbm', 'select_sine'], no_command=[]),   # the last four: the power-meter subset (cases in the fluke_6060a fixture)
         'AgilentAFG': dict(covered=['connect', 'sine', 'square', 'output', 'cleanup'], no_command=['max_hz']),   # property
         'ReferenceMeter': dict(covered=['connect', 'frequency', 'ac_rms', 'power', 'dc'], no_command=[]),
     },
@@ -226,6 +226,8 @@ from tests import golden_53220a as _g53220a  # noqa: E402  (53210A / 53220A / 53
 COVERAGE['keysight_53220a'] = _g53220a.COVERAGE
 from tests import golden_5491b as _g5491b  # noqa: E402  (B&K 5491B driver cases)
 COVERAGE['bk_5491b'] = _g5491b.COVERAGE
+from tests import golden_6060a as _g6060a  # noqa: E402  (Fluke 6060A, HP 8902A, HP 8563E drivers and the 96270A power-meter methods)
+COVERAGE['fluke_6060a'] = _g6060a.COVERAGE
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
@@ -233,6 +235,7 @@ LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevo
 LINT_FILES.append('tektronix_tbs2000b')
 LINT_FILES.append('keysight_53220a')
 LINT_FILES.append('bk_5491b')
+LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address']
 LINT_FILES += ['tektronix_tbs1000', 'tektronix_tbs1000c']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
@@ -372,6 +375,10 @@ class RecordingTransport(Transport):
     def clear(self): self._rec('ctl', 'clear'); self.inner.clear()
     def set_timeout(self, seconds): self._rec('ctl', 'set_timeout', float(seconds)); return self.inner.set_timeout(seconds)
     def go_local(self): self._rec('ctl', 'go_local'); return self.inner.go_local()
+    def read_stb(self):                                  # serial poll (drivers/gpib_address.serial_poll): the 6060A / 8902A simulators have it, a Scripted fake does not
+        value = self.inner.read_stb()
+        self._rec('ctl', 'read_stb', int(value))
+        return value
     def set_read_termination(self, term):
         self._rec('ctl', 'set_read_termination', term)
         method = getattr(self.inner, 'set_read_termination', None)
@@ -1775,6 +1782,7 @@ DRIVER_CASES = {
 DRIVER_CASES['tektronix_tbs2000b'] = _tbs2000b.driver_cases
 DRIVER_CASES['keysight_53220a'] = _g53220a.driver_cases
 DRIVER_CASES['bk_5491b'] = _g5491b.driver_cases
+DRIVER_CASES['fluke_6060a'] = _g6060a.driver_cases
 
 
 # ==== APPEND-ONLY BLOCK, 3 Series MDO (drivers/tektronix_mdo3.py; branch tektronix-mdo3): its own fixtures tektronix_mdo3.json / engine_mdo3.json ======

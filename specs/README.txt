@@ -256,3 +256,13 @@ keysight_53220a_pv.json (kind 'counter-pv', written by build_53220a_spec.py)
 
   bk_5491b_pv.json          B&K Precision 5491B: the lab datasheet (Mudcats MDD, ATS-1042, 365 days, 55 points) reconciled with the 2831E / 5491B manual tables;
                             two selectable limit sets ('mdd' default, 'mfr'); six points (MDD #2, #3, #4, #5, #8, #21) differ and are flagged; written by build_bk_5491b_spec.py
+
+  fluke_6060a_pv.json       Fluke 6060A / 6060A-AF RF signal generator (kind 'rf-generator-pv'; written by build_fluke_6060a_spec.py). Instruction Manual Section 4A, read from the
+                            RENDERED pages 4A-3 to 4A-17 (PDF pages 117-133); every point carries its page. 470 points in 15 sections: 4A-3 power-on (1), 4A-4 synthesis (9), 4A-5 high level
+                            (96: 6 frequencies x 8 sections + 7 section errors + the sum, derived), 4A-6 mid level (40), 4A-7 -127 dBm (5), 4A-8 alternate levels (144), 4A-11 harmonics and
+                            spurs (20), 4A-12 tests 1-8 (T1..T8). Output leakage 4A-9 / 4A-10 is not built. Per point: gen{freq_mhz, level_dbm, attenuator, am, fm}, meas (freq_count,
+                            level_tuned, level_power, level_pm, harmonic, spur, am, fm, ..., derived, thd_typed), rx / pm / sa (what the measuring instrument is set to), group (hook-up:
+                            POWERON RX RXPWR PM SA EXT1K EXT10K EXT400), nominal / low / high / unit, strict_high (the manual's "<"), derive{kind section | sum, inputs, constant, level0,
+                            attenuation} (the manual's formulas, NOT Figure 4A-3), limits_651 / skip_if_651 (Option -651 low-rate FM; the -651 limits are INFERRED), typed_only (THD at 10 kHz is
+                            typed from the owner's analyzer), flags (UNVERIFIED notes), page. Top-level: constants (mid_low_freqs_mhz = 120, 244, 245, 850, 1050 by owner decision 2026-10-28),
+                            discrepancies (printed typos, each listed and never silently corrected), options.

@@ -328,7 +328,7 @@ class Registry(unittest.TestCase):
     def test_every_tunable_is_read_by_the_source_of_its_engine(self):
         files = {'truevolt': 'truevolt_verification.py', 'dacq': 'dacq_verification.py', 'fgen': 'fgen_verification.py',
                  'handheld': 'handheld_dmm.py', 'a34401': 'Procedures/Agilent_34401A.py', 'f8846a': 'Procedures/Fluke_8846A_Verification.py',
-                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py', 'k2000': 'keithley2000_verification.py', 'a34410a': 'agilent34410a_verification.py', 'a53220a': 'keysight_53220a_verification.py', 'bk5491b': 'bk5491b_verification.py', 'dsb': 'dsb_runtime.py'}
+                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py', 'k2000': 'keithley2000_verification.py', 'a34410a': 'agilent34410a_verification.py', 'a53220a': 'keysight_53220a_verification.py', 'bk5491b': 'bk5491b_verification.py', 'f6060a': 'fluke6060a_verification.py', 'dsb': 'dsb_runtime.py'}
         dynamic = ('truevolt.settle.ac_', 'dacq.settle.ac_')
         for name, t in pe.TUNABLES.items():
             src = (ROOT / files[t['engine']]).read_text(encoding='utf-8')
@@ -349,7 +349,7 @@ class Registry(unittest.TestCase):
         """Source-level guard: every procedure loads the modifications at run start, binds drivers, and skips skipped points."""
         for rel in ('truevolt_verification.py', 'dacq_verification.py', 'fgen_verification.py', 'handheld_dmm.py', 'mdo4000c_verification.py',
                     'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'Procedures/WaveSurfer_WS4104HD.py',
-                    'fluke8808a_verification.py', 'keithley2000_verification.py', 'agilent34410a_verification.py', 'keysight_53220a_verification.py', 'bk5491b_verification.py'):
+                    'fluke8808a_verification.py', 'keithley2000_verification.py', 'agilent34410a_verification.py', 'keysight_53220a_verification.py', 'bk5491b_verification.py', 'fluke6060a_verification.py'):
             src = (ROOT / rel).read_text(encoding='utf-8')
             self.assertIn('procmods_engine.ProcModsMixin', src, rel)
             self.assertIn('pm_init(', src, rel)

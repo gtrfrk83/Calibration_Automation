@@ -61,7 +61,8 @@
     "Keysight 53220A Performance Verification": "Keysight_53220A_Verification.py",
     "Keysight 53230A Performance Verification": "Keysight_53230A_Verification.py",
     "Keysight 53210A Performance Verification": "Keysight_53210A_Verification.py",
-    "B&K Precision 5491B Performance Verification (RS-232 / USB)": "BK_5491B_Verification.py"
+    "B&K Precision 5491B Performance Verification (RS-232 / USB)": "BK_5491B_Verification.py",
+    "Fluke 6060A Signal Generator Performance Verification (GPIB)": "Fluke_6060A_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -125,7 +126,8 @@
     "Keysight_53220A_Verification.py": "1",
     "Keysight_53230A_Verification.py": "1",
     "Keysight_53210A_Verification.py": "1",
-    "BK_5491B_Verification.py": "1"
+    "BK_5491B_Verification.py": "1",
+    "Fluke_6060A_Verification.py": "1"
   },
   "records": [
     [
@@ -561,6 +563,13 @@
       "5491B",
       "Digital Multimeter",
       "BK_5491B_Verification.py"
+    ],
+    [
+      "Fluke 6060A Signal Generator Performance Verification (GPIB)",
+      "Fluke",
+      "6060A",
+      "RF Signal Generator",
+      "Fluke_6060A_Verification.py"
     ]
   ],
   "FILES": {

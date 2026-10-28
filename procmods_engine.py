@@ -57,6 +57,7 @@ MODEL_IDS = {
     'f8846a': '8846A',
     'f8808a': '8808A',
     'bk5491b': '5491B',
+    'f6060a': '6060A',
     'mdo': 'MDO4000C',
     'ws': 'WS4104HD',
     'k2000': '2000',
@@ -107,6 +108,10 @@ for _key, _default, _what in (('default', 2.0, 'settle, DC volts, DC current, re
                               ('freq', 3.0, 'settle, frequency points (UNVERIFIED estimate)'), ('ohm_high', 4.0, 'settle, resistance ranges of 5 Mohm and above (UNVERIFIED estimate)'),
                               ('i20a', 6.0, 'settle, current points on the 20 A terminal (5 A and 20 A ranges; UNVERIFIED estimate)')):
     _t('bk5491b', 'settle.' + _key, _default, 0.2, 120.0, f'B&K 5491B: {_what}')
+for _key, _default, _what in (('default', 0.5, 'settle after RF ON, before the first reading (UNVERIFIED estimate; the generator itself waits for a valid output)'),
+                              ('pm', 1.0, 'settle, 96270A power-meter points (UNVERIFIED estimate)'), ('mod', 2.0, 'settle, 8902A modulation and level points (UNVERIFIED estimate)'),
+                              ('sa', 1.0, 'settle, 8563E harmonic and spur points (UNVERIFIED estimate)')):
+    _t('f6060a', 'settle.' + _key, _default, 0.2, 120.0, f'Fluke 6060A: {_what}')
 _t('k2000', 'settle.default', 2.0, 0.2, 120.0, 'Keithley 2000: settle, DC volts and other points')
 _t('k2000', 'settle.ac', 20.0, 0.2, 120.0, 'Keithley 2000: settle, AC volts and AC current (3 Hz detector bandwidth; UNVERIFIED estimate)')
 _t('k2000', 'settle.dci', 3.0, 0.2, 120.0, 'Keithley 2000: settle, DC current')

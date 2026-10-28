@@ -1,0 +1,69 @@
+{
+ "schema": 1,
+ "id": "Fluke_6060A_Verification",
+ "name": "Fluke 6060A Signal Generator Performance Verification (GPIB)",
+ "manufacturer": "Fluke",
+ "model": "6060A",
+ "category": "RF Signal Generator",
+ "version": "1",
+ "order": 77,
+ "description": "Automated performance verification of the Fluke 6060A / 6060A-AF synthesized signal generator (Instruction Manual Section 4A): power-on, synthesis, high / mid / low / alternate level, harmonics and spurs, and the eight modulation tests. HP 8902A, Fluke 96270A power meter (NRP40T, unverified), HP 8563E and an LF function generator as the measuring equipment. Output leakage (4A-9, 4A-10) is not included. Remote commands, analyzer settings and several limits' wording are flagged unverified in the point details.",
+ "launcher": "Procedures/Fluke_6060A_Verification.py",
+ "engine": [
+  "fluke6060a_verification.py"
+ ],
+ "drivers": [
+  "fluke_6060a",
+  "hp_8902a",
+  "hp_8563e",
+  "gpib_address",
+  "reference_instruments",
+  "keysight_332xx"
+ ],
+ "specs": [
+  "specs/fluke_6060a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_6060A_Verification.py",
+   "fluke6060a_verification.py",
+   "fluke6060a_view_qt.py",
+   "qtui/bench_view.py",
+   "ui_port.py",
+   "procspec.py",
+   "manual_override.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/gpib_address.py",
+   "drivers/fluke_6060a.py",
+   "drivers/hp_8902a.py",
+   "drivers/hp_8563e.py",
+   "drivers/reference_instruments.py",
+   "drivers/keysight_332xx.py"
+  ],
+  "spec": [
+   "specs/fluke_6060a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_6060A"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_6060A_Verification.py",
+  "Procedures/Fluke_6060A_Verification.procedure.json",
+  "specs/fluke_6060a_pv.json",
+  "drivers/fluke_6060a.py",
+  "drivers/hp_8902a.py",
+  "drivers/hp_8563e.py",
+  "drivers/gpib_address.py",
+  "drivers/simulated_6060a.py",
+  "drivers/simulated_8902a.py",
+  "drivers/simulated_8563e.py",
+  "drivers/simulated_96270a.py",
+  "tests/test_fluke6060a_points.py"
+ ]
+}
