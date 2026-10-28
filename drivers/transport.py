@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     import serial
-    from pyvisa.resources import MessageBasedResource, SerialInstrument
+    from pyvisa.resources import GPIBInstrument, MessageBasedResource, SerialInstrument
 
 
 class TransportError(RuntimeError):
@@ -179,10 +179,10 @@ class VisaTransport(Transport):
         if bus_of(self.address) != 'GPIB' or self._res is None:
             return
         try:
-            import pyvisa
-            op = getattr(getattr(pyvisa.constants, 'RENLineOperation', None), 'address_gtl', None) or getattr(pyvisa.constants, 'VI_GPIB_REN_ADDRESS_GTL', None)
+            from pyvisa import constants
+            op = getattr(getattr(constants, 'RENLineOperation', None), 'address_gtl', None) or getattr(constants, 'VI_GPIB_REN_ADDRESS_GTL', None)
             if op is not None:
-                self._res.control_ren(op)
+                cast('GPIBInstrument', self._res).control_ren(op)
         except Exception:
             pass
 
