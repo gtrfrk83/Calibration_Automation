@@ -651,5 +651,15 @@ class CharacterHandshake(unittest.TestCase):
         self.assertIn('did not echo', str(cm.exception))
 
 
+class EchoFragments(unittest.TestCase):
+    def test_a_left_over_piece_of_the_command_is_not_taken_as_the_reply(self):
+        from drivers.bk_5491b import BK5491B
+        self.assertTrue(BK5491B._is_echo('?', '*IDN?', []))
+        self.assertTrue(BK5491B._is_echo('IDN?', '*IDN?', []))
+        self.assertFalse(BK5491B._is_echo('5491B  Multimeter,Ver1', '*IDN?', []))
+        self.assertFalse(BK5491B._is_echo('+5.000000E+00', 'VOLT:DC:RANG?', []))
+        self.assertFalse(BK5491B._is_echo('NO ERROR!', 'SYST:ERR?', []))
+
+
 if __name__ == '__main__':
     unittest.main()

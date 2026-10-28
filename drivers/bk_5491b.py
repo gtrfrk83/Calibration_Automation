@@ -162,7 +162,9 @@ class BK5491B(Instrument):
         up = text.strip().upper()
         if not up:
             return False
-        return up == cmd.strip().upper() or any(up == c.upper() for c in earlier)
+        c = cmd.strip().upper()
+        # a whole echoed command, or a left-over piece of one (real meter: a lone '?' line came after the echo of '*IDN?'); a reply is never a piece of its own command
+        return up == c or any(up == e.upper() for e in earlier) or (len(up) <= len(c) and up in c)
 
     def _query_lines(self, cmd, log_as):
         """Send a query once and read its reply. The meter echoes every received character (Section 5.2.4 item 3) and, with the menu RETURN on, the command text on its own
