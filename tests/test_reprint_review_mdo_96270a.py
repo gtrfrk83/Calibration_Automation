@@ -153,6 +153,7 @@ class Wiring(unittest.TestCase):
                   'Procedures/Tektronix_TBS1000C_Verification.py', 'Procedures/Tektronix_TBS1000C_Verification.procedure.json',
                   'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
                   'specs/build_tbs1000c_spec.py', 'specs/tektronix_tbs1000c_pv.json', 'specs/build_tbs1000_spec.py', 'specs/tektronix_tbs1000_pv.json')
+        later += ('fluke6060a_verification.py', 'Procedures/Fluke_6060A_Verification.py', 'Procedures/Fluke_6060A_Verification.procedure.json', 'specs/build_fluke_6060a_spec.py', 'specs/fluke_6060a_pv.json')       # the Fluke 6060A procedure (new engine, launcher and sidecar)
         later += ('mdo3_verification.py', 'Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json', 'specs/README.txt',     # the 3 Series MDO procedure (branch tektronix-mdo3); not this work
                   'specs/build_mdo3_spec.py', 'specs/tektronix_mdo3_pv.json', 'specs/mdo3_reference_cmc.json')
         later += ('tbs2000b_verification.py', 'Procedures/Tektronix_TBS2000B_Verification.py', 'Procedures/Tektronix_TBS2000B_Verification.procedure.json',   # the TBS2000B procedure (branch tektronix-tbs2000b)

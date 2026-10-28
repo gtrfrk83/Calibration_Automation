@@ -263,6 +263,6 @@ keysight_53220a_pv.json (kind 'counter-pv', written by build_53220a_spec.py)
                             spurs (20), 4A-12 tests 1-8 (T1..T8). Output leakage 4A-9 / 4A-10 is not built. Per point: gen{freq_mhz, level_dbm, attenuator, am, fm}, meas (freq_count,
                             level_tuned, level_power, level_pm, harmonic, spur, am, fm, ..., derived, thd_typed), rx / pm / sa (what the measuring instrument is set to), group (hook-up:
                             POWERON RX RXPWR PM SA EXT1K EXT10K EXT400), nominal / low / high / unit, strict_high (the manual's "<"), derive{kind section | sum, inputs, constant, level0,
-                            attenuation} (the manual's formulas, NOT Figure 4A-3), limits_651 / skip_if_651 (Option -651 low-rate FM; the -651 limits are INFERRED), typed_only (THD at 10 kHz is
+                            attenuation} (the manual's formulas, NOT Figure 4A-3), typed_only (THD at 10 kHz is
                             typed from the owner's analyzer), flags (UNVERIFIED notes), page. Top-level: constants (mid_low_freqs_mhz = 120, 244, 245, 850, 1050 by owner decision 2026-10-28),
                             discrepancies (printed typos, each listed and never silently corrected), options.

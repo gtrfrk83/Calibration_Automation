@@ -3,7 +3,7 @@
 * Spec: counts per test, JSON equals the builder's output, every point has a page reference, the printed typos are flagged (never corrected silently), limits judged in Decimal with the
   manual's strict "<" where it prints one, the section-error / sum formulas.
 * Engine (the real App on the simulated bench, tests/live_editor_harness.py): every test group passes, RF is off after each point and after a failure, a failed read-back is loud and the
-  write is not repeated, Option -651 adapts the points, THD at 10 kHz is typed (and can be switched off), a typed reading is judged by the engine, the power-on test, demo mode is synthetic.
+  write is not repeated, THD at 10 kHz is typed (and can be switched off), a typed reading is judged by the engine, the power-on test, demo mode is synthetic.
 Nothing here has run on a real 6060A, and the simulators are not facts about the instruments: see the UNVERIFIED flags on the points.
 """
 import importlib.util
@@ -76,7 +76,8 @@ class SpecTests(unittest.TestCase):
         self.assertEqual([round(p['gen']['freq_mhz'], 4) for p in pts], [round(n * 111.1111, 4) for n in range(1, 10)])
         for p in pts:
             self.assertEqual((p['high'] - p['nominal'], p['nominal'] - p['low']), (10.0, 10.0))
-        self.assertTrue(any('UNVERIFIED' in f for f in pts[0]['flags']), 'the count size is flagged')
+        self.assertTrue(any('owner confirmed' in f for f in pts[0]['flags']), 'the 10 Hz count is owner-confirmed, no longer UNVERIFIED')
+        self.assertFalse(any('one count' in f and 'UNVERIFIED' in f for f in pts[0]['flags']))
 
     def test_printed_typos_are_flagged_not_corrected(self):
         text = json.dumps(SPEC['discrepancies'])
@@ -166,7 +167,6 @@ class Bench(unittest.TestCase):
         self.app.io = E.IO(dict(uut='2'), self.app.lf_model.get(), transports=trs, mods=self.app.pm_state)
         st = self.app.pm_state
         st.store, st.devmode = self.h.env.store, self.h.env.dm
-        self.app.low_rate = self.app.io.low_rate_fm
         self.app.on_options(save=False)
         return self.app.io
 
@@ -308,23 +308,15 @@ class Failures(Bench):
 
 
 class Options(Bench):
-    def test_option_651_changes_the_test_6_points_and_skips_the_ones_the_manual_skips(self):
-        self.t6.io = (3, 8, 0)
-        io = self.connect()
-        self.assertTrue(io.low_rate_fm)
-        skipped = [p for p in E.POINTS if p['unavailable']]
-        self.assertTrue(skipped and all(p.get('skip_if_651') for p in skipped))
-        changed = [p for p in E.POINTS if p.get('limits_651')]
-        self.assertTrue(changed)
-        for p in changed:
-            self.assertEqual((p['nominal'], p['low'], p['high']), (p['limits_651']['nominal'], p['limits_651']['low'], p['limits_651']['high']))
-            self.assertEqual(p['gen']['fm']['khz'], 9.99)
-        self.assertTrue(any('inferred' in f.lower() for p in changed for f in p['flags']), 'the -651 limits are flagged as inferred')
-
-    def test_without_option_651_nothing_is_changed_or_skipped(self):
-        self.connect()
-        self.assertFalse(any(p['unavailable'] for p in E.POINTS if not p.get('typed_only')))
-        self.assertTrue(all(p['gen']['fm']['khz'] == 99.9 for p in E.POINTS if p.get('limits_651')))
+    def test_there_is_no_option_651_handling_and_the_standard_deviation_points_are_all_kept(self):
+        for p in E.POINTS:
+            self.assertFalse(p.get('limits_651') or p.get('skip_if_651'), p['ref'])
+            self.assertEqual(p['unavailable'], '' if not p.get('typed_only') else p['unavailable'])
+        for ref in ('4A-12 test 6 deviation 9.99 kHz', '4A-12 test 6 deviation 0.999 kHz', '4A-12 test 7'):
+            self.assertEqual(by_ref(ref)['ref'], ref)
+        self.assertTrue(all(p['gen']['fm']['khz'] == 99.9 for p in E.POINTS if p['ref'].startswith('4A-12 test 6 ') and p['meas'] == 'fm_dev' and 'deviation' not in p['ref']))
+        src = (ROOT / 'fluke6060a_verification.py').read_text(encoding='utf-8') + (ROOT / 'specs' / 'build_fluke_6060a_spec.py').read_text(encoding='utf-8')
+        self.assertNotRegex(src, r'651|low_rate')
 
     def test_thd_at_10_khz_is_typed_with_rf_on_then_off(self):
         self.connect()

@@ -105,25 +105,17 @@ def configure(model=MODEL):
     global SPEC, POINTS
     SPEC = load_spec()
     POINTS = flatten(SPEC)
-    apply_options(POINTS, False, True)
+    apply_options(POINTS, True)
 
 
-def apply_options(points, low_rate_fm, typed_thd):
-    """What depends on the generator and the ticked boxes: Option -651 (low-rate FM, found by IO) changes the deviation and the limits of test 6 and removes the points that cannot be made
-    (the manual says to skip them); the typed THD points are left out when their box is unticked. Sets p['unavailable'] (a reason) or ''."""
+def apply_options(points, typed_thd):
+    """What depends on the ticked box: the typed THD points are left out when their box is unticked. Sets p['unavailable'] (a reason) or ''."""
     for p in points:
         base = p['_base']
         p['nominal'], p['low'], p['high'], p['description'] = base['nominal'], base['low'], base['high'], base['description']
         if base['khz'] is not None:
             p['gen']['fm']['khz'] = base['khz']
         p['unavailable'] = ''
-        if low_rate_fm and p.get('limits_651'):
-            lim = p['limits_651']
-            p['nominal'], p['low'], p['high'] = lim['nominal'], lim['low'], lim['high']
-            p['gen']['fm']['khz'] = 9.99
-            p['description'] = base['description'].replace('99.9 kHz', '9.99 kHz')
-        if low_rate_fm and p.get('skip_if_651'):
-            p['unavailable'] = 'Option -651 is installed: the manual skips this test'
         if p.get('typed_only') and not typed_thd:
             p['unavailable'] = 'THD at 10 kHz typed from your analyzer is switched off (tick the box in the settings)'
         p['error'] = float(f"{max(p['nominal'] - p['low'], p['high'] - p['nominal']):.9g}")
@@ -315,10 +307,6 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self._logged = len(lines)
         except OSError:
             pass
-
-    @property
-    def low_rate_fm(self):
-        return bool(self.gen.low_rate_fm)
 
     def after_power_cycle(self):
         """4A-3: the technician switched the 6060A off and on. Its GPIB state is the power-on one (RF ON, interface modes lost): device clear, RF OFF confirmed at once, then the full
@@ -532,7 +520,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.lf_model = port.var(s.get('lf_model', NO_LF) if s.get('lf_model', NO_LF) in LF_CHOICES else NO_LF)
         self.lf_addr = port.var(s.get('lf_addr', ''))                                  # 33210A / 33220A / 33250A as the LF source (empty: set by hand)
         self.thd_typed = port.var(bool(s.get('thd_typed', True)), 'bool')
-        self.low_rate = False                                                          # Option -651, found by IO at the connection
         self.status = port.var()
         self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
@@ -626,9 +613,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.update_shell_sections([p for p in POINTS if self.active(p)], lambda p: p['section_title'])
 
     def on_options(self, save=True):
-        """Option -651 (from IO), the typed-THD box: the point list follows. Stored readings are judged again against the limits that now apply."""
+        """The typed-THD box: the point list follows. Stored readings are judged again against the limits that now apply."""
         self.pm_revert(POINTS)
-        apply_options(POINTS, self.low_rate, bool(self.thd_typed.get()))
+        apply_options(POINTS, bool(self.thd_typed.get()))
         self.pm_apply(POINTS)
         for records in (self.found, self.left):
             for key, rec in records.items():
@@ -695,11 +682,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return
         self._set_conn(True); self._save_settings()
-        self.low_rate = self.io.low_rate_fm
         self.on_options(save=False)
         parts = [f'{MODEL}: {self.io.ident}'] + [f'{x.label}: {x.idn}' for x in (self.io.rx, self.io.sa, self.io.pm, self.io.lf) if x is not None]
         missing = [name for name, x in (('8902A', self.io.rx), ('8563E', self.io.sa), ('96270A', self.io.pm)) if x is None]
-        self.status.set('Connected: ' + self.io.ident + ('. Option -651 (low-rate FM) found: test 6 uses 9.99 kHz.' if self.low_rate else '.') + ' RF output is OFF.')
+        self.status.set('Connected: ' + self.io.ident + '.' + ' RF output is OFF.')
         port.message('info', 'Connected', '\n'.join(parts) + '\nRF output is off.' + (f'\nNot connected (empty address): {", ".join(missing)}; their points offer a typed reading.' if missing else ''))
 
     def _reset_failed(self, msg, skipped=False):
@@ -982,7 +968,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def save(self, silent=False):
         path = self._checkpoint_path()
-        path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, thd_typed=bool(self.thd_typed.get()), low_rate=self.low_rate,
+        path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, thd_typed=bool(self.thd_typed.get()),
                                         lf_model=self.lf_model.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
@@ -994,7 +980,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             if not port.ask_yes_no('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.thd_typed.set(bool(data.get('thd_typed', self.thd_typed.get())))
-        self.low_rate = bool(data.get('low_rate', self.low_rate))
         self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_options(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
@@ -1035,7 +1020,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         demo = self.any_synthetic()
         try:
             header = [('Instrument', f'Fluke {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                      ('Limits applied', 'Fluke 6060A Instruction Manual, Section 4A' + ('; Option -651' if self.low_rate else '')), ('Source', SPEC['source']['cite'])]
+                      ('Limits applied', 'Fluke 6060A Instruction Manual, Section 4A'), ('Source', SPEC['source']['cite'])]
             report_pdf.write_calibration_pdf(path, rows, header=header, demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, None),
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:

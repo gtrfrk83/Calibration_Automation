@@ -29,7 +29,7 @@ HARM_LEVEL_DBM = 13
 HARM_COUNT = 4                                                  # fundamental plus harmonics 2, 3 and 4 ("at least three harmonics wherever possible", step d)
 LEVEL_LIMIT_DB = D('1.5')                                       # 4A-5 .. 4A-8
 PM_SWITCH_DBM = -20                                             # 4A-8: levels at or above this are read as RF power (M4, 11722A sensor module), lower ones as tuned RF level (S4): UNVERIFIED choice
-COUNT_RES_HZ = 10                                               # UNVERIFIED: 'one count' of the 10 Hz frequency counter of Table 4A-1 (8902A frequency resolution 7.1SP = 10 Hz)
+COUNT_RES_HZ = 10                                               # 'one count' = 10 Hz of the frequency counter of Table 4A-1 (8902A frequency resolution 7.1SP = 10 Hz); owner confirmed 2026-10-28
 SECTIONS_4A5 = ((0, 0, 12), (1, 6, 6), (2, 12, 0), (3, 24, -12), (4, 24, -12), (5, 24, -12), (6, 24, -12), (7, 24, -12))   # (section, nominal attenuation dB, programmed dBm): Figure 4A-2
 SP_CODE = {4: 'SP83', 5: 'SP84', 6: 'SP85', 7: 'SP86'}
 RES_FM_FREQS = {                                                # test 8 (printed p. 4A-16, PDF 132)
@@ -105,7 +105,7 @@ def build_spec():
         add(s, ref=f'4A-4 #{n}', func='FREQ', meas='freq_count', description=f'Synthesis {n * 111.1111:.4f} MHz', step_index=n,
             gen=dict(freq_mhz=num(n * 111.1111), level_dbm=None), rx=dict(resolution_hz=COUNT_RES_HZ),
             **band(hz, COUNT_RES_HZ, 'Hz'),
-            flags=(['UNVERIFIED: \'one count\' is taken as the 10 Hz resolution of the Table 4A-1 counter (the manual gives no Hz figure); the 8902A reads at 10 Hz resolution (7.1SP).',
+            flags=(['One count is the 10 Hz resolution of the Table 4A-1 counter (owner confirmed 2026-10-28); the 8902A reads at 10 Hz resolution (7.1SP).',
                     'The level is not specified in 4A-4: the preset level (-10 dBm) is left unchanged (RF switched on).'] if n == 1 else [])
             + (['Points 2 to 9 are n x 111.1111 MHz: the manual prints only 111.1111, 222.2222 and 999.9999 ("etc.").'] if n == 2 else []))
     # ---- 4A-5 high level -----------------------------------------------------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ def build_spec():
         flags=['Limit as printed for rms (0.1 %); the manual also prints 0.09 % for an average detector, not used here.'])
     s = section('T6', '4A-12 Test 6: FM accuracy and distortion (external FM)', PAGES['T6'],
                 'LF generator to the 6060A MOD INPUT and a DVM: 10 kHz at 707.1 mV rms while stepping the 6060A up from 245 to 1045 MHz in 50 MHz steps (8902A FM in 0.05 to 20 kHz), then 0.4 kHz '
-                'while stepping down to 245 MHz (0.05 to 3 kHz). 99.9 kHz deviation (9.99 kHz with Option -651), 7 dBm. Limits 93 to 107 kHz and THD < 1 %.', 'EXT10K')
+                'while stepping down to 245 MHz (0.05 to 3 kHz). 99.9 kHz deviation, 7 dBm. Limits 93 to 107 kHz and THD < 1 %.', 'EXT10K')
     ups = [245 + 50 * k for k in range(17)]
     downs = list(reversed(ups))
     first = True
@@ -236,9 +236,8 @@ def build_spec():
         for fmhz in freqs:
             base = dict(gen=dict(freq_mhz=fmhz, level_dbm=7, fm=dict(khz=99.9, src='ext')), lf=dict(freq_hz=lf_hz, vrms=0.7071))
             add(s, ref=f'4A-12 test 6 {direction} {mhz_text(fmhz)}', func='FMDEV', meas='fm_dev', description=f'FM deviation, {mhz_text(fmhz)}, 99.9 kHz EXT FM at {lf_hz / 1000:g} kHz ({direction})',
-                rx=dict(detector=1, hp=1, lp=lp), nominal=99900.0, low=93000.0, high=107000.0, limits_651=dict(nominal=9990.0, low=9300.0, high=10700.0), unit='Hz', **base,
-                flags=(['Limits as printed (93 to 107 kHz). With Option -651 the deviation is 9.99 kHz and the limits are those of step l (9.3 to 10.7 kHz): the manual prints no separate -651 limits for steps f and j (inferred).',
-                        'UNVERIFIED: peak detector D1 for "peak FM"; 8902A low-pass L3 (> 20 kHz) for the 0.05 to 20 kHz bandwidth.'] if first else []))
+                rx=dict(detector=1, hp=1, lp=lp), nominal=99900.0, low=93000.0, high=107000.0, unit='Hz', **base,
+                flags=(['UNVERIFIED: peak detector D1 for "peak FM"; 8902A low-pass L3 (> 20 kHz) for the 0.05 to 20 kHz bandwidth.'] if first else []))
             if direction == 'up':
                 add(s, ref=f'4A-12 test 6 {direction} {mhz_text(fmhz)} THD', func='THD', meas='thd_typed', description=f'THD, {mhz_text(fmhz)}, EXT FM at 10 kHz (typed from a distortion analyzer)',
                     rx=dict(source='fm', tone_hz=10000), nominal=0.0, low=0.0, high=1.0, strict_high=True, unit='%', typed_only=True, **base,
@@ -247,15 +246,14 @@ def build_spec():
                 add(s, ref=f'4A-12 test 6 {direction} {mhz_text(fmhz)} THD', func='THD', meas='thd', description=f'THD, {mhz_text(fmhz)}, EXT FM at 0.4 kHz ({direction})',
                     rx=dict(source='fm', tone_hz=400), nominal=0.0, low=0.0, high=1.0, strict_high=True, unit='%', **base)
             first = False
-    for tag, khz, lo, hi, steps, skip in (('9.99 kHz', 9.99, 9300.0, 10700.0, 'step k, l', True), ('0.999 kHz', 0.999, 930.0, 1070.0, 'step m, n', False)):
+    for tag, khz, lo, hi, steps in (('9.99 kHz', 9.99, 9300.0, 10700.0, 'step k, l'), ('0.999 kHz', 0.999, 930.0, 1070.0, 'step m, n')):
         add(s, ref=f'4A-12 test 6 deviation {tag}', func='FMDEV', meas='fm_dev', description=f'FM deviation {tag} (245 MHz, EXT FM at 0.4 kHz)',
             gen=dict(freq_mhz=245, level_dbm=7, fm=dict(khz=khz, src='ext')), lf=dict(freq_hz=400.0, vrms=0.7071), rx=dict(detector=1, hp=1, lp=1),
-            nominal=khz * 1000, low=lo, high=hi, unit='Hz', skip_if_651=skip, page=f'{PAGES["T6"]} ({steps})',
-            flags=['Frequency (245 MHz) and rate (0.4 kHz) are not restated in steps k to n: the state left by step j is used (inferred).'] + (['Skipped when Option -651 is installed (the manual: "skip to step m").'] if skip else []))
+            nominal=khz * 1000, low=lo, high=hi, unit='Hz', page=f'{PAGES["T6"]} ({steps})',
+            flags=['Frequency (245 MHz) and rate (0.4 kHz) are not restated in steps k to n: the state left by step j is used (inferred).'])
     s = section('T7', '4A-12 Test 7: Incidental AM', PAGES['T7'], '50 kHz deviation, INT FM only at 1 kHz, +7 dBm, 11 MHz; 8902A peak AM in the 0.3 kHz to 3 kHz bandwidth. Limit < 1 %.', 'RX')
     add(s, ref='4A-12 test 7', func='INCAM', meas='am_depth', description='Incidental AM, 50 kHz INT FM at 1 kHz, 11 MHz, +7 dBm',
-        gen=dict(freq_mhz=11, level_dbm=7, fm=dict(khz=50.0, src='int', rate_hz=1000)), rx=dict(detector=1, hp=2, lp=1), nominal=0.0, low=0.0, high=1.0, strict_high=True, unit='%', skip_if_651=True,
-        flags=['Not possible with Option -651 (maximum deviation 9.99 kHz): skipped when the option is installed.'])
+        gen=dict(freq_mhz=11, level_dbm=7, fm=dict(khz=50.0, src='int', rate_hz=1000)), rx=dict(detector=1, hp=2, lp=1), nominal=0.0, low=0.0, high=1.0, strict_high=True, unit='%')
     s = section('T8', '4A-12 Test 8: Residual FM', PAGES['T8'], 'No modulation; 8902A rms FM, first in the 0.3 kHz to 3 kHz bandwidth, then 0.05 kHz to 15 kHz.', 'RX')
     plan = []
     for bw, h, lp_, groups in (('0.3 kHz to 3 kHz', 2, 1, (('c', 27), ('d', 13), ('e', 27))), ('0.05 kHz to 15 kHz', 1, 2, (('e', 60), ('d', 30), ('c', 60)))):
@@ -283,7 +281,6 @@ def build_spec():
             'Test 8 step a: "4 MHz" is not in any frequency list; the level is not specified (+7 dBm used).',
             'Unspecified levels: 4A-4 (preset -10 dBm), 4A-11 spurs A and B (+13 dBm), test 8 (+7 dBm).',
             '4A-11 steps l.4 and l.5 give no offsets: read as absolute frequencies.',
-            'Test 6 steps f and j print the same 93 to 107 kHz limits with Option -651 (deviation 9.99 kHz): 9.3 to 10.7 kHz used for -651.',
             '4A-9 / 4A-10 (output leakage) are not built.'],
         sections=[s for s in SECTIONS])
     return spec

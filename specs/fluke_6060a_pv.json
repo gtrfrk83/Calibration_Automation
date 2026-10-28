@@ -44,7 +44,6 @@
   "Test 8 step a: \"4 MHz\" is not in any frequency list; the level is not specified (+7 dBm used).",
   "Unspecified levels: 4A-4 (preset -10 dBm), 4A-11 spurs A and B (+13 dBm), test 8 (+7 dBm).",
   "4A-11 steps l.4 and l.5 give no offsets: read as absolute frequencies.",
-  "Test 6 steps f and j print the same 93 to 107 kHz limits with Option -651 (deviation 9.99 kHz): 9.3 to 10.7 kHz used for -651.",
   "4A-9 / 4A-10 (output leakage) are not built."
  ],
  "sections": [
@@ -98,7 +97,7 @@
      "high": 111111110.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: 'one count' is taken as the 10 Hz resolution of the Table 4A-1 counter (the manual gives no Hz figure); the 8902A reads at 10 Hz resolution (7.1SP).",
+      "One count is the 10 Hz resolution of the Table 4A-1 counter (owner confirmed 2026-10-28); the 8902A reads at 10 Hz resolution (7.1SP).",
       "The level is not specified in 4A-4: the preset level (-10 dBm) is left unchanged (RF switched on)."
      ],
      "page": "4A-3, 4A-4 / PDF 119-120",
@@ -9267,7 +9266,7 @@
    "id": "T6",
    "title": "4A-12 Test 6: FM accuracy and distortion (external FM)",
    "page": "4A-14 to 4A-16 / PDF 130-132",
-   "setup": "LF generator to the 6060A MOD INPUT and a DVM: 10 kHz at 707.1 mV rms while stepping the 6060A up from 245 to 1045 MHz in 50 MHz steps (8902A FM in 0.05 to 20 kHz), then 0.4 kHz while stepping down to 245 MHz (0.05 to 3 kHz). 99.9 kHz deviation (9.99 kHz with Option -651), 7 dBm. Limits 93 to 107 kHz and THD < 1 %.",
+   "setup": "LF generator to the 6060A MOD INPUT and a DVM: 10 kHz at 707.1 mV rms while stepping the 6060A up from 245 to 1045 MHz in 50 MHz steps (8902A FM in 0.05 to 20 kHz), then 0.4 kHz while stepping down to 245 MHz (0.05 to 3 kHz). 99.9 kHz deviation, 7 dBm. Limits 93 to 107 kHz and THD < 1 %.",
    "group": "EXT10K",
    "points": [
     {
@@ -9283,11 +9282,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 245,
@@ -9302,7 +9296,6 @@
       "vrms": 0.7071
      },
      "flags": [
-      "Limits as printed (93 to 107 kHz). With Option -651 the deviation is 9.99 kHz and the limits are those of step l (9.3 to 10.7 kHz): the manual prints no separate -651 limits for steps f and j (inferred).",
       "UNVERIFIED: peak detector D1 for \"peak FM\"; 8902A low-pass L3 (> 20 kHz) for the 0.05 to 20 kHz bandwidth."
      ],
      "page": "4A-14 to 4A-16 / PDF 130-132",
@@ -9356,11 +9349,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 295,
@@ -9424,11 +9412,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 345,
@@ -9492,11 +9475,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 395,
@@ -9560,11 +9538,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 445,
@@ -9628,11 +9601,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 495,
@@ -9696,11 +9664,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 545,
@@ -9764,11 +9727,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 595,
@@ -9832,11 +9790,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 645,
@@ -9900,11 +9853,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 695,
@@ -9968,11 +9916,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 745,
@@ -10036,11 +9979,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 795,
@@ -10104,11 +10042,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 845,
@@ -10172,11 +10105,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 895,
@@ -10240,11 +10168,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 945,
@@ -10308,11 +10231,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 995,
@@ -10376,11 +10294,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 1045,
@@ -10444,11 +10357,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 1045,
@@ -10510,11 +10418,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 995,
@@ -10576,11 +10479,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 945,
@@ -10642,11 +10540,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 895,
@@ -10708,11 +10601,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 845,
@@ -10774,11 +10662,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 795,
@@ -10840,11 +10723,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 745,
@@ -10906,11 +10784,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 695,
@@ -10972,11 +10845,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 645,
@@ -11038,11 +10906,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 595,
@@ -11104,11 +10967,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 545,
@@ -11170,11 +11028,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 495,
@@ -11236,11 +11089,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 445,
@@ -11302,11 +11150,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 395,
@@ -11368,11 +11211,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 345,
@@ -11434,11 +11272,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 295,
@@ -11500,11 +11333,6 @@
      "nominal": 99900.0,
      "low": 93000.0,
      "high": 107000.0,
-     "limits_651": {
-      "nominal": 9990.0,
-      "low": 9300.0,
-      "high": 10700.0
-     },
      "unit": "Hz",
      "gen": {
       "freq_mhz": 245,
@@ -11579,11 +11407,9 @@
      "low": 9300.0,
      "high": 10700.0,
      "unit": "Hz",
-     "skip_if_651": true,
      "page": "4A-14 to 4A-16 / PDF 130-132 (step k, l)",
      "flags": [
-      "Frequency (245 MHz) and rate (0.4 kHz) are not restated in steps k to n: the state left by step j is used (inferred).",
-      "Skipped when Option -651 is installed (the manual: \"skip to step m\")."
+      "Frequency (245 MHz) and rate (0.4 kHz) are not restated in steps k to n: the state left by step j is used (inferred)."
      ],
      "group": "EXT400",
      "section": "T6"
@@ -11614,7 +11440,6 @@
      "low": 930.0,
      "high": 1070.0,
      "unit": "Hz",
-     "skip_if_651": false,
      "page": "4A-14 to 4A-16 / PDF 130-132 (step m, n)",
      "flags": [
       "Frequency (245 MHz) and rate (0.4 kHz) are not restated in steps k to n: the state left by step j is used (inferred)."
@@ -11655,10 +11480,6 @@
      "high": 1.0,
      "strict_high": true,
      "unit": "%",
-     "skip_if_651": true,
-     "flags": [
-      "Not possible with Option -651 (maximum deviation 9.99 kHz): skipped when the option is installed."
-     ],
      "page": "4A-16 / PDF 132",
      "group": "RX",
      "section": "T7"
