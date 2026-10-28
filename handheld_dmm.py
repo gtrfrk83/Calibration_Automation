@@ -24,6 +24,7 @@ import time
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
@@ -84,7 +85,7 @@ def points_for(spec, model):
     return chosen
 
 
-def _fmt(value, unit):
+def _fmt(value, unit: str):
     number, symbol = ui.si_one(value, SYMBOL.get(unit, unit), sig=6)
     if '.' in number:
         number = number.rstrip('0').rstrip('.')
@@ -173,7 +174,7 @@ def pad_reading(p, text):
     want = 0
     for key in ('low', 'high'):
         try:
-            want = max(want, max(0, -Decimal(p[key]).as_tuple().exponent))
+            want = max(want, max(0, -cast(int, Decimal(p[key]).as_tuple().exponent)))     # cast: type only (a NaN limit's 'n' still raises TypeError here)
         except (KeyError, InvalidOperation, TypeError):
             pass
     whole, _, frac = t.partition('.')
@@ -277,8 +278,9 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if not getattr(self, '_lcomp_on', False):
             return
         self._lcomp_on = False
+        cal: Any = self.cal                         # set_lcomp exists only on the 5522A / 5520A (_lcomp_on is set only after _lcomp_for found it)
         try:
-            self.cal.set_lcomp(False)
+            cal.set_lcomp(False)
             self.cal.check_error('LCOMP OFF')
         except Exception as exc:
             self.log.add('!!', f'LCOMP was NOT confirmed OFF: {exc}', self.cal.label)
@@ -312,12 +314,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """Inductive load compensation ON for an AC current point through the 50-turn coil (5522A / 5520A: LCOMP ON, read back).  Outside the range the calibrator
         allows (below 440 Hz under 0.33 A, below 1 kHz from 0.33 A) it is not set and the reason is logged; a calibrator without LCOMP (5560A) leaves it to the
         operator (the point's group text says so)."""
-        if not self.uses_coil(p) or not hasattr(self.cal, 'set_lcomp'):
+        cal: Any = self.cal                         # set_lcomp / lcomp_allowed exist only on the 5522A / 5520A (checked by name below)
+        if not self.uses_coil(p) or not hasattr(cal, 'set_lcomp'):
             return
-        if not self.cal.lcomp_allowed(amps, hz):
+        if not cal.lcomp_allowed(amps, hz):
             self.log.add('!!', f'LCOMP not set: {hz} Hz at {amps} A is outside what the calibrator allows for compensation', self.cal.label)
             return
-        self.cal.set_lcomp(True)
+        cal.set_lcomp(True)
         self._lcomp_on = True
         self.cal.check_error(context)
 
@@ -491,6 +494,8 @@ def ask_range(parent, p, total, dial, standby_text):
 
 # ============================================================================ application
 class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engine.QueueMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+    conn_pill: Any                      # type-only: the connection chip, set by the window (handheld_dmm_view_qt.setup_window)
+
     def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None, fast_demo=False):
         self.root, self.model, self.demo = root, model, demo
         self.init_virtual(demo, fast_demo)
@@ -510,7 +515,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         self.last_high_current = None
         self.settings = ui.Settings(self.settings_name())
         self.asset, self.serial = port.var(), port.var()
-        _saved = self.settings.get('cal_mode', CAL_CHOICES[0])
+        _saved = cast(str, self.settings.get('cal_mode', CAL_CHOICES[0]))     # cast: type only (the saved choice is text)
         _saved = OLD_CAL_CHOICES.get(_saved, _saved)
         self.cal_mode = port.var(_saved if _saved in self.cal_choices() or '5520' not in _saved else CAL_CHOICES[0])   # a saved 5520A choice the picker no longer offers falls back to the default
         self.cal_addr = port.var(self.settings.get('cal_addr', 'COM9'))
@@ -696,13 +701,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def hookup_meter(self):
         return self.spec.get('options', {}).get('hookup_meter')
 
-    def group_spec(self, p):
+    def group_spec(self, p) -> dict[str, Any] | None:
         """Cable-change text and diagram for the point's group: from hookups.py (follows the calibrator choice) when the spec names a
         hookup_meter, else from the spec's own groups."""
         meter = self.hookup_meter()
         if meter and hookups.has(meter, p['group']):
             cal = hookups.calibrator_key(self.cal_mode.get())
-            plan = hookups.plan(meter, cal, p['group'], self.manual_cal)
+            plan: Any = hookups.plan(meter, cal, p['group'], self.manual_cal)     # never None here: hookups.has() was checked above
             plan['summary'] = hookups.summary(meter, cal, p['group'])
             plan['diagram'] = plan['image']
             return plan
@@ -1166,11 +1171,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return 'Set this on the calibrator and press OPERATE, then read the meter.'
         return OUTPUT_ON_NOTE + ' - allow the reading to settle, then read the meter.' if on else 'Output is in STANDBY.'
 
-    def reading_labels(self, p):
+    def reading_labels(self, p) -> dict[str, Any]:
         """Extra keyword arguments for ask_reading (a hook: user-built datasheets say 'oscilloscope' / 'measuring standard' instead of 'meter')."""
         return {}
 
-    def _fill(self, p, yesno=False, sub=0):
+    def _fill(self, p, yesno=False, sub=0) -> dict[str, Any]:
         """Virtual bench only: {'demo_fill': callable} for the 'Fill with a simulated reading' button; {} in a real run, so its windows are unchanged."""
         if not self.virtual:
             return {}
@@ -1199,7 +1204,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         if p['test'] == 'numeric':
             def validate(text):
                 judge_numeric(p, text)
-            limit = {}
+            limit: dict[str, Any] = {}
             if p.get('max_on_s'):
                 on_at = getattr(self.io, 'on_at', None) if self.io and not self.manual_cal else None
                 used = (time.monotonic() - on_at) if on_at else 0.0
@@ -1331,7 +1336,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         """Deterministic, labelled synthetic reading inside the limits."""
         if p['test'] == 'numeric':
             lo, hi = Decimal(p['low']), Decimal(p['high'])
-            places = max(-lo.as_tuple().exponent, -hi.as_tuple().exponent, 0)
+            places = max(-int(lo.as_tuple().exponent), -int(hi.as_tuple().exponent), 0)
             mid, half = (lo + hi) / 2, (hi - lo) / 2
             value = mid + half * Decimal(str(round(math.sin(p['n'] * 1.71) * 0.38, 4)))
             text = f'{value:.{places}f}'
