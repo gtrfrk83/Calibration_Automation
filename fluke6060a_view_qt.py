@@ -54,7 +54,8 @@ def build_ui(self):
     f.note('External AM / FM (tests 3 and 6): a Keysight 33210A / 33220A / 33250A set to a sine (1 kHz, 10 kHz or 0.4 kHz) at 0.7071 V rms into High Z; its output is on only for the point. '
            'Choose None, or leave the address empty, to set your own generator at each prompt.', column=1)
     f.rule()
-    self.thd_check = f.wide(H.checkbutton(None, TYPED_THD_TEXT, self.thd_typed, self.on_options))
+    self.thd_check = f.wide(H.checkbutton(None, 'Test 6: type THD at 10 kHz by hand', self.thd_typed, self.on_options))
+    f.note('The 8902A measures distortion only at 1 kHz and 400 Hz, so THD at 10 kHz is typed from your own distortion analyzer. Untick to leave those 17 points out.')
     B.find_and_test(sh, self, 'Find instruments', self.find_instruments)
 
     B.action_bar(self, sh, manual=True)

@@ -604,7 +604,12 @@ class Shell:
         self.close_drawer() if self._drawer_open else self.open_drawer()
 
     def _place_drawer(self):
-        width = min(DRAWER_MAX, max(DRAWER_MIN, self.body.width() - 40))
+        avail = max(DRAWER_MIN, self.body.width() - 40)
+        try:                                   # a form wider than the usual drawer (the 6060A's five address boxes, long port lists) widens it instead of scrolling sideways
+            need = self.drawer_body.minimumSizeHint().width() + 28          # + the vertical scroll bar
+        except Exception:
+            need = 0
+        width = min(avail, max(DRAWER_MAX, need))
         self.drawer.setGeometry(self.body.width() - width, 0, width, self.body.height())
 
     def open_drawer(self):
