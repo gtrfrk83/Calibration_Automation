@@ -59,7 +59,8 @@ WIRING = {
     'SCOPE_SINE': 'Calibrator SCOPE output (leveled sine, 50 Ω) to the oscilloscope input through the 50 Ω BNC cable and a 50 Ω feedthrough terminator at the scope input.',
     'SCOPE_MARKER': 'Calibrator SCOPE output (time marker) to the oscilloscope input with the BNC cable and a 50 Ω feedthrough terminator at the scope input.',
 }
-SYMBOL = {'ohm': 'Ω', 'V': 'V', 'A': 'A', 'F': 'F', 'Hz': 'Hz', 'C': '°C', 'degC': '°C', 'degF': '°F', 'S': 'S', '%': '%', 's': 's', 'dB': 'dB'}
+SYMBOL = {'ohm': 'Ω', 'V': 'V', 'A': 'A', 'F': 'F', 'Hz': 'Hz', 'C': '°C', 'degC': '°C', 'degF': '°F', 'S': 'S', '%': '%', 's': 's', 'dB': 'dB',
+          'FC': 'FC', 'LUX': 'lux', 'lux': 'lux', 'LAMBERT': 'La', 'La': 'La', 'uW/cm2': 'µW/cm²'}      # light meters (MDD import): never SI-prefixed (uncertainty.NO_PREFIX_UNITS)
 TEMP_BASE_UNITS = ('C', 'degC', 'degF')     # temperatures are never SI-prefixed (no 'k°C'); the calibrator always sources degrees C
 SQUARE_KINDS = ('DUTY', 'SQUARE')          # square-wave sources: applied = value (V peak-to-peak), frequency, duty (%), offset (V DC); DUTY is read as duty cycle, SQUARE as DCV (Peak Min Max)
 

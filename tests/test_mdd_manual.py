@@ -729,3 +729,35 @@ class LightMeterUncertainty(unittest.TestCase):
     def test_best_fit_is_a_light_standard(self):
         fits = mc.standard_fits(self.conv.sheet)
         self.assertIn(mc.best_standard(fits), ('A2LA-LIGHT', 'T-10A'))
+
+
+class LightMeterReport(Fix):
+    """The registered DLM-1000 light-meter sheet exports its PDF (the row builder had no symbol for FC / lux / µW/cm²: KeyError 'FC') with the A2LA-LIGHT uncertainties."""
+
+    def setUp(self):
+        super().setUp()
+        self.path = Path(__file__).resolve().parent / 'fixtures' / 'mdd_dlm1000_light_meter.mdd'
+        self.parsed = imp.parse_mdd(self.path)
+        self.conv = mc.convert(self.parsed)
+        self.h = None
+
+    def tearDown(self):
+        if self.h is not None:
+            self.h.stop()
+
+    def test_pdf_exports_with_light_units_and_uncertainty(self):
+        r = self.register(standard='A2LA-LIGHT')
+        self.assertTrue(r.ok, r.message)
+        spec = json.loads((self.us / (r.uid + '.json')).read_text())
+        self.h = H.Harness().start()
+        a = self.h.make_app(spec)
+        for p in a.points:
+            a.type_reading(p, 'y') if p['test'] != 'numeric' else a.type_reading(p, H.typed_nominal(p))
+        out = str(Path(tempfile.mkdtemp()) / 'A-100-2026-10-27.pdf')
+        d = {'technician': 'T', 'temperature': '23', 'humidity': '45', 'standards': [], 'procedure': '', 'show_tar_tur': True}
+        with mock.patch.object(report_dialog, 'ask_details', lambda parent, proc='': d), mock.patch.object(rt.hh.filedialog, 'asksaveasfilename', lambda **k: out):
+            a.export_pdf()
+        txt = subprocess.run(['pdftotext', '-layout', out, '-'], capture_output=True, text=True).stdout
+        self.assertIn('Calibration Data', txt)
+        self.assertIn('FC', txt)
+        self.assertIn('2.9', txt)                                   # 100 fc x 2.9 %
