@@ -218,6 +218,7 @@ class BK5491B(Instrument):
             self.t.write(cmd)
             return
         full = getattr(self.t, 'timeout', 10.0)
+        self.t.clear()                                           # the echo of the previous command's end character may still be waiting: it would be read as this command's first echo
         try:
             self._set_short(res, ser, self.ECHO_WAIT_S)
             for ch in cmd.strip():
@@ -230,7 +231,11 @@ class BK5491B(Instrument):
                     self.echo_seen += 1
                 else:
                     raise InstrumentError(f'{self.MODEL}: the meter did not echo {ch!r} of {cmd!r} after {self.ECHO_RESENDS + 1} tries (Section 5.2.4 item 3: check the baud rate and the cable)')
-            self._raw_write(res, ser, self._terminator().encode('ascii'))
+            end = self._terminator().encode('ascii')
+            self._raw_write(res, ser, end)
+            echo = self._raw_read1(res, ser)                     # the meter echoes the end character too (owner's probe): take it here so it is not read as part of the reply
+            if echo and echo != end:
+                self.log.add('--', f'echo of the end character was {echo!r}', self.label)
         finally:
             self._set_short(res, ser, full)
 

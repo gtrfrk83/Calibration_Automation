@@ -535,8 +535,7 @@ class RawLineReading(unittest.TestCase):
             self.d, self.timeout, self.echo = bytearray(data), 20000, bytearray()
 
         def write_raw(self, b):
-            if b != b'\n':
-                self.echo += b                                      # the meter echoes each character it receives
+            self.echo += b                                          # the meter echoes each character it receives, the end character too
 
         def read_bytes(self, n):
             if self.echo:
@@ -594,7 +593,7 @@ class CharacterHandshake(unittest.TestCase):
             if self.silent:
                 return
             if b == b'\n':
-                self.out += b'\r\n*IDN?\r\n5491B  Multimeter,Ver1\r\n'
+                self.out += b'\n*IDN?\r\n5491B  Multimeter,Ver1\r\n'      # the end character's echo, the menu echo, the reply
                 return
             if self.drop and b == self.drop:
                 self.drop = None                                    # this copy of the character is lost: no echo
@@ -734,6 +733,8 @@ class RealSerialPort(unittest.TestCase):
                             os.write(master, b'5491B  Multimeter,Ver1.4.14.06.18,124J23117\n')
                         elif cmd == 'SYST:ERR?':
                             os.write(master, b'NO ERROR!\n')
+                        elif cmd == 'TRIG:SOUR?':
+                            os.write(master, b'IMM\n')
                     else:
                         line += bytes([b])
         th = threading.Thread(target=meter, daemon=True)
@@ -745,6 +746,9 @@ class RealSerialPort(unittest.TestCase):
             d.connect()
             self.assertIn('5491B', d.idn)
             self.assertEqual(d.query('SYST:ERR?').strip(), 'NO ERROR!')
+            d.write('TRIG:SOUR IMM')                                             # owner 2026-10-28: the end character's echo of a set command was read as the next command's first echo
+            self.assertEqual(d.query('TRIG:SOUR?').strip(), 'IMM')
+            self.assertEqual(d.query('TRIG:SOUR?').strip(), 'IMM')
             d.close()
         finally:
             stop.set()
