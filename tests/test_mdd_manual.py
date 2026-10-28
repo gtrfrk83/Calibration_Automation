@@ -710,3 +710,22 @@ class LightMeterUnits(unittest.TestCase):
         self.assertTrue(any(i.code == 'unit_note' and 'Check the unit' in i.message for i in self.conv.issues))
         labels = [p.label for f in self.conv.sheet.functions if f.kind == 'UVIRR' for p in f.points]
         self.assertTrue(labels and all('�' not in x and 'µW/cm²' in x for x in labels))
+
+
+class LightMeterUncertainty(unittest.TestCase):
+    """The light points of the DLM-1000 set get an uncertainty from the A2LA light scope (A2LA-LIGHT, 2.9 % white / 5.0 % black light of reading, k = 2), no longer 'none by design'."""
+
+    def setUp(self):
+        import mdd_importer_v49 as imp
+        self.conv = mc.convert(imp.parse_mdd(Path(__file__).resolve().parent / 'fixtures' / 'mdd_dlm1000_light_meter.mdd'))
+
+    def test_light_points_are_sourced(self):
+        plan, rows, text = mc.uncertainty_preview(self.conv.sheet, 'A2LA-LIGHT')
+        self.assertEqual(plan.counts()['sourced'], 11)
+        self.assertEqual(rows[9], '2.9 FC (A2LA-LIGHT)')                  # 100 fc x 2.9 %
+        self.assertEqual(rows[12], '5.0 uW/cm2 (A2LA-LIGHT)')             # 100 uW/cm2 x 5.0 %
+        self.assertFalse(any(v == 'none by design' for n, v in rows.items() if n > 1))
+
+    def test_best_fit_is_a_light_standard(self):
+        fits = mc.standard_fits(self.conv.sheet)
+        self.assertIn(mc.best_standard(fits), ('A2LA-LIGHT', 'T-10A'))

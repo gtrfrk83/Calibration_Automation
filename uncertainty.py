@@ -259,6 +259,9 @@ def round_up(value, sig=2):
     return out if out >= value else value
 
 
+NO_PREFIX_UNITS = ('FC', 'fc', 'lux', 'lx', 'La', 'uW/cm2', '\u00b5W/cm\u00b2')
+
+
 def format_value(value, unit, sig=2):
     """Uncertainty text with SI prefix and two significant figures: 153 Ohm, 0.16 %, 40 µV.  Always rounded UP, never to nearest."""
     if value is None:
@@ -270,6 +273,9 @@ def format_value(value, unit, sig=2):
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} dB' if value else '0 dB'
     if unit in ('C', 'degC', '\u00b0C'):       # temperatures are never SI-prefixed (no 'm\u00b0C'): 0.17 \u00b0C
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} \u00b0C' if value else '0 \u00b0C'
+    if unit in NO_PREFIX_UNITS:                # light units are never SI-prefixed (no 'mFC'): 0.29 FC
+        shown = f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f}' if value else '0'
+        return f'{shown} {unit}'
     import ui_theme_core as ui
     number, symbol = ui.si_one(value, 'Ω' if unit == 'ohm' else unit, sig=sig)
     return f'{number} {symbol}'.replace('Ω', 'Ohm')

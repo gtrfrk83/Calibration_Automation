@@ -49,12 +49,15 @@ CMC_KIND_MAP = {'DCV': ('DCV',), 'DCI': ('DCI',), 'OHM': ('OHM2', 'OHM4'), 'CAP'
                 'ACFLAT': ('GEN_FLAT',)}                                                         # AC Voltage - Measure, AC Flatness relative to 1 kHz (generator flatness)
 # Kinds the suite resolves an uncertainty for TODAY: the standards matcher / handheld_dmm.has_uncertainty give a value (TEMP in degC is not in the CMC table but the
 # handheld procedures print one, so it stays).  Every other should-have kind is an ERROR until the author waives it ('not_implemented').
-RESOLVABLE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP')
+RESOLVABLE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP', 'FC', 'LUX', 'LAMBERT', 'UVIRR')
 # A MANUAL calibration (.MDD import) also resolves FREQ and PERIOD: the laboratory's 'Frequency - Measure' CMC alone, as the engines report a frequency
 # (report_pdf.point_uncertainty), once the chosen standard's sheet covers the frequency (datasheet_builder_match.Matcher.manual_frequency).  An automated sheet keeps
 # FREQ / PERIOD waived: the matcher's figure there is the standard's own frequency row, a different method that is not changed here.
 MANUAL_RESOLVABLE_KINDS = RESOLVABLE_KINDS + ('FREQ', 'PERIOD')
-EXTRA_SHOULD_HAVE = ('TEMP',)
+# Light meters (FC / LUX / LAMBERT / UVIRR): the lab's A2LA scope has a 'Light - Measure' CMC (p. 45), kept as the standards sheet A2LA-LIGHT (the Minolta T-10A working standard is the
+# other choice), so these kinds carry an uncertainty from that sheet.  Not in a2la_1888_03_cmc.json, hence listed here.
+LIGHT_KINDS = ('FC', 'LUX', 'LAMBERT', 'UVIRR')
+EXTRA_SHOULD_HAVE = ('TEMP',) + LIGHT_KINDS
 
 
 def cmc_table_keys(path=None):

@@ -621,7 +621,7 @@ STANDARD_NONE = ''                       # 'None: waive'
 NONE_LABEL = 'None: waive the uncertainty'
 # When two standards cover the same number of points the sheet's kinds decide: a handheld-multimeter sheet (DCV / ACV / DCI / ACI / ohms / capacitance / temperature) prefers the
 # 5522A, then the 5520A, then the 5560A (owner: '5522A/5520A for handheld DMM functions').  A standard outside this list comes after it, by model name.
-PREFERRED_STANDARDS = ('5522A', '5520A', '5560A')
+PREFERRED_STANDARDS = ('5522A', '5520A', '5560A', 'A2LA-LIGHT')
 
 
 @dataclass

@@ -276,6 +276,9 @@ def _rms_factor(waveform, amp_unit):
     return None
 
 
+LIGHT_KINDS = ('FC', 'LUX', 'LAMBERT', 'UVIRR')
+
+
 def stimulus(fn, p, strict_sensor=False):
     """What the standard has to source / measure for point p of function fn (a Stim)."""
     k, nom, f = fn.kind, abs(p.nominal), p.frequency
@@ -295,6 +298,8 @@ def stimulus(fn, p, strict_sensor=False):
         return Stim('OHM', nom, None, out_dir, variant={'OHM2': '2-wire', 'OHM4': '4-wire'}.get(k, ''))
     if k == 'CAP':
         return Stim('CAP', nom, None, out_dir)
+    if k in LIGHT_KINDS:                                       # light meters: the reference light level in the point's own unit (A2LA-LIGHT / T-10A rows; nothing converted)
+        return Stim(k, nom, None, out_dir)
     if k in ('FREQ', 'PERIOD'):
         freq = nom if k == 'FREQ' else (D(1) / nom)
         cov = [Stim('ACV', p.amplitude, freq, out_dir)] if p.amplitude else []
