@@ -214,7 +214,12 @@ class HP8902A(Instrument):
         try:
             raw = self.t.read()
         except TransportError as exc:
-            raise InstrumentError(f'{self.MODEL}: no reading (timeout {timeout or prev}): {exc}') from exc
+            seen = ''
+            try:
+                seen = f' Status byte after the timeout: {serial_poll(self.t)}.'
+            except Exception:                                              # noqa: BLE001 - a diagnostic only
+                pass
+            raise InstrumentError(f'{self.MODEL}: no reading (timeout {timeout or prev}): {exc}.{seen}') from exc
         finally:
             if timeout:
                 self.t.set_timeout(prev if prev is not None else self.DEFAULT_TIMEOUT)
@@ -259,6 +264,7 @@ class HP8902A(Instrument):
             self.set_address(address)
         retarget(self.t, self.address)
         self.open(verify_model=False)
+        self._line_ends()
         try:
             self.t.clear()
             time.sleep(self.RESET_SETTLE_S)
@@ -292,6 +298,19 @@ class HP8902A(Instrument):
             self.close()
             raise
         return self
+
+    def _line_ends(self):
+        """HP-IB line ends for a VISA GPIB resource: commands end with LF only (the VISA default CR+LF sends a CR the receiver may not take as a character it ignores) and a reading
+        ends at the LF of its CR LF (the end-of-line character) as well as at EOI, so a read does not wait for an EOI the receiver may not send. Transports without these
+        attributes (the simulators) are left alone. UNVERIFIED on the bench: the manual states neither."""
+        res = getattr(self.t, '_res', None)
+        if res is None:
+            return
+        for attr, value in (('write_termination', '\n'), ('read_termination', '\n')):
+            try:
+                setattr(res, attr, value)
+            except Exception:                                              # noqa: BLE001 - not every resource has them; the defaults then stay
+                pass
 
     def remote(self):
         """Put the receiver in remote: it goes remote when addressed to listen (p. 3-21 / 71); T1 (hold) is the harmless listen. No settings change."""
