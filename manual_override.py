@@ -177,10 +177,9 @@ class ManualOverrideMixin:
 
     def mo_enter_for(self, p):
         import app_settings
-        if not app_settings.manual_override_on():                   # File > Settings
-            port.message('info', 'Enter reading manually', app_settings.OFF_TEXT, parent=self.root)
-            return
         ok, why = self.mo_state(p)
+        if not app_settings.manual_override_on():                   # File > Settings
+            ok, why = False, app_settings.OFF_TEXT
         if not ok:
             port.message('info', 'Enter reading manually', why, parent=self.root)
             return
