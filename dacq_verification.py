@@ -14,6 +14,7 @@ for a hook-up diagram whenever the wiring changes and never runs unattended. Har
 import json, math, sys, threading, time
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
@@ -32,7 +33,10 @@ import procspec
 import drivers
 from drivers.keysight_dacq import channel_for, pair_channel
 
-MODEL = SPEC_PATH = SPEC = POINTS = None
+MODEL: str = ''                      # set by configure()
+SPEC_PATH: Path | None = None
+SPEC: dict[str, Any] = {}
+POINTS: list[dict[str, Any]] = []
 PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522A), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
@@ -443,9 +447,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.io: self.io.close(); self.io = None
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise drivers.InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -493,7 +504,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                  ('Manual page', p['page'])]
         if image is None:
             facts.append(('Diagram', f'not installed (expected diagrams/hook_{MODEL}_{self.cal_key}_{group}.png)'))
-        self.io.standby()
+        self.connected_io().standby()
         if p['source'] == 'none':
             return port.operator_prompt('Zero offset: physical setup required', f'Setup: {GROUP_TITLE[group]}',
                 [('Set up the input', self.setup_text(p))], facts=facts,
@@ -525,12 +536,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
             self.mo_finish(p, reading, True, lambda: self._record(p, reading, True)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
+            io = self.io
             def work():
                 try:
-                    reading = self.io.measure(p)
+                    if io is None: raise RuntimeError('Instruments are not connected.')
+                    reading = io.measure(p)
                     port.post(self.root, lambda: self._done(points, i, p, reading, key))
                 except Exception as exc:
-                    try: self.io.standby()
+                    try:
+                        if io: io.standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
                     if isinstance(err, manual_override.ReadingUnavailable): port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))     # the automatic reading failed: a typed one may replace it
