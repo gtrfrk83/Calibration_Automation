@@ -141,7 +141,9 @@ def decode_reading(text: str) -> float:
     value = (-1 if m.group(1) == '-' else 1) * int(m.group(2)) * 10.0 ** int(m.group(3))
     if value > MAX_VALUE + 1.0:
         code = round((value - MAX_VALUE) / 1000.0)
-        raise InstrumentError(f'8902A error {code}: {ERROR_TEXT.get(code, "unknown error")} (reading {text.strip()})')
+        hint = (': the receiver sees no signal at its RF input (display "--") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT'
+                if code == 96 else '')                      # owner bench 2026-10-29: error 96 came back at once with the 6060A RF off
+        raise InstrumentError(f'8902A error {code}: {ERROR_TEXT.get(code, "unknown error")}{hint} (reading {text.strip()})')
     return value
 
 
