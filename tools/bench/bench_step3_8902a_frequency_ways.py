@@ -1,18 +1,20 @@
 """BENCH STEP 3 - why the 8902A does not SEND its frequency reading (bench-first driver workflow, NOTES.md).  Owner OK: "ok step 3", 2026-10-29 07:28.
-Step 2 result: the 8902A DISPLAYED 111.11110 MHz but after T1 / T3 nothing came over the bus in 20 s (status byte 0). This step tries five ways.
+Step 2 result: the 8902A DISPLAYED 111.11110 MHz but after T1 / T3 nothing came over the bus in 20 s (status byte 0). This step tries seven ways: GET first (owner, 07:33: 'you need the GET command to retrieve the reading').
 
 THIS STEP SWITCHES THE 6060A RF OUTPUT ON (-10 dBm, 111.1111 MHz). It is switched OFF again at the end, also if anything fails or you press Ctrl+C,
 and the OFF is confirmed by reading the 6060A back.
 
 What is sent (nothing else; every write is sent once, never repeated):
   6060A (GPIB1::2):  RO0, FR111.1111MZ, AP-10DB, then RO1 after you confirm the cable; at the end RO0.  Read-only: ID, IR, IU, LM99.  NO device clear.
-  8902A (GPIB1::14): for each of five tests: IP (preset), M5 (frequency), 7.1SP or 7.0SP (10 Hz / automatic resolution), and then
+  8902A (GPIB1::14): for each of seven tests: IP (preset), M5 (frequency), 7.1SP or 7.0SP (10 Hz / automatic resolution), and then
+                       F  T1 (hold), then GET (the IEEE-488 Group Execute Trigger bus message - the owner's earlier automation used it), read
+                       G  GET alone (no T code), read
                        A  22.3SP (SRQ mask: data ready + code error, the 8902A's own setting), T1, T3, serial poll every 0.5 s up to 30 s, read
                        B  T2 (trigger without settling), read
                        C  T0 (free run), read
                        D  7.0SP automatic resolution, T1, T3, read
                        E  T1, T3, read with a 60 s wait
-                     Read-only: serial polls and the readings.  It takes about 4 minutes.
+                     Read-only: serial polls and the readings.  It takes about 5 minutes.
 Cable: 6060A RF OUTPUT -> 8902A RF INPUT, the way it is connected for test 4A-4.
 
 Run:   python bench_step3_8902a_frequency_ways.py
@@ -155,6 +157,8 @@ try:
     query(gen, '6060A', 'IU', note='UNCAL codes with RF on (000000,000000,000000 = none)')
 
     TESTS = [
+        ('F', 'T1 hold, then GET (Group Execute Trigger), read', '7.1SP', [], ['T1', 'GET'], 'read', 20000),
+        ('G', 'GET alone, read', '7.1SP', [], ['GET'], 'read', 20000),
         ('A', 'data-ready SRQ mask, T1 T3, poll up to 30 s, read', '7.1SP', ['22.3SP'], ['T1', 'T3'], 'poll', 30000),
         ('B', 'T2 trigger without settling, read', '7.1SP', [], ['T2'], 'read', 20000),
         ('C', 'T0 free run, read', '7.1SP', [], ['T0'], 'read', 20000),
@@ -174,7 +178,14 @@ try:
         time.sleep(1.0)
         poll(rx, '8902A', 'after the setup + 1 s')
         for c in trig:
-            write(rx, '8902A', c)
+            if c == 'GET':                    # the bus message, not a text: pyvisa assert_trigger() sends GET to this address on GPIB
+                try:
+                    rx.assert_trigger()
+                    event('8902A', 'GET', 'GET (Group Execute Trigger)')
+                except Exception as exc:      # noqa: BLE001
+                    event('8902A', 'GET', 'GET (Group Execute Trigger)', error=f'{type(exc).__name__}: {str(exc)[:140]}')
+            else:
+                write(rx, '8902A', c)
         polls = []
         if how == 'poll':
             t_end = time.time() + wait_ms / 1000.0
