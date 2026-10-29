@@ -681,12 +681,12 @@ class EndToEnd(unittest.TestCase):
             self.hn = H.Harness().start()
 
     def test_the_unc_unit_key_changes_nothing_for_other_specs(self):
-        for name in ('fluke_77iv_pv.json', 'fluke_87v_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json', 'fluke_365_pv.json', 'fluke_287_289_pv.json', 'klein_mm325_pv.json'):
+        for name in ('fluke_77iv_pv.json', 'fluke_80_series_v_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json', 'fluke_365_pv.json', 'fluke_287_289_pv.json', 'klein_mm325_pv.json'):
             spec = json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8'))
             self.assertFalse([s['id'] for s in spec['steps'] if 'unc_unit' in s], name)
 
     def test_other_specs_keep_the_per_point_high_voltage_question(self):
-        for name in ('fluke_77iv_pv.json', 'fluke_87v_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json'):
+        for name in ('fluke_77iv_pv.json', 'fluke_80_series_v_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json'):
             self.assertNotIn('hv_once_per_group', json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8')).get('options', {}), name)
         self.assertIs(SPEC['options']['hv_once_per_group'], True)
 

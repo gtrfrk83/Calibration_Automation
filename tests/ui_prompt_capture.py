@@ -372,7 +372,7 @@ def _run_handheld(make_harness):
     reading windows (the virtual operator).  ask_reading is recorded at the Tk level only (it has no UiPort method yet)."""
     import handheld_dmm as hh
     out = {}
-    for key, model, spec in (('77iv', '77IV', 'fluke_77iv_pv.json'), ('117', '117', 'fluke_110_series_pv.json'), ('87v', '87V', 'fluke_87v_pv.json')):
+    for key, model, spec in (('77iv', '77IV', 'fluke_77iv_pv.json'), ('117', '117', 'fluke_110_series_pv.json'), ('87v', '87V', 'fluke_80_series_v_pv.json')):
         hn = make_harness(None)
         hn.start()
         app = hh.App(hn.root, model, demo=True, spec=hh.load_spec(spec), fast_demo=False)

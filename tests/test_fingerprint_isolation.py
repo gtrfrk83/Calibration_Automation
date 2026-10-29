@@ -14,7 +14,7 @@ import procscan  # noqa: E402
 import verified as V  # noqa: E402
 from tests._pkg_helpers import make_tree  # noqa: E402
 
-IDS = ['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V', 'Keithley_2000_Verification', 'Fluke_287_Verification', 'Fluke_289_Verification']
+IDS = ['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V_Verification', 'Keithley_2000_Verification', 'Fluke_287_Verification', 'Fluke_289_Verification']
 
 
 class Isolation(unittest.TestCase):
@@ -79,49 +79,49 @@ class Isolation(unittest.TestCase):
         self.assert_only(['Fluke_113_Verification', 'Fluke_117_Verification'])
 
     def test_another_meters_hookup_data_does_not_unlock(self):
-        self.edit('hookups.py', lambda t: t.replace("name='Fluke 87V'", "name='Fluke 87V (renamed)'", 1))
-        self.assert_only(['Fluke_87V'])
-        self.reg.sync(self.entries['Fluke_87V'])
+        self.edit('hookups.py', lambda t: t.replace("name='Fluke 83V / 87V / 88V'", "name='Fluke 83V / 87V / 88V (renamed)'", 1))
+        self.assert_only(['Fluke_87V_Verification'])
+        self.reg.sync(self.entries['Fluke_87V_Verification'])
 
     def test_another_meters_hookup_caution_does_not_unlock(self):
         self.edit('hookups.py', lambda t: t.replace('The mA µA input is fused', 'The mA µA input is fused (edited)', 1))
-        self.assert_only(['Fluke_87V'])
+        self.assert_only(['Fluke_87V_Verification'])
 
     def test_hookup_code_unlocks_every_meter_that_uses_it_but_not_the_meterless_ones(self):
         self.edit('hookups.py', lambda t: t.replace("return '5522A' if ('5522' in t", "return '5522A' if ('5522' in t or 'x' in t", 1))
-        self.assert_only(['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V'])
+        self.assert_only(['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V_Verification'])
 
     def test_another_procedures_launcher_driver_and_spec_do_not_unlock(self):
-        self.edit('Procedures/Fluke_87V.py', lambda t: t + '\n# edit\n')
-        self.assert_only(['Fluke_87V'])
+        self.edit('Procedures/Fluke_87V_Verification.py', lambda t: t + '\n# edit\n')
+        self.assert_only(['Fluke_87V_Verification'])
         self.edit('drivers/keithley_2000.py', lambda t: t + '\n# edit\n')
-        self.assert_only(['Fluke_87V', 'Keithley_2000_Verification'])
-        self.edit('specs/fluke_87v_pv.json', lambda t: t.replace('{', '{"_probe": 1,', 1))
-        self.assert_only(['Fluke_87V', 'Keithley_2000_Verification'])
+        self.assert_only(['Fluke_87V_Verification', 'Keithley_2000_Verification'])
+        self.edit('specs/fluke_80_series_v_pv.json', lambda t: t.replace('{', '{"_probe": 1,', 1))
+        self.assert_only(['Fluke_87V_Verification', 'Keithley_2000_Verification'])
 
     def test_a_shared_engine_still_unlocks_everything_that_runs_on_it(self):
         self.edit('handheld_dmm.py', lambda t: t + '\n# edit\n')
-        self.assert_only(['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V', 'Fluke_287_Verification', 'Fluke_289_Verification'])
+        self.assert_only(['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V_Verification', 'Fluke_287_Verification', 'Fluke_289_Verification'])
 
     def test_a_shared_driver_still_unlocks_every_user_of_it(self):
         self.edit('drivers/fluke_5560a.py', lambda t: t + '\n# edit\n')
         self.assert_only(IDS)
 
     def test_auto_unlock_event_is_written_once_and_names_the_file(self):
-        self.edit('Procedures/Fluke_87V.py', lambda t: t + '\n# edit\n')
+        self.edit('Procedures/Fluke_87V_Verification.py', lambda t: t + '\n# edit\n')
         for _ in range(3):
             self.reg.statuses(list(self.entries.values()))
-        hist = self.reg.history('Fluke_87V.py')
+        hist = self.reg.history('Fluke_87V_Verification.py')
         self.assertEqual([h['action'] for h in hist], ['verify', 'unlock'])
         self.assertEqual(hist[-1]['who'], 'system')
-        self.assertIn('Procedures/Fluke_87V.py', hist[-1]['reason'])
+        self.assertIn('Procedures/Fluke_87V_Verification.py', hist[-1]['reason'])
         self.assertEqual(len(self.reg.history('Fluke_117_Verification.py')), 1)
 
     def test_locked_procedures_still_cannot_be_unlocked_without_a_reason_and_unlock_needs_no_passphrase(self):
         with self.assertRaises(V.VerifyError):
-            self.reg.unlock('Fluke_87V.py', 'Sam', '')
-        self.reg.unlock('Fluke_87V.py', 'Sam', 'checking the jack names')
-        self.assertEqual(self.reg.lock_reason(proc_key='Fluke_87V.py'), '')
+            self.reg.unlock('Fluke_87V_Verification.py', 'Sam', '')
+        self.reg.unlock('Fluke_87V_Verification.py', 'Sam', 'checking the jack names')
+        self.assertEqual(self.reg.lock_reason(proc_key='Fluke_87V_Verification.py'), '')
         self.assertTrue(self.reg.lock_reason(proc_key='Fluke_117_Verification.py'))
 
 

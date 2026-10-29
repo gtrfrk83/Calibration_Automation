@@ -7,7 +7,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `Procedures/`: launchers (one per instrument), checkpoints are written here at run time (git-ignored).
 - `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
 - `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
-- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 175/177/179, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A), `fluke8808a_verification.py` (Fluke 8808A bench DMM), `keithley2000_verification.py` (Keithley 2000, two-way over GPIB / RS-232), `agilent34410a_verification.py` (Keysight 34410A, two-way over GPIB / USB), `i400_verification.py` (Fluke i400 AC current clamp: calibrator selectable 5560A / 5522A / 5520A, the clamp output read by a 34410A / 34411A / 8846A / 34401A).
+- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 175/177/179, 83V/87V/88V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A), `fluke8808a_verification.py` (Fluke 8808A bench DMM), `keithley2000_verification.py` (Keithley 2000, two-way over GPIB / RS-232), `agilent34410a_verification.py` (Keysight 34410A, two-way over GPIB / USB), `i400_verification.py` (Fluke i400 AC current clamp: calibrator selectable 5560A / 5522A / 5520A, the clamp output read by a 34410A / 34411A / 8846A / 34401A).
 - `procscan.py`: procedures register themselves. `Procedures/<id>.procedure.json` (sidecar) per launcher; the Manager scans them (no hand-written list). `packages.py` / `packages_ui.py` / `tools/make_package.py`: procedure packages (zip) export / import. See 'Procedure registration and packages'.
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
@@ -16,7 +16,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `diagrams/`: hook-up PNGs. 34970A/34972A naming is in `diagrams/README_dacq.txt`, the Keithley 2000 naming in `diagrams/README_k2000.txt`, the 34410A naming in `diagrams/README_34410a.txt`.
 
 ## Procedures
-WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
+WaveSurfer WS4104HD, Fluke 83V / 87V / 88V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
 Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Fluke 77 Series IV, Fluke 175/177/179, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
 Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings), Fluke 8808A (RS-232), Keithley 2000 (GPIB / RS-232), Agilent / Keysight 34410A (GPIB / USB), Fluke 365 clamp meter and the Fluke 374 / 375 / 376 / 376-II clamp meters (automated performance verification, typed readings).
 Tektronix 3 Series MDO (MDO32 / MDO34; own engine mdo3_verification.py, see '3 Series MDO').
@@ -278,15 +278,22 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
   Vertical position / offset accuracy: not built. TBS1052: not selectable (only in the TBS1000 trigger-source table, p. 1-8: no channel count, bandwidth,
   procedure frequency or test-record row). Calibrator: the operator picks 5560A, 5522A or 5520A; the demo bench simulates the one picked (`Family.sim_cal_exact`).
 
-## Fluke 87V notes
-- Temperature 1-50 / 1-51 are read and sourced in degC. Limits follow the 87 Series V Calibration Manual (Table 3 steps 49 / 50, printed p. 11): -1.0..1.0 at 0 degC
-  and 98.0..102.0 at 100 degC (decided by the lab owner; the MDD-derived 99.0..101.0 is not used).
-- Duty cycle 1-16 (5 V p-p square, 1 kHz, 2.5 V DC offset, 50 % duty; manual Table 3 step 16, p. 9) and Peak Min/Max 1-48 / 1-49 (6 V p-p square, 2 kHz,
-  1 V DC offset: MAX 3.897..4.103 V, MIN -2.102..-1.898 V; manual Table 3 step 47, p. 11) are sourced by the calibrator as square waves. The MDD's MAX row
-  (+6 V DC source, 5.896..6.104 V) disagreed with the manual and was replaced. 5522A commands (WAVE p. 6-48, DC_OFFSET p. 6-13, DUTY p. 6-14, coupled commands
-  p. 5-28, p-p amplitude pp. 4-42 / 1-24) are marked verified; the 5560A equivalents are NOT (5560A manual not read) and the remote OUT? reply for a square wave
-  (p-p vs rms, field layout) is not documented, so the point stops if OUT? disagrees. Uncertainty / TAR / TUR are blank for these square-wave points.
-- build_87v_spec.py was edited by hand and not re-run (the MDD file is not available); fluke_87v_pv.json was changed by the same rules.
+## Fluke 83V / 87V / 88V notes (80 Series V Calibration Manual; replaces the MDD-built 87V; simulated bench only, never run on hardware or a real UI)
+- 2026-10-28, owner request: the old 87V procedure (Procedures/Fluke_87V.py, spec built from the 87V Cal Processor MDD by build_87v_spec.py) is DELETED and replaced by one procedure per
+  model in the Fluke 80 Series V Calibration Manual (Sept 2004, Rev. 4, 11/25): `Procedures/Fluke_83V_Verification.py`, `Fluke_87V_Verification.py`, `Fluke_88V_Verification.py`, one family spec
+  `specs/fluke_80_series_v_pv.json` written by `specs/build_80v_spec.py`. The launcher and Manager name changed ('Fluke 87V Guided Verification' -> 'Fluke 87V Performance Verification'): the old
+  name's verified status and asset history do not carry over.
+- Source: Table 3 "Accuracy Tests" printed pp. 9-11, read from rendered page images (pypdfium2) twice. Two Display Reading columns: '83 and 88' and '87'. Ids: '3-<step>' when one limit pair applies,
+  '3-<step>.87' / '3-<step>.83' when the columns differ. 87V 56 points, 83V 46 (no steps 2, 4, 6, 8, 45, 46 (N/A), 47 (footnote 7), 49-50 ('87 and 88 only')), 88V 50. Plus the display test (p. 7),
+  pushbutton test (p. 9) and backlight steps 51-53 as visual checks. Limits as printed, no corrections. The build checks each limit pair brackets the nominal and is symmetric (low pass filter rows excepted).
+- NOT checked against the published accuracy: the Users Manual specifications are not in the calibration manual and were not supplied.
+- Changes against the old MDD spec (the manual wins): AC volts frequency 99.93..99.97 kHz (MDD 99.94..99.96); capacitance 5 nF 4.7..5.3 nF (MDD 4.75..5.25); 9.5 uF on the 100 uF range (MDD row differed);
+  open capacitance 0.21..0.31 nF (MDD '0.21 to 31'); 33B 10 A DC added; step 15 (DC volts Hz trigger level) is now SOURCED: 3.4 V p-p square wave, 1 kHz, no offset (manual prints no offset: UNVERIFIED);
+  capacitance 5 nF uses the REL offset prompt (footnote 5); HIGH VOLTAGE confirmation from 30 V (was 60 V: the meter's own high-voltage indicator, Table 2 item F).
+- Not built: the 88V inductive pickup test (pp. 11-14: function generator burst, oscilloscope). The calibration ADJUSTMENT (Table 4) is not built.
+- UNVERIFIED (confirm on the real meters): dial positions / yellow-button sequence (the manual has no dial figure; names are the 'Test Function' column); the 83V / 88V jack layout (taken as the 87V's;
+  hook-up diagrams are the existing hook_fluke87v_* PNGs, drawn as an 87V); which key enters Peak Min Max; the 5560A square-wave commands (unchanged from the old 87V: WAVE / DUTY / DC_OFFSET not verified on the 5560A).
+- Square-wave and temperature points keep the old 87V mechanisms (compound WAVE/OUT/DC_OFFSET line, DUTY, read-backs, WAVE SINE restored; TEMP in degC). Tests: `tests/test_80v_points.py`.
 
 ## Fluke 77 Series IV notes (branch `fluke-77`; checked on the simulated bench only, never run on hardware or a real UI)
 - Source: Model 77 Series IV Calibration Information (20 pp.), Table 2 Performance Tests, printed pp. 12-13 (35 steps); spec table pp. 4-6. Limits were read from rendered page images (260 dpi) twice;

@@ -56,16 +56,16 @@ class HandheldFit(unittest.TestCase):
                     self.assertTrue(o.offered, o.text)
 
     def test_87v_not_offered_square_wave_points_named(self):
-        o = handheld_offer('fluke_87v_pv.json', '87V')
+        o = handheld_offer('fluke_80_series_v_pv.json', '87V')
         self.assertFalse(o.offered)
-        self.assertEqual(sorted(r.label.split(':')[0] for r, _v in o.fit.excluded), ['1-16', '1-48', '1-49'])
+        self.assertEqual(sorted(r.label.split(':')[0] for r, _v in o.fit.excluded), ['3-16', '3-47MAX.87', '3-47MIN.87'])
         for _r, v in o.fit.excluded:
             self.assertIn('square-wave', v.reason)
         self.assertIn('NOT offered', o.text)
-        self.assertIn('1-16', o.tooltip)
+        self.assertIn('3-16', o.tooltip)
 
     def test_picker_values_follow_the_offer(self):
-        self.assertEqual(cf.picker_values(['a', 'b'], {'b': handheld_offer('fluke_87v_pv.json', '87V')}), ['a'])
+        self.assertEqual(cf.picker_values(['a', 'b'], {'b': handheld_offer('fluke_80_series_v_pv.json', '87V')}), ['a'])
         self.assertEqual(cf.picker_values(['a', 'b'], {'b': handheld_offer('fluke_77iv_pv.json', '77IV')}), ['a', 'b'])
 
 
@@ -141,7 +141,7 @@ class HandheldPickerChoices(unittest.TestCase):
         class On:
             cal_offer = handheld_offer('fluke_77iv_pv.json', '77IV')
         class Off:
-            cal_offer = handheld_offer('fluke_87v_pv.json', '87V')
+            cal_offer = handheld_offer('fluke_80_series_v_pv.json', '87V')
         on, off = h.App.cal_choices(On), h.App.cal_choices(Off)
         self.assertEqual(off, list(h.CAL_CHOICES))
         self.assertIn(h.CAL_5520A_AUTO, on)

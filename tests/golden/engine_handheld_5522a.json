@@ -3994,8 +3994,8 @@
    ]
   },
   {
-   "call": "{'applied': {'duty': 50.0, 'frequency': 1000.0, 'offset': 2.5, 'value': 5.0}, 'base_unit': '%', 'display_unit': '%', 'factor': 1.0, 'group': 'VOHM', 'high': '50.3', 'id': '1-16', 'kind': 'DUTY', 'low': '49.7', 'models': ['87V'], 'n': 16, 'nominal': 50.0, 'note': 'The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (manual Table 3 step 16, p. 9).', 'range': '6 V', 'section': 'DC volts duty cycle', 'step': 16, 'switch': 'Hz  (duty cycle, DC volts input)', 'table': '1', 'test': 'numeric'}",
-   "case": "handheld_dmm.IO.apply[87V DUTY#16]",
+   "call": "{'applied': {'duty': 50.0, 'frequency': 1000.0, 'offset': 2.5, 'value': 5.0}, 'base_unit': '%', 'display_unit': '%', 'factor': 1.0, 'group': 'VOHM', 'high': '50.3', 'id': '3-16', 'kind': 'DUTY', 'low': '49.7', 'models': ['83V', '87V', '88V'], 'n': 18, 'nominal': 50.0, 'note': 'The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (Table 3 step 16, p. 9).', 'range': '6 V', 'ref': 'T3 #16', 'section': 'DC volts duty cycle', 'step': 16, 'switch': 'V⎓ Hz  (DC volts duty cycle)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 16 (both columns): 49.7 to 50.3 %'}",
+   "case": "handheld_dmm.IO.apply[87V DUTY#18]",
    "log": [
     "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|WAVE SQUARE; OUT 5V,1kHz; DC_OFFSET 2.5V",
@@ -4115,7 +4115,7 @@
   },
   {
    "call": "",
-   "case": "handheld_dmm.IO.standby[87V after DUTY#16]",
+   "case": "handheld_dmm.IO.standby[87V after DUTY#18]",
    "log": [
     "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|OPER?",
@@ -4162,8 +4162,8 @@
    ]
   },
   {
-   "call": "{'applied': {'duty': 50.0, 'frequency': 2000.0, 'offset': 1.0, 'value': 6.0}, 'base_unit': 'V', 'display_unit': 'V', 'factor': 1.0, 'group': 'VOHM', 'high': '4.103', 'id': '1-48', 'kind': 'SQUARE', 'low': '3.897', 'models': ['87V'], 'n': 48, 'nominal': 4.0, 'note': 'Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (manual Table 3 step 47, p. 11).', 'prompt': 'With the meter on V DC (6 V range), select Peak Min Max (the p indicator shows the 250 µs Peak Min Max mode), then read MAX.', 'range': '6 V', 'section': 'Peak Min / Max', 'step': 48, 'switch': 'V⎓  (DC volts)', 'table': '1', 'test': 'numeric'}",
-   "case": "handheld_dmm.IO.apply[87V SQUARE#48]",
+   "call": "{'applied': {'duty': 50.0, 'frequency': 2000.0, 'offset': 1.0, 'value': 6.0}, 'base_unit': 'V', 'display_unit': 'V', 'factor': 1.0, 'group': 'VOHM', 'high': '4.103', 'id': '3-47MAX.87', 'kind': 'SQUARE', 'low': '3.897', 'models': ['87V'], 'n': 50, 'nominal': 4.0, 'note': 'Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (Table 3 step 47, p. 11).', 'prompt': 'With the meter on V DC (6 V range), select Peak Min Max (the PEAK indicator shows the 250 µs Peak Min Max mode, Table 2 item 9), then read MAX.', 'range': '6 V dc', 'ref': 'T3 #47 MAX (87)', 'section': 'Peak Min / Max', 'step': 48, 'switch': 'V⎓  (DC volts, Peak Min/Max)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 47 MAX (87 column): 3.897 to 4.103 V'}",
+   "case": "handheld_dmm.IO.apply[87V SQUARE#50]",
    "log": [
     "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|WAVE SQUARE; OUT 6V,2kHz; DC_OFFSET 1V",
@@ -4283,7 +4283,7 @@
   },
   {
    "call": "",
-   "case": "handheld_dmm.IO.standby[87V after SQUARE#48]",
+   "case": "handheld_dmm.IO.standby[87V after SQUARE#50]",
    "log": [
     "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|OPER?",
@@ -4330,8 +4330,8 @@
    ]
   },
   {
-   "call": "{'applied': {'frequency': None, 'value': 0.0}, 'base_unit': 'degC', 'display_unit': '°C', 'factor': 1.0, 'group': 'TEMP', 'high': '1.0', 'id': '1-50', 'kind': 'TEMP', 'low': '-1.0', 'models': ['87V'], 'n': 50, 'nominal': 0.0, 'note': 'Connect the K-type thermocouple between the meter and the calibrator (80AK adapter); allow the junctions to stabilise. The meter shows °C (set the meter to °C); the calibrator is set in °C.', 'range': 'Type K', 'section': 'Temperature', 'settle': 30, 'step': 50, 'switch': 'Temperature', 'table': '1', 'test': 'numeric'}",
-   "case": "handheld_dmm.IO.apply[87V TEMP#50]",
+   "call": "{'applied': {'frequency': None, 'value': 0.0}, 'base_unit': 'degC', 'display_unit': '°C', 'factor': 1.0, 'group': 'TEMP', 'high': '1.0', 'id': '3-49', 'kind': 'TEMP', 'low': '-1.0', 'models': ['87V', '88V'], 'n': 52, 'nominal': 0.0, 'note': 'Table 3 footnote 3: to ensure an accurate measurement, the meter and the thermocouple adapter must be at the same temperature. After connecting the thermocouple adapter (Fluke 80AK, K-type thermocouple with a mini-plug on both ends, Table 1) allow the reading to stabilise before recording it. The calibrator sources degrees C: set the meter to °C.', 'prompt': 'Connect the K-type thermocouple (mini-plug on both ends) through the Fluke 80AK adapter. The meter and the adapter must be at the same temperature: let the reading stabilise before recording it (Table 3 footnote 3). Set the meter to °C.', 'range': 'Type K', 'ref': 'T3 #49', 'section': 'Temperature', 'settle': 30, 'step': 50, 'switch': 'mV⎓  (Temperature)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 49 (both columns): -1.0 to 1.0 °C'}",
+   "case": "handheld_dmm.IO.apply[87V TEMP#52]",
    "log": [
     "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|TC_TYPE K",
@@ -4848,7 +4848,7 @@
   },
   {
    "call": "",
-   "case": "handheld_dmm.IO.standby[87V after TEMP#50]",
+   "case": "handheld_dmm.IO.standby[87V after TEMP#52]",
    "log": [
     "Fluke 5522A|>>|STBY"
    ],

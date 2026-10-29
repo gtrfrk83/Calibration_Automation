@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "id": "Fluke_88V_Verification",
+ "name": "Fluke 88V Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "88 Series V",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 1,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_88V_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_80_series_v_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_88V_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_qt.py",
+   "ui_port.py",
+   "hookups.py#fluke87v",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_80_series_v_pv.json#88V"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke87v",
+  "diagram_prefixes": [
+   "hook_fluke87v"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_88V_Verification.py",
+  "Procedures/Fluke_88V_Verification.procedure.json"
+ ]
+}

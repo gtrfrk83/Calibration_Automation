@@ -11,7 +11,7 @@ _tk_stub.install()
 import handheld_dmm as h  # noqa: E402
 from drivers.simulated import SimFlukeTransport, make_bench  # noqa: E402
 
-SPECS = {'113': 'fluke_110_series_pv.json', '117': 'fluke_110_series_pv.json', '87V': 'fluke_87v_pv.json', '287': 'fluke_287_289_pv.json',
+SPECS = {'113': 'fluke_110_series_pv.json', '117': 'fluke_110_series_pv.json', '87V': 'fluke_80_series_v_pv.json', '287': 'fluke_287_289_pv.json',
          '289': 'fluke_287_289_pv.json', 'MM325': 'klein_mm325_pv.json', '77IV': 'fluke_77iv_pv.json'}
 NEW_STYLE = ('87V', '287', '289', 'MM325', '77IV')          # specs whose options set auto_ramp false (the 110-series keeps explicit ramp lists)
 
@@ -219,8 +219,9 @@ EXPECTED = {       # the rotary-switch prompts, in order (group NONE points carr
     '113': ['Ω  (Ohms)  [113: CHEK / Ω position]', 'V CHEK  Continuity', 'V CHEK  Diode test', 'V CHEK  Volts'],
     '117': ['Ω  (Ohms)', 'Continuity', 'V~  (AC volts)', 'V~ Hz  (AC volts + frequency)', 'V⎓  (DC volts)', 'mV~  (AC millivolts)',
             'mV⎓  (DC millivolts)', 'Diode', 'LoZ capacitance', 'A⎓  (DC amps)', 'A~  (AC amps)', 'AUTO-V LoZ', 'VoltAlert  (Hi)', 'VoltAlert  (Lo)'],
-    '87V': ['mV  (AC millivolts)', 'V~  (AC volts)', 'Hz  (frequency, AC volts input)', 'Hz  (duty cycle, DC volts input)', 'V⎓  (DC volts)', 'mV  (DC millivolts)', 'Ω  (resistance)',
-            'Diode test', 'A~  (AC amps)', 'A⎓  (DC amps)', 'mA / µA', 'V~  (AC volts)', 'V⎓  (DC volts)', 'Temperature'],
+    '87V': ['V~  (AC volts)', 'V~ Hz  (AC volts frequency)', 'V⎓ Hz  (DC volts frequency)', 'V⎓ Hz  (DC volts duty cycle)', 'V⎓  (DC volts)', 'mV⎓  (DC millivolts)', 'Ω  (Ohms)',
+            'Diode  ▶|', 'A~  (AC amps)', 'A⎓  (DC amps)', 'mA~  (AC milliamps)', 'mA⎓  (DC milliamps)', 'µA~  (AC microamps)', 'µA⎓  (DC microamps)',
+            'V~  (AC volts, low pass filter)', 'V⎓  (DC volts, Peak Min/Max)', 'mV⎓  (Temperature)'],
     '287': ['mV ⎓ / temperature position, temperature (°C)', 'mV ⎓ / temperature position (DC millivolts)', 'Ω position (ohms)',
             'mV ~ position (AC millivolts)', 'V ~ position (AC volts)', 'V ⎓ position (DC volts)',
             'Ω position, capacitance (press the yellow button)', 'diode / continuity position', 'µA position (current)',
