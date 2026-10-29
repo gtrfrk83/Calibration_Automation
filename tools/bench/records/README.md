@@ -21,3 +21,9 @@ means GPIB0::14 and reaches the wrong instrument (the 2026-10-28 hang). Python 3
   driver does); RO1 -> IU 000000,000000,000000; RO0 -> IU 000000,000000,000400 (RF off confirmed).  VERIFIED on the bench: FR..MZ, AP..DB, RO0/RO1, IR, IU, LM99.
 - 8902A: IP, M5, 7.1SP, then T1 T3: the DISPLAY read 111.11110 MHz but nothing came over the bus in 20 s, three times; status byte 0 throughout.
   (With the RF off the same sequence returned error 96 at once.)  Step 3 looks for the way the reading is handed over.
+
+## 2026-10-29 step 3, seven ways to get the 8902A frequency (2026-10-29_step3_8902a_frequency_ways.json)
+GET after T1, GET alone, T3 with the data-ready mask, T2, T0, 7.0SP + T3, T3 with 60 s: the display always read 111.1111 MHz (111.11109 / 111.11110 at 10 Hz) and
+every read timed out. With 22.3SP the serial poll read 65 (data ready + RQS) right after the setup and again right after T3: the receiver HAD a reading ready.
+The reads of steps 2 and 3 ended on EOI only; the RF-off probe (whose read ended at LF) got its error word at once. Conclusion to confirm in step 4: the
+8902A does not assert EOI with a reading, so the read must end at the LF of its CR LF (drivers/hp_8902a.py _line_ends already does this since 2026-10-28).
