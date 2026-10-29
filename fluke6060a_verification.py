@@ -110,8 +110,26 @@ def configure(model=MODEL):
     apply_options(POINTS, True)
 
 
-def apply_options(points, typed_thd):
-    """What depends on the ticked box: the typed THD points are left out when their box is unticked. Sets p['unavailable'] (a reason) or ''."""
+# The generator's upper frequency (owner, 2026-10-29: the lab's 6060A here only goes up to 520 MHz; other units may cover the manual's 1050 MHz). A point whose 6060A
+# frequency is above the chosen range is NOT run and is listed on the report as not tested (owner decision: keep it, mark it).
+RANGE_CHOICES = {'0.1 to 1050 MHz (as the manual)': 1050.0, '0.1 to 520 MHz': 520.0}
+DEFAULT_RANGE = '0.1 to 1050 MHz (as the manual)'
+
+
+def uut_mhz(p, by_ref=None):
+    """The 6060A frequency (MHz) a point programs; a derived point (section error / sum) takes the highest of its inputs. None when the point programs none."""
+    f = (p.get('gen') or {}).get('freq_mhz')
+    if f is None and p.get('meas') == 'derived' and by_ref:
+        fs = [uut_mhz(by_ref[r]) for r in p['derive']['inputs'] if r in by_ref]
+        fs = [x for x in fs if x is not None]
+        f = max(fs) if fs else None
+    return f
+
+
+def apply_options(points, typed_thd, max_mhz=1050.0):
+    """What depends on the settings: the typed THD points are left out when their box is unticked, and points above the generator's frequency range are not run
+    (p['not_tested'] True, listed on the report). Sets p['unavailable'] (a reason) or ''."""
+    by_ref = {p['ref']: p for p in points}
     for p in points:
         base = p['_base']
         p['nominal'], p['low'], p['high'], p['description'] = base['nominal'], base['low'], base['high'], base['description']
@@ -120,6 +138,10 @@ def apply_options(points, typed_thd):
         p['unavailable'] = ''
         if p.get('typed_only') and not typed_thd:
             p['unavailable'] = 'THD at 10 kHz typed from your analyzer is switched off (tick the box in the settings)'
+        f = uut_mhz(p, by_ref)
+        p['not_tested'] = f is not None and f > float(max_mhz) + 1e-9
+        if p['not_tested']:
+            p['unavailable'] = f'not tested: {f:g} MHz is above this generator\'s {float(max_mhz):g} MHz range'
         p['error'] = float(f"{max(p['nominal'] - p['low'], p['high'] - p['nominal']):.9g}")
 
 
@@ -526,6 +548,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.lf_model = port.var(s.get('lf_model', NO_LF) if s.get('lf_model', NO_LF) in LF_CHOICES else NO_LF)
         self.lf_addr = port.var(s.get('lf_addr', ''))                                  # 33210A / 33220A / 33250A as the LF source (empty: set by hand)
         self.thd_typed = port.var(bool(s.get('thd_typed', True)), 'bool')
+        self.freq_range = port.var(s.get('freq_range', DEFAULT_RANGE) if s.get('freq_range', DEFAULT_RANGE) in RANGE_CHOICES else DEFAULT_RANGE)
         self.status = port.var()
         self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
@@ -621,13 +644,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def on_options(self, save=True):
         """The typed-THD box: the point list follows. Stored readings are judged again against the limits that now apply."""
         self.pm_revert(POINTS)
-        apply_options(POINTS, bool(self.thd_typed.get()))
+        apply_options(POINTS, bool(self.thd_typed.get()), self.max_mhz())
         self.pm_apply(POINTS)
         for records in (self.found, self.left):
             for key, rec in records.items():
                 rec['result'] = 'PASS' if judge(POINTS[int(key) - 1], rec['reading']) else 'FAIL'
         if save: self._save_settings()
         self.refresh()
+
+    def max_mhz(self) -> float:
+        return RANGE_CHOICES.get(self.freq_range.get(), 1050.0)
 
     def on_select(self, _event=None):
         sel = self.ui_view.table_selection(self)
@@ -722,6 +748,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                          ('lf_addr', self.lf_addr)):
             self.settings.set(key, var.get())
         self.settings.set('thd_typed', bool(self.thd_typed.get()))
+        self.settings.set('freq_range', self.freq_range.get())
         self.settings.save()
 
     # ------------------------------------------------------------------ running
@@ -982,7 +1009,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, thd_typed=bool(self.thd_typed.get()),
-                                        lf_model=self.lf_model.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
+                                        freq_range=self.freq_range.get(), lf_model=self.lf_model.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -993,6 +1020,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             if not port.ask_yes_no('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.thd_typed.set(bool(data.get('thd_typed', self.thd_typed.get())))
+        if data.get('freq_range') in RANGE_CHOICES:
+            self.freq_range.set(data['freq_range'])
         self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_options(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
@@ -1009,10 +1038,19 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """(rows, points): the report rows and, parallel to them, the spec point each came from."""
         rows, pts = [], []
         for p in POINTS:
+            if p.get('not_tested') and not p.get('skip'):
+                rows.append(self.not_tested_row(p)); pts.append(p)        # kept on the report, no result (owner decision 2026-10-29)
+                continue
             if not self.active(p): continue
             row = self.found_left_row(p, lambda r, p=p: self.point_row(p, r))
             if row: rows.append(row); pts.append(p)
         return rows, pts
+
+    def not_tested_row(self, p):
+        """A point above the generator's frequency range: on the report with its limits, no reading, marked NOT TESTED."""
+        import report_pdf
+        return report_pdf.cert_row(f"{p['description']} - NOT TESTED: above this unit's {self.max_mhz():g} MHz range", p['nominal'], p['low'], p['high'], p['unit'],
+                                   None, False, section=self.report_section(p))
 
     def point_row(self, p, r):
         """One report row. No uncertainty is printed (the suite has no uncertainty for these RF measurements; the cover sheet from the other software carries the standards)."""
@@ -1022,7 +1060,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def export_pdf(self):
         rows, pts = self.certificate_rows_and_points()
-        if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
+        if not any(not p.get('not_tested') for p in pts): port.message('info', 'No results', 'No recorded results to export yet.'); return
         try: import report_pdf
         except ImportError as exc: port.message('error', 'Report export', str(exc)); return
         details = port.report_details(f'Fluke {MODEL} performance verification', parent=self.root)
@@ -1034,6 +1072,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         try:
             header = [('Instrument', f'Fluke {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                       ('Limits applied', 'Fluke 6060A Instruction Manual, Section 4A'), ('Source', SPEC['source']['cite'])]
+            if self.max_mhz() < 1050.0:
+                header.append(('Frequency range', f'0.1 to {self.max_mhz():g} MHz (this unit): points above it are listed as NOT TESTED'))
             report_pdf.write_calibration_pdf(path, rows, header=header, demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, None),
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:

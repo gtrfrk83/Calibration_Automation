@@ -2263,3 +2263,10 @@ stand-in widgets. Check it on the bench PC.
 ### 6060A: 4A-6 on the 8902A (owner, 2026-10-29)
 4A-6 mid level (-24 to -66 dBm, 40 points) is measured with the 8902A tuned RF level, like 4A-7 and 4A-8: the R&S NRP40T is a thermal sensor (-35 to +20 dBm) and cannot
 reach -66 dBm. Deviation from the printed method, flagged on the first point and in the section note. 4A-5 high level (+12 to -12 dBm) stays on the 96270A + NRP40T.
+
+### 6060A: generator frequency range (owner, 2026-10-29)
+The lab's 6060A on the bench only reaches 520 MHz (other units may cover the manual's 1050 MHz). Connections window: 'Generator frequency range' = 0.1 to 1050 MHz
+(as the manual, the default) or 0.1 to 520 MHz, saved with the settings and the progress file. Points whose 6060A frequency is above the range (a derived section
+error / sum takes the highest frequency of its inputs) are not run and are listed on the report as "NOT TESTED: above this unit's 520 MHz range" with their
+limits and no reading (owner decision: keep, mark not tested). With 520 MHz: 172 of the 470 points (4A-4 5, 4A-5 32, 4A-6 16, 4A-7 2, 4A-8 48, 4A-11 2,
+modulation tests 3, 4, 6 and 8: 67). The report header says 'Frequency range: 0.1 to 520 MHz (this unit)'.

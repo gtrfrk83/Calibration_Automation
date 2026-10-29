@@ -20,7 +20,7 @@ def finish_window(self):
 
 def sync_buttons(self):
     B.sync_buttons(self, (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find),
-                   [(self.lf_combo, 'readonly'), (self.thd_check, B.idle_state(self.thd_check))])
+                   [(self.lf_combo, 'readonly'), (self.range_combo, 'readonly'), (self.thd_check, B.idle_state(self.thd_check))])
 
 
 def build_ui(self):
@@ -54,6 +54,8 @@ def build_ui(self):
     f.note('External AM / FM (tests 3 and 6): a Keysight 33210A / 33220A / 33250A set to a sine (1 kHz, 10 kHz or 0.4 kHz) at 0.7071 V rms into High Z; its output is on only for the point. '
            'Choose None, or leave the address empty, to set your own generator at each prompt.', column=1)
     f.rule()
+    self.range_combo = f.row('Generator frequency range', f.combo(self.freq_range, list(E.RANGE_CHOICES), 30, command=lambda *_a: self.on_options()))
+    f.note('Some 6060A units only reach 520 MHz. Points above the chosen range are not run and are listed on the report as NOT TESTED.', column=1)
     self.thd_check = f.wide(H.checkbutton(None, 'Test 6: type THD at 10 kHz by hand', self.thd_typed, self.on_options))
     f.note('The 8902A measures distortion only at 1 kHz and 400 Hz, so THD at 10 kHz is typed from your own distortion analyzer. Untick to leave those 17 points out.')
     B.find_and_test(sh, self, 'Find instruments', self.find_instruments)
