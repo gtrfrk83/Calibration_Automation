@@ -216,8 +216,14 @@ class HP8902A(Instrument):
         self._address = check_address(address)
 
     # ---- wire access ---------------------------------------------------------------------------------------------------------------------------
+    # codes that do not change the measurement setup the receiver holds (triggers, calibrate on / off, save cal, zero, the SRQ mask)
+    _KEEPS_SETUP = re.compile(r'^(T[0-3]|C[01]|SC|ZR|C1T3SC|22\.\d+SP)$')
+    _held_setup = None                    # the setup (steps) the receiver holds now; None = unknown
+
     def write(self, cmd, log_as=None):
         time.sleep(self.COMMAND_GAP_S)
+        if not getattr(self, '_in_setup', False) and not self._KEEPS_SETUP.match(str(cmd).strip()):
+            self._held_setup = None       # anything else (IP, M5, S4, a tune, a special function ...) may change what the receiver holds
         super().write(cmd, log_as)
 
     def send(self, key, **vals):
@@ -289,6 +295,7 @@ class HP8902A(Instrument):
         self._line_ends()
         try:
             self.t.clear()
+            self._held_setup = None
             time.sleep(self.RESET_SETTLE_S)
             # ID is only a courtesy: the manual shows the code but not any reply (owner bench, 2026-10-28: the 8902A does not answer ID). One short try (read-only, no
             # retries: every miss costs a full timeout); no reply is NOT an error as long as the receiver answers a serial poll (it is there and listening).
@@ -316,6 +323,7 @@ class HP8902A(Instrument):
             if self.idn and not self.id_matches:
                 self.log.add('!!', f'ID reply {self.idn!r} does not mention 8902 / 8901 (the reply text is not in the manual: UNVERIFIED)', self.label)
             self.status()                                                 # clear anything pending
+            self.show_recal()
         except Exception:
             self.close()
             raise
@@ -338,6 +346,18 @@ class HP8902A(Instrument):
         """Put the receiver in remote: it goes remote when addressed to listen (p. 3-21 / 71); T1 (hold) is the harmless listen. No settings change."""
         self.send('trig.hold')
 
+    RECAL_MASK = 34                       # 32 RECAL / UNCAL + 2 HP-IB code error (always on)
+
+    def show_recal(self):
+        """22.34SP: lets RECAL / UNCAL (bit value 32) through to the serial poll. The preset mask (22.2SP) hides it, and a masked bit never reads 1 (p. 3-32), so without this the
+        driver never sees a RECAL and never calibrates a range (bench 2026-10-29, step 6: readings drifted to -1.5 dB, then error 96). Set after every device clear / IP.
+        There is no safe read-back (the 22.64SP display is a special-function display, and 15.1SP locked the receiver on 2026-10-28); bench step 6b showed it working:
+        the poll read 96 (RECAL + RQS) at -13, -37 and -73 dBm."""
+        self.send('srq.set', mask=self.RECAL_MASK)
+
+    def _reset_extra(self):
+        return [('RECAL visible in the serial poll again (22.34SP; IP restores the 22.2SP mask)', self.show_recal)]
+
     def go_local(self):
         """GTL (the transport's go_local); the front panel works again. Never raises."""
         try:
@@ -359,8 +379,18 @@ class HP8902A(Instrument):
 
     # ---- measuring ------------------------------------------------------------------------------------------------------------------------------
     def _setup(self, steps, context):
-        for key, vals in steps:
-            self.send(key, **vals)                                        # each once, never retried
+        key = tuple((k, tuple(sorted(v.items()))) for k, v in steps)
+        if key == self._held_setup:
+            # Bench 2026-10-29 (step 6b): sending the tune + S4 again at every level re-acquires the signal; below about -110 dBm the receiver cannot find it again
+            # (error 96) although it measured -109 dBm a moment before. The setup it already holds is not sent again (the readings stay on the locked signal).
+            self.log.add('--', f'{context}: the receiver still holds this setup; not sent again', self.label)
+            return
+        self._in_setup = True
+        try:
+            for k, vals in steps:
+                self.send(k, **vals)                                      # each once, never retried
+        finally:
+            self._in_setup = False
         # Owner bench 2026-10-28: a serial poll straight after the setup read status byte 60 (instrument error, limit, offset, RECAL): the receiver is still tuning / settling and
         # briefly shows an error. Wait, then read (and so clear) the byte; only an HP-IB CODE error (a command it did not understand) is fatal here. A real measurement problem
         # arrives as an error word in the reading itself (decode_reading raises it) and the status byte is checked again after the reading.
@@ -370,6 +400,7 @@ class HP8902A(Instrument):
             raise InstrumentError(f'{self.MODEL} reports an HP-IB code error after {context} (status byte {st["value"]}): a command was not understood')
         if st['instrument_error']:
             self.log.add('!!', f'status byte {st["value"]} after {context}: an error was displayed while the receiver settled; it is read again with the measurement', self.label)
+        self._held_setup = key
 
     def _tune(self, carrier_mhz):
         return ('tune.mhz', {'mhz': float(carrier_mhz)}) if carrier_mhz else ('tune.auto', {})
@@ -451,14 +482,18 @@ class HP8902A(Instrument):
         return value
 
     def calibrate_power_sensor(self) -> float:
-        """The 1 mW 50 MHz power calibration (sensor on the RF POWER CALIBRATION OUTPUT): C1T3SC as one write (the manual's own string), C0, then a reading in watts: it must be between
-        0.999 and 1.000 mW (p. 3-49 / 101). Locked commands, each sent once."""
+        """The 1 mW 50 MHz power calibration (sensor on the RF POWER CALIBRATION OUTPUT): C1T3SC as one write (the manual's own string), its reading, a check reading with the
+        calibrator still on (must be 0.999 to 1.000 mW, p. 3-49 / 101), then C0. Locked commands, each sent once."""
         self._setup([('func.power', {}), ('units.lin', {}), ('units.watt', {})], 'power cal setup')
+        # Bench 2026-10-29 (step 6b): reading AFTER C0 measured the calibrator switched off (6E-08 W). The check reading is taken while the 1 mW calibrator is still on:
+        # C1T3SC (its T3 reading is read and logged), then T1 T3 with the calibrator on (the value after SC: 0.999 to 1.000 mW), and C0 last.
         try:
             self.send('cal.power')
+            first = self._read_reading(self.DEFAULT_TIMEOUT)
+            self.log.add('--', f'reading of the C1T3SC trigger: {first.strip()}', self.label)
+            value = self._trigger_read(self.DEFAULT_TIMEOUT)
         finally:
             self.send('cal.off')
-        value = self._trigger_read(self.DEFAULT_TIMEOUT)
         self.check_status('power calibration')
         if not CAL_POWER_W[0] - 1e-9 <= round(value, 7) <= CAL_POWER_W[1] + 1e-9:
             raise InstrumentError(f'{self.MODEL}: after SC the sensor reads {value * 1e3:.4f} mW, not 0.999 to 1.000 mW')

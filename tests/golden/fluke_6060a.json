@@ -2025,7 +2025,8 @@
    "log": [
     "8902A|>>|ID",
     "8902A|<<|HP8902A",
-    "8902A|--|serial poll -> 0"
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|22.34SP"
    ],
    "method": "HP8902A.connect",
    "result": "returned <HP8902A>",
@@ -2061,6 +2062,14 @@
      "ctl",
      "read_stb",
      0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.34SP"
     ]
    ]
   },
@@ -2176,6 +2185,25 @@
    ]
   },
   {
+   "call": "",
+   "case": "HP8902A.show_recal",
+   "log": [
+    "8902A|>>|22.34SP"
+   ],
+   "method": "HP8902A.show_recal",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.34SP"
+    ]
+   ]
+  },
+  {
    "call": "250.0",
    "case": "HP8902A.measure_frequency_hz[no signal]",
    "log": [
@@ -2256,9 +2284,7 @@
    "call": "250.0",
    "case": "HP8902A.measure_frequency_hz",
    "log": [
-    "8902A|>>|M5",
-    "8902A|>>|7.1SP",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|frequency setup: the receiver still holds this setup; not sent again",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|+0025000001E+01",
@@ -2267,31 +2293,6 @@
    "method": "HP8902A.measure_frequency_hz",
    "result": "returned 250000010.0",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "M5"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "7.1SP"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
     [
      "sleep",
      0.05
@@ -2524,11 +2525,11 @@
     "8902A|>>|S4",
     "8902A|>>|LG",
     "8902A|>>|4.0SP",
-    "8902A|--|serial poll -> 32",
+    "8902A|--|serial poll -> 96",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|-0049800000E-07",
-    "8902A|--|serial poll -> 32"
+    "8902A|--|serial poll -> 96"
    ],
    "method": "HP8902A.tuned_rf_level_dbm",
    "result": "raised RecalRequired: HP 8902A: RECAL / UNCAL after the tuned level reading -4.98: calibrate_tuned_level(250) at this level, then measure again",
@@ -2572,7 +2573,7 @@
     [
      "ctl",
      "read_stb",
-     32
+     96
     ],
     [
      "sleep",
@@ -2607,7 +2608,7 @@
     [
      "ctl",
      "read_stb",
-     32
+     96
     ]
    ]
   },
@@ -2615,11 +2616,7 @@
    "call": "250.0",
    "case": "HP8902A.calibrate_tuned_level",
    "log": [
-    "8902A|>>|250MZ",
-    "8902A|>>|S4",
-    "8902A|>>|LG",
-    "8902A|>>|4.0SP",
-    "8902A|--|serial poll -> 32",
+    "8902A|--|tuned level cal setup: the receiver still holds this setup; not sent again",
     "8902A|>>|C1",
     "8902A|>>|T1",
     "8902A|>>|T3",
@@ -2630,47 +2627,6 @@
    "method": "HP8902A.calibrate_tuned_level",
    "result": "returned -4.9799999999999995",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "S4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LG"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "4.0SP"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     32
-    ],
     [
      "sleep",
      0.05
@@ -2728,11 +2684,7 @@
    "call": "250.0",
    "case": "HP8902A.tuned_rf_level_dbm",
    "log": [
-    "8902A|>>|250MZ",
-    "8902A|>>|S4",
-    "8902A|>>|LG",
-    "8902A|>>|4.0SP",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|tuned level setup: the receiver still holds this setup; not sent again",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|-0049800000E-07",
@@ -2741,47 +2693,6 @@
    "method": "HP8902A.tuned_rf_level_dbm",
    "result": "returned -4.9799999999999995",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "S4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LG"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "4.0SP"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
     [
      "sleep",
      0.05
@@ -2926,15 +2837,14 @@
    "call": "",
    "case": "HP8902A.calibrate_power_sensor",
    "log": [
-    "8902A|>>|M4",
-    "8902A|>>|LN",
-    "8902A|>>|WT",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|power cal setup: the receiver still holds this setup; not sent again",
     "8902A|>>|C1T3SC",
-    "8902A|>>|C0",
+    "8902A|<<|+0099950000E-11",
+    "8902A|--|reading of the C1T3SC trigger: +0099950000E-11",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|+0099950000E-11",
+    "8902A|>>|C0",
     "8902A|--|serial poll -> 0"
    ],
    "method": "HP8902A.calibrate_power_sensor",
@@ -2946,48 +2856,21 @@
     ],
     [
      "W",
-     "M4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LN"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "WT"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
      "C1T3SC"
     ],
     [
-     "sleep",
-     0.05
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
-     "W",
-     "C0"
+     "R",
+     "+0099950000E-11"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
      "sleep",
@@ -3020,6 +2903,14 @@
      40.0
     ],
     [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
      "ctl",
      "read_stb",
      0
@@ -3030,15 +2921,14 @@
    "call": "",
    "case": "HP8902A.calibrate_power_sensor[sensor not on the calibrator]",
    "log": [
-    "8902A|>>|M4",
-    "8902A|>>|LN",
-    "8902A|>>|WT",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|power cal setup: the receiver still holds this setup; not sent again",
     "8902A|>>|C1T3SC",
-    "8902A|>>|C0",
+    "8902A|<<|+9000001800E+01",
+    "8902A|--|reading of the C1T3SC trigger: +9000001800E+01",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|+0010000000E-14",
+    "8902A|>>|C0",
     "8902A|--|serial poll -> 4"
    ],
    "method": "HP8902A.calibrate_power_sensor",
@@ -3050,48 +2940,21 @@
     ],
     [
      "W",
-     "M4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LN"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "WT"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
      "C1T3SC"
     ],
     [
-     "sleep",
-     0.05
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
-     "W",
-     "C0"
+     "R",
+     "+9000001800E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
      "sleep",
@@ -3122,6 +2985,14 @@
      "ctl",
      "set_timeout",
      40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
     ],
     [
      "ctl",
@@ -4294,10 +4165,11 @@
    "case": "HP8902A.reset_to_defaults",
    "log": [
     "8902A|>>|IP",
-    "8902A|--|serial poll -> 0"
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|22.34SP"
    ],
    "method": "HP8902A.reset_to_defaults",
-   "result": "returned ResetReport(instrument='8902A', ok=True, exempt=False, steps=[ResetStep(name='reset (IP)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='status byte clean')], warnings=[])",
+   "result": "returned ResetReport(instrument='8902A', ok=True, exempt=False, steps=[ResetStep(name='reset (IP)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='status byte clean'), ResetStep(name='RECAL visible in the serial poll again (22.34SP; IP restores the 22.2SP mask)', ok=True, detail='')], warnings=[])",
    "wire": [
     [
      "sleep",
@@ -4315,6 +4187,14 @@
      "ctl",
      "read_stb",
      0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.34SP"
     ]
    ]
   },

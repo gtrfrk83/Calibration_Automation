@@ -22,7 +22,7 @@ COVERAGE = {
                     'address', 'set_address',                            # the GPIB address of the object (the transport is re-targeted in connect)
                     'compare']),                                         # pure comparison of two dicts
     'HP8902A': dict(
-        covered=['connect', 'cleanup', 'identify', 'remote', 'go_local', 'status', 'check_status', 'set_srq_mask', 'measure_frequency_hz', 'read_special', 'time_base_is_external',
+        covered=['show_recal', 'connect', 'cleanup', 'identify', 'remote', 'go_local', 'status', 'check_status', 'set_srq_mask', 'measure_frequency_hz', 'read_special', 'time_base_is_external',
                  'tuned_rf_level_dbm', 'calibrate_tuned_level', 'rf_power_dbm', 'zero_power_sensor', 'calibrate_power_sensor', 'enter_reference_cal_factor', 'cal_factor_count',
                  'enter_cal_factor', 'measure_am_percent', 'measure_fm_deviation_hz', 'measure_distortion', 'measure_modulation_rate_hz', 'calibrate_modulation',
                  'reset_to_defaults'],
@@ -117,6 +117,7 @@ def cases_8902a(c):
     c.run('HP8902A.status', rx.status)
     c.run('HP8902A.check_status', rx.check_status, 'ctx')
     c.run('HP8902A.set_srq_mask', rx.set_srq_mask, 2)
+    c.run('HP8902A.show_recal', rx.show_recal)
     c.run('HP8902A.measure_frequency_hz[no signal]', rx.measure_frequency_hz, 250.0)
     gen.set_frequency(250.0)
     gen.set_level(-5.0)

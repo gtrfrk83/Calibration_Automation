@@ -711,6 +711,43 @@ class EightNineOhTwo(_NoSleep):
         self.assertNotIn('M5', t.sent)
         self.assertNotIn('T3', t.sent)
 
+    def test_recal_is_made_visible_at_connect_and_after_a_reset(self):
+        """Bench 2026-10-29: the preset SRQ mask hides RECAL; 22.34SP lets it through (the poll read 96 at each range change)."""
+        bench, src, rx, t = connected_8902a()
+        self.assertTrue(any(line.rstrip().endswith('>>  22.34SP') for line in rx.log.lines()), rx.log.lines())
+        t.sent.clear()
+        rx.reset_to_defaults()
+        self.assertIn('22.34SP', t.sent)
+        self.assertGreater(t.sent.index('22.34SP'), t.sent.index('IP'))
+
+    def test_a_held_setup_is_not_sent_again(self):
+        """Bench 2026-10-29 (step 6b): re-sending the tune + S4 at every level re-acquires the signal and loses it below about -110 dBm."""
+        bench, src, rx, t = connected_8902a(mhz=120.0, dbm=-13.0)
+        from drivers.hp_8902a import RecalRequired
+        try:
+            rx.tuned_rf_level_dbm(120.0)
+        except RecalRequired:
+            rx.calibrate_tuned_level(120.0)
+            rx.tuned_rf_level_dbm(120.0)
+        t.sent.clear()
+        rx.tuned_rf_level_dbm(120.0)
+        self.assertEqual(t.sent, ['T1', 'T3'])                                   # same setup: only the trigger
+        try:
+            rx.tuned_rf_level_dbm(244.0)                                         # another frequency: the whole setup again
+        except InstrumentError:                                                 # nothing at 244 MHz: only the commands matter here
+            pass
+        self.assertIn('244MZ', t.sent)
+        try:
+            rx.measure_frequency_hz(None, 10)                                    # another function in between
+        except InstrumentError:
+            pass
+        t.sent.clear()
+        try:
+            rx.tuned_rf_level_dbm(244.0)                                         # another function in between: sent again
+        except InstrumentError:                                                 # nothing at 244 MHz: only the commands matter here
+            pass
+        self.assertIn('S4', t.sent)
+
     def test_power_zero_and_calibration(self):
         bench, src, rx, t = connected_8902a(rf=False)
         self.assertLess(abs(rx.zero_power_sensor()), 3e-6)
@@ -718,7 +755,8 @@ class EightNineOhTwo(_NoSleep):
         t.sensor_on_calibrator = True
         t.sent.clear()
         value = rx.calibrate_power_sensor()
-        self.assertEqual(t.sent[3:5], ['C1T3SC', 'C0'])                         # the manual's own string, one write
+        self.assertEqual(t.sent, ['C1T3SC', 'T1', 'T3', 'C0'])                  # the manual's own string, one write; the check reading with the calibrator still on; C0 last
+                                                                                 # (M4 LN WT are held from the zero: not sent again)
         self.assertTrue(0.999e-3 <= value <= 1.000e-3)
         t.errors['power_cal_w'] = 0.9e-3
         with self.assertRaises(InstrumentError):

@@ -49,3 +49,11 @@ Driver: PMET1: commands (as on the bench), continuous trigger by default (SING i
 - The serial poll stayed 0 throughout: the preset SRQ mask hides RECAL (bit value 32), so the driver never saw a RECAL and never calibrated a range. The power-sensor
   zero / 1 mW calibration was not done either (owner: "the -120 and -127 no reading have to do with the sensor not being calibrated before hand").
   Step 6b repeats it the manual's way (p. 3-97): ZR + C1T3SC first, mask 22.34SP so RECAL shows, 6 dB steps, C1 at each RECAL.
+
+## 2026-10-29 step 6b, tuned level calibrated, 6 dB steps (2026-10-29_step6b_8902a_tuned_level_calibrated.json)
+- 22.34SP works: the serial poll read 96 (RECAL 32 + RQS 64) at -13, -37 and -73 dBm, the three range changes the manual describes; C1 T1 T3 read C0 cleared it each time.
+- Readings -13 to -109 dBm: errors -0.37 to -0.62 dB, smooth (RF power M4 at -13 dBm: -13.33; the NRP40T read the 6060A 0.5 dB low at -10 and 0 dBm in step 5: the
+  6060A itself is about 0.4 to 0.6 dB low at 120 MHz).
+- ZR: residual 0 W after 22 s. The 1 mW calibration READ-BACK was wrong in the driver: it read after C0 (calibrator off: 6E-08 W). Fixed: read with the calibrator on, C0 last.
+- -115, -121, -127 dBm: error 96 (no signal) 1.2 s after T3. The driver sent the tune + S4 again at every level (a re-acquisition); fixed: a setup the receiver
+  already holds is not sent again. Step 6c checks whether the locked receiver now reaches -127 dBm.
