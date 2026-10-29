@@ -23,6 +23,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 import ui_theme_core as ui                     # toolkit-free helpers only (si, si_row, si_scale); the entry window is manual_override_view_tk.py
 from drivers.base import InstrumentError, SafetyError
@@ -52,6 +53,7 @@ def guard_read(read, *args, **kwargs):
 
 class ReadGuardMixin:
     """For an engine's IO class: `self._read()` is `self.dmm.read()` with a failure raised as ReadingUnavailable (the command sent is the same)."""
+    dmm: Any                    # type-only: provided by the IO class (no value here, so nothing changes at run time)
 
     def _read(self, *args):
         return guard_read(self.dmm.read, *args)
@@ -158,8 +160,21 @@ class ManualOverrideMixin:
     io (None when not connected), demo, busy, asset, is_manual(p), _record(p, reading, synthetic, manual, extra=None), confirm_found_overwrite([p])
     and the two hooks `mo_point(iid)` (the point of a list row) and `mo_total()` (points in the procedure).  Its run loop sets `_mo_current` while a point is measured and calls `mo_take_pending(p)` when the
     automatic reading arrives, and `mo_failed(p, exc)` when the automatic reading failed."""
+    # type-only: what the App provides (see above); annotations without values, so nothing changes at run time (getattr(self, 'io', None) still sees no attribute)
+    root: Any
+    status: Any
+    tree: Any
+    results: Any
+    io: Any
+    demo: Any
+    busy: Any
+    asset: Any
+    _record: Any
+    confirm_found_overwrite: Any
+    request: Any                # engines whose points run on a worker thread (mo_worker_point): asks on the UI thread
+
     MANUAL_OVERRIDE = False
-    _mo_current = None          # the point being measured right now (set by the run loop)
+    _mo_current = None         # the point being measured right now (set by the run loop)
     _mo_pending = None          # (point id, Entered) typed while that point was being measured: replaces its automatic reading
     mo_events = ()              # what was logged (kept in memory too, for demo mode where there is no command log)
 

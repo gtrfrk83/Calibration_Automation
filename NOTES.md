@@ -2195,3 +2195,18 @@ Owner: "i need to be able to enter data manually on all procedures". "Enter read
 - 5491B: when the meter cannot be connected (no port, no *IDN? reply) the operator is asked once and the run goes on in typed-readings mode: the calibrator is still driven, the output stays ON while the meter display is read, STANDBY goes out after the typed reading, a cancel or a Stop. A failed reading with a connected meter offers the same typed entry. A `configure_point` failure with a connected meter still stops the run.
 - Qt views carry `manual=True` (action button + right-click); PySide6 is not installed in the test environment, so they are compile-checked only.
 - Tests: tests/test_manual_entry_all_engines.py (per engine on its simulated bench/demo path + coverage/exclusion pin); the 8808A / datasheet pin tests now list the engines above.
+
+## Bench-first driver workflow (owner decision 2026-10-28; documentation only, no code changed)
+
+Why: nearly every procedure is "simulated bench only" and every new one needed revisions on the first real run (8808A `=>` / `?>` prompts, 5560A error 7028, 8902A not answering an ID and needing a 1 s settle, the 6060A 15.1SP time-base check locking the 8902A). Those are wire and behaviour problems; a simulator written from the same manual reading as the driver cannot show them. Limits and test points are rarely the problem.
+
+Order of work for every new two-way instrument (also in the new-calibration-procedure skill, section 0):
+1. Manual, then the driver only (COMMANDS with page refs, verified=False).
+2. Bench session with Claude Code on the bench PC (Keysight GPIB adapter, NI-VISA and Keysight IO installed). Reads (`*IDN?`, status byte, serial poll, error queue) are free. A command that changes instrument state, or enables an output / OPER / RF, needs the owner's typed OK in chat, once per command, naming command and instrument. Never sent: calibration / adjustment, security / password, firmware, memory-erase commands. Outputs to standby / off after each test, confirmed by reading back. Every command and exact reply is recorded.
+3. `driver_verify` on the real instrument. VERIFIED = manual page in `ref` + recorded real reply + driver_verify pass. Commands that cannot be triggered safely stay UNVERIFIED and are listed in the final summary.
+4. No procedure uses a driver until every command it sends is verified, or listed UNVERIFIED with the reason.
+5. Simulators replay the recorded replies; hand-written behaviour only where it cannot be triggered safely (marked UNVERIFIED).
+6. Then the spec, engine and points.
+7. First hardware run: no step-through (long tests). Optional smoke pass (one lowest-energy point per test, full speed), then the full run at normal speed, stopping on the first surprise (`surprise.py`); the command log is kept. 'Mark verified on hardware' asks whether a clean full run is on record.
+
+Pilot: Fluke 6060A (2026-10-29 bench session, all five instruments connected: 6060A, 8902A, 8563E, 96270A + NRP40T, 33xxx generator; read-only passes first). Order: `drivers/fluke_6060a.py`, `hp_8902a.py`, `hp_8563e.py`, then the 96270A power-meter methods and the generator. The other ~37 never-hardware-run procedures are left as they are until the pilot is judged.

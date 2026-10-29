@@ -47,6 +47,7 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
@@ -208,7 +209,7 @@ def decorate(p):
     """Add the runtime description of a point (p['run']) and re-shape the hand-set scope / generator steps so the engine can list and run them."""
     d = p['dsb']
     kind, st = d['kind'], d['stimulus']
-    run = dict(kind=kind, direction=d['direction'], nominal=_num(st.get('nominal')), frequency=_num(st.get('frequency')),
+    run: dict[str, Any] = dict(kind=kind, direction=d['direction'], nominal=_num(st.get('nominal')), frequency=_num(st.get('frequency')),
                amplitude=_num(st.get('amplitude')), settings=dict(st.get('settings') or {}), unit=d.get('unit', ''), op='dmm')
     p['run'] = run
     if d['direction'] == 'source':                                      # the unit under test OUTPUTS: a standard measures
@@ -601,7 +602,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         expected_rms = abs(level) * rms_factor(run)
         std.set_range_for(expected_rms)
         rf = rms_factor(run)
-        volts, _res = self.stable_read(p, lambda: fg.IO._std_volts(SimpleNamespace(std=std), freq), conv or (lambda v: v / rf), cancel=cancel)
+        volts, _res = self.stable_read(p, lambda: fg.IO._std_volts(cast(Any, SimpleNamespace(std=std)), freq), conv or (lambda v: v / rf), cancel=cancel)
         return volts, dict(input=inp, range_expected_v=expected_rms)
 
     # ---- rule 8: settle by stable reading ----------------------------------------------------------------------------------
@@ -691,6 +692,11 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
     added here and in DsbIO; the engine itself (handheld_dmm.py) is not edited."""
     RESET_ONCE_PER_SESSION = True      # rule 10 (reset_startup pattern): the first Run of a session resets; later Runs only check the connection and the start state
     MANUAL_OVERRIDE = True             # rule 13: right-click a point > Enter reading manually (dsb_override.py; the 8808A's mixin)
+    # Type-only declarations (no values): these are set by the window's view module (dsb_runtime_view_qt.py / the shell) when it is built.
+    shell: Any
+    section_caption: Any
+    section_mode_var: Any
+    tree: Any
 
     def __init__(self, root, spec, demo=False, io_factory=None, period=None, fast_demo=False):
         self.mdd_import = str((spec.get('source') or {}).get('document') or '').startswith('Cal Processor datasheet')     # an imported .MDD: a lean report (no standard tags, shorter header)
@@ -1495,11 +1501,11 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             if k.get('image') is None:
                 k['image'] = ref
             return orig(*a, **k)
-        port.operator_prompt = with_image
+        setattr(port, 'operator_prompt', with_image)       # the same assignment; setattr because the UI proxy declares no such attribute for the type checker
         try:
             return prompt(p)
         finally:
-            port.operator_prompt = orig
+            setattr(port, 'operator_prompt', orig)
 
     def _prompt_setup_driven(self, p):
         run = p.get('run')
@@ -1692,7 +1698,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         places = 0
         for k in ('low', 'high'):
             try:
-                places = max(places, -Decimal(p[k]).as_tuple().exponent)
+                places = max(places, -int(Decimal(p[k]).as_tuple().exponent))
             except Exception:
                 pass
         text = f'{value:.{min(places + 2, 9)}f}'
@@ -1794,7 +1800,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
 
     def _coil_q(self, p, nom, unit):
         """The uncertainty_budget point dict of a coil point: the interaction term of a coil-covered point, the x 50 scale of the below-range fallback (only written when not 1)."""
-        q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=unit, range=None, extra=self.unc_extra(p))
+        q: dict[str, Any] = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=unit, range=None, extra=self.unc_extra(p))
         if self.unc_scale(p) != 1.0:
             q['scale'] = self.unc_scale(p)
         return q
@@ -1988,8 +1994,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         skipped = self.not_tested_sections()
         if skipped:                                                    # rule 12: a section switched to Not tested is listed, never printed as failed or pending
             header.append(('Not tested', '; '.join(f'{s} ({n} point(s))' for s, n in skipped)))
-        unverified = sorted({(rec.get('route') or {}).get('standard') for rec in list(self.found.values()) + list(self.left.values())
-                             if (rec.get('route') or {}).get('status') == 'unverified'} - {None, ''})
+        unverified = sorted(cast('set[str]', {(rec.get('route') or {}).get('standard') for rec in list(self.found.values()) + list(self.left.values())
+                             if (rec.get('route') or {}).get('status') == 'unverified'} - {None, ''}))
         if unverified:
             header.append(('Unverified', 'Instrument commands not yet confirmed on hardware: ' + ', '.join(unverified)))
         st = self.generated_state()

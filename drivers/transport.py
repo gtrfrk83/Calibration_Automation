@@ -7,6 +7,11 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    import serial
+    from pyvisa.resources import GPIBInstrument, MessageBasedResource, SerialInstrument
 
 
 class TransportError(RuntimeError):
@@ -97,26 +102,32 @@ class VisaTransport(Transport):
         self.serial = serial
         self._rm = resource_manager
         self._own_rm = resource_manager is None
-        self._res = None
+        self._res: MessageBasedResource | None = None
+
+    def _opened(self) -> MessageBasedResource:
+        if self._res is None:
+            raise TransportError(f'{self.address} is not open')
+        return self._res
 
     def open(self):
         try:
             import pyvisa
+            from pyvisa import constants as c
             if self._rm is None:
                 self._rm = pyvisa.ResourceManager()
-            self._res = self._rm.open_resource(self.address)
+            self._res = cast('MessageBasedResource', self._rm.open_resource(self.address))
             self._res.timeout = int(self.timeout * 1000)
             if bus_of(self.address) == 'RS232':
                 s = self.serial or SerialSettings()
-                c = pyvisa.constants
-                self._res.baud_rate = s.baud
-                self._res.data_bits = s.data_bits
-                self._res.parity = {'none': c.Parity.none, 'even': c.Parity.even, 'odd': c.Parity.odd}[s.parity]
-                self._res.stop_bits = {1: c.StopBits.one, 1.5: c.StopBits.one_and_a_half, 2: c.StopBits.two}[s.stop_bits]
-                self._res.write_termination = s.write_termination
-                self._res.read_termination = s.read_termination
-                self._res.flow_control = {'none': c.ControlFlow.none, 'xon_xoff': c.ControlFlow.xon_xoff,
-                                          'rts_cts': c.ControlFlow.rts_cts}[s.flow_control]
+                res = cast('SerialInstrument', self._res)
+                res.baud_rate = s.baud
+                res.data_bits = s.data_bits
+                res.parity = {'none': c.Parity.none, 'even': c.Parity.even, 'odd': c.Parity.odd}[s.parity]
+                res.stop_bits = {1: c.StopBits.one, 1.5: c.StopBits.one_and_a_half, 2: c.StopBits.two}[s.stop_bits]
+                res.write_termination = s.write_termination
+                res.read_termination = s.read_termination
+                res.flow_control = {'none': c.ControlFlow.none, 'xon_xoff': c.ControlFlow.xon_xoff,
+                                    'rts_cts': c.ControlFlow.rts_cts}[s.flow_control]
         except Exception as exc:
             raise TransportError(f'Could not open {self.address}: {exc}') from exc
 
@@ -135,24 +146,29 @@ class VisaTransport(Transport):
             self._res.timeout = int(seconds * 1000)
 
     def write(self, text):
+        res = self._opened()
         try:
-            self._res.write(text)
+            res.write(text)
         except Exception as exc:
             raise TransportError(f'write {text!r} failed: {exc}') from exc
 
     def read(self):
+        res = self._opened()
         try:
-            return self._res.read()
+            return res.read()
         except Exception as exc:
             raise TransportError(f'read failed: {exc}') from exc
 
     def query(self, text):
+        res = self._opened()
         try:
-            return self._res.query(text)
+            return res.query(text)
         except Exception as exc:
             raise TransportError(f'query {text!r} failed: {exc}') from exc
 
     def clear(self):
+        if self._res is None:
+            return
         try:
             self._res.clear()
         except Exception:
@@ -163,10 +179,10 @@ class VisaTransport(Transport):
         if bus_of(self.address) != 'GPIB' or self._res is None:
             return
         try:
-            import pyvisa
-            op = getattr(getattr(pyvisa.constants, 'RENLineOperation', None), 'address_gtl', None) or getattr(pyvisa.constants, 'VI_GPIB_REN_ADDRESS_GTL', None)
+            from pyvisa import constants
+            op = getattr(getattr(constants, 'RENLineOperation', None), 'address_gtl', None) or getattr(constants, 'VI_GPIB_REN_ADDRESS_GTL', None)
             if op is not None:
-                self._res.control_ren(op)
+                cast('GPIBInstrument', self._res).control_ren(op)
         except Exception:
             pass
 
@@ -177,7 +193,12 @@ class SerialTransport(Transport):
     def __init__(self, port, settings: SerialSettings | None = None, timeout=10.0):
         self.port, self.settings, self.timeout = port, settings or SerialSettings(), timeout
         self.name = port
-        self._ser = None
+        self._ser: serial.Serial | None = None
+
+    def _opened(self) -> serial.Serial:
+        if self._ser is None:
+            raise TransportError(f'{self.port} is not open')
+        return self._ser
 
     def open(self):
         try:
@@ -205,16 +226,18 @@ class SerialTransport(Transport):
             self._ser.timeout = seconds
 
     def write(self, text):
+        ser = self._opened()
         try:
-            self._ser.write((text + self.settings.write_termination).encode('ascii'))
-            self._ser.flush()
+            ser.write((text + self.settings.write_termination).encode('ascii'))
+            ser.flush()
         except Exception as exc:
             raise TransportError(f'write {text!r} failed: {exc}') from exc
 
     def read(self):
+        ser = self._opened()
         term = self.settings.read_termination.encode('ascii')
         try:
-            data = self._ser.read_until(term)
+            data = ser.read_until(term)
         except Exception as exc:
             raise TransportError(f'read failed: {exc}') from exc
         if not data.endswith(term):
@@ -222,6 +245,8 @@ class SerialTransport(Transport):
         return data[:-len(term)].decode('ascii', 'replace')
 
     def clear(self):
+        if self._ser is None:
+            return
         try:
             self._ser.reset_input_buffer()
         except Exception:

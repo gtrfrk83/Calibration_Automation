@@ -20,6 +20,7 @@ from __future__ import annotations
 import json, math, queue, sys, threading, time
 from datetime import datetime
 from pathlib import Path
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
@@ -47,7 +48,7 @@ MODELS = SPEC['models']
 MODEL_INFO = SPEC['model_info']                # per model: channels, bandwidth_hz, bw_limits, counter_max_hz, option
 PLAIN_UNITS = {'%', 'dB', 'dBm', 'dBc', 'dBm/Hz', 'dBc/Hz', 'ratio', '', 'div'}
 
-FAMILY = dict(label='MDO3', settings='TektronixMDO3', panel='MDO3', default_model='34-1000', scope_addr='', hv_max=100.0, trig_out='AUX OUT',
+FAMILY: dict[str, Any] = dict(label='MDO3', settings='TektronixMDO3', panel='MDO3', default_model='34-1000', scope_addr='', hv_max=100.0, trig_out='AUX OUT',
               report_title='Tektronix 3 Series MDO performance verification',
               source='3 Series MDO Specifications and Performance Verification, 077-1499-10')
 CAL_MODEL = '5560A'
@@ -147,8 +148,9 @@ def uncertainty_parts(p, raw):
                 # each applied level: the larger of the 5560A DC budget and the scope's oscilloscope DC CMC (absolute volts); the two are combined
                 # in quadrature and shown as a percentage of the expected difference (CMC-only before: the budget is far below the CMC at every level)
                 bs = [uncertainty_budget.osc_dc(p[n], p['term'], CAL_MODEL, sc) for n in ('vneg', 'vpos')]
-                if all(b is not None and b.value for b in bs):
-                    return 100 * math.hypot(*[b.value for b in bs]) / abs(p['vdiff']), '%', 'si'
+                vals = [bv for b in bs if b is not None and (bv := b.value)]
+                if len(vals) == len(bs):                       # every level has a budget with a value
+                    return 100 * math.hypot(*vals) / abs(p['vdiff']), '%', 'si'
             if k == 'OFFSET':
                 b = uncertainty_budget.osc_dc(p['offset'], p['term'], CAL_MODEL, sc)
                 return (b.value, 'V', 'si') if b is not None else None
@@ -219,7 +221,7 @@ def tar_tur_fields(p, r):
         if p['kind'] == 'ABSAMP':
             import uncertainty_budget
             b = uncertainty_budget.rf_level_sweep(p)
-            acc, au = (b.hit.limit, 'dB') if b is not None else (None, None)
+            acc, au = (cast(Any, b.hit).limit, 'dB') if b is not None else (None, None)     # Budget.hit is set after construction (typed None there)
         if p['kind'] in ('OFFSET', 'DVMDC') and p['stim'] == 'cal':
             acc, au = tartur.standard_accuracy('5560A', 'DCV', abs(p['offset'] if p['kind'] == 'OFFSET' else p['nominal']))
         return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], acc, au, u, uu))
@@ -238,7 +240,11 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
         self.addrs = addrs
-        self.scope = self.cal = self.rf1 = self.rf2 = self.gen = self.dmm = self.counter = self.power = None
+        # scope and cal are required (always set below; None only while __init__ fails part-way). The others are optional: a point that
+        # needs one checks it first (Runner.need), so they are typed Any.
+        self.scope: drivers.TektronixMDO3 = cast(Any, None)
+        self.cal: drivers.Fluke5560A = cast(Any, None)
+        self.rf1: Any = None; self.rf2: Any = None; self.gen: Any = None; self.dmm: Any = None; self.counter: Any = None; self.power: Any = None
         t = transports or {}
         self._tr = t
         def tr(name, **kw):
@@ -993,7 +999,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             def __init__(s, io):
                 s.io, s.cfg = io, self.cfg
 
-            def request(s, kind, payload=None):
+            def request(s, kind, payload: Any = None):
                 return payload['p']['nominal'] if kind == 'manual' else True
 
             def post(s, *a, **k):
@@ -1084,9 +1090,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         set_virtual_pace(False)
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments; a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise drivers.InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_addrs(self):
@@ -1099,7 +1112,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def request(self, kind, payload):
         """Called on the worker thread: ask the main thread something and wait for the answer."""
-        box = dict(ev=threading.Event(), value=None)
+        box: dict[str, Any] = dict(ev=threading.Event(), value=None)
         self.q.put((kind, payload, box))
         while not box['ev'].wait(0.1):
             if self.stop and kind != 'reconnect_scope':
@@ -1114,7 +1127,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return False, 'This check is a pass / fail result of the instrument itself: there is no reading to type.'
         return True, ''
 
-    def mo_standby(self): self.io.all_outputs_off()
+    def mo_standby(self): self.connected_io().all_outputs_off()
 
     def mo_record(self, p, value, synthetic, extra):
         """The typed value is judged by judge() like every reading; no raw measurements are kept (the demo reading is recorded the same way)."""
@@ -1163,7 +1176,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _reconnect(self):
         try:
-            return self.io.reconnect_scope()
+            return self.connected_io().reconnect_scope()
         except Exception:
             return False
 
@@ -1228,7 +1241,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         except BaseException as exc:
             error = exc
         finally:
-            try: self.io.all_outputs_off()
+            try: self.connected_io().all_outputs_off()
             except Exception: pass
         self.post('done', error)
 

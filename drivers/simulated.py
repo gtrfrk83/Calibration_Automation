@@ -8,14 +8,54 @@ from __future__ import annotations
 
 import math
 import re
+from typing import Any
 
 from .transport import Transport, TransportError
 
 
 class SimBench:
+    # Settings the individual simulators attach at run time (they read them with getattr(bench, name, default)).
+    # Declared here for the type checker only: these lines create no attributes.
+    atten_db: Any
+    attenuator: Any
+    cable_loss_db: Any
+    connected: Any
+    counter_model: Any
+    ext_ref_present: Any
+    external_signal: Any
+    gen: Any
+    gen_transport: Any
+    mdo: Any
+    mdo_state: Any
+    meter: Any
+    model: Any
+    ppm: Any
+    ppm_counter: Any
+    ref_error: Any
+    rf_source: Any
+    std: Any
+    std_option: Any
+    std_unsettled: Any
+    tbs_bw_scale: Any
+    tbs_dc_balance_v: Any
+    tbs_diag_pass: Any
+    tbs_gain_error: Any
+    tbs_offset_err_v: Any
+    tbs_ppm: Any
+    tbs_spc_result: Any
+    tds_bw_scale: Any
+    tds_diag_pass: Any
+    tds_gain_error: Any
+    tds_pos_err_v: Any
+    tds_ppm: Any
+    tds_self_cal_result: Any
+    tds_trig_fault: Any
+    vrms_into: Any
+    wbaf_on: Any
+
     def __init__(self, gain_error=1.0005, offset_v=0.0001):
-        self.fluke = dict(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', ohms=50.02, wave='SINE', duty=50.0, offset=0.0)
-        self.scope = {}
+        self.fluke: dict[str, Any] = dict(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', ohms=50.02, wave='SINE', duty=50.0, offset=0.0)
+        self.scope: dict[str, Any] = {}
         self.gain_error, self.offset_v = gain_error, offset_v
         self.fail_next = None        # set to a substring to make the next matching command time out
         self.timebase_ratio = 1 + 1.2e-7     # simulated scope time base error (frequency reads high by 0.12 ppm)
@@ -65,6 +105,7 @@ class _SimBase(Transport):
 
     def open(self): self.opened = True
     def close(self): self.opened = False
+    def handle(self, cmd) -> Any: raise NotImplementedError
 
     def write(self, text):
         if not self.opened:
@@ -114,6 +155,7 @@ class SimFlukeTransport(_SimBase):
         if u == 'DUTY?': return f"{f['duty']:.3E}"
         if u.startswith('DC_OFFSET '):
             m = re.match(r'DC_OFFSET\s+([-+0-9.eE]+)\s*(MV|V)?$', u)
+            if m is None: raise TransportError(f'simulated: bad DC_OFFSET command {cmd!r}')
             f['offset'] = float(m.group(1)) * (0.001 if m.group(2) == 'MV' else 1.0); return None
         if u == 'DC_OFFSET?': return f"{f['offset']:+.5E}"
         if u == 'SCOPE MARKER': f['scope'], f['func'] = 'MARKER', 'SMARK'; return None
@@ -180,7 +222,7 @@ class SimFlukeTransport(_SimBase):
 
         if u == '*TRG':
             term = getattr(self.bench, 'mdo', {}).get('term')
-            ohms = {'1M': 1.0004e6, '250k': 250.2e3, '50': 50.01}.get(term, f['ohms'])
+            ohms = {'1M': 1.0004e6, '250k': 250.2e3, '50': 50.01}.get(term or '', f['ohms'])
             return f"{ohms:.4f},OHM"
         raise TransportError(f'simulated 5560A: unknown command {cmd!r}')
 

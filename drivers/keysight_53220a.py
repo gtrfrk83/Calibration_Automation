@@ -25,6 +25,7 @@ from __future__ import annotations
 import dataclasses
 import math
 import re
+from typing import Any
 
 import cmdreg
 from cmdreg import Cmd, Placeholder
@@ -179,7 +180,7 @@ def parse_options(reply):
     fields = [f.strip().strip('"\'').strip() for f in str(reply).strip().split(',')]
     fields += ['0'] * (5 - len(fields))
     tb, ch3, pulse = fields[0], fields[1], fields[2]
-    out = dict(timebase='010' if tb == '010' else 'std', ch3=ch3 if ch3 in ('106', '115') else None, pulse='150' if pulse == '150' else None, unknown=[])
+    out: dict[str, Any] = dict(timebase='010' if tb == '010' else 'std', ch3=ch3 if ch3 in ('106', '115') else None, pulse='150' if pulse == '150' else None, unknown=[])
     for name, val, ok in (('timebase', tb, ('0', '010')), ('ch3', ch3, ('0', '106', '115')), ('pulse', pulse, ('0', '150'))):
         if val not in ok:
             out['unknown'].append(f'{name}={val}')
@@ -300,7 +301,7 @@ class Keysight53220A(SurpriseMixin, Instrument):
             raise InstrumentError(f'{self.MODEL} reported an error{" after " + context if context else ""}: ' + ' | '.join(found))
 
     # ---- reference oscillator ----------------------------------------------------------------------------------------------
-    def read_reference(self):
+    def read_reference(self) -> dict[str, Any]:
         """The three non-volatile settings: source (INT / EXT), automatic selection, external frequency.  Read-only queries."""
         src = _text(self.ask('rosc.src.query'))
         auto = _flag(self.ask('rosc.auto.query'))

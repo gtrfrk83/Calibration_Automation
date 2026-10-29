@@ -18,6 +18,7 @@ import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Any, cast
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
@@ -36,7 +37,8 @@ from drivers.gpib_address import address_of, check_address
 
 MODEL = '6060A'
 SPEC_PATH = HERE / 'specs' / 'fluke_6060a_pv.json'
-SPEC = POINTS = None
+SPEC: dict[str, Any] = {}           # set by configure()
+POINTS: list[dict[str, Any]] = []
 UUT_ADDRESS = drivers.Fluke6060A.DEFAULT_ADDRESS          # the owner's lab addresses; each is an editable box and none is fixed in code
 RX_ADDRESS = drivers.HP8902A.DEFAULT_ADDRESS
 SA_ADDRESS = drivers.HP8563E.DEFAULT_ADDRESS
@@ -201,7 +203,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
     def __init__(self, addrs, lf_model=NO_LF, transports=None, mods=None):
         self.log = drivers.CommandLog()
-        self.gen = self.rx = self.sa = self.pm = self.lf = None
+        # gen is required (always set below; None only while __init__ fails part-way). The others are optional: a point that needs one
+        # checks it first with _need(), by name, which the type checker cannot follow, so they are typed Any.
+        self.gen: drivers.Fluke6060A = cast(Any, None)
+        self.rx: Any = None
+        self.sa: Any = None
+        self.pm: Any = None
+        self.lf: Any = None
         self.lf_model = lf_model
         self._reset_state()
         tr = dict(transports or {})
@@ -697,9 +705,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._prep_done = set()
         self._set_conn(None)
 
+    def connected_io(self) -> IO:
+        """The connected instruments (hardware mode); a clear error instead of a crash when they are not connected."""
+        if self.io is None:
+            raise InstrumentError('The instruments are not connected. Press Test connections first.')
+        return self.io
+
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -754,7 +769,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Specification', p['page'])]
         if image is None:
             facts.append(('Diagram', f'not installed (expected diagrams/hook_{MODEL}_{group}.png)'))
-        self.io.standby()
+        self.connected_io().standby()
         steps = [('RF off', 'The 6060A RF output is switched OFF (read back) before you rewire.'), ('Wiring', self.setup_text(p))]
         return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
             steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
@@ -785,7 +800,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """One calibration of the 8902A: the prompt (UI thread), the calibration (worker thread), the next one or the hook-up prompt."""
         name = preps[0]
         title, heading, steps, caution = self.PREP[name]
-        self.io.standby()
+        self.connected_io().standby()
         if not port.operator_prompt(title, heading, steps, facts=[('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description'])], caution=caution,
                                     ok='Connected - calibrate', parent=self.root):
             self.busy = False; self.status.set('Paused for calibration'); return
@@ -793,11 +808,11 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
         def work():
             try:
-                if name == 'rx_power': self.io.prep_rx_power()
-                else: self.io.prep_rx_mod('am' if name == 'rx_am' else 'fm')
+                if name == 'rx_power': self.connected_io().prep_rx_power()
+                else: self.connected_io().prep_rx_mod('am' if name == 'rx_am' else 'fm')
                 port.post(self.root, lambda: self._preps_done(points, i, p, key, name, preps[1:]))
             except Exception as exc:
-                try: self.io.standby()
+                try: self.connected_io().standby()
                 except Exception: pass
                 err = exc
                 port.post(self.root, lambda err=err: self._error(err))
@@ -842,16 +857,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         else:
             def work():
                 try:
-                    reading = self.io.measure(p)
+                    reading = self.connected_io().measure(p)
                     if isinstance(reading, TypedPoint):
                         port.post(self.root, lambda: self._typed_point(points, i, p, key, reading))
                     else:
                         port.post(self.root, lambda: self._done(points, i, p, reading, key))
                 except Exception as exc:
-                    try: self.io.standby()
+                    try: self.connected_io().standby()
                     except Exception: pass
                     if isinstance(exc, ReadingUnavailable):
-                        try: self.io.after_read_failure(p, exc)
+                        try: self.connected_io().after_read_failure(p, exc)
                         except Exception: pass
                         err = exc
                         port.post(self.root, lambda err=err: self._reading_failed(points, i, p, key, err))
@@ -868,7 +883,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     # ---- 4A-3: the power-on self test (prompt based)
     def _power_on_test(self, p):
-        self.io.standby()
+        self.connected_io().standby()
         return port.operator_prompt('Power-on self test', GROUP_TITLE['POWERON'],
             [('Power off and on', 'Switch the 6060A POWER switch off, then on.'), ('Watch', 'The self test runs: every indicator and display segment is on for about 5 seconds. If it passes, the generator goes to the '
                                                                                          'Instrument Preset state; if it fails the failure codes show in the four display fields.')],
@@ -881,7 +896,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
         def work():
             try:
-                self.io.after_power_cycle()
+                self.connected_io().after_power_cycle()
                 port.post(self.root, lambda: self._after_selftest(points, i, p, key, reading))
             except Exception as exc:
                 err = exc
@@ -896,7 +911,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def _typed_point(self, points, i, p, key, typed):
         self.status.set(f'Point {p["id"]}: read your distortion analyzer and type the value (RF output is ON).')
         entered = self.mo_ask(p, reason=typed.reason, cancel_text='Stop run')
-        try: self.io.standby()
+        try: self.connected_io().standby()
         except Exception as exc: self._error(exc); return
         self._mo_current = None
         if entered is None:

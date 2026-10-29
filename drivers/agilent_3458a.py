@@ -28,6 +28,7 @@ from __future__ import annotations
 import math
 import re
 import struct
+from typing import Any
 
 import cmdreg
 from cmdreg import Cmd, Placeholder
@@ -217,9 +218,10 @@ def set_read_termination(transport, term) -> None:
 def read_raw(transport, count: int) -> bytes:
     """Exactly `count` bytes with no termination handling (a LF inside binary data must not stop the read): the transport's own `read_raw`, else the pyvisa
     resource's `read_bytes`.  Raises TransportError when neither exists or the read fails."""
-    method = getattr(transport, 'read_raw', None)
+    method: Any = getattr(transport, 'read_raw', None)
     if callable(method):
-        return bytes(method(count))
+        data: Any = method(count)
+        return bytes(data)
     res = getattr(transport, '_res', None)
     if res is None or not hasattr(res, 'read_bytes'):
         raise TransportError('this transport cannot read binary data')
@@ -248,7 +250,7 @@ class OverloadError(InstrumentError):
     """The reading is the overload value (+-1E+38): the signal does not fit the range, or nothing is connected where a signal is expected."""
 
 
-def select_range(function: str, max_input: float):
+def select_range(function: str | None, max_input: float):
     """(nominal range, full scale) the max._input parameter selects for a function (UG p. 273-274).  Raises InstrumentError for a value no range holds."""
     if function not in RANGES:
         raise InstrumentError(f'3458A: no range table for function {function!r}')

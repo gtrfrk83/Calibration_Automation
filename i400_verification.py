@@ -21,6 +21,7 @@ import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
@@ -58,6 +59,11 @@ class _ScpiReading:
     """What the engine needs of a multimeter that the shared SCPI DMM driver (8846A, 34401A) does not have on its own.  Nothing is sent that the driver does not already send:
     configure_point is the driver's configure('ACI', range), check_errors reads its SYST:ERR? queue.  The AC filter is not set (the point's own range only)."""
     SHORT = ''
+    # type-only: provided by the SCPI DMM driver this is mixed into (annotations without values, so nothing changes at run time)
+    MODEL: Any
+    configure: Any
+    query_retry: Any
+    _error_code: Any
 
     def configure_point(self, point: dict):
         self.configure(point['kind'], float(point['range']))
@@ -179,7 +185,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
             self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
-        self.ident = 'manual entry (no multimeter)' if self.manual else self.dmm.idn
+        self.ident = 'manual entry (no multimeter)' if self.dmm is None else self.dmm.idn     # dmm is None exactly when manual
         self.guards = []
         if surprise_handler is not None:
             self.enable_surprise(surprise_handler)
@@ -539,8 +545,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._set_conn(None)
 
     def _set_conn(self, ok):
-        if hasattr(self, 'conn_pill'):
-            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+        pill = getattr(self, 'conn_pill', None)
+        if pill is not None:
+            pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -739,7 +746,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         """Manual entry: the calibrator output is ON at the point; the operator types the reading in mA, then the output goes to standby."""
         shim = dict(p, n=p['id'], test='numeric', dsb_desc=p['description'], section=p['section_title'], switch='AC mA  (clamp output cable on the multimeter current input)', range='')
         lo, hi = (p['nominal'] - p['error']) * 1000, (p['nominal'] + p['error']) * 1000
-        fill = dict(demo_fill=lambda: virtualbench.plausible_text(f'{lo:.6g}', f'{hi:.6g}', p['id'], self.virtual_failures())) if self.virtual else {}
+        fill: dict[str, Any] = dict(demo_fill=lambda: virtualbench.plausible_text(f'{lo:.6g}', f'{hi:.6g}', p['id'], self.virtual_failures())) if self.virtual else {}
         try:
             import handheld_dmm
             r = handheld_dmm.ask_reading(self.root, shim, len(POINTS), f'{p["applied"]["value"]:g} A at {p["applied"]["frequency"]:g} Hz through {p["turns"]} turn' + ('s' if p['turns'] != 1 else '')
@@ -817,7 +824,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if p['turns'] == 1:
             return dict(kind='ACI', nominal=a['value'], frequency=a['frequency'], unit='A', range=None), self.standard_for(p)
         nom, std, extra = coil_rule.uncertainty_source('ACI', p['clamp_amps'], a['value'], a['frequency'])
-        q = dict(kind='ACI', nominal=nom, frequency=a['frequency'], unit='A', range=None, extra=extra)
+        q: dict[str, Any] = dict(kind='ACI', nominal=nom, frequency=a['frequency'], unit='A', range=None, extra=extra)
         scale = coil_rule.uncertainty_scale('ACI', p['clamp_amps'], a['frequency'])
         if scale != 1.0:
             q['scale'] = scale

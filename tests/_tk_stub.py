@@ -56,13 +56,14 @@ MESSAGES = []
 
 
 def install():
-    """Put stub tkinter modules in sys.modules (only if the real one is missing); returns True when the stubs are in use (installed now or by an
-    earlier test module: several test modules call this, and they must all agree that tkinter is the stub), False when the real tkinter is there."""
-    try:
-        import tkinter
-        return bool(getattr(tkinter, '_cal_stub', False))
-    except Exception:
-        pass
+    """Put stub tkinter modules in sys.modules; returns True (the stubs are in use). Several test modules call this, and they must all agree that tkinter is the stub.
+    Always the stub, even where a real tkinter is installed: the tests are written against the do-nothing stand-ins (the real widgets need a display and a main loop).
+    Before, a real tkinter was left in place, so install_legacy_layer() found no 'tkinter.messagebox' stand-in and every test module that calls it failed to load."""
+    current = sys.modules.get('tkinter')
+    if current is not None and getattr(current, '_cal_stub', False):
+        return True
+    for name in [n for n in sys.modules if n == 'tkinter' or n.startswith('tkinter.')]:
+        del sys.modules[name]                       # a real tkinter, or the None entry some tests set to make `import tkinter` fail
     names = ('tkinter', 'tkinter.ttk', 'tkinter.messagebox', 'tkinter.simpledialog', 'tkinter.filedialog', 'tkinter.font', 'tkinter.scrolledtext')
     mods = {n: _Mod(n) for n in names}
     for n, m in mods.items():

@@ -283,7 +283,7 @@ class BK5491B(Instrument):
         try:
             while True:
                 try:
-                    b = bytes(res.read_bytes(1)) if res is not None else ser.read(1)
+                    b = bytes(res.read_bytes(1)) if res is not None else ser.read(1)  # pyright: ignore[reportOptionalMemberAccess]  (ser is set when res is None; checked above)
                 except Exception as exc:
                     if buf:                                         # silence after some characters: the line is complete
                         self.log.add('--', f'line taken as complete after {self.IDLE_END_S:g} s of silence: {bytes(buf)!r}', self.label)
