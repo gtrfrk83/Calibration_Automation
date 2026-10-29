@@ -46,7 +46,7 @@ CAL_TERMS = {
 METERS = {
     'mm325': dict(name='Klein Tools MM325', jacks={'vohm': 'VΩ', 'ma': 'VΩ µA mA', 'a10': '10A', 'com': 'COM'}),
     'fluke110': dict(name='Fluke 110 series', jacks={'vohm': 'VΩ', 'ma': 'VΩ', 'a10': 'A', 'com': 'COM'}),
-    # Fluke 83V / 87V / 88V (80 Series V): the 87V jacks; the 80 Series V Calibration Manual has no jack figure, so the 83V / 88V layout is taken to be the same (UNVERIFIED)
+    # Fluke 83V / 87V / 88V (80 Series V): the 87V jacks; the 87V hook-up drawings (hook_fluke87v_*) apply to all three meters (owner decision 2026-10-28); the technician sets up the meter
     'fluke87v': dict(name='Fluke 83V / 87V / 88V', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': '10A', 'com': 'COM'}),
     # Fluke 77 Series IV: jacks named as printed on the case (photo of the real terminals): 2 x 2 block, top-left '400 mA', bottom-left '10A'
     # (the two fused inputs), top-right 'V Ω' (red), bottom-right 'COM' (black)

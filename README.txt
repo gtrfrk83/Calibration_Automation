@@ -339,8 +339,8 @@ Fluke 83V / 87V / 88V (handheld multimeters, one spec for the family)
 Procedures/Fluke_83V_Verification.py, Fluke_87V_Verification.py, Fluke_88V_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_80_series_v_pv.json built by specs/build_80v_spec.py; diagrams: diagrams/hook_fluke87v_*)
   Table 3 "Accuracy Tests" of the Fluke 80 Series V Calibration Manual (printed pp. 9-11): 87V = the '87' column (56 points); 83V = the '83 and 88' column without the 87-only rows, Peak Min/Max and temperature (46);
   88V = the '83 and 88' column with Peak Min/Max and temperature (50). Each includes the display, pushbutton and backlight checks.
-  Calibrator: Fluke 5560A (the manual's) or 5522A, automatic or Manual. No remote interface: you type the display reading. HIGH VOLTAGE confirmation from 30 V, no ramp.
-  Not included: the 88V inductive pickup test (oscilloscope + function generator), the calibration ADJUSTMENT (Table 4).
+  Calibrator: Fluke 5560A (the manual's) or 5522A, automatic or Manual. No remote interface: you type the display reading. HIGH VOLTAGE confirmation from 30 V, once per hook-up group, no ramp.
+  The 87V hook-up drawings are used for all three meters. Not included: the 88V inductive pickup test (owner decision), the calibration ADJUSTMENT (Table 4).
   Rebuild after editing the table:  python3 specs/build_80v_spec.py     Demo with:  python Procedures/Fluke_87V_Verification.py --demo
 
 Tektronix TDS2000C / TDS1000C-EDU

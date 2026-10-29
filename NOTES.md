@@ -288,11 +288,12 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
   pushbutton test (p. 9) and backlight steps 51-53 as visual checks. Limits as printed, no corrections. The build checks each limit pair brackets the nominal and is symmetric (low pass filter rows excepted).
 - NOT checked against the published accuracy: the Users Manual specifications are not in the calibration manual and were not supplied.
 - Changes against the old MDD spec (the manual wins): AC volts frequency 99.93..99.97 kHz (MDD 99.94..99.96); capacitance 5 nF 4.7..5.3 nF (MDD 4.75..5.25); 9.5 uF on the 100 uF range (MDD row differed);
-  open capacitance 0.21..0.31 nF (MDD '0.21 to 31'); 33B 10 A DC added; step 15 (DC volts Hz trigger level) is now SOURCED: 3.4 V p-p square wave, 1 kHz, no offset (manual prints no offset: UNVERIFIED);
-  capacitance 5 nF uses the REL offset prompt (footnote 5); HIGH VOLTAGE confirmation from 30 V (was 60 V: the meter's own high-voltage indicator, Table 2 item F).
-- Not built: the 88V inductive pickup test (pp. 11-14: function generator burst, oscilloscope). The calibration ADJUSTMENT (Table 4) is not built.
-- UNVERIFIED (confirm on the real meters): dial positions / yellow-button sequence (the manual has no dial figure; names are the 'Test Function' column); the 83V / 88V jack layout (taken as the 87V's;
-  hook-up diagrams are the existing hook_fluke87v_* PNGs, drawn as an 87V); which key enters Peak Min Max; the 5560A square-wave commands (unchanged from the old 87V: WAVE / DUTY / DC_OFFSET not verified on the 5560A).
+  open capacitance 0.21..0.31 nF (MDD '0.21 to 31'); 33B 10 A DC added; step 15 (DC volts Hz trigger level) is now SOURCED: 3.4 V p-p square wave, 1 kHz, no DC offset;
+  capacitance 5 nF uses the REL offset prompt (footnote 5); HIGH VOLTAGE confirmation from 30 V (the meter's own high-voltage indicator, Table 2 item F), once per hook-up group (`hv_once_per_group`).
+- Owner decisions 2026-10-28: step 15 has no DC offset (confirmed); HIGH VOLTAGE once per hook-up group; the 88V inductive pickup test (pp. 11-14) is NOT built; the technician sets up the meter for each
+  point (dial position, yellow button, range, Peak Min Max) from the prompt, nothing further to verify; the existing 87V hook-up drawings (hook_fluke87v_*) apply to all three meters.
+  The calibration ADJUSTMENT (Table 4) is not built.
+- Still not verified: the 5560A square-wave commands (unchanged from the old 87V: WAVE / DUTY / DC_OFFSET not verified on the 5560A); the limits against the Users Manual accuracy (not supplied).
 - Square-wave and temperature points keep the old 87V mechanisms (compound WAVE/OUT/DC_OFFSET line, DUTY, read-backs, WAVE SINE restored; TEMP in degC). Tests: `tests/test_80v_points.py`.
 
 ## Fluke 77 Series IV notes (branch `fluke-77`; checked on the simulated bench only, never run on hardware or a real UI)

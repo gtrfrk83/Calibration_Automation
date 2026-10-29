@@ -3981,16 +3981,6 @@
    "unit": "V"
   },
   {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 33 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
    "annunciator": false,
    "answer": {
     "action": "record",
@@ -4007,16 +3997,6 @@
    "text": "33 V AC @ 20 kHz",
    "title": "point 3-6",
    "unit": "V"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 330 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
   },
   {
    "annunciator": false,
@@ -4037,16 +4017,6 @@
    "unit": "V"
   },
   {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 330 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
    "annunciator": false,
    "answer": {
     "action": "record",
@@ -4065,16 +4035,6 @@
    "unit": "V"
   },
   {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
    "annunciator": false,
    "answer": {
     "action": "record",
@@ -4091,16 +4051,6 @@
    "text": "500 V AC @ 60 Hz",
    "title": "point 3-9.87",
    "unit": "V"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
   },
   {
    "annunciator": false,
@@ -4487,16 +4437,6 @@
    "unit": "V"
   },
   {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 33 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
    "annunciator": false,
    "answer": {
     "action": "record",
@@ -4515,16 +4455,6 @@
    "unit": "V"
   },
   {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 330 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
    "annunciator": false,
    "answer": {
     "action": "record",
@@ -4541,16 +4471,6 @@
    "text": "330 V DC",
    "title": "point 3-19.87",
    "unit": "V"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
   },
   {
    "annunciator": false,
@@ -5923,16 +5843,6 @@
    "text": "400 V AC @ 400 Hz",
    "title": "point 3-45",
    "unit": "V"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 400 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
   },
   {
    "annunciator": false,

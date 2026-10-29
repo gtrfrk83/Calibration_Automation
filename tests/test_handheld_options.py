@@ -200,6 +200,15 @@ class FunctionPrompt(unittest.TestCase):
             pts = {p['n']: p for p in f.app.points}
             hv_points = [p for p in f.app.points if f.app._high_voltage(p)]
             hv_texts = [e[1] for e in f.events if e[0] == 'hv']
+            if f.app.spec['options'].get('hv_once_per_group'):                  # 80 Series V (owner decision 2026-10-28): once per hook-up group
+                first, group, asked = [], None, False                                 # the question is asked again only after the hook-up group changes
+                for p in f.app.points:
+                    if p['group'] != group:
+                        group, asked = p['group'], False
+                    if p in hv_points and not asked:
+                        first.append(p)
+                        asked = True
+                hv_points = first
             self.assertEqual(len(hv_texts), len(hv_points), model)
             texts[model] = dict(zip([p['id'] for p in hv_points], hv_texts))
         self.assertFalse([i for i, t in texts['87V'].items() if 'ramp' in t])

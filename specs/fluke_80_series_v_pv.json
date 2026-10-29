@@ -4,6 +4,7 @@
  "options": {
   "hookup_meter": "fluke87v",
   "hv_threshold_v": 30,
+  "hv_once_per_group": true,
   "auto_ramp": false,
   "function_prompt": true,
   "report_title": "Calibration Data"
@@ -14,7 +15,7 @@
   "cite": "Fluke 80 Series V Calibration Manual, Table 3 \"Accuracy Tests\", printed pp. 9-11",
   "limits": "Manufacturer limits, Table 3 (1 year), as printed",
   "report_note": "Limits are the manufacturer's, as printed in the Fluke 80 Series V Calibration Manual, Table 3 \"Accuracy Tests\" (printed pp. 9-11), \"83 and 88\" or \"87\" column as applies to the model.",
-  "note": "Table 3 \"Accuracy Tests\" (printed pp. 9-11) of the Fluke 80 Series V Calibration Manual, two Display Reading columns (\"83 and 88\", \"87\"); plus the display test (p. 7), the pushbutton test (p. 9) and the backlight steps 51-53. 87V: all rows. 83V: the \"83 and 88\" column without steps 2, 4, 6, 8, 45, 46 (N/A), 47 (no Peak Min/Max, footnote 7) and 49-50 (temperature, 87 and 88 only). 88V: the \"83 and 88\" column with steps 47 and 49-50. Not built: the 88V inductive pickup test (pp. 11-14, oscilloscope and function generator). Limits as printed (no corrections). The manual names a Fluke 5560A; the procedure drives a Fluke 5560A or 5522A (or you set the calibrator by hand). High-voltage points go straight to the test value (the manual prescribes no ramp). The meters have no remote interface: you type the display reading. Function names are the manual's own (Table 3, \"Test Function\"); the manual has no dial figure and names no button sequence, so confirm the position (and any yellow-button press) on the real meter."
+  "note": "Table 3 \"Accuracy Tests\" (printed pp. 9-11) of the Fluke 80 Series V Calibration Manual, two Display Reading columns (\"83 and 88\", \"87\"); plus the display test (p. 7), the pushbutton test (p. 9) and the backlight steps 51-53. 87V: all rows. 83V: the \"83 and 88\" column without steps 2, 4, 6, 8, 45, 46 (N/A), 47 (no Peak Min/Max, footnote 7) and 49-50 (temperature, 87 and 88 only). 88V: the \"83 and 88\" column with steps 47 and 49-50. Not built (owner decision): the 88V inductive pickup test (pp. 11-14, oscilloscope and function generator). Limits as printed (no corrections). The manual names a Fluke 5560A; the procedure drives a Fluke 5560A or 5522A (or you set the calibrator by hand). High-voltage points go straight to the test value (the manual prescribes no ramp); the HIGH VOLTAGE confirmation (30 V and above) is asked once per hook-up group. The meters have no remote interface: you type the display reading. Function names are the manual's own (Table 3, \"Test Function\"). The technician sets the meter up for each point: rotary switch position, range, any yellow-button press and Peak Min Max, as the prompt names them."
  },
  "models": {
   "83V": {

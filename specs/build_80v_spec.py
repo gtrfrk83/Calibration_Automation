@@ -13,8 +13,7 @@ One family spec, three models.  Table 3 prints two Display Reading columns: '83 
   * 'N/A' in the 83 and 88 column (steps 2, 4, 6, 8 AC volts at high frequency, 45 and 46 low pass filter) = 87V only.
   * Step 47 Peak Min/Max: '87 and 88 only'; footnote 7 'The Fluke-83 V does not have a Peak Min/Max function' -> 87V and 88V.
   * Steps 49 / 50 temperature: '87 and 88 only' -> 87V and 88V.
-Not built: 'Testing the Inductive Pickup (88 Only)' (printed pp. 11-14: function generator burst into a 10 ohm loop, oscilloscope reading of the pickup output).
-It needs an oscilloscope and a function generator, not the calibrator, and is left for the owner to decide (see the report).
+Not built (owner decision 2026-10-28): 'Testing the Inductive Pickup (88 Only)' (printed pp. 11-14: function generator burst into a 10 ohm loop, oscilloscope reading of the pickup output).
 
 The published accuracy specifications (80 Series V Users Manual) are NOT in the calibration manual and were not supplied, so the limits are not checked
 against them here: the build checks only that every numeric limit pair brackets its nominal reading and (where the row is a plain accuracy test) is
@@ -42,7 +41,7 @@ UNITS = {'Ω': ('1', 'ohm'), 'kΩ': ('1000', 'ohm'), 'MΩ': ('1000000', 'ohm'), 
          'nS': ('0.000000001', 'S'), '%': ('1', '%')}
 
 # rotary switch / function text shown by the "Change the function" prompt.  The names are Table 3's own 'Test Function' column; the manual has no
-# figure of the dial and does not say which positions need the yellow (shift) button, so the button sequence is NOT verified (see NOTE_DIAL).
+# figure of the dial and names no button sequence: the technician sets the meter up for each function (owner decision 2026-10-28, see NOTE_DIAL).
 SW = {
     'acv': 'V~  (AC volts)',
     'hzac': 'V~ Hz  (AC volts frequency)',
@@ -64,8 +63,8 @@ SW = {
     'peak': 'V⎓  (DC volts, Peak Min/Max)',
     'temp': 'mV⎓  (Temperature)',
 }
-NOTE_DIAL = ('Function names are the manual\'s own (Table 3, "Test Function"); the manual has no dial figure and names no button sequence, '
-             'so confirm the position (and any yellow-button press) on the real meter.')
+NOTE_DIAL = ('Function names are the manual\'s own (Table 3, "Test Function"). The technician sets the meter up for each point: rotary switch position, '
+             'range, any yellow-button press and Peak Min Max, as the prompt names them.')
 NOTE_OHMS_COMP = 'Table 3 footnote 1: use 2-wire compensation at the calibrator (the program sets it), or short the test leads and use REL to offset the lead resistance.'
 NOTE_CAP_REL = ('Table 3 footnote 5: use REL to compensate for the internal meter and lead capacitance. The test leads must be disconnected from the calibrator '
                 'before using REL.')
@@ -98,7 +97,7 @@ ROWS = [
     ('13', 'AC volts frequency sensitivity', 'hzac', '6 V', 'ACV', 0.7, 99950, 'kHz', '0.01', ('99.93', '99.97'), ('99.93', '99.97'), dict(hzread=True)),
     ('14', 'AC volts frequency sensitivity', 'hzac', '60 V', 'ACV', 7, 99950, 'kHz', '0.01', ('99.93', '99.97'), ('99.93', '99.97'), dict(hzread=True)),
     # step 15 '3.4 V, 1 kHz Sq. Wave': a square-wave level, read as peak-to-peak like step 16's '5 V ... DC offset 2.5 V' (5522A square amplitude is p-p, Operators Manual p. 4-42);
-    # no DC offset is printed, so none is set (UNVERIFIED, see the report)
+    # no DC offset is printed, so none is set (confirmed by the lab owner 2026-10-28)
     ('15', 'DC volts frequency trigger level', 'hzdc', '6 V', 'ACV', 3.4, 1000, 'Hz', '0.1', ('999.8', '1000.2'), ('999.8', '1000.2'),
      dict(hzread=True, square=dict(waveform='square', duty=50.0, offset=0.0))),
     ('16', 'DC volts duty cycle', 'duty', '6 V', 'DUTY', 5.0, 1000, '%', '0.1', ('49.7', '50.3'), ('49.7', '50.3'), dict(square=dict(duty=50.0, offset=2.5), nominal=50.0)),
@@ -312,9 +311,9 @@ def build_steps():
 SOURCE_NOTE = (
     'Table 3 "Accuracy Tests" (printed pp. 9-11) of the Fluke 80 Series V Calibration Manual, two Display Reading columns ("83 and 88", "87"); plus the display test (p. 7), '
     'the pushbutton test (p. 9) and the backlight steps 51-53. 87V: all rows. 83V: the "83 and 88" column without steps 2, 4, 6, 8, 45, 46 (N/A), 47 (no Peak Min/Max, '
-    'footnote 7) and 49-50 (temperature, 87 and 88 only). 88V: the "83 and 88" column with steps 47 and 49-50. Not built: the 88V inductive pickup test (pp. 11-14, '
+    'footnote 7) and 49-50 (temperature, 87 and 88 only). 88V: the "83 and 88" column with steps 47 and 49-50. Not built (owner decision): the 88V inductive pickup test (pp. 11-14, '
     'oscilloscope and function generator). Limits as printed (no corrections). The manual names a Fluke 5560A; the procedure drives a Fluke 5560A or 5522A (or you set the '
-    'calibrator by hand). High-voltage points go straight to the test value (the manual prescribes no ramp). The meters have no remote interface: you type the display reading.')
+    'calibrator by hand). High-voltage points go straight to the test value (the manual prescribes no ramp); the HIGH VOLTAGE confirmation (30 V and above) is asked once per hook-up group. The meters have no remote interface: you type the display reading.')
 REPORT_NOTE = ('Limits are the manufacturer\'s, as printed in the Fluke 80 Series V Calibration Manual, Table 3 "Accuracy Tests" (printed pp. 9-11), '
                '"83 and 88" or "87" column as applies to the model.')
 
@@ -326,7 +325,7 @@ def build_spec():
     count = {m: sum(1 for s in steps if m in s['models']) for m in MODELS}
     return dict(
         schema=2, kind='manual-reading',
-        options=dict(hookup_meter='fluke87v', hv_threshold_v=30, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
+        options=dict(hookup_meter='fluke87v', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
         source=dict(document=DOCUMENT,
                     pages='6-11 (printed): Table 1 p. 6, display test p. 7, pushbutton test p. 9, Table 3 pp. 9-11',
                     cite='Fluke 80 Series V Calibration Manual, Table 3 "Accuracy Tests", printed pp. 9-11',
