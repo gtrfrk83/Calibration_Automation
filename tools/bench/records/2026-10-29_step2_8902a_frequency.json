@@ -1,0 +1,326 @@
+{
+ "step": 2,
+ "owner_ok": "OK STEP 2 (2026-10-29 07:22)",
+ "started": "2026-10-29T07:25:12",
+ "events": [
+  {
+   "t": 0.272,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "ID",
+   "reply": "6060A/AN\n",
+   "error": null,
+   "seconds": 0.015,
+   "note": ""
+  },
+  {
+   "t": 0.321,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.048,
+   "note": "clear any old rejected entry (read)"
+  },
+  {
+   "t": 0.323,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF off first"
+  },
+  {
+   "t": 0.329,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "FR111.1111MZ",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 0.332,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-10DB",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 0.863,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.03,
+   "note": "rejected entries after the writes (000000,... = none)"
+  },
+  {
+   "t": 0.942,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABBAEEBBAGBLKKLIAC\n",
+   "error": null,
+   "seconds": 0.078,
+   "note": "read back"
+  },
+  {
+   "t": 2.987,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "before"
+  },
+  {
+   "t": 3.072,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "IP",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 8.059,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after IP + 3 s"
+  },
+  {
+   "t": 8.094,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "M5",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 8.166,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "7.1SP",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 11.148,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after M5 7.1SP + 1 s"
+  },
+  {
+   "t": 17.636,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF ON"
+  },
+  {
+   "t": 18.665,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.027,
+   "note": "UNCAL codes with RF on (000000,000000,000000 = none)"
+  },
+  {
+   "t": 18.69,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 18.728,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T3",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 38.77,
+   "who": "8902A",
+   "kind": "query",
+   "cmd": null,
+   "reply": null,
+   "error": "VisaIOError: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.",
+   "seconds": 20.041,
+   "note": "reading 1 (talk)"
+  },
+  {
+   "t": 39.622,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after reading 1"
+  },
+  {
+   "t": 39.646,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 39.682,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T3",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 59.723,
+   "who": "8902A",
+   "kind": "query",
+   "cmd": null,
+   "reply": null,
+   "error": "VisaIOError: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.",
+   "seconds": 20.041,
+   "note": "reading 2 (talk)"
+  },
+  {
+   "t": 59.731,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after reading 2"
+  },
+  {
+   "t": 59.76,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 59.794,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T3",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 79.834,
+   "who": "8902A",
+   "kind": "query",
+   "cmd": null,
+   "reply": null,
+   "error": "VisaIOError: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.",
+   "seconds": 20.039,
+   "note": "reading 3 (talk)"
+  },
+  {
+   "t": 80.689,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after reading 3"
+  },
+  {
+   "t": 90.99,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF off at the end"
+  },
+  {
+   "t": 91.52,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000400\n",
+   "error": null,
+   "seconds": 0.029,
+   "note": "RF off is confirmed when field 3 has 400"
+  }
+ ],
+ "readback_before_rf": {
+  "frequency_hz": 111111100,
+  "amplitude_dbm": -10.0,
+  "ir": "000000,000000,000000\n"
+ },
+ "operator_cable_confirm": "YES",
+ "readings": [
+  {
+   "n": 1,
+   "raw": null,
+   "decoded": null,
+   "status": 0
+  },
+  {
+   "n": 2,
+   "raw": null,
+   "decoded": null,
+   "status": 0
+  },
+  {
+   "n": 3,
+   "raw": null,
+   "decoded": null,
+   "status": 0
+  }
+ ],
+ "display": "111.11110",
+ "rf_off_confirmed": true,
+ "finished": "2026-10-29T07:26:43"
+}

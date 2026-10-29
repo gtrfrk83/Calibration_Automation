@@ -15,3 +15,9 @@ means GPIB0::14 and reaches the wrong instrument (the 2026-10-28 hang). Python 3
 - 96270A: *IDN? -> "Fluke,96270A,398472732,1.17"; INST:CAT? -> "SINE,SWEEP,AM,FM,PM,FCO,PMET"; PMET1:IDN? and PMET2:IDN? -> "NONE,NONE,NONE,NONE":
   NO POWER SENSOR IS SEEN (the NRP40T is not connected, or not recognised). PMET1:FREQ? -> "5.0E+7" (the manual gives *RST 1E6).
 - LF generator: not run (no address given).
+
+## 2026-10-29 step 2, 6060A RF on, 8902A frequency (2026-10-29_step2_8902a_frequency.json)
+- 6060A: RO0, FR111.1111MZ, AP-10DB accepted (IR 000000,000000,000000); LM99 read back 111 111 100 Hz and -10.0 dBm (characters 25-32 and 9-12 decode as the
+  driver does); RO1 -> IU 000000,000000,000000; RO0 -> IU 000000,000000,000400 (RF off confirmed).  VERIFIED on the bench: FR..MZ, AP..DB, RO0/RO1, IR, IU, LM99.
+- 8902A: IP, M5, 7.1SP, then T1 T3: the DISPLAY read 111.11110 MHz but nothing came over the bus in 20 s, three times; status byte 0 throughout.
+  (With the RF off the same sequence returned error 96 at once.)  Step 3 looks for the way the reading is handed over.
