@@ -295,6 +295,27 @@ def encode_learn(state: dict) -> str:
     return ''.join(chr(65 + n) for n in nibs)
 
 
+
+# ---- bench records (bench-first driver workflow, NOTES.md; tools/bench/records/README.md): the real reply each command gave on the owner's unit.  This does NOT
+# flip `verified` by itself (that also needs a driver_verify pass); it puts the recorded evidence next to the manual page in `ref`.
+def _bench(table):
+    import dataclasses
+    for key, text in table.items():
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, ref=f'{c.ref}; BENCH {text}')
+
+_bench({
+    'id': '2026-10-29 step 1: "6060A/AN" + LF (no CR)',
+    'ir.query': '2026-10-29 steps 1-4: three 6-digit octal fields "000000,000000,000000"; "000020,..." = a syntax error left from an earlier session',
+    'iu.query': '2026-10-29 steps 1-4: "000000,000000,000400" with RF off, "000000,000000,000000" with RF on at -10 dBm',
+    'io.query': '2026-10-29 step 1: "5,0,1" (field 3 = 1: Option -870 reverse-power protection; field 1 is 5, the manual says 3)',
+    'ii.query': '2026-10-29 step 1: "00004"', 'im.query': '2026-10-29 step 1: "00192" (decimal)', 'xa.query': '2026-10-29 step 1: "00023" with RF off',
+    'lm.query': '2026-10-29 steps 1-4: 64 letters; characters 25-32 = 111 111 100 Hz and 9-12 = -10.0 dBm after FR111.1111MZ / AP-10DB',
+    'fr.set': '2026-10-28 FR111.11110MZ and 2026-10-29 FR111.1111MZ accepted (IR all zero, LM99 111 111 100 Hz)',
+    'ap.set': '2026-10-29 AP-10DB accepted (IR all zero, LM99 -10.0 dBm)',
+    'ro.on': '2026-10-29 steps 2-4: IU third field 000400 -> 000000', 'ro.off': '2026-10-29 steps 2-4: IU third field 000000 -> 000400 (RF off confirmed)',
+})
+
 class Fluke6060A(Instrument):
     MODEL = 'Fluke 6060A'
     IDN_MATCH = ('6060A',)

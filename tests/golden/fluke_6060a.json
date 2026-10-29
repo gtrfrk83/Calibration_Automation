@@ -2179,7 +2179,6 @@
    "call": "250.0",
    "case": "HP8902A.measure_frequency_hz[no signal]",
    "log": [
-    "8902A|>>|250MZ",
     "8902A|>>|M5",
     "8902A|>>|7.1SP",
     "8902A|--|serial poll -> 0",
@@ -2191,14 +2190,6 @@
    "method": "HP8902A.measure_frequency_hz",
    "result": "raised InstrumentError: 8902A error 96: no input signal sensed (HP-IB only): the receiver sees no signal at its RF input (display \"--\") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT (reading +9000009600E+01)",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
     [
      "sleep",
      0.05
@@ -2265,7 +2256,6 @@
    "call": "250.0",
    "case": "HP8902A.measure_frequency_hz",
    "log": [
-    "8902A|>>|250MZ",
     "8902A|>>|M5",
     "8902A|>>|7.1SP",
     "8902A|--|serial poll -> 0",
@@ -2277,14 +2267,6 @@
    "method": "HP8902A.measure_frequency_hz",
    "result": "returned 250000010.0",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
     [
      "sleep",
      0.05
@@ -2351,7 +2333,6 @@
    "call": "250.0, 100",
    "case": "HP8902A.measure_frequency_hz[100 Hz resolution]",
    "log": [
-    "8902A|>>|250MZ",
     "8902A|>>|M5",
     "8902A|>>|7.2SP",
     "8902A|--|serial poll -> 0",
@@ -2363,14 +2344,6 @@
    "method": "HP8902A.measure_frequency_hz",
    "result": "returned 250000000.0",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
     [
      "sleep",
      0.05

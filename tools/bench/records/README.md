@@ -27,3 +27,9 @@ GET after T1, GET alone, T3 with the data-ready mask, T2, T0, 7.0SP + T3, T3 wit
 every read timed out. With 22.3SP the serial poll read 65 (data ready + RQS) right after the setup and again right after T3: the receiver HAD a reading ready.
 The reads of steps 2 and 3 ended on EOI only; the RF-off probe (whose read ended at LF) got its error word at once. Conclusion to confirm in step 4: the
 8902A does not assert EOI with a reading, so the read must end at the LF of its CR LF (drivers/hp_8902a.py _line_ends already does this since 2026-10-28).
+
+## 2026-10-29 step 4, the same as step 2 with the 8902A read ending at LF (2026-10-29_step4_8902a_read_to_lf.json)
+CONFIRMED: IP, M5, 7.1SP, T1, T3, read (ends at LF) -> "+0011111109E+01" CR LF, "+0011111108E+01", "+0011111109E+01" = 111 111 090 / 080 / 090 Hz, 1.4 to 2.7 s after T3,
+display 111.11109. The 8902A does not assert EOI with a reading. The driver reads to LF (since 2026-10-28) and no longer sends a tune code before M5.
+The 8902A reads 10 to 20 Hz BELOW the 6060A's 111 111 100 Hz: one to two counts at 10 Hz. The two were most likely on separate time bases (4A-4 step a connects the
+6060A 10 MHz IN/OUT to the counter's reference input): to be checked before 4A-4 is judged (limit +/- 1 count).

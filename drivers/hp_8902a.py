@@ -163,6 +163,25 @@ class RecalRequired(InstrumentError):
     """The receiver's RECAL / UNCAL flag (status bit 5) is set after a tuned-RF-level reading: calibrate_tuned_level() at a constant level."""
 
 
+
+
+# ---- bench records (bench-first driver workflow, NOTES.md; tools/bench/records/README.md): the real reply each command gave on the owner's unit.  This does NOT
+# flip `verified` by itself (that also needs a driver_verify pass); it puts the recorded evidence next to the manual page in `ref`.
+def _bench(table):
+    import dataclasses
+    for key, text in table.items():
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, ref=f'{c.ref}; BENCH {text}')
+
+_bench({
+    'reset': '2026-10-29: IP accepted, status byte 0 after 3 s',
+    'id': '2026-10-28 and 2026-10-29: NO reply to ID (time-out); the driver connects on a serial poll instead',
+    'func.freq': '2026-10-29 step 4: IP, M5, 7.1SP, T1, T3 -> "+0011111109E+01" CR LF = 111 111 090 Hz with the 6060A at 111.1111 MHz (display 111.11109)',
+    'res.set': '2026-10-29 steps 2-4: 7.1SP gives a 10 Hz display (111.11110); 7.0SP gave 111.1111', 'trig.hold': '2026-10-29 step 4 (see func.freq)',
+    'trig.settle': '2026-10-29 step 4: the reading came 1.4 to 2.7 s after T3. The receiver does NOT assert EOI with a reading: a read must end at the LF of its CR LF '
+                   '(steps 2 and 3, reads ending on EOI only, timed out with data ready in the status byte)',
+})
+
 class HP8902A(Instrument):
     MODEL = 'HP 8902A'
     IDN_MATCH = ()                       # the ID reply is not printed in the manual: kept as read, see connect()
@@ -373,7 +392,9 @@ class HP8902A(Instrument):
         old firmware) or None (auto). The accuracy is that of the time base (internal 10 MHz, or the external reference the receiver switches to by itself)."""
         if resolution_hz not in RESOLUTION_SF:
             raise InstrumentError(f'frequency resolution {resolution_hz!r} is not one of {list(RESOLUTION_SF)}')
-        steps = [self._tune(carrier_mhz), ('func.freq', {}), ('res.set', {'n': RESOLUTION_SF[resolution_hz]})]
+        # Bench 2026-10-29 (step 4): the sequence that returned the reading was IP ... M5, 7.1SP, T1, T3 with NO tune code (the counter finds the signal by itself);
+        # carrier_mhz is kept in the signature for the callers but is no longer sent.
+        steps = [('func.freq', {}), ('res.set', {'n': RESOLUTION_SF[resolution_hz]})]
         self._setup(steps, 'frequency setup')
         timeout = self.SLOW_FREQ_TIMEOUT_S if resolution_hz == 0.1 else self.DEFAULT_TIMEOUT
         value = self._trigger_read(timeout)

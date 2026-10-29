@@ -593,14 +593,14 @@ class EightNineOhTwo(_NoSleep):
     def test_frequency_command_order_and_value(self):
         bench, src, rx, t = connected_8902a(mhz=111.1111)
         f = rx.measure_frequency_hz(111.1111, 10)
-        self.assertEqual(t.sent, ['111.1111MZ', 'M5', '7.1SP', 'T1', 'T3'])
+        self.assertEqual(t.sent, ['M5', '7.1SP', 'T1', 'T3'])          # bench 2026-10-29 step 4: no tune code
         self.assertAlmostEqual(f, 111_111_100, delta=20)
         self.assertEqual(rf_state(bench)['frequency_hz'], 111_111_100)
 
     def test_frequency_resolutions_and_the_slow_mode_timeout(self):
         bench, src, rx, t = connected_8902a()
         self.assertEqual(rx.measure_frequency_hz(None, 1000) % 1000, 0)
-        self.assertIn('AU', t.sent)
+        self.assertNotIn('AU', t.sent)                                  # no tune code at all (bench 2026-10-29)
         t.timeouts.clear()
         rx.measure_frequency_hz(100.0, 0.1)
         self.assertIn('7.4SP', t.sent)

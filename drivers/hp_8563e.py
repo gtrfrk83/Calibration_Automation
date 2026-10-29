@@ -120,6 +120,23 @@ COMMANDS = {
 }
 
 
+
+
+# ---- bench records (bench-first driver workflow, NOTES.md; tools/bench/records/README.md): the real reply each command gave on the owner's unit.  This does NOT
+# flip `verified` by itself (that also needs a driver_verify pass); it puts the recorded evidence next to the manual page in `ref`.
+def _bench(table):
+    import dataclasses
+    for key, text in table.items():
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, ref=f'{c.ref}; BENCH {text}')
+
+_bench({
+    'id.query': '2026-10-29 step 1: "HP8563E" + LF', 'err.query': '2026-10-29 step 1: "112,111" + LF (left from earlier); "0" after IP on 2026-10-28',
+    'cf.query': '2026-10-29 step 1: "1.3250000000E10"', 'sp.query': '2026-10-29 step 1: "2.6500000000E10"', 'rl.query': '2026-10-29 step 1: "0 " (trailing space)',
+    'at.query': '2026-10-29 step 1: "10 "', 'rb.query': '2026-10-29 step 1: "1.0000E6"', 'vb.query': '2026-10-29 step 1: "1.0000E6"', 'st.query': '2026-10-29 step 1: "5.3000E-1"',
+    'aunits.query': '2026-10-29 step 1: "DBM"', 'sweep.done': '2026-10-28: TS;DONE?; -> "1" after 1.2 s',
+})
+
 class HP8563E(Instrument):
     MODEL = 'HP 8563E'
     IDN_MATCH = ('8563',)
