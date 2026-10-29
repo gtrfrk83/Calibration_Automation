@@ -2259,3 +2259,7 @@ Standards Specs tab > Check an EMU (qtui/screens/standards_specs.CheckDialog, mo
 Nothing shared changed: the calculator restricts a copy of the standard (emu_check_model._Restricted) and calls uncertainty_budget.build / rf_level as the engines do.
 Tests: tests/test_emu_check_model.py (FullyFledged). The Qt window itself is compile-checked only here (PySide6 is not installable in the sandbox); its logic was run against
 stand-in widgets. Check it on the bench PC.
+
+### 6060A: 4A-6 on the 8902A (owner, 2026-10-29)
+4A-6 mid level (-24 to -66 dBm, 40 points) is measured with the 8902A tuned RF level, like 4A-7 and 4A-8: the R&S NRP40T is a thermal sensor (-35 to +20 dBm) and cannot
+reach -66 dBm. Deviation from the printed method, flagged on the first point and in the section note. 4A-5 high level (+12 to -12 dBm) stays on the 96270A + NRP40T.

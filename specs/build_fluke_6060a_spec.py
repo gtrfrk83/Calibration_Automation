@@ -134,13 +134,15 @@ def build_spec():
             flags=(['The sum is (M0 - 12) plus the section errors 1 to 7 (section 0\'s own section error is its level error M0 - 12, so it is not repeated as a separate row).'] if fi == 0 else []))
     # ---- 4A-6 mid level ------------------------------------------------------------------------------------------------------------------------------
     s = section('4A-6', '4A-6 Mid-level accuracy test', PAGES['4A-6'],
-                'Power sensor (96270A power-meter mode with the R&S NRP40T) on the RF OUTPUT. The sensor is zeroed with the 6060A RF off at each frequency. Levels -24 to -66 dBm in 6 dB steps.', 'PM')
+                'DEVIATION FROM THE PRINTED METHOD (owner, 2026-10-29): the 8902A tuned RF level measures -24 to -66 dBm instead of a power meter with a low-level sensor; '
+                'the R&S NRP40T (a thermal sensor, -35 to +20 dBm) cannot reach -66 dBm. Levels -24 to -66 dBm in 6 dB steps.', 'RX')
     for fmhz in MID_LOW_FREQS_MHZ:
         for lv in MID_LEVELS_DBM:
-            add(s, ref=f'4A-6 {mhz_text(fmhz)} {lv} dBm', func='LEVEL', meas='level_pm', description=f'{mhz_text(fmhz)}, {lv} dBm', zero_key=f'4A-6@{fmhz:g}',
-                gen=dict(freq_mhz=fmhz, level_dbm=lv), pm=dict(freq_mhz=fmhz), **band(lv, LEVEL_LIMIT_DB, 'dBm'),
-                flags=(['The manual\'s procedure (step a) programs 30 MHz first; its introduction lists 120 MHz: the introduction list is used (owner decision).',
-                        'UNVERIFIED: whether the NRP40T range reaches -66 dBm (readings near the sensor floor may fail for that reason, not the generator).'] if (fmhz == MID_LOW_FREQS_MHZ[0] and lv == -24) else []))
+            add(s, ref=f'4A-6 {mhz_text(fmhz)} {lv} dBm', func='LEVEL', meas='level_rx', description=f'{mhz_text(fmhz)}, {lv} dBm (8902A tuned RF level)',
+                gen=dict(freq_mhz=fmhz, level_dbm=lv), rx=dict(freq_mhz=fmhz, mode='tuned'), **band(lv, LEVEL_LIMIT_DB, 'dBm'),
+                flags=(['DEVIATION from the printed method (power meter with a low-level sensor, steps b to e): measured with the 8902A tuned RF level, as in 4A-7 and 4A-8 '
+                        '(owner, 2026-10-29: the NRP40T thermal sensor stops at -35 dBm).',
+                        'The manual\'s procedure (step a) programs 30 MHz first; its introduction lists 120 MHz: the introduction list is used (owner decision).'] if (fmhz == MID_LOW_FREQS_MHZ[0] and lv == -24) else []))
     # ---- 4A-7 low level ------------------------------------------------------------------------------------------------------------------------------
     s = section('4A-7', '4A-7 Low-level accuracy test', PAGES['4A-7'],
                 'DEVIATION FROM THE PRINTED METHOD: the 8902A tuned RF level (as in 4A-8) measures -127 dBm instead of the power meter, 60 dB attenuator, wideband amplifier and spectrum analyzer.', 'RX')
@@ -270,7 +272,7 @@ def build_spec():
         schema=1, kind='rf-generator-pv', model='6060A',
         source=dict(cite='Fluke 6060A / 6060A-AF Synthesized Signal Generator Instruction Manual, Section 4A Performance Tests (printed pp. 4A-3 to 4A-17, PDF pages 119 to 133)',
                     note='Points and limits from the rendered pages; leakage tests 4A-9 and 4A-10 are not built (owner). The 8902A replaces the counter, modulation analyzer, distortion analyzer and (4A-7, 4A-8) '
-                         'the power meter chain; 4A-5 and 4A-6 use the 96270A power-meter mode with a Rohde & Schwarz NRP40T (UNVERIFIED).'),
+                         'the power meter chain; 4A-5 uses the 96270A power-meter mode with a Rohde & Schwarz NRP40T; 4A-6 uses the 8902A tuned RF level (owner, 2026-10-29).'),
         options=dict(level_limit_db=f(LEVEL_LIMIT_DB), count_resolution_hz=COUNT_RES_HZ),
         constants=dict(mid_low_freqs_mhz=list(MID_LOW_FREQS_MHZ), high_level_freqs_mhz=list(HIGH_LEVEL_FREQS_MHZ), alt_freqs_mhz=list(ALT_FREQS_MHZ), harm_count=HARM_COUNT),
         discrepancies=[

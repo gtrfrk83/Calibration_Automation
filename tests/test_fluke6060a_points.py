@@ -97,6 +97,17 @@ class SpecTests(unittest.TestCase):
                 self.assertEqual((p['nominal'] - p['low'], p['high'] - p['nominal']) if p['meas'] != 'derived' else (1.5, 1.5), (1.5, 1.5), p['ref'])
 
 
+class MidLevelOnThe8902A(unittest.TestCase):
+    def test_4a6_is_measured_with_the_8902a_tuned_level(self):
+        """Owner, 2026-10-29: the NRP40T (thermal, -35 to +20 dBm) cannot reach -66 dBm; 4A-6 uses the 8902A tuned RF level like 4A-7 / 4A-8. 4A-5 stays on the power meter."""
+        mid = [p for p in points() if p["ref"].startswith("4A-6")]
+        high = [p for p in points() if p["ref"].startswith("4A-5") and p.get("meas") == "level_pm"]
+        self.assertEqual(len(mid), 40)
+        self.assertTrue(all(p['meas'] == 'level_rx' and p['rx']['mode'] == 'tuned' for p in mid))
+        self.assertEqual(len(high), 48)
+        self.assertTrue(any('DEVIATION' in f for p in mid for f in p.get('flags', ())))
+
+
 class JudgeAndDerive(unittest.TestCase):
     def test_judge_is_decimal_and_includes_its_limits(self):
         p = {'low': 0.1, 'high': 0.3}

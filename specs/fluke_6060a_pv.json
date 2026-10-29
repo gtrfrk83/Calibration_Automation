@@ -4,7 +4,7 @@
  "model": "6060A",
  "source": {
   "cite": "Fluke 6060A / 6060A-AF Synthesized Signal Generator Instruction Manual, Section 4A Performance Tests (printed pp. 4A-3 to 4A-17, PDF pages 119 to 133)",
-  "note": "Points and limits from the rendered pages; leakage tests 4A-9 and 4A-10 are not built (owner). The 8902A replaces the counter, modulation analyzer, distortion analyzer and (4A-7, 4A-8) the power meter chain; 4A-5 and 4A-6 use the 96270A power-meter mode with a Rohde & Schwarz NRP40T (UNVERIFIED)."
+  "note": "Points and limits from the rendered pages; leakage tests 4A-9 and 4A-10 are not built (owner). The 8902A replaces the counter, modulation analyzer, distortion analyzer and (4A-7, 4A-8) the power meter chain; 4A-5 uses the 96270A power-meter mode with a Rohde & Schwarz NRP40T; 4A-6 uses the 8902A tuned RF level (owner, 2026-10-29)."
  },
  "options": {
   "level_limit_db": 1.5,
@@ -2841,46 +2841,46 @@
    "id": "4A-6",
    "title": "4A-6 Mid-level accuracy test",
    "page": "4A-6 / PDF 122",
-   "setup": "Power sensor (96270A power-meter mode with the R&S NRP40T) on the RF OUTPUT. The sensor is zeroed with the 6060A RF off at each frequency. Levels -24 to -66 dBm in 6 dB steps.",
-   "group": "PM",
+   "setup": "DEVIATION FROM THE PRINTED METHOD (owner, 2026-10-29): the 8902A tuned RF level measures -24 to -66 dBm instead of a power meter with a low-level sensor; the R&S NRP40T (a thermal sensor, -35 to +20 dBm) cannot reach -66 dBm. Levels -24 to -66 dBm in 6 dB steps.",
+   "group": "RX",
    "points": [
     {
      "ref": "4A-6 120 MHz -24 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -24 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -24 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -24
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -24.0,
      "low": -25.5,
      "high": -22.5,
      "unit": "dBm",
      "flags": [
-      "The manual's procedure (step a) programs 30 MHz first; its introduction lists 120 MHz: the introduction list is used (owner decision).",
-      "UNVERIFIED: whether the NRP40T range reaches -66 dBm (readings near the sensor floor may fail for that reason, not the generator)."
+      "DEVIATION from the printed method (power meter with a low-level sensor, steps b to e): measured with the 8902A tuned RF level, as in 4A-7 and 4A-8 (owner, 2026-10-29: the NRP40T thermal sensor stops at -35 dBm).",
+      "The manual's procedure (step a) programs 30 MHz first; its introduction lists 120 MHz: the introduction list is used (owner decision)."
      ],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -30 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -30 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -30 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -30
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -30.0,
      "low": -31.5,
@@ -2888,21 +2888,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -36 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -36 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -36 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -36
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -36.0,
      "low": -37.5,
@@ -2910,21 +2910,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -42 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -42 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -42 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -42
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -42.0,
      "low": -43.5,
@@ -2932,21 +2932,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -48 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -48 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -48 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -48
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -48.0,
      "low": -49.5,
@@ -2954,21 +2954,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -54 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -54 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -54 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -54
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -54.0,
      "low": -55.5,
@@ -2976,21 +2976,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -60 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -60 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -60 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -60
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -60.0,
      "low": -61.5,
@@ -2998,21 +2998,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 120 MHz -66 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "120 MHz, -66 dBm",
-     "zero_key": "4A-6@120",
+     "meas": "level_rx",
+     "description": "120 MHz, -66 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 120,
       "level_dbm": -66
      },
-     "pm": {
-      "freq_mhz": 120
+     "rx": {
+      "freq_mhz": 120,
+      "mode": "tuned"
      },
      "nominal": -66.0,
      "low": -67.5,
@@ -3020,21 +3020,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -24 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -24 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -24 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -24
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -24.0,
      "low": -25.5,
@@ -3042,21 +3042,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -30 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -30 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -30 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -30
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -30.0,
      "low": -31.5,
@@ -3064,21 +3064,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -36 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -36 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -36 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -36
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -36.0,
      "low": -37.5,
@@ -3086,21 +3086,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -42 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -42 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -42 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -42
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -42.0,
      "low": -43.5,
@@ -3108,21 +3108,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -48 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -48 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -48 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -48
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -48.0,
      "low": -49.5,
@@ -3130,21 +3130,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -54 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -54 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -54 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -54
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -54.0,
      "low": -55.5,
@@ -3152,21 +3152,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -60 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -60 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -60 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -60
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -60.0,
      "low": -61.5,
@@ -3174,21 +3174,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 244 MHz -66 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "244 MHz, -66 dBm",
-     "zero_key": "4A-6@244",
+     "meas": "level_rx",
+     "description": "244 MHz, -66 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 244,
       "level_dbm": -66
      },
-     "pm": {
-      "freq_mhz": 244
+     "rx": {
+      "freq_mhz": 244,
+      "mode": "tuned"
      },
      "nominal": -66.0,
      "low": -67.5,
@@ -3196,21 +3196,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -24 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -24 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -24 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -24
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -24.0,
      "low": -25.5,
@@ -3218,21 +3218,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -30 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -30 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -30 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -30
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -30.0,
      "low": -31.5,
@@ -3240,21 +3240,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -36 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -36 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -36 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -36
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -36.0,
      "low": -37.5,
@@ -3262,21 +3262,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -42 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -42 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -42 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -42
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -42.0,
      "low": -43.5,
@@ -3284,21 +3284,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -48 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -48 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -48 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -48
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -48.0,
      "low": -49.5,
@@ -3306,21 +3306,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -54 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -54 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -54 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -54
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -54.0,
      "low": -55.5,
@@ -3328,21 +3328,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -60 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -60 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -60 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -60
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -60.0,
      "low": -61.5,
@@ -3350,21 +3350,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 245 MHz -66 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "245 MHz, -66 dBm",
-     "zero_key": "4A-6@245",
+     "meas": "level_rx",
+     "description": "245 MHz, -66 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 245,
       "level_dbm": -66
      },
-     "pm": {
-      "freq_mhz": 245
+     "rx": {
+      "freq_mhz": 245,
+      "mode": "tuned"
      },
      "nominal": -66.0,
      "low": -67.5,
@@ -3372,21 +3372,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -24 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -24 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -24 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -24
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -24.0,
      "low": -25.5,
@@ -3394,21 +3394,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -30 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -30 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -30 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -30
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -30.0,
      "low": -31.5,
@@ -3416,21 +3416,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -36 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -36 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -36 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -36
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -36.0,
      "low": -37.5,
@@ -3438,21 +3438,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -42 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -42 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -42 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -42
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -42.0,
      "low": -43.5,
@@ -3460,21 +3460,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -48 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -48 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -48 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -48
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -48.0,
      "low": -49.5,
@@ -3482,21 +3482,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -54 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -54 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -54 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -54
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -54.0,
      "low": -55.5,
@@ -3504,21 +3504,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -60 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -60 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -60 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -60
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -60.0,
      "low": -61.5,
@@ -3526,21 +3526,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 850 MHz -66 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "850 MHz, -66 dBm",
-     "zero_key": "4A-6@850",
+     "meas": "level_rx",
+     "description": "850 MHz, -66 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 850,
       "level_dbm": -66
      },
-     "pm": {
-      "freq_mhz": 850
+     "rx": {
+      "freq_mhz": 850,
+      "mode": "tuned"
      },
      "nominal": -66.0,
      "low": -67.5,
@@ -3548,21 +3548,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -24 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -24 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -24 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -24
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -24.0,
      "low": -25.5,
@@ -3570,21 +3570,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -30 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -30 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -30 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -30
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -30.0,
      "low": -31.5,
@@ -3592,21 +3592,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -36 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -36 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -36 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -36
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -36.0,
      "low": -37.5,
@@ -3614,21 +3614,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -42 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -42 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -42 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -42
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -42.0,
      "low": -43.5,
@@ -3636,21 +3636,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -48 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -48 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -48 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -48
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -48.0,
      "low": -49.5,
@@ -3658,21 +3658,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -54 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -54 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -54 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -54
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -54.0,
      "low": -55.5,
@@ -3680,21 +3680,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -60 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -60 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -60 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -60
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -60.0,
      "low": -61.5,
@@ -3702,21 +3702,21 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     },
     {
      "ref": "4A-6 1050 MHz -66 dBm",
      "func": "LEVEL",
-     "meas": "level_pm",
-     "description": "1050 MHz, -66 dBm",
-     "zero_key": "4A-6@1050",
+     "meas": "level_rx",
+     "description": "1050 MHz, -66 dBm (8902A tuned RF level)",
      "gen": {
       "freq_mhz": 1050,
       "level_dbm": -66
      },
-     "pm": {
-      "freq_mhz": 1050
+     "rx": {
+      "freq_mhz": 1050,
+      "mode": "tuned"
      },
      "nominal": -66.0,
      "low": -67.5,
@@ -3724,7 +3724,7 @@
      "unit": "dBm",
      "flags": [],
      "page": "4A-6 / PDF 122",
-     "group": "PM",
+     "group": "RX",
      "section": "4A-6"
     }
    ]
