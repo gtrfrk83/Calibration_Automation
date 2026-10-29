@@ -1,0 +1,51 @@
+{
+ "schema": 1,
+ "id": "Fluke_101_Verification",
+ "name": "Fluke 101 Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "101",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 78,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_101_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_101_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_101_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_qt.py",
+   "ui_port.py",
+   "hookups.py#fluke101",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_101_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke101",
+  "diagram_prefixes": [
+   "hook_fluke101"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_101_Verification.py",
+  "Procedures/Fluke_101_Verification.procedure.json",
+  "specs/fluke_101_pv.json",
+  "specs/build_fluke_101_spec.py",
+  "diagrams/README_fluke101.txt",
+  "tests/test_fluke_101_points.py"
+ ]
+}

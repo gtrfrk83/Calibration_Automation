@@ -456,7 +456,7 @@ class EndToEnd(unittest.TestCase):
         self.assertFalse(set(PTS) - {p['n'] for p in app.points})
 
     def test_other_specs_keep_the_per_point_high_voltage_question(self):
-        for name in ('fluke_77iv_pv.json', 'fluke_87v_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json'):
+        for name in ('fluke_77iv_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json'):
             self.assertNotIn('hv_once_per_group', json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8')).get('options', {}), name)
         self.assertIs(SPEC['options']['hv_once_per_group'], True)
 

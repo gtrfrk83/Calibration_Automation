@@ -44,7 +44,7 @@ class Card(unittest.TestCase):
         self.assertEqual(h.function_change_card(p, total, STANDBY, standby_known=True)['steps'][0][2], 'done')
 
     def test_other_families_keep_full_switch_text(self):
-        for model, section in (('87V', 'Resistance'), ('287', 'Capacitance'), ('77IV', 'Continuity'), ('MM325', 'DC current')):
+        for model, section in (('87V', 'Ohms'), ('287', 'Capacitance'), ('77IV', 'Continuity'), ('MM325', 'DC current')):
             p, total = first(model, section)
             c = h.function_change_card(p, total, STANDBY)
             short, detail = h.split_switch(p['switch'])

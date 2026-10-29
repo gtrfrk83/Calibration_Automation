@@ -1,14 +1,14 @@
 {
  "schema": 1,
- "id": "Fluke_87V",
- "name": "Fluke 87V Guided Verification",
+ "id": "Fluke_87V_Verification",
+ "name": "Fluke 87V Performance Verification",
  "manufacturer": "Fluke",
  "model": "87 Series V",
  "category": "Digital Multimeter",
- "version": "53",
+ "version": "1",
  "order": 1,
  "description": "Standalone calibration procedure",
- "launcher": "Procedures/Fluke_87V.py",
+ "launcher": "Procedures/Fluke_87V_Verification.py",
  "engine": [
   "handheld_dmm.py"
  ],
@@ -16,11 +16,11 @@
   "fluke_5560a"
  ],
  "specs": [
-  "specs/fluke_87v_pv.json"
+  "specs/fluke_80_series_v_pv.json"
  ],
  "fingerprint": {
   "code": [
-   "Procedures/Fluke_87V.py",
+   "Procedures/Fluke_87V_Verification.py",
    "handheld_dmm.py",
    "handheld_dmm_view_qt.py",
    "ui_port.py",
@@ -30,7 +30,7 @@
    "drivers/fluke_5560a.py"
   ],
   "spec": [
-   "specs/fluke_87v_pv.json"
+   "specs/fluke_80_series_v_pv.json#87V"
   ]
  },
  "hookup": {
@@ -41,9 +41,10 @@
  },
  "seed_verified": false,
  "own_files": [
-  "Procedures/Fluke_87V.py",
-  "Procedures/Fluke_87V.procedure.json",
-  "specs/fluke_87v_pv.json",
-  "tests/test_87v_points.py"
+  "Procedures/Fluke_87V_Verification.py",
+  "Procedures/Fluke_87V_Verification.procedure.json",
+  "specs/fluke_80_series_v_pv.json",
+  "specs/build_80v_spec.py",
+  "tests/test_80v_points.py"
  ]
 }

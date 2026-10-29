@@ -20,7 +20,6 @@ Folder layout (same as before, plus one new file):
       Agilent_34401A.py              v54
       Fluke_8846A_Verification.py    v58
       Fluke_8846A_Adjustment.py      v57
-      Fluke_87V.py                   v52
       WaveSurfer_WS4104HD.py         v56
 
 Install: copy these files over the old ones (keep your calibration_procedures.sqlite3,
@@ -39,12 +38,8 @@ Column headings no longer carry units. Each grid has a "Units" column instead, a
 auto-scaled with SI prefixes (0.006 V is shown as 6 mV, 1,000,123 ohm as 1.000123 MOhm) using only as
 many decimals as the limits need; readings get two extra digits so small errors stay visible.
 Display only: stored results, checkpoints, exports, limits and pass/fail still use base units.
-The Fluke 87V now runs on the shared handheld engine (see the Fluke 110-117 section): specs/fluke_87v_pv.json, built by
-specs/build_87v_spec.py from the 87V MDD datasheet. All 51 MDD points keep their limits exactly as printed (as-found values are
-still typed in the units shown). Three rows the MDD marks Pass/Fail but prints a numeric range for (open capacitance and the two
-low-pass-filter rows) are recorded as numeric readings against that range. Rows with no input signal (open capacitance, 0 nS) and the
-frequency-trigger and duty-cycle rows (3.4 Vpp / 50 %) have no automatic calibrator output: the program tells you what to set. The old
-MDD-import screen, Excel export and its saved runs in the database are no longer used (the data stays in the database).
+The Fluke 87V procedure built from the MDD datasheet was replaced (2026-10-28) by the Fluke 83V / 87V / 88V procedures built from the
+80 Series V Calibration Manual: see 'Fluke 83V / 87V / 88V' below.
 
 Asset history and per-asset results
 -----------------------------------
@@ -297,6 +292,14 @@ Procedures/Fluke_77IV_Verification.py   (engine: handheld_dmm.py; spec: specs/fl
   Not included: the calibration ADJUSTMENT (Table 3, pp. 14-16), fuse test, diode test (it has no step in Table 2).
   Rebuild the spec after editing the table:  python3 specs/build_77_spec.py     Demo with:  python Procedures/Fluke_77IV_Verification.py --demo
 
+Fluke 101 digital multimeter (automated performance verification: lists on the Automated Calibrations tab)
+-------------------------------------------------------------------------------------------------
+Procedures/Fluke_101_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_101_pv.json built by specs/build_fluke_101_spec.py; diagrams: diagrams/README_fluke101.txt)
+  29 points, ONE per range at 90 % of the range (owner's choice; the 101 Users Manual has no calibration table): AC volts 6 (5.4 / 54 / 540 V at 60 and 400 Hz), DC volts 3, AC millivolts 2 (540 mV at 60 and 400 Hz),
+  ohms 6, diode test 1 (1.8 V), capacitance 6 (45 nF ... 900 uF), frequency 5 (5 V at 45 Hz ... 90 kHz). Limits = the published 1-year accuracy (Users Manual pp. 20 and 22) rounded inward to the display step.
+  No current points: the 101 has no current function. Duty cycle and continuity are not built. Calibrator: Fluke 5522A or 5560A (or by hand); readings are typed. Every point prints an uncertainty (and TAR / TUR).
+  Rebuild the spec:  python3 specs/build_fluke_101_spec.py     Demo with:  python Procedures/Fluke_101_Verification.py --demo
+
 Fluke 365 detachable jaw clamp meter (automated performance verification: lists on the Automated Calibrations tab)
 -------------------------------------------------------------------------------------------------
 Procedures/Fluke_365_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_365_pv.json built by specs/build_fluke_365_spec.py; diagrams: diagrams/README_fluke365.txt)
@@ -338,6 +341,15 @@ Procedures/Fluke_175_Verification.py, Fluke_177_Verification.py, Fluke_179_Verif
   "Change the function" at every dial / yellow-button change, HIGH VOLTAGE confirmation from 30 V, no ramp. Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf.
   Three printed table values are corrected and flagged (see NOTES.md). Not included: the calibration ADJUSTMENT (Table 4), fuse test.
   Rebuild after editing the table:  python3 specs/build_170_spec.py     Demo with:  python Procedures/Fluke_175_Verification.py --demo
+
+Fluke 83V / 87V / 88V (handheld multimeters, one spec for the family)
+-------------------------------------------------------------------
+Procedures/Fluke_83V_Verification.py, Fluke_87V_Verification.py, Fluke_88V_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_80_series_v_pv.json built by specs/build_80v_spec.py; diagrams: diagrams/hook_fluke87v_*)
+  Table 3 "Accuracy Tests" of the Fluke 80 Series V Calibration Manual (printed pp. 9-11): 87V = the '87' column (56 points); 83V = the '83 and 88' column without the 87-only rows, Peak Min/Max and temperature (46);
+  88V = the '83 and 88' column with Peak Min/Max and temperature (50). Each includes the display, pushbutton and backlight checks.
+  Calibrator: Fluke 5560A (the manual's) or 5522A, automatic or Manual. No remote interface: you type the display reading. HIGH VOLTAGE confirmation from 30 V, once per hook-up group, no ramp.
+  The 87V hook-up drawings are used for all three meters. Not included: the 88V inductive pickup test (owner decision), the calibration ADJUSTMENT (Table 4).
+  Rebuild after editing the table:  python3 specs/build_80v_spec.py     Demo with:  python Procedures/Fluke_87V_Verification.py --demo
 
 Tektronix TDS2000C / TDS1000C-EDU
 ---------------------------------

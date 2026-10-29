@@ -16,7 +16,7 @@ def setUpModule():
     import handheld_dmm as _h
     from tests.test_handheld_options import make_io as _make_io
     h, make_io = _h, _make_io
-    SPEC = h.load_spec('fluke_87v_pv.json')
+    SPEC = h.load_spec('fluke_80_series_v_pv.json')
     PTS = {p['id']: p for p in h.points_for(SPEC, '87V')}
 
 

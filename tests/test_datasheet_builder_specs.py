@@ -24,7 +24,7 @@ SPECS = HERE.parent / 'specs'
 
 class ProcspecHook(unittest.TestCase):
     def test_shipped_handheld_specs_are_clean(self):
-        for name in ('fluke_110_series_pv', 'fluke_87v_pv', 'fluke_287_289_pv', 'klein_mm325_pv'):
+        for name in ('fluke_110_series_pv', 'fluke_80_series_v_pv', 'fluke_287_289_pv', 'klein_mm325_pv'):
             spec = json.loads((SPECS / f'{name}.json').read_text(encoding='utf-8'))
             self.assertEqual(procspec.validate_manual_reading(spec), [], name)
 

@@ -1,0 +1,2355 @@
+{
+ "schema": 2,
+ "kind": "manual-reading",
+ "options": {
+  "hookup_meter": "fluke87v",
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Fluke 80 Series V Digital Multimeter - Calibration Manual (September 2004, Rev. 4, 11/25)",
+  "pages": "6-11 (printed): Table 1 p. 6, display test p. 7, pushbutton test p. 9, Table 3 pp. 9-11",
+  "cite": "Fluke 80 Series V Calibration Manual, Table 3 \"Accuracy Tests\", printed pp. 9-11",
+  "limits": "Manufacturer limits, Table 3 (1 year), as printed",
+  "report_note": "Limits are the manufacturer's, as printed in the Fluke 80 Series V Calibration Manual, Table 3 \"Accuracy Tests\" (printed pp. 9-11), \"83 and 88\" or \"87\" column as applies to the model.",
+  "note": "Table 3 \"Accuracy Tests\" (printed pp. 9-11) of the Fluke 80 Series V Calibration Manual, two Display Reading columns (\"83 and 88\", \"87\"); plus the display test (p. 7), the pushbutton test (p. 9) and the backlight steps 51-53. 87V: all rows. 83V: the \"83 and 88\" column without steps 2, 4, 6, 8, 45, 46 (N/A), 47 (no Peak Min/Max, footnote 7) and 49-50 (temperature, 87 and 88 only). 88V: the \"83 and 88\" column with steps 47 and 49-50. Not built (owner decision): the 88V inductive pickup test (pp. 11-14, oscilloscope and function generator). Limits as printed (no corrections). The manual names a Fluke 5560A; the procedure drives a Fluke 5560A or 5522A (or you set the calibrator by hand). High-voltage points go straight to the test value (the manual prescribes no ramp); the HIGH VOLTAGE confirmation (30 V and above) is asked once per hook-up group. The meters have no remote interface: you type the display reading. Function names are the manual's own (Table 3, \"Test Function\"). The technician sets the meter up for each point: rotary switch position, range, any yellow-button press and Peak Min Max, as the prompt names them."
+ },
+ "models": {
+  "83V": {
+   "name": "Fluke 83V",
+   "brand": "Fluke",
+   "model_note": "Fluke 83 Series V digital multimeter: Table 3 \"83 and 88\" column, 46 points"
+  },
+  "87V": {
+   "name": "Fluke 87V",
+   "brand": "Fluke",
+   "model_note": "Fluke 87 Series V true-rms digital multimeter: Table 3 \"87\" column, 56 points"
+  },
+  "88V": {
+   "name": "Fluke 88V",
+   "brand": "Fluke",
+   "model_note": "Fluke 88 Series V automotive multimeter: Table 3 \"83 and 88\" column, 50 points (inductive pickup test not included)"
+  }
+ },
+ "steps": [
+  {
+   "table": "F",
+   "step": 1,
+   "section": "Functional checks",
+   "switch": "Display test",
+   "range": "",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Display test",
+   "setup": "Turn the meter on to V~ while holding down the AutoHOLD button to view all segments of the display. Compare the display with Figure 3 and Table 2 of the calibration manual (printed pp. 7-8).",
+   "question": "All display segments come on and match Figure 3 (no missing or extra segments).",
+   "setup_key": "NONE",
+   "ref": "p. 7",
+   "id": "F-1"
+  },
+  {
+   "table": "F",
+   "step": 2,
+   "section": "Functional checks",
+   "switch": "Pushbutton test",
+   "range": "",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Pushbutton test",
+   "setup": "Turn the rotary knob to V~ (the first position, \"Testing the Pushbuttons\" step 1), then press each button.",
+   "question": "The meter beeps for each button press. Then press and hold MIN MAX a second time to exit MIN MAX mode.",
+   "setup_key": "NONE",
+   "ref": "p. 9",
+   "id": "F-2"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600 mV",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "327.3",
+   "high": "332.7",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": 60.0
+   },
+   "nominal": 0.33,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 1 (87 column): 327.3 to 332.7 mV",
+   "ref": "T3 #1 (87)",
+   "step": 1,
+   "id": "3-1.87"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600 mV",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "327.9",
+   "high": "332.1",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": 60.0
+   },
+   "nominal": 0.33,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 1 (83 and 88 column): 327.9 to 332.1 mV",
+   "ref": "T3 #1 (83 and 88)",
+   "step": 1,
+   "id": "3-1.83"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600 mV",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "586.0",
+   "high": "614.0",
+   "test": "numeric",
+   "applied": {
+    "value": 0.6,
+    "frequency": 13000.0
+   },
+   "nominal": 0.6,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 2 (87 column; N/A for the 83 and 88): 586.0 to 614.0 mV",
+   "ref": "T3 #2 (87)",
+   "step": 2,
+   "id": "3-2"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.275",
+   "high": "3.325",
+   "test": "numeric",
+   "applied": {
+    "value": 3.3,
+    "frequency": 60.0
+   },
+   "nominal": 3.3,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 3 (87 column): 3.275 to 3.325 V",
+   "ref": "T3 #3 (87)",
+   "step": 3,
+   "id": "3-3.87"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.281",
+   "high": "3.319",
+   "test": "numeric",
+   "applied": {
+    "value": 3.3,
+    "frequency": 60.0
+   },
+   "nominal": 3.3,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 3 (83 and 88 column): 3.281 to 3.319 V",
+   "ref": "T3 #3 (83 and 88)",
+   "step": 3,
+   "id": "3-3.83"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.214",
+   "high": "3.386",
+   "test": "numeric",
+   "applied": {
+    "value": 3.3,
+    "frequency": 20000.0
+   },
+   "nominal": 3.3,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 4 (87 column; N/A for the 83 and 88): 3.214 to 3.386 V",
+   "ref": "T3 #4 (87)",
+   "step": 4,
+   "id": "3-4"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "32.75",
+   "high": "33.25",
+   "test": "numeric",
+   "applied": {
+    "value": 33.0,
+    "frequency": 60.0
+   },
+   "nominal": 33.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 5 (87 column): 32.75 to 33.25 V",
+   "ref": "T3 #5 (87)",
+   "step": 5,
+   "id": "3-5.87"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "32.81",
+   "high": "33.19",
+   "test": "numeric",
+   "applied": {
+    "value": 33.0,
+    "frequency": 60.0
+   },
+   "nominal": 33.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 5 (83 and 88 column): 32.81 to 33.19 V",
+   "ref": "T3 #5 (83 and 88)",
+   "step": 5,
+   "id": "3-5.83"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "32.14",
+   "high": "33.86",
+   "test": "numeric",
+   "applied": {
+    "value": 33.0,
+    "frequency": 20000.0
+   },
+   "nominal": 33.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 6 (87 column; N/A for the 83 and 88): 32.14 to 33.86 V",
+   "ref": "T3 #6 (87)",
+   "step": 6,
+   "id": "3-6"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "327.5",
+   "high": "332.5",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": 60.0
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 7 (87 column): 327.5 to 332.5 V",
+   "ref": "T3 #7 (87)",
+   "step": 7,
+   "id": "3-7.87"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "328.1",
+   "high": "331.9",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": 60.0
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 7 (83 and 88 column): 328.1 to 331.9 V",
+   "ref": "T3 #7 (83 and 88)",
+   "step": 7,
+   "id": "3-7.83"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "323.0",
+   "high": "337.0",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": 2500.0
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 8 (87 column; N/A for the 83 and 88): 323.0 to 337.0 V",
+   "ref": "T3 #8 (87)",
+   "step": 8,
+   "id": "3-8"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "494",
+   "high": "506",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": 60.0
+   },
+   "nominal": 500.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 9 (87 column): 494 to 506 V",
+   "ref": "T3 #9 (87)",
+   "step": 9,
+   "id": "3-9.87"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "495",
+   "high": "505",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": 60.0
+   },
+   "nominal": 500.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 9 (83 and 88 column): 495 to 505 V",
+   "ref": "T3 #9 (83 and 88)",
+   "step": 9,
+   "id": "3-9.83"
+  },
+  {
+   "table": "3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "986",
+   "high": "1014",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 1000.0
+   },
+   "nominal": 1000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 10 (both columns): 986 to 1014 V",
+   "ref": "T3 #10",
+   "step": 10,
+   "id": "3-10"
+  },
+  {
+   "table": "3",
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency)",
+   "range": "600 mV",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "99.93",
+   "high": "99.97",
+   "test": "numeric",
+   "applied": {
+    "value": 0.15,
+    "frequency": 99950.0
+   },
+   "nominal": 99950.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "600 mV range (150 mV applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 150 mV at 99.95 kHz).",
+   "tol_text": "Table 3 step 11 (both columns): 99.93 to 99.97 kHz",
+   "ref": "T3 #11",
+   "step": 11,
+   "id": "3-11"
+  },
+  {
+   "table": "3",
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency)",
+   "range": "600 mV",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "199.48",
+   "high": "199.52",
+   "test": "numeric",
+   "applied": {
+    "value": 0.15,
+    "frequency": 199500.0
+   },
+   "nominal": 199500.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "600 mV range (150 mV applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 150 mV at 199.5 kHz).",
+   "tol_text": "Table 3 step 12 (both columns): 199.48 to 199.52 kHz",
+   "ref": "T3 #12",
+   "step": 12,
+   "id": "3-12"
+  },
+  {
+   "table": "3",
+   "section": "AC volts frequency sensitivity",
+   "switch": "V~ Hz  (AC volts frequency)",
+   "range": "6 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "99.93",
+   "high": "99.97",
+   "test": "numeric",
+   "applied": {
+    "value": 0.7,
+    "frequency": 99950.0
+   },
+   "nominal": 99950.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "6 V range (700 mV applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 700 mV at 99.95 kHz).",
+   "tol_text": "Table 3 step 13 (both columns): 99.93 to 99.97 kHz",
+   "ref": "T3 #13",
+   "step": 13,
+   "id": "3-13"
+  },
+  {
+   "table": "3",
+   "section": "AC volts frequency sensitivity",
+   "switch": "V~ Hz  (AC volts frequency)",
+   "range": "60 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "99.93",
+   "high": "99.97",
+   "test": "numeric",
+   "applied": {
+    "value": 7.0,
+    "frequency": 99950.0
+   },
+   "nominal": 99950.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "60 V range (7 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 7 V at 99.95 kHz).",
+   "tol_text": "Table 3 step 14 (both columns): 99.93 to 99.97 kHz",
+   "ref": "T3 #14",
+   "step": 14,
+   "id": "3-14"
+  },
+  {
+   "table": "3",
+   "section": "DC volts frequency trigger level",
+   "switch": "V⎓ Hz  (DC volts frequency)",
+   "range": "6 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "ACV",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "999.8",
+   "high": "1000.2",
+   "test": "numeric",
+   "applied": {
+    "value": 3.4,
+    "frequency": 1000.0,
+    "waveform": "square",
+    "duty": 50.0,
+    "offset": 0.0
+   },
+   "nominal": 1000.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "6 V range (3.4 V p-p square wave applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies a 3.4 V p-p square wave at 1 kHz).",
+   "tol_text": "Table 3 step 15 (both columns): 999.8 to 1000.2 Hz",
+   "ref": "T3 #15",
+   "step": 15,
+   "id": "3-15"
+  },
+  {
+   "table": "3",
+   "section": "DC volts duty cycle",
+   "switch": "V⎓ Hz  (DC volts duty cycle)",
+   "range": "6 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "DUTY",
+   "display_unit": "%",
+   "factor": 1.0,
+   "base_unit": "%",
+   "low": "49.7",
+   "high": "50.3",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0,
+    "duty": 50.0,
+    "offset": 2.5
+   },
+   "nominal": 50.0,
+   "unc_kind": "DUTY",
+   "group": "VOHM",
+   "note": "The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (Table 3 step 16, p. 9).",
+   "tol_text": "Table 3 step 16 (both columns): 49.7 to 50.3 %",
+   "ref": "T3 #16",
+   "step": 16,
+   "id": "3-16"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.297",
+   "high": "3.303",
+   "test": "numeric",
+   "applied": {
+    "value": 3.3,
+    "frequency": null
+   },
+   "nominal": 3.3,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 17 (87 column): 3.297 to 3.303 V",
+   "ref": "T3 #17 (87)",
+   "step": 17,
+   "id": "3-17.87"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.296",
+   "high": "3.304",
+   "test": "numeric",
+   "applied": {
+    "value": 3.3,
+    "frequency": null
+   },
+   "nominal": 3.3,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 17 (83 and 88 column): 3.296 to 3.304 V",
+   "ref": "T3 #17 (83 and 88)",
+   "step": 17,
+   "id": "3-17.83"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "60 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "32.97",
+   "high": "33.03",
+   "test": "numeric",
+   "applied": {
+    "value": 33.0,
+    "frequency": null
+   },
+   "nominal": 33.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 18 (87 column): 32.97 to 33.03 V",
+   "ref": "T3 #18 (87)",
+   "step": 18,
+   "id": "3-18.87"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "60 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "32.96",
+   "high": "33.04",
+   "test": "numeric",
+   "applied": {
+    "value": 33.0,
+    "frequency": null
+   },
+   "nominal": 33.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 18 (83 and 88 column): 32.96 to 33.04 V",
+   "ref": "T3 #18 (83 and 88)",
+   "step": 18,
+   "id": "3-18.83"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "329.7",
+   "high": "330.3",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": null
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 19 (87 column): 329.7 to 330.3 V",
+   "ref": "T3 #19 (87)",
+   "step": 19,
+   "id": "3-19.87"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600 V",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "329.6",
+   "high": "330.4",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": null
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 19 (83 and 88 column): 329.6 to 330.4 V",
+   "ref": "T3 #19 (83 and 88)",
+   "step": 19,
+   "id": "3-19.83"
+  },
+  {
+   "table": "3",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "1000 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "998",
+   "high": "1002",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": null
+   },
+   "nominal": 1000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 20 (both columns): 998 to 1002 V",
+   "ref": "T3 #20",
+   "step": 20,
+   "id": "3-20"
+  },
+  {
+   "table": "3",
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600 mV",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "32.9",
+   "high": "33.1",
+   "test": "numeric",
+   "applied": {
+    "value": 0.033,
+    "frequency": null
+   },
+   "nominal": 0.033,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 21 (87 column): 32.9 to 33.1 mV",
+   "ref": "T3 #21 (87)",
+   "step": 21,
+   "id": "3-21.87"
+  },
+  {
+   "table": "3",
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600 mV",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "32.8",
+   "high": "33.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.033,
+    "frequency": null
+   },
+   "nominal": 0.033,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 21 (83 and 88 column): 32.8 to 33.2 mV",
+   "ref": "T3 #21 (83 and 88)",
+   "step": 21,
+   "id": "3-21.83"
+  },
+  {
+   "table": "3",
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600 mV",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "329.6",
+   "high": "330.4",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": null
+   },
+   "nominal": 0.33,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 22 (87 column): 329.6 to 330.4 mV",
+   "ref": "T3 #22 (87)",
+   "step": 22,
+   "id": "3-22.87"
+  },
+  {
+   "table": "3",
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600 mV",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "328.9",
+   "high": "331.1",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": null
+   },
+   "nominal": 0.33,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 22 (83 and 88 column): 328.9 to 331.1 mV",
+   "ref": "T3 #22 (83 and 88)",
+   "step": 22,
+   "id": "3-22.83"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600 Ω",
+   "models": [
+    "87V"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "329.1",
+   "high": "330.9",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": null
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "note": "Table 3 footnote 1: use 2-wire compensation at the calibrator (the program sets it), or short the test leads and use REL to offset the lead resistance.",
+   "tol_text": "Table 3 step 23 (87 column): 329.1 to 330.9 Ω",
+   "ref": "T3 #23 (87)",
+   "step": 23,
+   "id": "3-23.87"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600 Ω",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "328.5",
+   "high": "331.5",
+   "test": "numeric",
+   "applied": {
+    "value": 330.0,
+    "frequency": null
+   },
+   "nominal": 330.0,
+   "group": "VOHM",
+   "note": "Table 3 footnote 1: use 2-wire compensation at the calibrator (the program sets it), or short the test leads and use REL to offset the lead resistance.",
+   "tol_text": "Table 3 step 23 (83 and 88 column): 328.5 to 331.5 Ω",
+   "ref": "T3 #23 (83 and 88)",
+   "step": 23,
+   "id": "3-23.83"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6 kΩ",
+   "models": [
+    "87V"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "3.292",
+   "high": "3.308",
+   "test": "numeric",
+   "applied": {
+    "value": 3300.0,
+    "frequency": null
+   },
+   "nominal": 3300.0,
+   "group": "VOHM",
+   "note": "Table 3 footnote 1: use 2-wire compensation at the calibrator (the program sets it), or short the test leads and use REL to offset the lead resistance.",
+   "tol_text": "Table 3 step 24 (87 column): 3.292 to 3.308 kΩ",
+   "ref": "T3 #24 (87)",
+   "step": 24,
+   "id": "3-24.87"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6 kΩ",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "3.286",
+   "high": "3.314",
+   "test": "numeric",
+   "applied": {
+    "value": 3300.0,
+    "frequency": null
+   },
+   "nominal": 3300.0,
+   "group": "VOHM",
+   "note": "Table 3 footnote 1: use 2-wire compensation at the calibrator (the program sets it), or short the test leads and use REL to offset the lead resistance.",
+   "tol_text": "Table 3 step 24 (83 and 88 column): 3.286 to 3.314 kΩ",
+   "ref": "T3 #24 (83 and 88)",
+   "step": 24,
+   "id": "3-24.83"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "60 kΩ",
+   "models": [
+    "87V"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "32.92",
+   "high": "33.08",
+   "test": "numeric",
+   "applied": {
+    "value": 33000.0,
+    "frequency": null
+   },
+   "nominal": 33000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 25 (87 column): 32.92 to 33.08 kΩ",
+   "ref": "T3 #25 (87)",
+   "step": 25,
+   "id": "3-25.87"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "60 kΩ",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "32.86",
+   "high": "33.14",
+   "test": "numeric",
+   "applied": {
+    "value": 33000.0,
+    "frequency": null
+   },
+   "nominal": 33000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 25 (83 and 88 column): 32.86 to 33.14 kΩ",
+   "ref": "T3 #25 (83 and 88)",
+   "step": 25,
+   "id": "3-25.83"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600 kΩ",
+   "models": [
+    "87V"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "327.9",
+   "high": "332.1",
+   "test": "numeric",
+   "applied": {
+    "value": 330000.0,
+    "frequency": null
+   },
+   "nominal": 330000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 26 (87 column): 327.9 to 332.1 kΩ",
+   "ref": "T3 #26 (87)",
+   "step": 26,
+   "id": "3-26.87"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600 kΩ",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "327.6",
+   "high": "332.4",
+   "test": "numeric",
+   "applied": {
+    "value": 330000.0,
+    "frequency": null
+   },
+   "nominal": 330000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 26 (83 and 88 column): 327.6 to 332.4 kΩ",
+   "ref": "T3 #26 (83 and 88)",
+   "step": 26,
+   "id": "3-26.83"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6 MΩ",
+   "models": [
+    "87V"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "3.279",
+   "high": "3.321",
+   "test": "numeric",
+   "applied": {
+    "value": 3300000.0,
+    "frequency": null
+   },
+   "nominal": 3300000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 27 (87 column): 3.279 to 3.321 MΩ",
+   "ref": "T3 #27 (87)",
+   "step": 27,
+   "id": "3-27.87"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6 MΩ",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "3.276",
+   "high": "3.324",
+   "test": "numeric",
+   "applied": {
+    "value": 3300000.0,
+    "frequency": null
+   },
+   "nominal": 3300000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 27 (83 and 88 column): 3.276 to 3.324 MΩ",
+   "ref": "T3 #27 (83 and 88)",
+   "step": 27,
+   "id": "3-27.83"
+  },
+  {
+   "table": "3",
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "50 MΩ",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "29.67",
+   "high": "30.33",
+   "test": "numeric",
+   "applied": {
+    "value": 30000000.0,
+    "frequency": null
+   },
+   "nominal": 30000000.0,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 28 (both columns): 29.67 to 30.33 MΩ",
+   "ref": "T3 #28",
+   "step": 28,
+   "id": "3-28"
+  },
+  {
+   "table": "3",
+   "section": "Conductance",
+   "switch": "nS  (Conductance)",
+   "range": "60 nS",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "NONE",
+   "display_unit": "nS",
+   "factor": 1e-09,
+   "base_unit": "S",
+   "low": "-0.30",
+   "high": "0.30",
+   "test": "numeric",
+   "nominal": 0.0,
+   "setup_key": "NONE",
+   "setup": "Open input: disconnect the test leads from the calibrator and leave the meter inputs OPEN. Select conductance (nS). The calibrator stays in STANDBY.",
+   "unc_text": "N/A (no standard applied)",
+   "group": "NONE",
+   "tol_text": "Table 3 step 29 (both columns): -0.30 to 0.30 nS",
+   "ref": "T3 #29",
+   "step": 29,
+   "id": "3-29"
+  },
+  {
+   "table": "3",
+   "section": "Conductance",
+   "switch": "nS  (Conductance)",
+   "range": "60 nS",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "OHM",
+   "display_unit": "nS",
+   "factor": 1e-09,
+   "base_unit": "S",
+   "low": "9.60",
+   "high": "10.40",
+   "test": "numeric",
+   "applied": {
+    "value": 100000000.0,
+    "frequency": null
+   },
+   "nominal": 1e-08,
+   "unc_kind": "CONDUCTANCE",
+   "group": "VOHM",
+   "note": "10 nS is a 100 MΩ resistance: the calibrator is set to 100 MΩ (Table 3 step 30).",
+   "tol_text": "Table 3 step 30 (both columns): 9.60 to 10.40 nS",
+   "ref": "T3 #30",
+   "step": 30,
+   "id": "3-30"
+  },
+  {
+   "table": "3",
+   "section": "Diode",
+   "switch": "Diode  ▶|",
+   "range": "6 V",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "2.939",
+   "high": "3.061",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": null
+   },
+   "nominal": 3.0,
+   "group": "VOHM",
+   "note": "Apply 3.0 V dc to the VΩ input in diode test; the table lists the displayed voltage.",
+   "tol_text": "Table 3 step 31 (both columns): 2.939 to 3.061 V",
+   "ref": "T3 #31",
+   "step": 31,
+   "id": "3-31"
+  },
+  {
+   "table": "3",
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "6 A",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "2.968",
+   "high": "3.032",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": 60.0
+   },
+   "nominal": 3.0,
+   "settle": 5,
+   "group": "AMP10",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 32 (87 column): 2.968 to 3.032 A",
+   "ref": "T3 #32 (87)",
+   "step": 32,
+   "id": "3-32.87"
+  },
+  {
+   "table": "3",
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "6 A",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "2.962",
+   "high": "3.038",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": 60.0
+   },
+   "nominal": 3.0,
+   "settle": 5,
+   "group": "AMP10",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 32 (83 and 88 column): 2.962 to 3.038 A",
+   "ref": "T3 #32 (83 and 88)",
+   "step": 32,
+   "id": "3-32.83"
+  },
+  {
+   "table": "3",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps)",
+   "range": "6 A",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "2.990",
+   "high": "3.010",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": null
+   },
+   "nominal": 3.0,
+   "settle": 5,
+   "group": "AMP10",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 33 (87 column): 2.990 to 3.010 A",
+   "ref": "T3 #33 (87)",
+   "step": 33,
+   "id": "3-33.87"
+  },
+  {
+   "table": "3",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps)",
+   "range": "6 A",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "2.984",
+   "high": "3.016",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": null
+   },
+   "nominal": 3.0,
+   "settle": 5,
+   "group": "AMP10",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 33 (83 and 88 column): 2.984 to 3.016 A",
+   "ref": "T3 #33 (83 and 88)",
+   "step": 33,
+   "id": "3-33.83"
+  },
+  {
+   "table": "3",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps)",
+   "range": "10 A",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.96",
+   "high": "10.04",
+   "test": "numeric",
+   "applied": {
+    "value": 10.0,
+    "frequency": null
+   },
+   "nominal": 10.0,
+   "settle": 5,
+   "group": "AMP10",
+   "note": "Table 3 footnote 6: 10 A continuous up to 35 °C; < 20 minutes on, 5 minutes off at 35 °C to 55 °C. 20 A for 30 seconds maximum; > 10 A unspecified. The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 33B (87 column): 9.96 to 10.04 A",
+   "ref": "T3 #33B (87)",
+   "step": 34,
+   "id": "3-33B.87"
+  },
+  {
+   "table": "3",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps)",
+   "range": "10 A",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.94",
+   "high": "10.06",
+   "test": "numeric",
+   "applied": {
+    "value": 10.0,
+    "frequency": null
+   },
+   "nominal": 10.0,
+   "settle": 5,
+   "group": "AMP10",
+   "note": "Table 3 footnote 6: 10 A continuous up to 35 °C; < 20 minutes on, 5 minutes off at 35 °C to 55 °C. 20 A for 30 seconds maximum; > 10 A unspecified. The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 33B (83 and 88 column): 9.94 to 10.06 A",
+   "ref": "T3 #33B (83 and 88)",
+   "step": 34,
+   "id": "3-33B.83"
+  },
+  {
+   "table": "3",
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "60 mA",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "32.65",
+   "high": "33.35",
+   "test": "numeric",
+   "applied": {
+    "value": 0.033,
+    "frequency": 60.0
+   },
+   "nominal": 0.033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 34 (87 column): 32.65 to 33.35 mA",
+   "ref": "T3 #34 (87)",
+   "step": 35,
+   "id": "3-34.87"
+  },
+  {
+   "table": "3",
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "60 mA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "32.58",
+   "high": "33.42",
+   "test": "numeric",
+   "applied": {
+    "value": 0.033,
+    "frequency": 60.0
+   },
+   "nominal": 0.033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 34 (83 and 88 column): 32.58 to 33.42 mA",
+   "ref": "T3 #34 (83 and 88)",
+   "step": 35,
+   "id": "3-34.83"
+  },
+  {
+   "table": "3",
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "400 mA",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "326.5",
+   "high": "333.5",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": 60.0
+   },
+   "nominal": 0.33,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 35 (87 column): 326.5 to 333.5 mA",
+   "ref": "T3 #35 (87)",
+   "step": 36,
+   "id": "3-35.87"
+  },
+  {
+   "table": "3",
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "400 mA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "325.8",
+   "high": "334.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": 60.0
+   },
+   "nominal": 0.33,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 35 (83 and 88 column): 325.8 to 334.2 mA",
+   "ref": "T3 #35 (83 and 88)",
+   "step": 36,
+   "id": "3-35.83"
+  },
+  {
+   "table": "3",
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps)",
+   "range": "60 mA",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "32.89",
+   "high": "33.11",
+   "test": "numeric",
+   "applied": {
+    "value": 0.033,
+    "frequency": null
+   },
+   "nominal": 0.033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 36 (87 column): 32.89 to 33.11 mA",
+   "ref": "T3 #36 (87)",
+   "step": 37,
+   "id": "3-36.87"
+  },
+  {
+   "table": "3",
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps)",
+   "range": "60 mA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "32.83",
+   "high": "33.17",
+   "test": "numeric",
+   "applied": {
+    "value": 0.033,
+    "frequency": null
+   },
+   "nominal": 0.033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 36 (83 and 88 column): 32.83 to 33.17 mA",
+   "ref": "T3 #36 (83 and 88)",
+   "step": 37,
+   "id": "3-36.83"
+  },
+  {
+   "table": "3",
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps)",
+   "range": "400 mA",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "329.1",
+   "high": "330.9",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": null
+   },
+   "nominal": 0.33,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 37 (87 column): 329.1 to 330.9 mA",
+   "ref": "T3 #37 (87)",
+   "step": 38,
+   "id": "3-37.87"
+  },
+  {
+   "table": "3",
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps)",
+   "range": "400 mA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "328.5",
+   "high": "331.5",
+   "test": "numeric",
+   "applied": {
+    "value": 0.33,
+    "frequency": null
+   },
+   "nominal": 0.33,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 37 (83 and 88 column): 328.5 to 331.5 mA",
+   "ref": "T3 #37 (83 and 88)",
+   "step": 38,
+   "id": "3-37.83"
+  },
+  {
+   "table": "3",
+   "section": "AC microamps",
+   "switch": "µA~  (AC microamps)",
+   "range": "600 µA",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "326.5",
+   "high": "333.5",
+   "test": "numeric",
+   "applied": {
+    "value": 0.00033,
+    "frequency": 60.0
+   },
+   "nominal": 0.00033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 38 (87 column): 326.5 to 333.5 µA",
+   "ref": "T3 #38 (87)",
+   "step": 39,
+   "id": "3-38.87"
+  },
+  {
+   "table": "3",
+   "section": "AC microamps",
+   "switch": "µA~  (AC microamps)",
+   "range": "600 µA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "325.8",
+   "high": "334.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.00033,
+    "frequency": 60.0
+   },
+   "nominal": 0.00033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 38 (83 and 88 column): 325.8 to 334.2 µA",
+   "ref": "T3 #38 (83 and 88)",
+   "step": 39,
+   "id": "3-38.83"
+  },
+  {
+   "table": "3",
+   "section": "AC microamps",
+   "switch": "µA~  (AC microamps)",
+   "range": "6000 µA",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "3265",
+   "high": "3335",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0033,
+    "frequency": 60.0
+   },
+   "nominal": 0.0033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 39 (87 column): 3265 to 3335 µA",
+   "ref": "T3 #39 (87)",
+   "step": 40,
+   "id": "3-39.87"
+  },
+  {
+   "table": "3",
+   "section": "AC microamps",
+   "switch": "µA~  (AC microamps)",
+   "range": "6000 µA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "ACI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "3258",
+   "high": "3342",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0033,
+    "frequency": 60.0
+   },
+   "nominal": 0.0033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 39 (83 and 88 column): 3258 to 3342 µA",
+   "ref": "T3 #39 (83 and 88)",
+   "step": 40,
+   "id": "3-39.83"
+  },
+  {
+   "table": "3",
+   "section": "DC microamps",
+   "switch": "µA⎓  (DC microamps)",
+   "range": "600 µA",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "328.9",
+   "high": "331.1",
+   "test": "numeric",
+   "applied": {
+    "value": 0.00033,
+    "frequency": null
+   },
+   "nominal": 0.00033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 40 (87 column): 328.9 to 331.1 µA",
+   "ref": "T3 #40 (87)",
+   "step": 41,
+   "id": "3-40.87"
+  },
+  {
+   "table": "3",
+   "section": "DC microamps",
+   "switch": "µA⎓  (DC microamps)",
+   "range": "600 µA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "328.3",
+   "high": "331.7",
+   "test": "numeric",
+   "applied": {
+    "value": 0.00033,
+    "frequency": null
+   },
+   "nominal": 0.00033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 40 (83 and 88 column): 328.3 to 331.7 µA",
+   "ref": "T3 #40 (83 and 88)",
+   "step": 41,
+   "id": "3-40.83"
+  },
+  {
+   "table": "3",
+   "section": "DC microamps",
+   "switch": "µA⎓  (DC microamps)",
+   "range": "6000 µA",
+   "models": [
+    "87V"
+   ],
+   "kind": "DCI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "3291",
+   "high": "3309",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0033,
+    "frequency": null
+   },
+   "nominal": 0.0033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 41 (87 column): 3291 to 3309 µA",
+   "ref": "T3 #41 (87)",
+   "step": 42,
+   "id": "3-41.87"
+  },
+  {
+   "table": "3",
+   "section": "DC microamps",
+   "switch": "µA⎓  (DC microamps)",
+   "range": "6000 µA",
+   "models": [
+    "83V",
+    "88V"
+   ],
+   "kind": "DCI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "3285",
+   "high": "3315",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0033,
+    "frequency": null
+   },
+   "nominal": 0.0033,
+   "group": "UAMP",
+   "note": "The meter shows LEAd if the leads are in the A or mA µA jack and the rotary switch does not match the jack in use (Table 2, error messages).",
+   "tol_text": "Table 3 step 41 (83 and 88 column): 3285 to 3315 µA",
+   "ref": "T3 #41 (83 and 88)",
+   "step": 42,
+   "id": "3-41.83"
+  },
+  {
+   "table": "3",
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢",
+   "range": "10 nF",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "NONE",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "0.21",
+   "high": "0.31",
+   "test": "numeric",
+   "nominal": 0.0,
+   "setup_key": "NONE",
+   "setup": "Table 3 footnote 2: remove the test leads from the meter (open input). Select capacitance, 10 nF range. The calibrator stays in STANDBY.",
+   "unc_text": "N/A (no standard applied)",
+   "group": "NONE",
+   "tol_text": "Table 3 step 42 (both columns): 0.21 to 0.31 nF",
+   "ref": "T3 #42",
+   "step": 43,
+   "id": "3-42"
+  },
+  {
+   "table": "3",
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢",
+   "range": "100 nF",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "CAP",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "4.7",
+   "high": "5.3",
+   "test": "numeric",
+   "applied": {
+    "value": 5e-09,
+    "frequency": null
+   },
+   "nominal": 5e-09,
+   "rel_zero": {
+    "value": null,
+    "text": "Disconnect the test leads from the calibrator, then press REL on the meter to null the internal meter and lead capacitance (Table 3 footnote 5). Reconnect the leads to the calibrator before continuing."
+   },
+   "printed_text": {
+    "low": "04.7",
+    "high": "05.3",
+    "note": "printed with the leading zero the meter displays; same value"
+   },
+   "settle": 10,
+   "group": "VOHM",
+   "note": "Table 3 footnote 5: use REL to compensate for the internal meter and lead capacitance. The test leads must be disconnected from the calibrator before using REL.",
+   "tol_text": "Table 3 step 43 (both columns): 4.7 to 5.3 nF",
+   "ref": "T3 #43",
+   "step": 44,
+   "id": "3-43"
+  },
+  {
+   "table": "3",
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢",
+   "range": "100 µF",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "9.2",
+   "high": "9.8",
+   "test": "numeric",
+   "applied": {
+    "value": 9.5e-06,
+    "frequency": null
+   },
+   "nominal": 9.5e-06,
+   "printed_text": {
+    "low": "09.2",
+    "high": "09.8",
+    "note": "printed with the leading zero the meter displays; same value"
+   },
+   "settle": 15,
+   "group": "VOHM",
+   "tol_text": "Table 3 step 44 (both columns): 9.2 to 9.8 µF",
+   "ref": "T3 #44",
+   "step": 45,
+   "id": "3-44"
+  },
+  {
+   "table": "3",
+   "section": "Low pass filter",
+   "switch": "V~  (AC volts, low pass filter)",
+   "range": "1000 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "372",
+   "high": "408",
+   "test": "numeric",
+   "applied": {
+    "value": 400.0,
+    "frequency": 400.0
+   },
+   "nominal": 400.0,
+   "group": "VOHM",
+   "note": "Select the low pass filter on the AC volts function (the K / LPF indicator, Table 2 item 11, shows it is on).",
+   "tol_text": "Table 3 step 45 (87 column; N/A for the 83 and 88): 372 to 408 V",
+   "ref": "T3 #45 (87)",
+   "step": 46,
+   "id": "3-45"
+  },
+  {
+   "table": "3",
+   "section": "Low pass filter",
+   "switch": "V~  (AC volts, low pass filter)",
+   "range": "1000 V",
+   "models": [
+    "87V"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "226",
+   "high": "340",
+   "test": "numeric",
+   "applied": {
+    "value": 400.0,
+    "frequency": 800.0
+   },
+   "nominal": 400.0,
+   "group": "VOHM",
+   "note": "Select the low pass filter on the AC volts function (the K / LPF indicator, Table 2 item 11, shows it is on). Table 3 footnote 4: the meter accuracy is not specified at this input frequency with the low pass filter selected. The reading shows the filter is active and follows the expected roll-off curve; it is judged against the printed range 226 to 340 V.",
+   "tol_text": "Table 3 step 46 (87 column; N/A for the 83 and 88): 226 to 340 V",
+   "ref": "T3 #46 (87)",
+   "step": 47,
+   "id": "3-46"
+  },
+  {
+   "table": "3",
+   "section": "Peak Min / Max",
+   "switch": "V⎓  (DC volts, Peak Min/Max)",
+   "range": "6 V dc",
+   "models": [
+    "87V"
+   ],
+   "kind": "SQUARE",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.897",
+   "high": "4.103",
+   "test": "numeric",
+   "applied": {
+    "value": 6.0,
+    "frequency": 2000.0,
+    "duty": 50.0,
+    "offset": 1.0
+   },
+   "nominal": 4.0,
+   "prompt": "With the meter on V DC (6 V range), select Peak Min Max (the PEAK indicator shows the 250 µs Peak Min Max mode, Table 2 item 9), then read MAX.",
+   "unc_kind": "SQUARE_PEAK",
+   "group": "VOHM",
+   "note": "Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (Table 3 step 47, p. 11).",
+   "tol_text": "Table 3 step 47 MAX (87 column): 3.897 to 4.103 V",
+   "ref": "T3 #47 MAX (87)",
+   "step": 48,
+   "id": "3-47MAX.87"
+  },
+  {
+   "table": "3",
+   "section": "Peak Min / Max",
+   "switch": "V⎓  (DC volts, Peak Min/Max)",
+   "range": "6 V dc",
+   "models": [
+    "88V"
+   ],
+   "kind": "SQUARE",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "3.895",
+   "high": "4.105",
+   "test": "numeric",
+   "applied": {
+    "value": 6.0,
+    "frequency": 2000.0,
+    "duty": 50.0,
+    "offset": 1.0
+   },
+   "nominal": 4.0,
+   "prompt": "With the meter on V DC (6 V range), select Peak Min Max (the PEAK indicator shows the 250 µs Peak Min Max mode, Table 2 item 9), then read MAX.",
+   "unc_kind": "SQUARE_PEAK",
+   "group": "VOHM",
+   "note": "Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (Table 3 step 47, p. 11).",
+   "tol_text": "Table 3 step 47 MAX (88 column): 3.895 to 4.105 V",
+   "ref": "T3 #47 MAX (88)",
+   "step": 48,
+   "id": "3-47MAX.83"
+  },
+  {
+   "table": "3",
+   "section": "Peak Min / Max",
+   "switch": "V⎓  (DC volts, Peak Min/Max)",
+   "range": "6 V dc",
+   "models": [
+    "87V"
+   ],
+   "kind": "SQUARE",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-2.102",
+   "high": "-1.898",
+   "test": "numeric",
+   "applied": {
+    "value": 6.0,
+    "frequency": 2000.0,
+    "duty": 50.0,
+    "offset": 1.0
+   },
+   "nominal": -2.0,
+   "prompt": "Peak Min Max is on: step the meter to MIN (the display shows MIN) and read it.",
+   "unc_kind": "SQUARE_PEAK",
+   "group": "VOHM",
+   "note": "Peak Min/Max, read the MIN value (same 6 V p-p, 2 kHz, 1 V offset square wave; Table 3 step 47, p. 11). After you record this reading, exit Min Max by pressing and holding the MIN MAX button.",
+   "tol_text": "Table 3 step 47 MIN (87 column): -2.102 to -1.898 V",
+   "ref": "T3 #47 MIN (87)",
+   "step": 49,
+   "id": "3-47MIN.87"
+  },
+  {
+   "table": "3",
+   "section": "Peak Min / Max",
+   "switch": "V⎓  (DC volts, Peak Min/Max)",
+   "range": "6 V dc",
+   "models": [
+    "88V"
+   ],
+   "kind": "SQUARE",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-2.103",
+   "high": "-1.897",
+   "test": "numeric",
+   "applied": {
+    "value": 6.0,
+    "frequency": 2000.0,
+    "duty": 50.0,
+    "offset": 1.0
+   },
+   "nominal": -2.0,
+   "prompt": "Peak Min Max is on: step the meter to MIN (the display shows MIN) and read it.",
+   "unc_kind": "SQUARE_PEAK",
+   "group": "VOHM",
+   "note": "Peak Min/Max, read the MIN value (same 6 V p-p, 2 kHz, 1 V offset square wave; Table 3 step 47, p. 11). After you record this reading, exit Min Max by pressing and holding the MIN MAX button.",
+   "tol_text": "Table 3 step 47 MIN (88 column): -2.103 to -1.897 V",
+   "ref": "T3 #47 MIN (88)",
+   "step": 49,
+   "id": "3-47MIN.83"
+  },
+  {
+   "table": "3",
+   "section": "Temperature",
+   "switch": "mV⎓  (Temperature)",
+   "range": "Type K",
+   "models": [
+    "87V",
+    "88V"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "degC",
+   "low": "-1.0",
+   "high": "1.0",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "settle": 30,
+   "group": "TEMP",
+   "note": "Table 3 footnote 3: to ensure an accurate measurement, the meter and the thermocouple adapter must be at the same temperature. After connecting the thermocouple adapter (Fluke 80AK, K-type thermocouple with a mini-plug on both ends, Table 1) allow the reading to stabilise before recording it. The calibrator sources degrees C: set the meter to °C.",
+   "tol_text": "Table 3 step 49 (both columns): -1.0 to 1.0 °C",
+   "ref": "T3 #49",
+   "step": 50,
+   "id": "3-49",
+   "prompt": "Connect the K-type thermocouple (mini-plug on both ends) through the Fluke 80AK adapter. The meter and the adapter must be at the same temperature: let the reading stabilise before recording it (Table 3 footnote 3). Set the meter to °C."
+  },
+  {
+   "table": "3",
+   "section": "Temperature",
+   "switch": "mV⎓  (Temperature)",
+   "range": "Type K",
+   "models": [
+    "87V",
+    "88V"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "degC",
+   "low": "98.0",
+   "high": "102.0",
+   "test": "numeric",
+   "applied": {
+    "value": 100.0,
+    "frequency": null
+   },
+   "nominal": 100.0,
+   "settle": 30,
+   "group": "TEMP",
+   "note": "Table 3 footnote 3: to ensure an accurate measurement, the meter and the thermocouple adapter must be at the same temperature. After connecting the thermocouple adapter (Fluke 80AK, K-type thermocouple with a mini-plug on both ends, Table 1) allow the reading to stabilise before recording it. The calibrator sources degrees C: set the meter to °C.",
+   "tol_text": "Table 3 step 50 (both columns): 98.0 to 102.0 °C",
+   "ref": "T3 #50",
+   "step": 51,
+   "id": "3-50"
+  },
+  {
+   "table": "3",
+   "step": 52,
+   "section": "Backlight",
+   "switch": "Backlight",
+   "range": "",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Backlight (step 51)",
+   "setup": "Press the backlight button.",
+   "question": "The backlight comes on.",
+   "setup_key": "NONE",
+   "ref": "T3 #51",
+   "id": "3-51"
+  },
+  {
+   "table": "3",
+   "step": 53,
+   "section": "Backlight",
+   "switch": "Backlight",
+   "range": "",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Backlight (step 52)",
+   "setup": "Press the backlight button again.",
+   "question": "The backlight intensifies.",
+   "setup_key": "NONE",
+   "ref": "T3 #52",
+   "id": "3-52"
+  },
+  {
+   "table": "3",
+   "step": 54,
+   "section": "Backlight",
+   "switch": "Backlight",
+   "range": "",
+   "models": [
+    "83V",
+    "87V",
+    "88V"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Backlight (step 53)",
+   "setup": "Press the backlight button again.",
+   "question": "The backlight goes off.",
+   "setup_key": "NONE",
+   "ref": "T3 #53",
+   "id": "3-53"
+  }
+ ]
+}

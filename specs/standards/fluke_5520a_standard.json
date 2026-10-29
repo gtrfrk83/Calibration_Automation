@@ -13,7 +13,7 @@
   "approve_date": "",
   "source_pdf": "5520A_Manual.pdf",
   "sheet_generated": "",
-  "built": "2026-10-22T19:27:46"
+  "built": "2026-10-28T21:06:38"
  },
  "notes": {
   "1": "SOURCE: Fluke 5520A Service Manual (supplied PDF 5520A_Manual.pdf), Chapter 1 Specifications, printed pp. 1-6 to 1-25 = PDF pp. 22-41 (printed 1-N = PDF N + 16). Rows carry the PDF page. Every value was read from rendered page images (130 dpi page, then a 200 dpi crop read a second time), not from extracted text.",
@@ -26,7 +26,8 @@
   "8": "AUXILIARY output (dual output mode): DC voltage (p. 1-8) and AC voltage sine (p. 1-13) are stored in their own functions (\"Auxiliary Output (Dual Output Mode)\"), which a plain DCV / ACV lookup excludes. AUX AC is printed in % of output + uV (the NORMAL table is ppm of output + uV).",
   "9": "PRINTED ANOMALIES (stored as read, flagged in problems): (a) DC current p. 1-9 first row is printed \"0 to 329.999 mA\" with resolution \"1 nA\"; the noise table below it says 329.999 uA, so it is stored as microamps; the resolution column of that table is printed in mA for rows 2 to 8 (\"0.01 mA\" ... \"100 mA\") but the digits of the ranges make them uA (3.29999 mA range: 0.01 uA), stored as uA-based values (10 nA ... 100 uA). (b) AC current LCOMP off, 3 A to 10.9999 A (p. 1-14) prints the second band \"100 kHz to 1 kHz\": stored as 100 Hz to 1 kHz (the next band is 1 kHz to 5 kHz, and the 11 A row prints 100 Hz to 1 kHz). (c) AC current LCOMP on, 3 A to 20.5 A footnote [3] (p. 1-15): \"floor 1000 uA within 30 seconds, 5000 uA for operating times > 30 seconds\" while the table prints 5000 uA (footnote [2] gives 4000 / 2000 for the lower band): the table value is stored; the footnote wording looks transposed. (d) Capacitance p. 1-16 prints \"0.33 uF to 1.09999mF\" for the 0.33 mF range: stored as 0.33 mF to 1.09999 mF. (e) The Pt 385 100 ohm RTD is NOT in the 5520A RTD table (p. 1-18: Pt 395, Pt 3926, Pt 3916 at 100 ohm; Pt 385 at 200, 500, 1000 ohm; PtNi 385 120 ohm; Cu 427 10 ohm), unlike the 5522A sheet. (f) The general specifications table (p. 1-7) says \"5500A Calibrator\" for weight / power / dimensions (a manual-wide wording quirk); the 5520A is the instrument of every table.",
   "10": "TEMPERATURE: thermocouple types B C E J K L N R S T U, 90 day and 1 yr, in degC; the manual prints one \"Source/Measure\" column, stored for both directions (functions \"... Output\" = the calibrator sources, \"... Input\" = it measures). Resolution 0.01 degC; standard ITS-90 or IPTS-68 selectable; note [3]: does not include thermocouple error. The manual prints no reference-junction condition beyond tcal +/-5 degC (p. 1-17). Type K values are identical to the 5522A sheet. RTD (p. 1-18): COMP OFF (NORMAL terminals) and 2-wire / 4-wire compensation, resolution 0.003 degC; Cu 427 is based on MINCO Application Aid No. 18.",
-  "11": "NOT STORED: DC power and AC power (pp. 1-18, 1-19 summaries in % of watts output), power / dual-output limits (summarised in \"limits\"), phase (p. 1-21), harmonics (p. 1-25), AC voltage and current non-sine and extended bandwidth (pp. 1-25 .. 1-30, summarised in \"limits\"), AC voltage DC offset, TC linear 10 uV/degC and 1 mV/degC modes (p. 1-8: 50 ppm + 3 uV 1 yr), and the SC300 / SC600 scope-option specifications (chapters 6 and 7). The 5522A sheet carries the scope-option rows; this one does not, so scope bandwidth / time base points cannot be costed on it."
+  "11": "NOT STORED: DC power and AC power (pp. 1-18, 1-19 summaries in % of watts output), power / dual-output limits (summarised in \"limits\"), phase (p. 1-21), harmonics (p. 1-25), AC voltage and current non-sine and extended bandwidth (pp. 1-25 .. 1-30, summarised in \"limits\"), AC voltage DC offset, TC linear 10 uV/degC and 1 mV/degC modes (p. 1-8: 50 ppm + 3 uV 1 yr), and the SC300 / SC600 scope-option specifications (chapters 6 and 7). The 5522A sheet carries the scope-option rows; this one does not, so scope bandwidth / time base points cannot be costed on it.",
+  "square_wave": "SQUARE WAVE ROWS (amplitude, DC offset, duty cycle at 1 kHz): written by specs/build_square_wave_rows.py from the rendered page images; see that file for the pages. Used for the uncertainty of square-wave points (Fluke 83V / 87V / 88V duty cycle and Peak Min/Max). The amplitude table prints one row (2.9 mV to 66 V p-p), so the range term is 66 Vpp. Duty cycle is specified for 1 % to 99 % below 3.3 V p-p (printed p. 1-28); the 50 % figure is used at higher amplitudes (UNVERIFIED). The WAVE / DUTY / DC_OFFSET commands are not in this Service Manual (UNVERIFIED for the 5520A)."
  },
  "limits": [
   {
@@ -16624,6 +16625,784 @@
      "res_src": "manual"
     }
    ]
+  },
+  {
+   "name": "Voltage, AC [Squarewave (Normal Output)]",
+   "direction": "output",
+   "page": 42,
+   "ranges": [
+    {
+     "label": "0.0029 Vpp to 66 Vpp, 0.01 Hz to 10 Hz",
+     "page": 42,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0029,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "0.0029 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "0.01 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.05,
+       "fs_rel": 0.005,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(5% I.V. + 0.5% F.S.{\"Full Scale\" = 66 Vpp})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.05,
+       "fs_rel": 0.005,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(5% I.V. + 0.5% F.S.{\"Full Scale\" = 66 Vpp})"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.0029,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 0.01,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.0029 Vpp to 66 Vpp, 10 Hz to 45 Hz",
+     "page": 42,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0029,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "0.0029 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 45.0,
+       "unit": "Hz",
+       "text": "10 Hz to 45 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0025,
+       "fs_rel": 0.005,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.25% I.V. + 0.5% F.S.{\"Full Scale\" = 66 Vpp})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0025,
+       "fs_rel": 0.005,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.25% I.V. + 0.5% F.S.{\"Full Scale\" = 66 Vpp})"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.0029,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 10.0,
+     "freq_hi": 45.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.0029 Vpp to 66 Vpp, 45 Hz to 1000 Hz",
+     "page": 42,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0029,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "0.0029 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "45 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0025,
+       "fs_rel": 0.0025,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.25% I.V. + 0.25% F.S.{\"Full Scale\" = 66 Vpp})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0025,
+       "fs_rel": 0.0025,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.25% I.V. + 0.25% F.S.{\"Full Scale\" = 66 Vpp})"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.0029,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 45.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.0029 Vpp to 66 Vpp, 1000 Hz to 20000 Hz",
+     "page": 42,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0029,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "0.0029 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "1000 Hz to 20000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.0025,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.5% I.V. + 0.25% F.S.{\"Full Scale\" = 66 Vpp})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0025,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.5% I.V. + 0.25% F.S.{\"Full Scale\" = 66 Vpp})"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.0029,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.0029 Vpp to 66 Vpp, 20000 Hz to 100000 Hz",
+     "page": 42,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0029,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "0.0029 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "20000 Hz to 100000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.05,
+       "fs_rel": 0.005,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(5% I.V. + 0.5% F.S.{\"Full Scale\" = 66 Vpp})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.05,
+       "fs_rel": 0.005,
+       "fs_value": 66.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(5% I.V. + 0.5% F.S.{\"Full Scale\" = 66 Vpp})"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.0029,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 20000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Voltage, AC [Squarewave DC Offset (Normal Output)]",
+   "direction": "output",
+   "page": 43,
+   "ranges": [
+    {
+     "label": "offset 0 V to 0.05 V with 0.0066 Vpp to 0.065999 Vpp",
+     "page": 43,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 0.05,
+       "unit": "V",
+       "text": "0 V to 0.05 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 0.0066,
+       "hi": 0.065999,
+       "unit": "Vpp",
+       "text": "[Vpp] 0.0066 Vpp to 0.065999 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 6.6e-05,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 6.6e-05 V)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 6.6e-05,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 6.6e-05 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 0.05,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 0.0066,
+       "hi": 0.065999,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 0.5 V with 0.066 Vpp to 0.659999 Vpp",
+     "page": 43,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 0.5,
+       "unit": "V",
+       "text": "0 V to 0.5 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 0.066,
+       "hi": 0.659999,
+       "unit": "Vpp",
+       "text": "[Vpp] 0.066 Vpp to 0.659999 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00066,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 0.00066 V)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00066,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 0.00066 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 0.5,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 0.066,
+       "hi": 0.659999,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 5 V with 0.66 Vpp to 6.59999 Vpp",
+     "page": 43,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 5.0,
+       "unit": "V",
+       "text": "0 V to 5 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 0.66,
+       "hi": 6.59999,
+       "unit": "Vpp",
+       "text": "[Vpp] 0.66 Vpp to 6.59999 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0066,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 0.0066 V)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0066,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 0.0066 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 5.0,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 0.66,
+       "hi": 6.59999,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 50 V with 6.6 Vpp to 66 Vpp",
+     "page": 43,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 50.0,
+       "unit": "V",
+       "text": "0 V to 50 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 6.6,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "[Vpp] 6.6 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.066,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 0.066 V)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.066,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 0.066 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 50.0,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 6.6,
+       "hi": 66.0,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Frequency [Duty Cycle]",
+   "direction": "output",
+   "page": 44,
+   "ranges": [
+    {
+     "label": "1000Hz 50 to 50 %",
+     "page": 44,
+     "params": [
+      {
+       "tag": "",
+       "lo": 50.0,
+       "hi": 50.0,
+       "unit": "%DC",
+       "text": "50 %DC to 50 %DC",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Hz",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "[Hz] 1000 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.03,
+       "unit": "%DC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.03 %DC)"
+      }
+     ],
+     "raw_other": [
+      "manual: +/-(0.02 % of period + 100 ns at 50 %); at 1000 Hz (period 1 ms) = +/-0.03 % of the period = 0.03 %DC"
+     ],
+     "kind": "FREQ",
+     "variant": "Duty Cycle",
+     "amp_lo": 50.0,
+     "amp_hi": 50.0,
+     "unit": "%DC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Hz",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1000Hz 10 to 49 %",
+     "page": 44,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 49.0,
+       "unit": "%DC",
+       "text": "10 %DC to 49 %DC",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Hz",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "[Hz] 1000 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.06,
+       "unit": "%DC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.06 %DC)"
+      }
+     ],
+     "raw_other": [
+      "manual: +/-(0.05 % of period + 100 ns, 10 % to 90 %); at 1000 Hz (period 1 ms) = +/-0.06 % of the period = 0.06 %DC"
+     ],
+     "kind": "FREQ",
+     "variant": "Duty Cycle",
+     "amp_lo": 10.0,
+     "amp_hi": 49.0,
+     "unit": "%DC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Hz",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1000Hz 51 to 90 %",
+     "page": 44,
+     "params": [
+      {
+       "tag": "",
+       "lo": 51.0,
+       "hi": 90.0,
+       "unit": "%DC",
+       "text": "51 %DC to 90 %DC",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Hz",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "[Hz] 1000 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.06,
+       "unit": "%DC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.06 %DC)"
+      }
+     ],
+     "raw_other": [
+      "manual: +/-(0.05 % of period + 100 ns, 10 % to 90 %); at 1000 Hz (period 1 ms) = +/-0.06 % of the period = 0.06 %DC"
+     ],
+     "kind": "FREQ",
+     "variant": "Duty Cycle",
+     "amp_lo": 51.0,
+     "amp_hi": 90.0,
+     "unit": "%DC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Hz",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
   }
  ],
  "problems": [
@@ -16685,7 +17464,7 @@
   {
    "level": "warn",
    "where": "standard",
-   "what": "Not stored: stability, noise, burden, compliance adders, power, phase, harmonics, non-sine and extended bandwidth AC, TC linear modes, SC300 / SC600 (note 11)."
+   "what": "Not stored: stability, noise, burden, compliance adders, power, phase, harmonics, non-sine AC other than the square wave (written by build_square_wave_rows.py), extended bandwidth AC, TC linear modes, SC300 / SC600 (note 11)."
   }
  ]
 }

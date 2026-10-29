@@ -97,7 +97,7 @@ class Model(unittest.TestCase):
         self.assertIn('series', next(RQ.share_reason(p, sp['options']) for p in p116 if p['group'] == 'UAMP'))
         sp, p289 = pts('289', 'fluke_287_289_pv.json')
         self.assertIn('4-wire', next(RQ.share_reason(p, sp['options']) for p in p289 if p['group'] == 'OHM4'))
-        sp, p87 = pts('87V', 'fluke_87v_pv.json')
+        sp, p87 = pts('87V', 'fluke_80_series_v_pv.json')
         self.assertIn('special source', next(RQ.share_reason(p, sp['options']) for p in p87 if p['kind'] == 'SQUARE'))
         self.assertIn('special source', next(RQ.share_reason(p, sp['options']) for p in p87 if p['kind'] == 'DUTY'))
 
@@ -113,7 +113,7 @@ class Model(unittest.TestCase):
         self.assertEqual(RQ.share_reason(v, {'queue_single_groups': ['VOHM']}), RQ.FLAGGED_REASON)
 
     def test_every_shipped_handheld_spec_has_a_plan(self):
-        for spec in ('fluke_110_series_pv.json', 'fluke_87v_pv.json', 'fluke_77iv_pv.json', 'fluke_170_series_pv.json', 'fluke_287_289_pv.json', 'klein_mm325_pv.json'):
+        for spec in ('fluke_110_series_pv.json', 'fluke_80_series_v_pv.json', 'fluke_77iv_pv.json', 'fluke_170_series_pv.json', 'fluke_287_289_pv.json', 'klein_mm325_pv.json'):
             sp = h.load_spec(spec)
             for model in sp['models']:
                 points = h.points_for(sp, model)

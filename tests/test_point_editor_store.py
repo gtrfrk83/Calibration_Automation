@@ -214,7 +214,7 @@ class PointDefinition(TP.Base):
             self.add(self.value())
 
     def test_band_points_keep_low_le_nominal_le_high_decimal_safe(self):
-        steps = json.loads((ROOT / 'specs' / 'fluke_87v_pv.json').read_text(encoding='utf-8'))['steps']
+        steps = json.loads((ROOT / 'specs' / 'fluke_80_series_v_pv.json').read_text(encoding='utf-8'))['steps']
         p = next(s for s in steps if s.get('low') is not None and s.get('nominal') is not None and s['nominal'] != 0)
         self.assertEqual(pm.check_limit_value(p, {'mode': 'band', 'low': p['low'], 'high': p['high']}), [])
         nom_disp = Decimal(str(p['nominal'])) / Decimal(str(p['factor']))

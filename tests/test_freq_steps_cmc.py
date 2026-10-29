@@ -22,13 +22,13 @@ _stub.install()
 import handheld_dmm as H  # noqa: E402
 import uncertainty  # noqa: E402
 
-FIXED = {'fluke_77iv_pv.json': ['2-17'], 'fluke_110_series_pv.json': ['3-17'], 'fluke_87v_pv.json': ['1-11', '1-12', '1-13', '1-14'], 'fluke_287_289_pv.json': ['4-24'],
+FIXED = {'fluke_77iv_pv.json': ['2-17'], 'fluke_110_series_pv.json': ['3-17'], 'fluke_80_series_v_pv.json': ['3-11', '3-12', '3-13', '3-14', '3-15'], 'fluke_287_289_pv.json': ['4-24'],
          'fluke_170_series_pv.json': ['2-16', '2-17', '2-18', '2-19', '2-25', '2-26', '3-16', '3-17', '3-18', '3-19', '3-25']}
 LEFT_BLANK = set()                                 # no Hz-reading step with a source is left without the marker
 CMC_REL = 7.1e-12                                  # Frequency - Measure, 10 Hz to 26.5 GHz (specs/a2la_1888_03_cmc.json)
 EXPECTED = {('fluke_77iv_pv.json', '2-17'): ('360 nHz', 50000.0), ('fluke_110_series_pv.json', '3-17'): ('360 nHz', 50000.0),
-            ('fluke_87v_pv.json', '1-11'): ('710 nHz', 99950.0), ('fluke_87v_pv.json', '1-12'): ('1.5 µHz', 199500.0),
-            ('fluke_87v_pv.json', '1-13'): ('710 nHz', 99950.0), ('fluke_87v_pv.json', '1-14'): ('710 nHz', 99950.0),
+            ('fluke_80_series_v_pv.json', '3-11'): ('710 nHz', 99950.0), ('fluke_80_series_v_pv.json', '3-12'): ('1.5 µHz', 199500.0),
+            ('fluke_80_series_v_pv.json', '3-13'): ('710 nHz', 99950.0), ('fluke_80_series_v_pv.json', '3-14'): ('710 nHz', 99950.0),
             ('fluke_287_289_pv.json', '4-24'): ('320 pHz', 45.0)}
 for _sid, _text, _f in (('2-16', '320 pHz', 45.0), ('2-17', '6.4 nHz', 900.0), ('2-18', '64 nHz', 9000.0), ('2-19', '360 nHz', 50000.0), ('2-25', '320 pHz', 45.0),
                         ('2-26', '360 nHz', 50000.0), ('3-16', '320 pHz', 45.0), ('3-17', '6.4 nHz', 900.0), ('3-18', '64 nHz', 9000.0), ('3-19', '360 nHz', 50000.0),
@@ -37,8 +37,8 @@ for _sid, _text, _f in (('2-16', '320 pHz', 45.0), ('2-17', '6.4 nHz', 900.0), (
 
 
 NEW = {('fluke_77iv_pv.json', '2-17'): ('5.8 Hz', '130 mHz'), ('fluke_110_series_pv.json', '3-17'): ('5.8 Hz', '130 mHz'),
-       ('fluke_87v_pv.json', '1-11'): ('5.8 Hz', '250 mHz'), ('fluke_87v_pv.json', '1-12'): ('58 Hz', '500 mHz'),
-       ('fluke_87v_pv.json', '1-13'): ('5.8 Hz', '250 mHz'), ('fluke_87v_pv.json', '1-14'): ('5.8 Hz', '250 mHz'),
+       ('fluke_80_series_v_pv.json', '3-11'): ('5.8 Hz', '250 mHz'), ('fluke_80_series_v_pv.json', '3-12'): ('58 Hz', '500 mHz'),
+       ('fluke_80_series_v_pv.json', '3-13'): ('5.8 Hz', '250 mHz'), ('fluke_80_series_v_pv.json', '3-14'): ('5.8 Hz', '250 mHz'),
        ('fluke_287_289_pv.json', '4-24'): ('5.8 mHz', '120 µHz')}
 for _sid, _a, _b in (('2-16', '5.8 mHz', '120 µHz'), ('2-17', '58 mHz', '2.3 mHz'), ('2-18', '580 mHz', '23 mHz'), ('2-19', '5.8 Hz', '130 mHz'), ('2-25', '5.8 mHz', '120 µHz'),
                      ('2-26', '5.8 Hz', '130 mHz'), ('3-16', '5.8 mHz', '120 µHz'), ('3-17', '58 mHz', '2.3 mHz'), ('3-18', '580 mHz', '23 mHz'), ('3-19', '5.8 Hz', '130 mHz'),
@@ -126,9 +126,10 @@ class FrequencyRows(OldRule, unittest.TestCase):
         b = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(b)
         self.assertEqual(json.loads(json.dumps(b.build_spec())), json.loads((ROOT / 'specs' / 'fluke_77iv_pv.json').read_text(encoding='utf-8')))
-        src = (ROOT / 'specs' / 'build_87v_spec.py').read_text(encoding='utf-8')
-        self.assertEqual(src.count("unc_kind='FREQ')"), 3)
-        self.assertIn("'no_uncertainty', 'unc_kind'", src)
+        spec = importlib.util.spec_from_file_location('build_80v_spec', ROOT / 'specs' / 'build_80v_spec.py')
+        b = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(b)
+        self.assertEqual(json.loads(json.dumps(b.build_spec(), ensure_ascii=False)), json.loads((ROOT / 'specs' / 'fluke_80_series_v_pv.json').read_text(encoding='utf-8')))
 
 
 class CalibratorFrequencyRule(unittest.TestCase):

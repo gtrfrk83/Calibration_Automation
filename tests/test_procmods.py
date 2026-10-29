@@ -332,7 +332,7 @@ class PointsAndLimits(Base):
         self.assertNotIn('settle', out[1])
 
     def test_limits_unchanged_for_every_non_limit_kind_on_real_specs(self):
-        specs = [('keysight_34465a_pv.json', False), ('keysight_34470a_pv.json', False), ('fluke_87v_pv.json', True),
+        specs = [('keysight_34465a_pv.json', False), ('keysight_34470a_pv.json', False), ('fluke_80_series_v_pv.json', True),
                  ('klein_mm325_pv.json', True), ('tektronix_mdo4000c_pv.json', None), ('fluke_287_289_pv.json', True)]
         for name, steps in specs:
             spec = json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8'))
@@ -409,7 +409,7 @@ class PointsAndLimits(Base):
         self.assertEqual(e2['version'], 2)
 
     def test_limit_override_band_handheld_strings(self):
-        steps = json.loads((ROOT / 'specs' / 'fluke_87v_pv.json').read_text(encoding='utf-8'))['steps'][:10]
+        steps = [s for s in json.loads((ROOT / 'specs' / 'fluke_80_series_v_pv.json').read_text(encoding='utf-8'))['steps'] if s['test'] == 'numeric'][:10]
         p = steps[0]
         k = pm.point_key(p)
         lo, hi = float(p['low']), float(p['high'])

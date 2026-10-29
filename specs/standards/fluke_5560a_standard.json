@@ -39,7 +39,8 @@
   "21": "RTD (printed p.18): temperature standard ITS-90 or IPTS-68 selectable; the specifications do NOT include sensor accuracy; they apply within 24 hours and +/-1 degC of the ohms zero adjustment and with COMP OFF at the output terminals or with two-wire and four-wire compensation; see Resistance Operating Characteristics for the stimulus current limits; resolution 0.001 degC; tcal +/-5 degC.",
   "22": "RTD standards (printed p.20, notes): [1] ITS-90 per Resistance Thermometry - MINCO Application Aid No. 18 (Cu 10, Ni 120, Pt 100 (3926)); [2] ITS-90 per GOST 6651-2009 (Cu 50, Cu 100); [3] ITS-90 per IEC 60751:2008, ASTM E1137-08; IPTS-68 per IEC 751:1983, DIN 43760 (Pt 100 (385), Pt 200, Pt 500, Pt 1000); [4] IPTS-68 per JIS C1604:1981 (Pt 100 (3916)).",
   "23": "Frequency (printed p.10): the only accuracy printed is \"2 Year Absolute Uncertainty +/-2.5 uHz/Hz\" (jitter 100 ns p-p).  With REF CLK set to external the frequency uncertainty is the uncertainty of the external 10 MHz clock (square or pulse, positive peak 3 V to 5 V, within +/-20 uHz/Hz of 10 MHz).  No 90 day or 1 yr figure is printed.  Frequency resolution (not stored): 0.01 Hz (0.01 Hz - 119.99 Hz), 0.1 Hz (120.0 Hz - 1199.9 Hz), 1 Hz (1.200 - 11.999 kHz), 10 Hz (12.00 - 119.99 kHz), 100 Hz (120.0 - 1199.9 kHz), 1 kHz (1.200 - 2.000 MHz).",
-  "24": "Duty cycle (printed p.24, ACV Square Wave Characteristics; frequency 0.01 Hz to 100 kHz, duty range 1 % to 99 %): uncertainty +/-(0.02 % of period + 100 ns) at 50 % duty, +/-(0.05 % of period + 100 ns) for duty cycles from 10 % to 90 %; none is printed for 1 % to 10 % and 90 % to 99 %.  Stored in duty-cycle per cent (%DC) at the 1000 Hz of the previous sheet: 0.02 % + 100 ns x 1 kHz (0.01 %DC) = 0.03 %DC; 0.05 % + 0.01 %DC = 0.06 %DC.  The 100 ns term depends on frequency, which the schema cannot hold, so the figures are valid at 1 kHz only."
+  "24": "Duty cycle (printed p.24, ACV Square Wave Characteristics; frequency 0.01 Hz to 100 kHz, duty range 1 % to 99 %): uncertainty +/-(0.02 % of period + 100 ns) at 50 % duty, +/-(0.05 % of period + 100 ns) for duty cycles from 10 % to 90 %; none is printed for 1 % to 10 % and 90 % to 99 %.  Stored in duty-cycle per cent (%DC) at the 1000 Hz of the previous sheet: 0.02 % + 100 ns x 1 kHz (0.01 %DC) = 0.03 %DC; 0.05 % + 0.01 %DC = 0.06 %DC.  The 100 ns term depends on frequency, which the schema cannot hold, so the figures are valid at 1 kHz only.",
+  "square_wave": "SQUARE WAVE ROWS (amplitude, DC offset, duty cycle at 1 kHz): written by specs/build_square_wave_rows.py from the rendered page images; see that file for the pages. Used for the uncertainty of square-wave points (Fluke 83V / 87V / 88V duty cycle and Peak Min/Max). 95 % columns. The DC offset floor of the 12 V range is printed 120 mV (the other ranges follow 0.1 % of the range): stored as printed, possibly a misprint for 12 mV. Duty cycle: the Frequency [Duty Cycle] rows (printed p. 24)."
  },
  "functions": [
   {
@@ -14316,6 +14317,1840 @@
      "res_src": ""
     }
    ]
+  },
+  {
+   "name": "Voltage, AC [Squarewave (Normal Output)]",
+   "direction": "output",
+   "page": 24,
+   "ranges": [
+    {
+     "label": "0.002 Vpp to 0.022 Vpp, 0.01 Hz to 10 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp",
+       "text": "0.002 Vpp to 0.022 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "0.01 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.00011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.00011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.002,
+     "amp_hi": 0.022,
+     "unit": "Vpp",
+     "freq_lo": 0.01,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.002 Vpp to 0.022 Vpp, 10 Hz to 45 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp",
+       "text": "0.002 Vpp to 0.022 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 45.0,
+       "unit": "Hz",
+       "text": "10 Hz to 45 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.00011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.00011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.002,
+     "amp_hi": 0.022,
+     "unit": "Vpp",
+     "freq_lo": 10.0,
+     "freq_hi": 45.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.002 Vpp to 0.022 Vpp, 45 Hz to 1000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp",
+       "text": "0.002 Vpp to 0.022 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "45 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5.5e-05,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 5.5e-05 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5.5e-05,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 5.5e-05 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.002,
+     "amp_hi": 0.022,
+     "unit": "Vpp",
+     "freq_lo": 45.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.002 Vpp to 0.022 Vpp, 1000 Hz to 20000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp",
+       "text": "0.002 Vpp to 0.022 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "1000 Hz to 20000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5.5e-05,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.4% I.V. + 5.5e-05 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5.5e-05,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.4% I.V. + 5.5e-05 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.002,
+     "amp_hi": 0.022,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.002 Vpp to 0.022 Vpp, 20000 Hz to 100000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp",
+       "text": "0.002 Vpp to 0.022 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "20000 Hz to 100000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.00011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.00011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.002,
+     "amp_hi": 0.022,
+     "unit": "Vpp",
+     "freq_lo": 20000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.022 Vpp to 0.22 Vpp, 0.01 Hz to 10 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp",
+       "text": "0.022 Vpp to 0.22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "0.01 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.0011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.0011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.022,
+     "amp_hi": 0.22,
+     "unit": "Vpp",
+     "freq_lo": 0.01,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.022 Vpp to 0.22 Vpp, 10 Hz to 45 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp",
+       "text": "0.022 Vpp to 0.22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 45.0,
+       "unit": "Hz",
+       "text": "10 Hz to 45 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.0011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.0011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.022,
+     "amp_hi": 0.22,
+     "unit": "Vpp",
+     "freq_lo": 10.0,
+     "freq_hi": 45.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.022 Vpp to 0.22 Vpp, 45 Hz to 1000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp",
+       "text": "0.022 Vpp to 0.22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "45 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.00055 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.00055 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.022,
+     "amp_hi": 0.22,
+     "unit": "Vpp",
+     "freq_lo": 45.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.022 Vpp to 0.22 Vpp, 1000 Hz to 20000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp",
+       "text": "0.022 Vpp to 0.22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "1000 Hz to 20000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.4% I.V. + 0.00055 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.4% I.V. + 0.00055 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.022,
+     "amp_hi": 0.22,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.022 Vpp to 0.22 Vpp, 20000 Hz to 100000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp",
+       "text": "0.022 Vpp to 0.22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "20000 Hz to 100000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.0011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.0011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.022,
+     "amp_hi": 0.22,
+     "unit": "Vpp",
+     "freq_lo": 20000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.22 Vpp to 2.2 Vpp, 0.01 Hz to 10 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp",
+       "text": "0.22 Vpp to 2.2 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "0.01 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.22,
+     "amp_hi": 2.2,
+     "unit": "Vpp",
+     "freq_lo": 0.01,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.22 Vpp to 2.2 Vpp, 10 Hz to 45 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp",
+       "text": "0.22 Vpp to 2.2 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 45.0,
+       "unit": "Hz",
+       "text": "10 Hz to 45 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.22,
+     "amp_hi": 2.2,
+     "unit": "Vpp",
+     "freq_lo": 10.0,
+     "freq_hi": 45.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.22 Vpp to 2.2 Vpp, 45 Hz to 1000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp",
+       "text": "0.22 Vpp to 2.2 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "45 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.0055 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.0055 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.22,
+     "amp_hi": 2.2,
+     "unit": "Vpp",
+     "freq_lo": 45.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.22 Vpp to 2.2 Vpp, 1000 Hz to 20000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp",
+       "text": "0.22 Vpp to 2.2 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "1000 Hz to 20000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.4% I.V. + 0.0055 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.4% I.V. + 0.0055 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.22,
+     "amp_hi": 2.2,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0.22 Vpp to 2.2 Vpp, 20000 Hz to 100000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp",
+       "text": "0.22 Vpp to 2.2 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "20000 Hz to 100000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.011 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.011,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.011 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 0.22,
+     "amp_hi": 2.2,
+     "unit": "Vpp",
+     "freq_lo": 20000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "2.2 Vpp to 22 Vpp, 0.01 Hz to 10 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp",
+       "text": "2.2 Vpp to 22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "0.01 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.11,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.11 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.11,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.11 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 2.2,
+     "amp_hi": 22.0,
+     "unit": "Vpp",
+     "freq_lo": 0.01,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "2.2 Vpp to 22 Vpp, 10 Hz to 45 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp",
+       "text": "2.2 Vpp to 22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 45.0,
+       "unit": "Hz",
+       "text": "10 Hz to 45 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.11,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.11 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.11,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.11 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 2.2,
+     "amp_hi": 22.0,
+     "unit": "Vpp",
+     "freq_lo": 10.0,
+     "freq_hi": 45.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "2.2 Vpp to 22 Vpp, 45 Hz to 1000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp",
+       "text": "2.2 Vpp to 22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "45 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.055 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.055 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 2.2,
+     "amp_hi": 22.0,
+     "unit": "Vpp",
+     "freq_lo": 45.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "2.2 Vpp to 22 Vpp, 1000 Hz to 20000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp",
+       "text": "2.2 Vpp to 22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "1000 Hz to 20000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.4% I.V. + 0.055 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.055,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.4% I.V. + 0.055 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 2.2,
+     "amp_hi": 22.0,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "2.2 Vpp to 22 Vpp, 20000 Hz to 100000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp",
+       "text": "2.2 Vpp to 22 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "20000 Hz to 100000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.11,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 0.11 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.11,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 0.11 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 2.2,
+     "amp_hi": 22.0,
+     "unit": "Vpp",
+     "freq_lo": 20000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "22 Vpp to 66 Vpp, 0.01 Hz to 10 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "22 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "0.01 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.1,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 1.1 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.1,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 1.1 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 22.0,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 0.01,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "22 Vpp to 66 Vpp, 10 Hz to 45 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "22 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 45.0,
+       "unit": "Hz",
+       "text": "10 Hz to 45 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.1,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 1.1 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.1,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 1.1 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 22.0,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 10.0,
+     "freq_hi": 45.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "22 Vpp to 66 Vpp, 45 Hz to 1000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "22 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "45 Hz to 1000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.55,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2% I.V. + 0.55 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.55,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2% I.V. + 0.55 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 22.0,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 45.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "22 Vpp to 66 Vpp, 1000 Hz to 20000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "22 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "1000 Hz to 20000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.55,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.4% I.V. + 0.55 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.55,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.4% I.V. + 0.55 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 22.0,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "22 Vpp to 66 Vpp, 20000 Hz to 100000 Hz",
+     "page": 24,
+     "params": [
+      {
+       "tag": "",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "22 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "20000 Hz to 100000 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.1,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.9% I.V. + 1.1 Vpp)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.039,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.1,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(3.9% I.V. + 1.1 Vpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave (Normal Output)",
+     "amp_lo": 22.0,
+     "amp_hi": 66.0,
+     "unit": "Vpp",
+     "freq_lo": 20000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Voltage, AC [Squarewave DC Offset (Normal Output)]",
+   "direction": "output",
+   "page": 26,
+   "ranges": [
+    {
+     "label": "offset 0 V to 0.0085 V with 0.002 Vpp to 0.022 Vpp",
+     "page": 26,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 0.0085,
+       "unit": "V",
+       "text": "0 V to 0.0085 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 40.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "40 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp",
+       "text": "[Vpp] 0.002 Vpp to 0.022 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.2e-05,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 1.2e-05 V)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.2e-05,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 1.2e-05 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 0.0085,
+     "unit": "V",
+     "freq_lo": 40.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 0.002,
+       "hi": 0.022,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 0.085 V with 0.022 Vpp to 0.22 Vpp",
+     "page": 26,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 0.085,
+       "unit": "V",
+       "text": "0 V to 0.085 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 40.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "40 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp",
+       "text": "[Vpp] 0.022 Vpp to 0.22 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00012,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 0.00012 V)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.00012,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 0.00012 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 0.085,
+     "unit": "V",
+     "freq_lo": 40.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 0.022,
+       "hi": 0.22,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 0.85 V with 0.22 Vpp to 2.2 Vpp",
+     "page": 26,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 0.85,
+       "unit": "V",
+       "text": "0 V to 0.85 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 40.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "40 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp",
+       "text": "[Vpp] 0.22 Vpp to 2.2 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0012,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 0.0012 V)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0012,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 0.0012 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 0.85,
+     "unit": "V",
+     "freq_lo": 40.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 0.22,
+       "hi": 2.2,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 8.5 V with 2.2 Vpp to 22 Vpp",
+     "page": 26,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 8.5,
+       "unit": "V",
+       "text": "0 V to 8.5 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 40.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "40 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp",
+       "text": "[Vpp] 2.2 Vpp to 22 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.12,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 0.12 V)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.12,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 0.12 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 8.5,
+     "unit": "V",
+     "freq_lo": 40.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 2.2,
+       "hi": 22.0,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "offset 0 V to 85 V with 22 Vpp to 66 Vpp",
+     "page": 26,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 85.0,
+       "unit": "V",
+       "text": "0 V to 85 V",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 40.0,
+       "hi": 500000.0,
+       "unit": "Hz",
+       "text": "40 Hz to 500000 Hz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "Vpp",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp",
+       "text": "[Vpp] 22 Vpp to 66 Vpp",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.2,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1% I.V. + 1.2 V)"
+      },
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.2,
+       "unit": "V",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1% I.V. + 1.2 V)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Squarewave DC Offset (Normal Output)",
+     "amp_lo": 0.0,
+     "amp_hi": 85.0,
+     "unit": "V",
+     "freq_lo": 40.0,
+     "freq_hi": 500000.0,
+     "qualifiers": [
+      {
+       "tag": "Vpp",
+       "lo": 22.0,
+       "hi": 66.0,
+       "unit": "Vpp"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
   }
  ],
  "problems": [
@@ -14387,7 +16222,7 @@
   {
    "level": "warn",
    "where": "standard",
-   "what": "NOT LOADED (the document prints them; owner to decide whether to add): resolution tables (DCV p.3, ACV p.5, DCI p.7, ACI p.9, resistance p.12, capacitance p.13, inductance p.14, TC 0.01 degC / RTD 0.001 degC) - the sheet row field \"resolution\" stays blank, so no resolution term enters the budgets (as before); operating characteristics (stability, noise, distortion, compliance, output impedance, load limits); ACI compliance adders; ACV extended bandwidth (0.01 Hz - 3 Hz 5 %, printed p.23); ACV / ACI square wave accuracy (pp.24-25); ACV DC offset (p.26); Aux voltage DC / AC sine / AC square (pp.26-28); phase (p.11); AC / DC power and dual output limits (pp.21-22); harmonics (p.23); TC voltage source / measure in linear modes (p.17); 5560A with 52120A current specifications (pp.28-29); the 2 y and 99 % columns of every table."
+   "what": "NOT LOADED (the document prints them; owner to decide whether to add): resolution tables (DCV p.3, ACV p.5, DCI p.7, ACI p.9, resistance p.12, capacitance p.13, inductance p.14, TC 0.01 degC / RTD 0.001 degC) - the sheet row field \"resolution\" stays blank, so no resolution term enters the budgets (as before); operating characteristics (stability, noise, distortion, compliance, output impedance, load limits); ACI compliance adders; ACV extended bandwidth (0.01 Hz - 3 Hz 5 %, printed p.23); ACI square wave accuracy (p.25; the ACV square wave amplitude and DC offset ARE loaded, by build_square_wave_rows.py); Aux voltage DC / AC sine / AC square (pp.26-28); phase (p.11); AC / DC power and dual output limits (pp.21-22); harmonics (p.23); TC voltage source / measure in linear modes (p.17); 5560A with 52120A current specifications (pp.28-29); the 2 y and 99 % columns of every table."
   }
  ]
 }

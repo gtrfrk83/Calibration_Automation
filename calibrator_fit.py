@@ -51,6 +51,8 @@ class Req:
     high: float | None = None
     detail: str = ''                # free text added to the reason
     key: object = None              # the procedure's own id of the point (so an engine can find the point again)
+    duty: float | None = None       # SQUARE / DUTY: the duty cycle (%) the point sets
+    offset: float = 0.0             # SQUARE / DUTY: the DC offset (V)
 
     def text(self):
         from ui_theme_core import si_one
@@ -157,6 +159,25 @@ def _variant(std, kind):
     return ''
 
 
+def _check_square(model, req, std):
+    """A square-wave source: covered when the sheet has a square-wave amplitude row (Vpp) at the frequency, a DC offset row for that amplitude when the point
+    sets an offset, and a duty-cycle row at the frequency for a DUTY point (rows written by specs/build_square_wave_rows.py)."""
+    f = req.frequency
+    amp = std.lookup('ACV', req.value, frequency=f, variant='Squarewave (Normal')
+    if amp is None:
+        return Verdict(False, f'{model}: no square-wave amplitude row covers {req.value:g} Vpp at {f:g} Hz in its sheet', code='unsupported_waveform')
+    if req.offset:
+        off = std.lookup('ACV', req.offset, frequency=f, variant='Squarewave DC Offset', qualifier=('Vpp', req.value))
+        if off is None:
+            return Verdict(False, f'{model}: no DC offset row covers {req.offset:g} V on a {req.value:g} Vpp square wave at {f:g} Hz', code='unsupported_waveform')
+    if req.kind == 'DUTY':
+        duty = std.lookup('FREQ', req.duty if req.duty is not None else 50.0, variant='Duty', qualifier=('Hz', f))
+        if duty is None:
+            return Verdict(False, f'{model}: no duty-cycle row covers {req.duty if req.duty is not None else 50.0:g} % at {f:g} Hz', code='unsupported_waveform')
+        return Verdict(True, accuracy=duty.limit, row=f"{duty.row['function']} {duty.row['label']}")
+    return Verdict(True, accuracy=amp.limit, row=f"{amp.row['function']} {amp.row['label']}")
+
+
 def check(model, req, std=None):
     """Verdict for one request on one calibrator model (never raises)."""
     try:
@@ -181,8 +202,7 @@ def _check(model, req, std):
         return Verdict(False, f'no {model} specification sheet is installed', code='no_sheet')
     k = req.kind
     if k in ('SQUARE', 'DUTY'):
-        return Verdict(False, f'{model}: a square-wave source. The suite holds no {model} specification for non-sine waveforms (they are not in the sheet), and the WAVE / DUTY / '
-                              f'DC_OFFSET commands are not verified for it', code='unsupported_waveform')
+        return _check_square(model, req, std)
     variant = _variant(std, k)
     if k == 'TEMP':
         hit = std.lookup_temperature(req.value)
@@ -278,15 +298,19 @@ def handheld_requests(points):
         if not a or k not in KINDS:
             continue
         f = a.get('frequency')
+        if k == 'ACV' and a.get('waveform') == 'square':
+            k = 'SQUARE'                                        # a level given in Vpp (80 Series V 3-15): a square wave, whatever the reading
         factor = _dec(p.get('factor')) or 1.0
         lo, hi = _dec(p.get('low')), _dec(p.get('high'))
         low = lo * factor if lo is not None else None
         high = hi * factor if hi is not None else None
         if p.get('base_unit') not in BASE_UNITS.get(k, ()) or p.get('no_uncertainty'):
             low = high = None                                   # tolerance not in the unit of the source (Hz readings of an AC source, nS): no ratio
-        req = Req(k, a['value'], f if k in ('ACV', 'ACI', 'SQUARE') else None, f"{p.get('id', p.get('n', ''))}: {p.get('title') or p.get('range', '')}".strip(': '), False,
+        req = Req(k, a['value'], f if k in ('ACV', 'ACI', 'SQUARE', 'DUTY') else None, f"{p.get('id', p.get('n', ''))}: {p.get('title') or p.get('range', '')}".strip(': '), False,
                   low if k not in ('SQUARE', 'DUTY') else None, high if k not in ('SQUARE', 'DUTY') else None)
         req.key = p.get('id')
+        if k in ('SQUARE', 'DUTY'):
+            req.duty, req.offset = a.get('duty', 50.0), a.get('offset', 0.0) or 0.0
         out.append(req)
     return out
 

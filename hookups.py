@@ -46,7 +46,8 @@ CAL_TERMS = {
 METERS = {
     'mm325': dict(name='Klein Tools MM325', jacks={'vohm': 'VΩ', 'ma': 'VΩ µA mA', 'a10': '10A', 'com': 'COM'}),
     'fluke110': dict(name='Fluke 110 series', jacks={'vohm': 'VΩ', 'ma': 'VΩ', 'a10': 'A', 'com': 'COM'}),
-    'fluke87v': dict(name='Fluke 87V', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': '10A', 'com': 'COM'}),
+    # Fluke 83V / 87V / 88V (80 Series V): the 87V jacks; the 87V hook-up drawings (hook_fluke87v_*) apply to all three meters (owner decision 2026-10-28); the technician sets up the meter
+    'fluke87v': dict(name='Fluke 83V / 87V / 88V', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': '10A', 'com': 'COM'}),
     # Fluke 77 Series IV: jacks named as printed on the case (photo of the real terminals): 2 x 2 block, top-left '400 mA', bottom-left '10A'
     # (the two fused inputs), top-right 'V Ω' (red), bottom-right 'COM' (black)
     'fluke77': dict(name='Fluke 77 Series IV', jacks={'vohm': 'V Ω', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
@@ -58,6 +59,8 @@ METERS = {
     # Fluke 287 / 289: jacks as printed on the case (supplied photo): A, mA uA, COM, V Ohm
     'fluke28x': dict(name='Fluke 287 / 289', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': 'A', 'com': 'COM'}),
     'fluke365': dict(name='Fluke 365', jacks={'vohm': 'VΩ', 'com': 'COM'}),
+    # Fluke 101: the Users Manual (Terminals, printed p. 3) shows two jacks, COM and the input jack printed 'VΩ' (item 2, 'input terminal for all measurements'); there is no current jack
+    'fluke101': dict(name='Fluke 101', jacks={'vohm': 'VΩ', 'com': 'COM'}),
     # Fluke 374 / 375 / 376 / 376-II clamp meters: the Calibration Manual's Figure 1 (p. 2) labels two jacks 'VΩ' and 'COM' (the iFlex 2 mm jack is named 'far left' on p. 3);
     # the current points use the detachable jaw or the iFlex loop on a 50-turn coil, and the iFlex simulation uses the iFlex jack, so only the voltage / mV / ohms / capacitance
     # hook-up is described here and the other hook-ups are the spec's own groups (specs/fluke_376_pv.json)
@@ -90,6 +93,7 @@ AVAILABLE = {
     'fluke170': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke28x': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke365': ('VOHM',),
+    'fluke101': ('VOHM',),
     'fluke376': ('VOHM',),
     'fluke323': ('VOHM',),
     'fluke381': ('VOHM',),
@@ -116,6 +120,8 @@ EXTRA = {
     ('fluke365', 'VOHM'): dict(caution='Up to 570 V ac or dc is applied to the VΩ and COM jacks (600 V CAT III meter). Use CAT III 600 V leads with the finger guards, connect COM before the live lead '
                                        'and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on (Safety Information, pp. 2-3). '
                                        'Do not touch more than 30 V ac rms, 42 V ac peak or 60 V dc.'),
+    ('fluke101', 'VOHM'): dict(caution='Up to 540 V ac or dc is applied to the VΩ and COM jacks (the meter is rated CAT III 600 V, Users Manual p. 2). Use CAT III 600 V leads with the finger guards, connect COM before the live '
+                                      'lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on.'),
     ('fluke376', 'VOHM'): dict(caution='Up to 900 V ac or dc is applied to the VΩ and COM jacks (the jaw is marked CAT III 1000 V, CAT IV 600 V, Figure 1). Use CAT III 1000 V leads with the finger guards, connect COM before the live '
                                        'lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. The Calibration Manual gives no further safety information '
                                        '(it refers to the Users Manual).'),

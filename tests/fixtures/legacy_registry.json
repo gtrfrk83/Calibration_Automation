@@ -1,7 +1,9 @@
 {
   "STABLE": {
     "WaveSurfer WS4104HD Verification": "WaveSurfer_WS4104HD.py",
-    "Fluke 87V Guided Verification": "Fluke_87V.py",
+    "Fluke 83V Performance Verification": "Fluke_83V_Verification.py",
+    "Fluke 87V Performance Verification": "Fluke_87V_Verification.py",
+    "Fluke 88V Performance Verification": "Fluke_88V_Verification.py",
     "Agilent 34401A Performance Verification": "Agilent_34401A.py",
     "Fluke 8846A Performance Verification (1-Year)": "Fluke_8846A_Verification.py",
     "Fluke 8846A Guided Adjustment": "Fluke_8846A_Adjustment.py",
@@ -62,11 +64,14 @@
     "Keysight 53230A Performance Verification": "Keysight_53230A_Verification.py",
     "Keysight 53210A Performance Verification": "Keysight_53210A_Verification.py",
     "B&K Precision 5491B Performance Verification (RS-232 / USB)": "BK_5491B_Verification.py",
-    "Fluke 6060A Signal Generator Performance Verification (GPIB)": "Fluke_6060A_Verification.py"
+    "Fluke 6060A Signal Generator Performance Verification (GPIB)": "Fluke_6060A_Verification.py",
+    "Fluke 101 Performance Verification": "Fluke_101_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
-    "Fluke_87V.py": "53",
+    "Fluke_83V_Verification.py": "1",
+    "Fluke_87V_Verification.py": "1",
+    "Fluke_88V_Verification.py": "1",
     "Agilent_34401A.py": "55",
     "Fluke_8846A_Verification.py": "59",
     "Fluke_8846A_Adjustment.py": "57",
@@ -127,7 +132,8 @@
     "Keysight_53230A_Verification.py": "1",
     "Keysight_53210A_Verification.py": "1",
     "BK_5491B_Verification.py": "1",
-    "Fluke_6060A_Verification.py": "1"
+    "Fluke_6060A_Verification.py": "1",
+    "Fluke_101_Verification.py": "1"
   },
   "records": [
     [
@@ -138,11 +144,25 @@
       "WaveSurfer_WS4104HD.py"
     ],
     [
-      "Fluke 87V Guided Verification",
+      "Fluke 83V Performance Verification",
+      "Fluke",
+      "83 Series V",
+      "Digital Multimeter",
+      "Fluke_83V_Verification.py"
+    ],
+    [
+      "Fluke 87V Performance Verification",
       "Fluke",
       "87 Series V",
       "Digital Multimeter",
-      "Fluke_87V.py"
+      "Fluke_87V_Verification.py"
+    ],
+    [
+      "Fluke 88V Performance Verification",
+      "Fluke",
+      "88 Series V",
+      "Digital Multimeter",
+      "Fluke_88V_Verification.py"
     ],
     [
       "Agilent 34401A Performance Verification",
@@ -570,6 +590,13 @@
       "6060A",
       "RF Signal Generator",
       "Fluke_6060A_Verification.py"
+    ],
+    [
+      "Fluke 101 Performance Verification",
+      "Fluke",
+      "101",
+      "Digital Multimeter",
+      "Fluke_101_Verification.py"
     ]
   ],
   "FILES": {
@@ -582,19 +609,6 @@
         "drivers/fluke_5560a.py"
       ],
       "spec": []
-    },
-    "Fluke_87V.py": {
-      "code": [
-        "Procedures/Fluke_87V.py",
-        "handheld_dmm.py",
-        "hookups.py",
-        "drivers/base.py",
-        "drivers/transport.py",
-        "drivers/fluke_5560a.py"
-      ],
-      "spec": [
-        "specs/fluke_87v_pv.json"
-      ]
     },
     "Agilent_34401A.py": {
       "code": [

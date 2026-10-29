@@ -34,6 +34,7 @@ import ui_theme_core as ui                  # only its toolkit-free helpers here
 import appdata
 import calibrator_fit
 import datamode
+import handheld_unc
 import drivers
 import procmods_engine
 import reset_startup
@@ -1399,7 +1400,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             clean = lambda d: float(f'{float(d * factor):.9g}')
             unit = SYMBOL[p['base_unit']]
             unc = ''
-            if self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the calibrator's own output-frequency spec (FREQ_UNCERTAINTY_FROM_CALIBRATOR); switched off, the Frequency - Measure CMC alone
+            if p.get('unc_text') or p.get('unc_kind') in handheld_unc.KINDS:   # opt-in (80 Series V): duty cycle, square-wave peak, conductance, or a fixed text (open input)
+                unc = handheld_unc.text(p, self.calibrator_model())
+            elif self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the calibrator's own output-frequency spec (FREQ_UNCERTAINTY_FROM_CALIBRATOR); switched off, the Frequency - Measure CMC alone
                 unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None,
                                                         use_standard=freq_from_calibrator()), standard=self.calibrator_model() if freq_from_calibrator() else None)
             elif self.has_uncertainty(p):
@@ -1451,6 +1454,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def has_uncertainty(p):
         """True for the points that carry an Uncertainty (and TAR / TUR): numeric DCV / ACV / DCI / ACI / OHM / CAP with a source, and the
         thermocouple-simulation TEMP points (degC only: a degF point has no degC calibrator specification, so it stays blank)."""
+        if p.get('unc_kind') in handheld_unc.KINDS and p.get('applied'):
+            return True                   # opt-in: duty cycle, square-wave peak, conductance (handheld_unc)
         if p.get('unc_kind') == 'FREQ' and unc_frequency(p) is not None and not p.get('no_uncertainty'):
             return True                   # a frequency reading carries an uncertainty (calibrator's frequency spec, or the CMC alone when the switch is off): no applied source needed (a hand-set calibrator point)
         if not p.get('applied') or p.get('no_uncertainty'):
@@ -1469,6 +1474,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             import tartur
             factor = Decimal(str(p['factor']))
             clean = lambda d: float(f'{float(d * factor):.9g}')
+            if p.get('unc_kind') in handheld_unc.KINDS:
+                return handheld_unc.ratios(p, self.calibrator_model(), clean(Decimal(p['low'])), clean(Decimal(p['high'])))
             if p.get('unc_kind') == 'FREQ':            # frequency reading: switch on, the calibrator's frequency spec (TAR and TUR as any point); switch off, the CMC alone (TAR blank)
                 q = dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None, use_standard=freq_from_calibrator())
             else:

@@ -131,7 +131,7 @@ def build_engine(spec, root, cal_mode=None):
         return app, mod, mod.POINTS
     if kind == 'handheld':
         mod = importlib.import_module('handheld_dmm')
-        spec_file = {'Fluke 115': None, 'Fluke 87V': 'fluke_87v_pv.json', 'Klein MM325': 'klein_mm325_pv.json', 'Fluke 287': 'fluke_287_289_pv.json',
+        spec_file = {'Fluke 115': None, 'Fluke 87V': 'fluke_80_series_v_pv.json', 'Klein MM325': 'klein_mm325_pv.json', 'Fluke 287': 'fluke_287_289_pv.json',
                      'Fluke 116': None, 'Fluke 179': 'fluke_170_series_pv.json'}[arg]          # 116 / 179 are not in ENGINES (the baseline set); tests/test_beta_temp_uncertainty.py uses them
         model = {'Fluke 115': '115', 'Fluke 87V': '87V', 'Klein MM325': 'MM325', 'Fluke 287': '287', 'Fluke 116': '116', 'Fluke 179': '179'}[arg]
         spec = mod.load_spec(Path(root) / 'specs' / spec_file) if spec_file else mod.load_spec()

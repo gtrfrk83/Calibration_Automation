@@ -30,6 +30,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 import specmanager as sm  # noqa: E402
+sys.path.insert(0, str(HERE))
+import build_square_wave_rows as sq  # noqa: E402
 
 PDF_OFFSET = 16
 MU = 'µ'
@@ -425,7 +427,7 @@ def problems_for(data):
     w('Temperature [RTD]', 'No Pt 385 100 ohm row in the 5520A table (p. 1-18); the 5522A sheet has one. A lookup for that RTD finds nothing.')
     w('Resistance', 'Floors are the 4-wire values (footnote [2], p. 1-11). 2-wire / 2-wire COMP add 5 uV per amp of stimulus current: not included.')
     w('Frequency', 'The manual prints a 1 year column only; there is no 90 day specification for frequency.')
-    w('standard', 'Not stored: stability, noise, burden, compliance adders, power, phase, harmonics, non-sine and extended bandwidth AC, TC linear modes, SC300 / SC600 (note 11).')
+    w('standard', 'Not stored: stability, noise, burden, compliance adders, power, phase, harmonics, non-sine AC other than the square wave (written by build_square_wave_rows.py), extended bandwidth AC, TC linear modes, SC300 / SC600 (note 11).')
     return probs
 
 
@@ -439,12 +441,13 @@ def build():
     functions += capacitance()
     functions += temperature()
     functions += frequency()
+    functions += sq.functions_5520a()           # square-wave amplitude, DC offset, duty cycle (specs/build_square_wave_rows.py)
     data = dict(schema=1, standard=dict(
         manufacturer='Fluke', model='5520A', description='Multi-Product Calibrator (5520A)',
         confidence_text='99%', confidence_pct=99.0,
         reference='5520A Service Manual, Chapter 1 Specifications, printed pp. 1-6 to 1-25 (PDF pp. 22-41)', revision='', author='typed from the page images by specs/build_5520a_standard.py',
         approved_by='', approve_date='', source_pdf='5520A_Manual.pdf', sheet_generated='', built=datetime.now().isoformat(timespec='seconds')),
-        notes=NOTES, limits=LIMITS, functions=functions)
+        notes=dict(NOTES, square_wave=sq.NOTE_5520A), limits=LIMITS, functions=functions)
     data['problems'] = problems_for(data)
     return data
 

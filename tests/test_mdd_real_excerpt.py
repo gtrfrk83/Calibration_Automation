@@ -1,5 +1,5 @@
 """The converter against an EXCERPT of the real Fluke 87 Series V Cal Processor .MDD (tests/fixtures/fluke87v_points_excerpt.MDD: 28 of its 51 test points, the
-header replaced; the file as received holds U+FFFD where the micro / degree / plus-minus signs were).  Compared with the existing 87V spec (specs/fluke_87v_pv.json).
+header replaced; the file as received holds U+FFFD where the micro / degree / plus-minus signs were).  (The 87V spec is now built from the 80 Series V Calibration Manual, not this MDD, so the excerpt is no longer compared with it.)
 Run:  python -m unittest tests.test_mdd_real_excerpt"""
 import json
 import sys
@@ -46,22 +46,6 @@ class Excerpt(unittest.TestCase):
         self.assertIn('µA', units.values())
         p = next(p for k, (f, p) in self.pts.items() if f.kind == 'TEMPF')
         self.assertEqual(p.overrides['365d'], {'low': '30.2', 'high': '33.8'})      # limits exactly as printed (degF)
-
-    def test_limits_nominals_and_frequencies_as_printed(self):
-        spec = {s['step']: s for s in json.loads((ROOT / 'specs' / 'fluke_87v_pv.json').read_text(encoding='utf-8'))['steps']}
-        checked = 0
-        for tp, (fn, p) in self.pts.items():
-            s = spec[int(tp)] if int(tp) in spec else None
-            if s is None or s['kind'] in ('SQUARE', 'TEMP', 'NONE', 'DUTY'):
-                continue
-            fac = D(str(s['factor']))
-            ov = p.overrides.get('365d')
-            if ov:
-                self.assertEqual((D(ov['low']), D(ov['high'])), (D(str(s['low'])) * fac, D(str(s['high'])) * fac), tp)
-                checked += 1
-            if fn.kind in ('ACV', 'ACI') and s['applied'].get('frequency') is not None:
-                self.assertEqual(p.frequency, D(str(s['applied']['frequency'])), tp)
-        self.assertGreater(checked, 15)
 
     def test_display_unit_is_the_printed_unit_not_a_guess_from_the_largest_value(self):
         """Found on the real file: a base-unit range holding 1014 V was shown in kV (3.3 V as 0.0033 kV)."""
