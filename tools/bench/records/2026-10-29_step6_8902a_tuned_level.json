@@ -1,0 +1,356 @@
+{
+ "step": 6,
+ "title": "8902A tuned RF level with the suite driver (6060A at 120 MHz)",
+ "owner_ok": "lets do them (2026-10-29 07:57); YES typed before RF on",
+ "started": "2026-10-29T08:12:25",
+ "events": [
+  {
+   "t": 0.706,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "ID",
+   "reply": "6060A/AN",
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 0.755,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "clear any old rejected entry (read)"
+  },
+  {
+   "t": 0.757,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "note": "RF off first"
+  },
+  {
+   "t": 0.76,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "FR120MZ",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 0.764,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-10DB",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 1.294,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 1.373,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPPJMAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABBAEEBBAGBLKKEIAC",
+   "error": null,
+   "note": "read back"
+  },
+  {
+   "t": 13.45,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO1",
+   "reply": null,
+   "error": null,
+   "note": "RF ON"
+  },
+  {
+   "t": 14.478,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "UNCAL codes with RF on (all zero = none)"
+  },
+  {
+   "t": 40.38,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-30DB",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 40.909,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 40.987,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPONEAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABFAEEBBAGBLKKNBAC",
+   "error": null,
+   "note": "read back"
+  },
+  {
+   "t": 56.179,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-60DB",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 56.708,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 56.786,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPNKIAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABFAEEBBAGBLKKPOAC",
+   "error": null,
+   "note": "read back"
+  },
+  {
+   "t": 72.099,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-90DB",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 72.627,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 72.705,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPMHMAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABFAEEBBAGBLKKCLAC",
+   "error": null,
+   "note": "read back"
+  },
+  {
+   "t": 98.596,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-120DB",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 99.128,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 99.202,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPLFAAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABFAEEBBAGBLKKFIAC",
+   "error": null,
+   "note": "read back"
+  },
+  {
+   "t": 182.735,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-127DB",
+   "reply": null,
+   "error": null,
+   "note": ""
+  },
+  {
+   "t": 183.263,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000",
+   "error": null,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 183.341,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPLAKAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABFAEEBBAGBLKKJOAC",
+   "error": null,
+   "note": "read back"
+  },
+  {
+   "t": 193.245,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "note": "RF off at the end"
+  },
+  {
+   "t": 193.774,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000400",
+   "error": null,
+   "note": "RF off is confirmed when field 3 has 400"
+  }
+ ],
+ "results": [
+  {
+   "what": "8902A connect",
+   "id_reply": "+0000089021E-01"
+  },
+  {
+   "level_set_dbm": -10,
+   "reading_dbm": -10.58,
+   "error_db": -0.58,
+   "recal": false,
+   "seconds": 8.3,
+   "display": "-10.57"
+  },
+  {
+   "level_set_dbm": -30,
+   "reading_dbm": -30.58,
+   "error_db": -0.58,
+   "recal": false,
+   "seconds": 6.8,
+   "display": "-30.59"
+  },
+  {
+   "level_set_dbm": -60,
+   "reading_dbm": -60.85,
+   "error_db": -0.85,
+   "recal": false,
+   "seconds": 7.5,
+   "display": "-60.84"
+  },
+  {
+   "level_set_dbm": -90,
+   "reading_dbm": -91.5,
+   "error_db": -1.5,
+   "recal": false,
+   "seconds": 17.7,
+   "display": "-91.5"
+  },
+  {
+   "level_set_dbm": -120,
+   "error": "InstrumentError: 8902A error 96: no input signal sensed (HP-IB only): the receiver sees no signal at its RF input (display \"--\") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT (reading +9000009600E+01)",
+   "recal": false,
+   "seconds": 5.1,
+   "display": "--"
+  },
+  {
+   "level_set_dbm": -127,
+   "error": "InstrumentError: 8902A error 96: no input signal sensed (HP-IB only): the receiver sees no signal at its RF input (display \"--\") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT (reading +9000009600E+01)",
+   "recal": false,
+   "seconds": 5.1,
+   "display": "--"
+  }
+ ],
+ "operator_cable_confirm": "yes",
+ "rf_off_confirmed": true,
+ "driver_log": [
+  "    0.000  8902A      >>  ID",
+  "    0.118  8902A      <<  +0000089021E-01",
+  "    0.204  8902A      --  serial poll -> 0",
+  "   11.128  8902A      >>  120MZ",
+  "   11.268  8902A      >>  S4",
+  "   11.341  8902A      >>  LG",
+  "   11.472  8902A      >>  4.0SP",
+  "   16.390  8902A      --  serial poll -> 0",
+  "   16.440  8902A      >>  T1",
+  "   16.592  8902A      >>  T3",
+  "   18.272  8902A      <<  -0000001058E-02",
+  "   19.411  8902A      --  serial poll -> 0",
+  "   37.637  8902A      >>  120MZ",
+  "   37.741  8902A      >>  S4",
+  "   37.813  8902A      >>  LG",
+  "   37.941  8902A      >>  4.0SP",
+  "   41.396  8902A      --  serial poll -> 0",
+  "   41.447  8902A      >>  T1",
+  "   41.611  8902A      >>  T3",
+  "   43.250  8902A      <<  -0000003058E-02",
+  "   44.367  8902A      --  serial poll -> 0",
+  "   53.436  8902A      >>  120MZ",
+  "   53.547  8902A      >>  S4",
+  "   53.619  8902A      >>  LG",
+  "   53.762  8902A      >>  4.0SP",
+  "   57.851  8902A      --  serial poll -> 0",
+  "   57.902  8902A      >>  T1",
+  "   58.052  8902A      >>  T3",
+  "   59.737  8902A      <<  -0000006085E-02",
+  "   60.892  8902A      --  serial poll -> 0",
+  "   69.355  8902A      >>  120MZ",
+  "   69.456  8902A      >>  S4",
+  "   69.527  8902A      >>  LG",
+  "   69.652  8902A      >>  4.0SP",
+  "   75.152  8902A      --  serial poll -> 0",
+  "   75.202  8902A      >>  T1",
+  "   75.349  8902A      >>  T3",
+  "   82.776  8902A      <<  -0000009150E-02",
+  "   86.962  8902A      --  serial poll -> 0",
+  "   95.853  8902A      >>  120MZ",
+  "   95.954  8902A      >>  S4",
+  "   96.024  8902A      >>  LG",
+  "   96.150  8902A      >>  4.0SP",
+  "   98.398  8902A      --  serial poll -> 0",
+  "   98.449  8902A      >>  T1",
+  "   98.594  8902A      >>  T3",
+  "   99.792  8902A      <<  +9000009600E+01",
+  "  100.889  8902A      --  serial poll -> 0",
+  "  179.991  8902A      >>  120MZ",
+  "  180.093  8902A      >>  S4",
+  "  180.163  8902A      >>  LG",
+  "  180.288  8902A      >>  4.0SP",
+  "  182.537  8902A      --  serial poll -> 0",
+  "  182.588  8902A      >>  T1",
+  "  182.733  8902A      >>  T3",
+  "  183.931  8902A      <<  +9000009600E+01",
+  "  185.027  8902A      --  serial poll -> 0"
+ ],
+ "finished": "2026-10-29T08:15:38"
+}

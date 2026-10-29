@@ -42,3 +42,10 @@ The 8902A reads 10 to 20 Hz BELOW the 6060A's 111 111 100 Hz: one to two counts 
 - 6060A -10 dBm -> -10.51 dBm (x3); 0 dBm -> -0.484 dBm (x3; front panel -0.49). Both inside the 4A-5 +/-1.5 dB.
 - INST SINE at the end -> SINE, OUTP? 0.
 Driver: PMET1: commands (as on the bench), continuous trigger by default (SING is UNVERIFIED), no UNIT:POW in power-meter mode.
+
+## 2026-10-29 step 6, 8902A tuned RF level with the suite driver, no power-sensor calibration (2026-10-29_step6_8902a_tuned_level.json)
+- With reads ending at LF the 8902A DOES answer ID: "+0000089021E-01" (= 8902.1, the model as a number). The earlier "no reply" was the EOI read.
+- 120MZ, S4, LG, 4.0SP, T1, T3: -10 -> -10.58, -30 -> -30.58, -60 -> -60.85, -90 -> -91.50 dBm (display agrees), 6.8 to 17.7 s per reading; -120 and -127: error 96 (display "--").
+- The serial poll stayed 0 throughout: the preset SRQ mask hides RECAL (bit value 32), so the driver never saw a RECAL and never calibrated a range. The power-sensor
+  zero / 1 mW calibration was not done either (owner: "the -120 and -127 no reading have to do with the sensor not being calibrated before hand").
+  Step 6b repeats it the manual's way (p. 3-97): ZR + C1T3SC first, mask 22.34SP so RECAL shows, 6 dB steps, C1 at each RECAL.
