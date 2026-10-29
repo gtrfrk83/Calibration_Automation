@@ -100,7 +100,7 @@ ROWS = [
     # no DC offset is printed, so none is set (confirmed by the lab owner 2026-10-28)
     ('15', 'DC volts frequency trigger level', 'hzdc', '6 V', 'ACV', 3.4, 1000, 'Hz', '0.1', ('999.8', '1000.2'), ('999.8', '1000.2'),
      dict(hzread=True, square=dict(waveform='square', duty=50.0, offset=0.0))),
-    ('16', 'DC volts duty cycle', 'duty', '6 V', 'DUTY', 5.0, 1000, '%', '0.1', ('49.7', '50.3'), ('49.7', '50.3'), dict(square=dict(duty=50.0, offset=2.5), nominal=50.0)),
+    ('16', 'DC volts duty cycle', 'duty', '6 V', 'DUTY', 5.0, 1000, '%', '0.1', ('49.7', '50.3'), ('49.7', '50.3'), dict(square=dict(duty=50.0, offset=2.5), nominal=50.0, unc_kind='DUTY')),
     ('17', 'DC volts', 'dcv', '6 V', 'DCV', 3.3, None, 'V', '0.001', ('3.296', '3.304'), ('3.297', '3.303'), {}),
     ('18', 'DC volts', 'dcv', '60 V', 'DCV', 33, None, 'V', '0.01', ('32.96', '33.04'), ('32.97', '33.03'), {}),
     ('19', 'DC volts', 'dcv', '600 V', 'DCV', 330, None, 'V', '0.1', ('329.6', '330.4'), ('329.7', '330.3'), {}),
@@ -116,7 +116,7 @@ ROWS = [
     ('29', 'Conductance', 'ns', '60 nS', 'NONE', None, None, 'nS', '0.01', ('-0.30', '0.30'), ('-0.30', '0.30'),
      dict(setup='Open input: disconnect the test leads from the calibrator and leave the meter inputs OPEN. Select conductance (nS). The calibrator stays in STANDBY.')),
     ('30', 'Conductance', 'ns', '60 nS', 'OHM', 100000000, None, 'nS', '0.01', ('9.60', '10.40'), ('9.60', '10.40'),
-     dict(nominal_base=1e-08, no_uncertainty=True, note='10 nS is a 100 MΩ resistance: the calibrator is set to 100 MΩ (Table 3 step 30).')),
+     dict(nominal_base=1e-08, unc_kind='CONDUCTANCE', note='10 nS is a 100 MΩ resistance: the calibrator is set to 100 MΩ (Table 3 step 30).')),
     ('31', 'Diode', 'diode', '6 V', 'DCV', 3.0, None, 'V', '0.001', ('2.939', '3.061'), ('2.939', '3.061'),
      dict(note='Apply 3.0 V dc to the VΩ input in diode test; the table lists the displayed voltage.')),
     ('32', 'AC amps', 'aca', '6 A', 'ACI', 3.0, 60, 'A', '0.001', ('2.962', '3.038'), ('2.968', '3.032'), dict(settle=5)),
@@ -140,9 +140,9 @@ ROWS = [
     ('46', 'Low pass filter', 'lpf', '1000 V', 'ACV', 400, 800, 'V', '1', None, ('226', '340'), dict(note=NOTE_LPF + ' ' + NOTE_LPF_800, asym=True, nocheck=True)),
     # step 47 Peak Min/Max: 6 V p-p square wave, 2 kHz, 1 V DC offset -> the signal swings +4 V / -2 V; '83 and 88' column = 88V only (footnote 7)
     ('47 MAX', 'Peak Min / Max', 'peak', '6 V dc', 'SQUARE', 6.0, 2000, 'V', '0.001', ('3.895', '4.105'), ('3.897', '4.103'),
-     dict(square=dict(duty=50.0, offset=1.0), nominal=4.0, peak='MAX', models83=('88V',))),
+     dict(square=dict(duty=50.0, offset=1.0), nominal=4.0, peak='MAX', models83=('88V',), unc_kind='SQUARE_PEAK')),
     ('47 MIN', 'Peak Min / Max', 'peak', '6 V dc', 'SQUARE', 6.0, 2000, 'V', '0.001', ('-2.103', '-1.897'), ('-2.102', '-1.898'),
-     dict(square=dict(duty=50.0, offset=1.0), nominal=-2.0, peak='MIN', models83=('88V',))),
+     dict(square=dict(duty=50.0, offset=1.0), nominal=-2.0, peak='MIN', models83=('88V',), unc_kind='SQUARE_PEAK')),
     ('49', 'Temperature', 'temp', 'Type K', 'TEMP', 0.0, None, '°C', '0.1', ('-1.0', '1.0'), ('-1.0', '1.0'), dict(models83=('88V',))),
     ('50', 'Temperature', 'temp', 'Type K', 'TEMP', 100.0, None, '°C', '0.1', ('98.0', '102.0'), ('98.0', '102.0'), dict(models83=('88V',))),
 ]
@@ -201,7 +201,7 @@ def numeric_step(row, models, limits, column):
         step['nominal'] = 0.0
         step['setup_key'] = 'NONE'
         step['setup'] = extra['setup']
-        step['no_uncertainty'] = True
+        step['unc_text'] = 'N/A (no standard applied)'      # owner decision 2026-10-28: open-input points print this, not a blank
     else:
         applied = dict(value=clean(value), frequency=float(freq) if freq else None)
         if 'square' in extra:
@@ -253,7 +253,7 @@ def numeric_step(row, models, limits, column):
         notes.insert(0, extra['note'])
     if 'printed_text' in extra:
         step['printed_text'] = extra['printed_text']
-    for key in ('settle', 'no_uncertainty'):
+    for key in ('settle', 'no_uncertainty', 'unc_kind'):
         if key in extra:
             step[key] = extra[key]
     step['group'] = group_for(kind, unit)

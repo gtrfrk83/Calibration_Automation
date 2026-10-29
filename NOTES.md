@@ -293,6 +293,23 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - Owner decisions 2026-10-28: step 15 has no DC offset (confirmed); HIGH VOLTAGE once per hook-up group; the 88V inductive pickup test (pp. 11-14) is NOT built; the technician sets up the meter for each
   point (dial position, yellow button, range, Peak Min Max) from the prompt, nothing further to verify; the existing 87V hook-up drawings (hook_fluke87v_*) apply to all three meters.
   The calibration ADJUSTMENT (Table 4) is not built.
+- Calibrators and uncertainties (owner request 2026-10-28: all three calibrators selectable, every point with an uncertainty):
+  - 5560A, 5522A and 5520A are offered for the 83V, 87V and 88V. `calibrator_fit` now judges SQUARE / DUTY requests (and an ACV level with waveform 'square') against the sheets'
+    square-wave rows instead of refusing every non-sine source; `Req` carries `duty` / `offset`. No other procedure sources a square wave through it.
+  - Square-wave rows written by `specs/build_square_wave_rows.py` from the rendered pages (5522A Operators Manual pp. 1-23/1-24; 5520A Service Manual pp. 1-26 to 1-28; 5560A Product Specifications pp. 24, 26):
+    amplitude (Vpp) per band, DC offset per square-wave range, duty cycle at 1 kHz (5522A / 5520A; the 5560A sheet already had it). The 5520A and 5560A builders call it, so they still reproduce
+    their sheets; the 5522A sheet (no builder) is patched by it. CORRECTED: the 5522A square-wave amplitude rows used 66 Vpp as the range for every output; the manual has four p-p ranges
+    (66 mV / 660 mV / 6.6 V / 66 V). No report used those rows before.
+  - `handheld_unc.py` (new) + three opt-in hooks in `handheld_dmm.py` (`step.unc_kind` DUTY / SQUARE_PEAK / CONDUCTANCE, `step.unc_text`): duty cycle 3-16 from the duty-cycle row; Peak Min/Max
+    3-47 from sqrt((A_pp/2)^2 + A_offset^2) / divisor x 2; conductance 3-30 from the 100 Mohm budget carried over relatively; open inputs 3-29 / 3-42 print 'N/A (no standard applied)' (owner decision).
+    Square-wave points: calibrator specification alone, no CMC floor and no flag (the lab's A2LA scope has no square-wave or duty line; owner decision).
+  - Results (87V): duty 0.030 % (5560A) / 0.024 % (5522A, 5520A); conductance 4.4 pS; Peak Min/Max 19 mV TUR 5.4:1 (5522A), 76 mV TUR 1.3:1 (5520A: one printed range, 66 Vpp term),
+    130 mV TUR 0.7:1 (5560A: dominated by the DC offset floor of the 12 V range printed 120 mV, possibly a misprint for 12 mV; owner to confirm with Fluke).
+  - Existing finding: the 5522A capacitance spec at 5 nF (+/-0.31 nF) is wider than the manual's 3-43 limit (+/-0.3 nF): TAR 0.96:1.
+  - UNVERIFIED: the duty-cycle range of all three is printed as 1 % to 99 % and, for the 5522A / 5520A, '< 3.3 V p-p'; 3-16 runs at 5 V p-p with DUTY 50, and the 50 % figure is used.
+    The 5520A WAVE / DUTY / DC_OFFSET commands are not in the 5520A Service Manual (the Operators Manual was not supplied).
+  - The lab database (lab_registry.sqlite3) copies a standard sheet only on first use: the new rows reach an existing installation only after the 5522A, 5520A and 5560A sheets are re-imported
+    in the Standards Specs manager.
 - Still not verified: the 5560A square-wave commands (unchanged from the old 87V: WAVE / DUTY / DC_OFFSET not verified on the 5560A); the limits against the Users Manual accuracy (not supplied).
 - Square-wave and temperature points keep the old 87V mechanisms (compound WAVE/OUT/DC_OFFSET line, DUTY, read-backs, WAVE SINE restored; TEMP in degC). Tests: `tests/test_80v_points.py`.
 

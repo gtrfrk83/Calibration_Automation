@@ -39,6 +39,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 import specmanager as sm  # noqa: E402
+sys.path.insert(0, str(HERE))
+import build_square_wave_rows as sq  # noqa: E402
 
 OUT = HERE / 'standards' / 'fluke_5560a_standard.json'
 PDF_OFFSET = 2          # printed page n  ->  PDF page n + 2 (the cover is PDF page 1)
@@ -381,6 +383,7 @@ def build():
         r = entry(fd['name'], f'1000Hz {label}', P(24), (lo, hi), '%DC', None, [s], [24], qualifiers=[('Hz', 1000, 1000, 'Hz')])
         fd['ranges'].append(r)
     functions.append(fd)
+    functions += sq.functions_5560a(PERIODS)          # square-wave amplitude and DC offset (specs/build_square_wave_rows.py)
 
     data = dict(schema=1, standard=dict(
         manufacturer='Fluke', model='5560A', description='Calibrator',
@@ -388,7 +391,7 @@ def build():
         confidence_pct=95.0,
         reference='Product Specifications Dec 2022 Rev. 8, 6/26', revision='Rev. 8, 6/26',
         author='', approved_by='', approve_date='', source_pdf='5560_Specs.pdf', sheet_generated='', built=BUILT),
-        notes={str(k): v for k, v in NOTES.items()}, functions=functions)
+        notes=dict({str(k): v for k, v in NOTES.items()}, square_wave=sq.NOTE_5560A), functions=functions)
 
     def w(where, what, level='warn'):
         problems.append(dict(level=level, where=where, what=what))
@@ -406,7 +409,7 @@ def build():
     w('Temperature', 'The J and K "input" rows are kept from the previous sheet: the document prints one TC table (source), not a measure table. Values equal the printed J / K figures. Direction "input" is unverified.')
     w('Temperature', 'Thermocouple and RTD specifications exclude thermocouple / sensor error and are valid for tcal +/-5 degC (printed pp.15, 18). Types B C D E G L N R S T U BP XK and all RTD tables are NEW on this sheet (not in the previous one).')
     w('standard', 'NOT LOADED (the document prints them; owner to decide whether to add): resolution tables (DCV p.3, ACV p.5, DCI p.7, ACI p.9, resistance p.12, capacitance p.13, inductance p.14, TC 0.01 degC / RTD 0.001 degC) - the sheet row field "resolution" stays blank, so no resolution term enters the budgets (as before); '
-                'operating characteristics (stability, noise, distortion, compliance, output impedance, load limits); ACI compliance adders; ACV extended bandwidth (0.01 Hz - 3 Hz 5 %, printed p.23); ACV / ACI square wave accuracy (pp.24-25); ACV DC offset (p.26); Aux voltage DC / AC sine / AC square (pp.26-28); '
+                'operating characteristics (stability, noise, distortion, compliance, output impedance, load limits); ACI compliance adders; ACV extended bandwidth (0.01 Hz - 3 Hz 5 %, printed p.23); ACI square wave accuracy (p.25; the ACV square wave amplitude and DC offset ARE loaded, by build_square_wave_rows.py); Aux voltage DC / AC sine / AC square (pp.26-28); '
                 'phase (p.11); AC / DC power and dual output limits (pp.21-22); harmonics (p.23); TC voltage source / measure in linear modes (p.17); 5560A with 52120A current specifications (pp.28-29); the 2 y and 99 % columns of every table.')
     problems.extend(sm.validate_data(data))
     data['problems'] = problems

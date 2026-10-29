@@ -56,14 +56,14 @@ class Sheet(unittest.TestCase):
 
     def test_sheet_is_registered_and_clean(self):
         self.assertIsNotNone(self.s)
-        self.assertEqual(len(self.s.rows), 256)
-        self.assertEqual(len(self.data['functions']), 37)
+        self.assertEqual(len(self.s.rows), 286)                  # 256 + the square-wave amplitude (25) and DC offset (5) rows of build_square_wave_rows.py
+        self.assertEqual(len(self.data['functions']), 39)
         self.assertFalse([p for p in sm.validate_data(self.data) if p['level'] == 'error'])
         self.assertFalse([p for p in self.data['problems'] if p['level'] == 'error'])
         by = {}
         for r in self.s.rows:
             by[r['kind']] = by.get(r['kind'], 0) + 1
-        self.assertEqual(by, {'TEMP': 124, 'ACV': 45, 'ACI': 36, 'OHM': 18, 'CAP': 9, 'DCI': 8, 'IND': 7, 'DCV': 5, 'FREQ': 4})
+        self.assertEqual(by, {'TEMP': 124, 'ACV': 75, 'ACI': 36, 'OHM': 18, 'CAP': 9, 'DCI': 8, 'IND': 7, 'DCV': 5, 'FREQ': 4})
 
     def test_builder_reproduces_the_shipped_sheet_byte_for_byte(self):
         fresh = json.dumps(b.build(), indent=1, ensure_ascii=False) + '\n'

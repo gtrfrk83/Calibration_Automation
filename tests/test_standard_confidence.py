@@ -85,7 +85,7 @@ class Rule(unittest.TestCase):
     def test_5522a_spec_numbers_were_not_touched(self):
         """Only the metadata changed: same number of spec rows and the same hand-checked limits as before the change (1 yr)."""
         s = sm.standard('5522A', self.db)
-        self.assertEqual(len(s.rows), 545)
+        self.assertEqual(len(s.rows), 567)                  # 545 + 22: the square-wave rows rewritten by specs/build_square_wave_rows.py (2026-10-28; 5 old amplitude rows -> 20, + 4 DC offset, + 3 duty cycle)
         self.assertAlmostEqual(s.lookup('DCV', 10.0).limit, 140e-6, 12)
         self.assertAlmostEqual(s.lookup('ACV', 1.0, frequency=1000.0).limit, 210e-6, 12)
         self.assertAlmostEqual(s.lookup_temperature(100).limit, 0.16, 12)

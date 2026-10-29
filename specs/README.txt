@@ -120,6 +120,11 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
   step.no_uncertainty       optional true: the report row gets no Uncertainty (and TAR / TUR stay blank). No spec uses it for a frequency reading any more (see unc_kind).
   step.unc_kind             optional 'FREQ' (Fluke 170 series hzread rows, 77 IV 2-17, 110-series 3-17, 80 Series V 3-11 .. 3-15, 287 / 289 4-24): the step sources AC volts and reads a frequency; the Uncertainty is the lab's 'Frequency - Measure' CMC at the applied frequency, on its own (no calibrator budget), TUR against it, TAR blank.
 
+  step.unc_kind             also 'DUTY' / 'SQUARE_PEAK' / 'CONDUCTANCE' (80 Series V 3-16, 3-47, 3-30; handheld_unc.py): duty cycle from the calibrator's duty-cycle row, square-wave peak from its
+                            amplitude and DC offset rows, conductance from the resistance budget carried over relatively. Calibrator specification alone for the square-wave kinds (no scope line).
+  step.unc_text             optional fixed Uncertainty text (80 Series V open inputs 3-29 / 3-42: 'N/A (no standard applied)').
+  build_square_wave_rows.py square-wave amplitude / DC offset / duty-cycle rows of the 5522A, 5520A and 5560A sheets (called by the 5520A and 5560A builders; patches the 5522A sheet).
+
 Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
   step.kind                 DUTY    square-wave source, the meter reads the duty cycle (%) (80 Series V 3-16)
                             SQUARE  square-wave source, the meter reads DC volts (80 Series V peak Min/Max 3-47MAX / 3-47MIN)

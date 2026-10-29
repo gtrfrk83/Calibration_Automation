@@ -3994,7 +3994,7 @@
    ]
   },
   {
-   "call": "{'applied': {'duty': 50.0, 'frequency': 1000.0, 'offset': 2.5, 'value': 5.0}, 'base_unit': '%', 'display_unit': '%', 'factor': 1.0, 'group': 'VOHM', 'high': '50.3', 'id': '3-16', 'kind': 'DUTY', 'low': '49.7', 'models': ['83V', '87V', '88V'], 'n': 18, 'nominal': 50.0, 'note': 'The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (Table 3 step 16, p. 9).', 'range': '6 V', 'ref': 'T3 #16', 'section': 'DC volts duty cycle', 'step': 16, 'switch': 'V⎓ Hz  (DC volts duty cycle)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 16 (both columns): 49.7 to 50.3 %'}",
+   "call": "{'applied': {'duty': 50.0, 'frequency': 1000.0, 'offset': 2.5, 'value': 5.0}, 'base_unit': '%', 'display_unit': '%', 'factor': 1.0, 'group': 'VOHM', 'high': '50.3', 'id': '3-16', 'kind': 'DUTY', 'low': '49.7', 'models': ['83V', '87V', '88V'], 'n': 18, 'nominal': 50.0, 'note': 'The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (Table 3 step 16, p. 9).', 'range': '6 V', 'ref': 'T3 #16', 'section': 'DC volts duty cycle', 'step': 16, 'switch': 'V⎓ Hz  (DC volts duty cycle)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 16 (both columns): 49.7 to 50.3 %', 'unc_kind': 'DUTY'}",
    "case": "handheld_dmm.IO.apply[87V DUTY#18]",
    "log": [
     "Fluke 5522A|>>|STBY",
@@ -4162,7 +4162,7 @@
    ]
   },
   {
-   "call": "{'applied': {'duty': 50.0, 'frequency': 2000.0, 'offset': 1.0, 'value': 6.0}, 'base_unit': 'V', 'display_unit': 'V', 'factor': 1.0, 'group': 'VOHM', 'high': '4.103', 'id': '3-47MAX.87', 'kind': 'SQUARE', 'low': '3.897', 'models': ['87V'], 'n': 50, 'nominal': 4.0, 'note': 'Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (Table 3 step 47, p. 11).', 'prompt': 'With the meter on V DC (6 V range), select Peak Min Max (the PEAK indicator shows the 250 µs Peak Min Max mode, Table 2 item 9), then read MAX.', 'range': '6 V dc', 'ref': 'T3 #47 MAX (87)', 'section': 'Peak Min / Max', 'step': 48, 'switch': 'V⎓  (DC volts, Peak Min/Max)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 47 MAX (87 column): 3.897 to 4.103 V'}",
+   "call": "{'applied': {'duty': 50.0, 'frequency': 2000.0, 'offset': 1.0, 'value': 6.0}, 'base_unit': 'V', 'display_unit': 'V', 'factor': 1.0, 'group': 'VOHM', 'high': '4.103', 'id': '3-47MAX.87', 'kind': 'SQUARE', 'low': '3.897', 'models': ['87V'], 'n': 50, 'nominal': 4.0, 'note': 'Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (Table 3 step 47, p. 11).', 'prompt': 'With the meter on V DC (6 V range), select Peak Min Max (the PEAK indicator shows the 250 µs Peak Min Max mode, Table 2 item 9), then read MAX.', 'range': '6 V dc', 'ref': 'T3 #47 MAX (87)', 'section': 'Peak Min / Max', 'step': 48, 'switch': 'V⎓  (DC volts, Peak Min/Max)', 'table': '3', 'test': 'numeric', 'tol_text': 'Table 3 step 47 MAX (87 column): 3.897 to 4.103 V', 'unc_kind': 'SQUARE_PEAK'}",
    "case": "handheld_dmm.IO.apply[87V SQUARE#50]",
    "log": [
     "Fluke 5522A|>>|STBY",

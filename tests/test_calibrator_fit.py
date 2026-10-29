@@ -55,17 +55,20 @@ class HandheldFit(unittest.TestCase):
                     o = cf.make_offer('5520A', cf.handheld_requests(h.points_for(spec, m)))
                     self.assertTrue(o.offered, o.text)
 
-    def test_87v_not_offered_square_wave_points_named(self):
-        o = handheld_offer('fluke_80_series_v_pv.json', '87V')
-        self.assertFalse(o.offered)
-        self.assertEqual(sorted(r.label.split(':')[0] for r, _v in o.fit.excluded), ['3-16', '3-47MAX.87', '3-47MIN.87'])
-        for _r, v in o.fit.excluded:
-            self.assertIn('square-wave', v.reason)
-        self.assertIn('NOT offered', o.text)
-        self.assertIn('3-16', o.tooltip)
+    def test_80_series_v_offered_square_wave_points_from_the_sheet(self):
+        """The 83V / 87V / 88V square-wave points (3-15 trigger level, 3-16 duty cycle, 3-47 Peak Min/Max) are covered by the 5520A's square-wave rows
+        (specs/build_square_wave_rows.py): the 5520A is offered for all three models (owner request 2026-10-28)."""
+        for model in ('83V', '87V', '88V'):
+            o = handheld_offer('fluke_80_series_v_pv.json', model)
+            self.assertTrue(o.offered, model)
+            self.assertEqual(o.fit.excluded, [], model)
+            self.assertIn('is offered', o.text)
+        reqs = {r.key: r for r in cf.handheld_requests(h.points_for(h.load_spec('fluke_80_series_v_pv.json'), '87V'))}
+        self.assertEqual((reqs['3-15'].kind, reqs['3-16'].kind, reqs['3-47MAX.87'].kind), ('SQUARE', 'DUTY', 'SQUARE'))
+        self.assertEqual((reqs['3-16'].duty, reqs['3-16'].offset, reqs['3-16'].frequency), (50.0, 2.5, 1000.0))
 
     def test_picker_values_follow_the_offer(self):
-        self.assertEqual(cf.picker_values(['a', 'b'], {'b': handheld_offer('fluke_80_series_v_pv.json', '87V')}), ['a'])
+        self.assertEqual(cf.picker_values(['a', 'b'], {'b': cf.make_offer('5520A', cf.dmm_requests(A34.POINTS))}), ['a'])      # the 34410A's 300 kHz points: not offered
         self.assertEqual(cf.picker_values(['a', 'b'], {'b': handheld_offer('fluke_77iv_pv.json', '77IV')}), ['a', 'b'])
 
 
@@ -80,9 +83,13 @@ class CheckRules(unittest.TestCase):
         self.assertTrue(v.ok)
         self.assertIsNotNone(v.accuracy)
 
-    def test_square_and_duty_unsupported(self):
-        for k in ('SQUARE', 'DUTY'):
-            self.assertFalse(cf.check('5520A', cf.Req(k, 5.0, 1000.0)).ok)
+    def test_square_and_duty_from_the_sheet(self):
+        self.assertTrue(cf.check('5520A', cf.Req('SQUARE', 6.0, 2000.0, offset=1.0)).ok)
+        self.assertTrue(cf.check('5520A', cf.Req('DUTY', 5.0, 1000.0, duty=50.0, offset=2.5)).ok)
+        self.assertFalse(cf.check('5520A', cf.Req('DUTY', 5.0, 2000.0, duty=50.0)).ok)            # duty-cycle rows exist at 1 kHz only
+        self.assertFalse(cf.check('5520A', cf.Req('SQUARE', 80.0, 1000.0)).ok)                  # above the 66 Vpp row
+        miss = cf.check('5520A', cf.Req('SQUARE', 6.0, 200000.0))
+        self.assertIn('square-wave', miss.reason)
 
     def test_aci_uses_lcomp_off_rows(self):
         std = cf.standard('5520A')
@@ -139,9 +146,9 @@ class Fluke5520ADriver(unittest.TestCase):
 class HandheldPickerChoices(unittest.TestCase):
     def test_choices_with_and_without_5520a(self):
         class On:
-            cal_offer = handheld_offer('fluke_77iv_pv.json', '77IV')
-        class Off:
             cal_offer = handheld_offer('fluke_80_series_v_pv.json', '87V')
+        class Off:
+            cal_offer = cf.make_offer('5520A', cf.dmm_requests(A34.POINTS))
         on, off = h.App.cal_choices(On), h.App.cal_choices(Off)
         self.assertEqual(off, list(h.CAL_CHOICES))
         self.assertIn(h.CAL_5520A_AUTO, on)
