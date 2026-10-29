@@ -2189,7 +2189,7 @@
     "8902A|--|serial poll -> 4"
    ],
    "method": "HP8902A.measure_frequency_hz",
-   "result": "raised InstrumentError: 8902A error 96: no input signal sensed (HP-IB only) (reading +9000009600E+01)",
+   "result": "raised InstrumentError: 8902A error 96: no input signal sensed (HP-IB only): the receiver sees no signal at its RF input (display \"--\") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT (reading +9000009600E+01)",
    "wire": [
     [
      "sleep",
