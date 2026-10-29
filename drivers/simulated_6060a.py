@@ -52,7 +52,7 @@ class Sim6060ATransport(_SimBase):
         self.serial = serial
         self.sent = []
         self.cleared = 0
-        self.ir_format = 'groups'
+        self.ir_format = 'bench'            # the owner's 6060A (bench 2026-10-29): three 6-digit octal fields, '000000,000000,000400'
         self.io = (3, 1, 0)                 # first field always 3; second 1 = -570 NV memory (8 would add -651 low-rate FM)
         self.valid_after_polls = 1
         self.ext_level = 'valid'            # level of an external modulation input: 'valid' | 'ext_lo' | 'ext_hi' | 'invalid'
@@ -127,6 +127,8 @@ class Sim6060ATransport(_SimBase):
         self.rejected[field] |= bit
 
     def _fmt(self, fields):
+        if self.ir_format == 'bench':
+            return ','.join(f'{f:06o}' for f in fields)
         return ','.join(f'{f:03o}' for f in fields) if self.ir_format == 'groups' else ''.join(f'{f:03o}' for f in fields)
 
     def _modes(self, text):
@@ -171,9 +173,9 @@ class Sim6060ATransport(_SimBase):
         n = float(num) if num is not None else None
         low_rate = bool(self.io[1] & 8)
         if head == 'ID':
-            return '6060A'
+            return '6060A/AN'                     # bench 2026-10-29
         if head == 'IV':
-            return 'V1.0'
+            return 'V1.1'                         # bench 2026-10-29
         if head == 'IO':
             return ','.join(str(x) for x in self.io)
         if head == 'IR':
@@ -184,9 +186,9 @@ class Sim6060ATransport(_SimBase):
         if head == 'II':
             return f'{self.modes:05d}'
         if head == 'IM':
-            return str(self.mask)
+            return f'{self.mask:05d}'             # bench 2026-10-29: '00192'
         if head == 'XA':
-            return str(int(min(23, max(0, round((13.0 - s['amplitude_dbm']) / 6.0)))))
+            return f"{int(min(23, max(0, round((13.0 - s['amplitude_dbm']) / 6.0)))):05d}"       # bench 2026-10-29: '00023'
         if head == 'LM':
             if n == 99:
                 return encode_learn(s)
