@@ -1,0 +1,853 @@
+{
+ "schema": 2,
+ "kind": "manual-reading",
+ "options": {
+  "hookup_meter": "fluke101",
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Fluke 101 Digital Multimeter - Users Manual (Rev. 2, 12/22)",
+  "pages": "Accuracy Specifications printed pp. 20-22; Rotary Switch pp. 6-7; Measurements pp. 8-14",
+  "cite": "Fluke 101 Users Manual, Accuracy Specifications, pp. 20 and 22 (limits computed from the published 1-year accuracy; the manual has no performance-verification table)",
+  "limits": "Computed from the manufacturer's published 1-year accuracy specification at 90 % of each range (no 2:1 test margin)",
+  "report_note": "The Fluke 101 Users Manual has no calibration procedure. Test points: one per range at 90 % of the range (AC volts and AC millivolts at 60 Hz and 400 Hz). Limits are the manufacturer's published 1-year accuracy specification (Users Manual pp. 20 and 22), +/-(% of reading + counts), rounded inward to the display step.",
+  "note": "The Fluke 101 Users Manual has no performance-verification table. The 90 % test points were chosen by the lab owner; the limits are the published 1-year accuracy specification applied to each point (p. 20, p. 22). The meter has no current function. The Fluke 5522A or 5560A drives every point (or you set the calibrator by hand). High-voltage points go straight to the test value."
+ },
+ "models": {
+  "101": {
+   "name": "Fluke 101",
+   "brand": "Fluke",
+   "model_note": "Fluke 101 Digital Multimeter (6000 counts, CAT III 600 V)"
+  }
+ },
+ "steps": [
+  {
+   "table": "1",
+   "step": 1,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "5.343",
+   "high": "5.457",
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 5.343 to 5.457 V at 90 % of range   (±(1.0 % of reading + 3 counts), resolution 0.001 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.4,
+    "frequency": 60.0
+   },
+   "nominal": 5.4,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #1",
+   "id": "1-1"
+  },
+  {
+   "table": "1",
+   "step": 2,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "5.343",
+   "high": "5.457",
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 5.343 to 5.457 V at 90 % of range   (±(1.0 % of reading + 3 counts), resolution 0.001 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.4,
+    "frequency": 400.0
+   },
+   "nominal": 5.4,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #2",
+   "id": "1-2"
+  },
+  {
+   "table": "1",
+   "step": 3,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "53.43",
+   "high": "54.57",
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 53.43 to 54.57 V at 90 % of range   (±(1.0 % of reading + 3 counts), resolution 0.01 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 54.0,
+    "frequency": 60.0
+   },
+   "nominal": 54.0,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #3",
+   "id": "1-3"
+  },
+  {
+   "table": "1",
+   "step": 4,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "53.43",
+   "high": "54.57",
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 53.43 to 54.57 V at 90 % of range   (±(1.0 % of reading + 3 counts), resolution 0.01 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 54.0,
+    "frequency": 400.0
+   },
+   "nominal": 54.0,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #4",
+   "id": "1-4"
+  },
+  {
+   "table": "1",
+   "step": 5,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "534.3",
+   "high": "545.7",
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 534.3 to 545.7 V at 90 % of range   (±(1.0 % of reading + 3 counts), resolution 0.1 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 540.0,
+    "frequency": 60.0
+   },
+   "nominal": 540.0,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #5",
+   "id": "1-5"
+  },
+  {
+   "table": "1",
+   "step": 6,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "534.3",
+   "high": "545.7",
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 534.3 to 545.7 V at 90 % of range   (±(1.0 % of reading + 3 counts), resolution 0.1 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 540.0,
+    "frequency": 400.0
+   },
+   "nominal": 540.0,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #6",
+   "id": "1-6"
+  },
+  {
+   "table": "1",
+   "step": 7,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6.000 V",
+   "models": [
+    "101"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "5.370",
+   "high": "5.430",
+   "accuracy": "±(0.5 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 5.370 to 5.430 V at 90 % of range   (±(0.5 % of reading + 3 counts), resolution 0.001 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.4,
+    "frequency": null
+   },
+   "nominal": 5.4,
+   "group": "VOHM",
+   "ref": "Spec #7",
+   "id": "1-7"
+  },
+  {
+   "table": "1",
+   "step": 8,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "60.00 V",
+   "models": [
+    "101"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "53.70",
+   "high": "54.30",
+   "accuracy": "±(0.5 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 53.70 to 54.30 V at 90 % of range   (±(0.5 % of reading + 3 counts), resolution 0.01 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 54.0,
+    "frequency": null
+   },
+   "nominal": 54.0,
+   "group": "VOHM",
+   "ref": "Spec #8",
+   "id": "1-8"
+  },
+  {
+   "table": "1",
+   "step": 9,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "101"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "537.0",
+   "high": "543.0",
+   "accuracy": "±(0.5 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 537.0 to 543.0 V at 90 % of range   (±(0.5 % of reading + 3 counts), resolution 0.1 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 540.0,
+    "frequency": null
+   },
+   "nominal": 540.0,
+   "group": "VOHM",
+   "ref": "Spec #9",
+   "id": "1-9"
+  },
+  {
+   "table": "1",
+   "step": 10,
+   "section": "AC millivolts",
+   "switch": "mV~  (AC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "523.5",
+   "high": "556.5",
+   "accuracy": "±(3.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 523.5 to 556.5 mV at 90 % of range   (±(3.0 % of reading + 3 counts), resolution 0.1 mV; limits rounded inward to the display step)",
+   "applied": {
+    "value": 0.54,
+    "frequency": 60.0
+   },
+   "nominal": 0.54,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #10",
+   "id": "1-10"
+  },
+  {
+   "table": "1",
+   "step": 11,
+   "section": "AC millivolts",
+   "switch": "mV~  (AC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "523.5",
+   "high": "556.5",
+   "accuracy": "±(3.0 % of reading + 3 counts)",
+   "tol_text": "Specification p. 20: 523.5 to 556.5 mV at 90 % of range   (±(3.0 % of reading + 3 counts), resolution 0.1 mV; limits rounded inward to the display step)",
+   "applied": {
+    "value": 0.54,
+    "frequency": 400.0
+   },
+   "nominal": 0.54,
+   "group": "VOHM",
+   "note": "Specified from 1 % to 100 % of range (p. 20, p. 22 note 2); this point is at 90 %. AC specified 40 Hz to 500 Hz.",
+   "ref": "Spec #11",
+   "id": "1-11"
+  },
+  {
+   "table": "1",
+   "step": 12,
+   "section": "Ohms",
+   "switch": "Ω  (ohms)",
+   "range": "400.0 Ω",
+   "models": [
+    "101"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "test": "numeric",
+   "low": "357.9",
+   "high": "362.1",
+   "accuracy": "±(0.5 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 357.9 to 362.1 Ω at 90 % of range   (±(0.5 % of reading + 3 counts), resolution 0.1 Ω; limits rounded inward to the display step)",
+   "applied": {
+    "value": 360.0,
+    "frequency": null
+   },
+   "nominal": 360.0,
+   "group": "VOHM",
+   "ref": "Spec #12",
+   "id": "1-12"
+  },
+  {
+   "table": "1",
+   "step": 13,
+   "section": "Ohms",
+   "switch": "Ω  (ohms)",
+   "range": "4.000 kΩ",
+   "models": [
+    "101"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "test": "numeric",
+   "low": "3.580",
+   "high": "3.620",
+   "accuracy": "±(0.5 % of reading + 2 counts)",
+   "tol_text": "Specification p. 22: 3.580 to 3.620 kΩ at 90 % of range   (±(0.5 % of reading + 2 counts), resolution 0.001 kΩ; limits rounded inward to the display step)",
+   "applied": {
+    "value": 3600.0,
+    "frequency": null
+   },
+   "nominal": 3600.0,
+   "group": "VOHM",
+   "ref": "Spec #13",
+   "id": "1-13"
+  },
+  {
+   "table": "1",
+   "step": 14,
+   "section": "Ohms",
+   "switch": "Ω  (ohms)",
+   "range": "40.00 kΩ",
+   "models": [
+    "101"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "test": "numeric",
+   "low": "35.80",
+   "high": "36.20",
+   "accuracy": "±(0.5 % of reading + 2 counts)",
+   "tol_text": "Specification p. 22: 35.80 to 36.20 kΩ at 90 % of range   (±(0.5 % of reading + 2 counts), resolution 0.01 kΩ; limits rounded inward to the display step)",
+   "applied": {
+    "value": 36000.0,
+    "frequency": null
+   },
+   "nominal": 36000.0,
+   "group": "VOHM",
+   "ref": "Spec #14",
+   "id": "1-14"
+  },
+  {
+   "table": "1",
+   "step": 15,
+   "section": "Ohms",
+   "switch": "Ω  (ohms)",
+   "range": "400.0 kΩ",
+   "models": [
+    "101"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "test": "numeric",
+   "low": "358.0",
+   "high": "362.0",
+   "accuracy": "±(0.5 % of reading + 2 counts)",
+   "tol_text": "Specification p. 22: 358.0 to 362.0 kΩ at 90 % of range   (±(0.5 % of reading + 2 counts), resolution 0.1 kΩ; limits rounded inward to the display step)",
+   "applied": {
+    "value": 360000.0,
+    "frequency": null
+   },
+   "nominal": 360000.0,
+   "group": "VOHM",
+   "ref": "Spec #15",
+   "id": "1-15"
+  },
+  {
+   "table": "1",
+   "step": 16,
+   "section": "Ohms",
+   "switch": "Ω  (ohms)",
+   "range": "4.000 MΩ",
+   "models": [
+    "101"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "test": "numeric",
+   "low": "3.580",
+   "high": "3.620",
+   "accuracy": "±(0.5 % of reading + 2 counts)",
+   "tol_text": "Specification p. 22: 3.580 to 3.620 MΩ at 90 % of range   (±(0.5 % of reading + 2 counts), resolution 0.001 MΩ; limits rounded inward to the display step)",
+   "applied": {
+    "value": 3600000.0,
+    "frequency": null
+   },
+   "nominal": 3600000.0,
+   "group": "VOHM",
+   "ref": "Spec #16",
+   "id": "1-16"
+  },
+  {
+   "table": "1",
+   "step": 17,
+   "section": "Ohms",
+   "switch": "Ω  (ohms)",
+   "range": "40.00 MΩ",
+   "models": [
+    "101"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "test": "numeric",
+   "low": "35.43",
+   "high": "36.57",
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 35.43 to 36.57 MΩ at 90 % of range   (±(1.5 % of reading + 3 counts), resolution 0.01 MΩ; limits rounded inward to the display step)",
+   "applied": {
+    "value": 36000000.0,
+    "frequency": null
+   },
+   "nominal": 36000000.0,
+   "group": "VOHM",
+   "ref": "Spec #17",
+   "id": "1-17"
+  },
+  {
+   "table": "1",
+   "step": 18,
+   "section": "Diode test",
+   "switch": "Diode  ▶|  (dial: Ω position; push the YELLOW button twice)",
+   "range": "2.000 V",
+   "models": [
+    "101"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "test": "numeric",
+   "low": "1.620",
+   "high": "1.980",
+   "accuracy": "±(10 % of reading)",
+   "tol_text": "Specification p. 20: 1.620 to 1.980 V at 90 % of range   (±(10 % of reading), resolution 0.001 V; limits rounded inward to the display step)",
+   "applied": {
+    "value": 1.8,
+    "frequency": null
+   },
+   "nominal": 1.8,
+   "group": "VOHM",
+   "note": "Turn the dial to Ω, then push the YELLOW button twice to activate the diode test mode (Test Diodes, p. 12). The meter shows the voltage across the diode test input; the calibrator applies 1.8 V DC.",
+   "ref": "Spec #18",
+   "id": "1-18"
+  },
+  {
+   "table": "1",
+   "step": 19,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (dial: capacitance position)",
+   "range": "50.00 nF",
+   "models": [
+    "101"
+   ],
+   "kind": "CAP",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "test": "numeric",
+   "low": "44.05",
+   "high": "45.95",
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Specification p. 22: 44.05 to 45.95 nF at 90 % of range   (±(2 % of reading + 5 counts), resolution 0.01 nF; limits rounded inward to the display step)",
+   "applied": {
+    "value": 4.5e-08,
+    "frequency": null
+   },
+   "nominal": 4.5e-08,
+   "settle": 20,
+   "group": "VOHM",
+   "note": "Let the reading stabilize (up to 18 seconds, p. 12). The specification does not include test lead capacitance or the capacitance floor (up to 1.5 nF on the 50 nF range, p. 22 note 1): null the leads as you would on the bench if the lab practice does so (UNVERIFIED: the manual describes no REL step).",
+   "ref": "Spec #19",
+   "id": "1-19"
+  },
+  {
+   "table": "1",
+   "step": 20,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (dial: capacitance position)",
+   "range": "500.0 nF",
+   "models": [
+    "101"
+   ],
+   "kind": "CAP",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "test": "numeric",
+   "low": "440.5",
+   "high": "459.5",
+   "accuracy": "±(2 % of reading + 5 counts)",
+   "tol_text": "Specification p. 22: 440.5 to 459.5 nF at 90 % of range   (±(2 % of reading + 5 counts), resolution 0.1 nF; limits rounded inward to the display step)",
+   "applied": {
+    "value": 4.5e-07,
+    "frequency": null
+   },
+   "nominal": 4.5e-07,
+   "settle": 20,
+   "group": "VOHM",
+   "note": "Let the reading stabilize (up to 18 seconds, p. 12). The specification does not include test lead capacitance or the capacitance floor (up to 1.5 nF on the 50 nF range, p. 22 note 1): null the leads as you would on the bench if the lab practice does so (UNVERIFIED: the manual describes no REL step).",
+   "ref": "Spec #20",
+   "id": "1-20"
+  },
+  {
+   "table": "1",
+   "step": 21,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (dial: capacitance position)",
+   "range": "5.000 µF",
+   "models": [
+    "101"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "test": "numeric",
+   "low": "4.270",
+   "high": "4.730",
+   "accuracy": "±(5 % of reading + 5 counts)",
+   "tol_text": "Specification p. 22: 4.270 to 4.730 µF at 90 % of range   (±(5 % of reading + 5 counts), resolution 0.001 µF; limits rounded inward to the display step)",
+   "applied": {
+    "value": 4.5e-06,
+    "frequency": null
+   },
+   "nominal": 4.5e-06,
+   "settle": 20,
+   "group": "VOHM",
+   "note": "Let the reading stabilize (up to 18 seconds, p. 12). The specification does not include test lead capacitance or the capacitance floor (up to 1.5 nF on the 50 nF range, p. 22 note 1): null the leads as you would on the bench if the lab practice does so (UNVERIFIED: the manual describes no REL step).",
+   "ref": "Spec #21",
+   "id": "1-21"
+  },
+  {
+   "table": "1",
+   "step": 22,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (dial: capacitance position)",
+   "range": "50.00 µF",
+   "models": [
+    "101"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "test": "numeric",
+   "low": "42.70",
+   "high": "47.30",
+   "accuracy": "±(5 % of reading + 5 counts)",
+   "tol_text": "Specification p. 22: 42.70 to 47.30 µF at 90 % of range   (±(5 % of reading + 5 counts), resolution 0.01 µF; limits rounded inward to the display step)",
+   "applied": {
+    "value": 4.5e-05,
+    "frequency": null
+   },
+   "nominal": 4.5e-05,
+   "settle": 20,
+   "group": "VOHM",
+   "note": "Let the reading stabilize (up to 18 seconds, p. 12). The specification does not include test lead capacitance or the capacitance floor (up to 1.5 nF on the 50 nF range, p. 22 note 1): null the leads as you would on the bench if the lab practice does so (UNVERIFIED: the manual describes no REL step).",
+   "ref": "Spec #22",
+   "id": "1-22"
+  },
+  {
+   "table": "1",
+   "step": 23,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (dial: capacitance position)",
+   "range": "500.0 µF",
+   "models": [
+    "101"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "test": "numeric",
+   "low": "427.0",
+   "high": "473.0",
+   "accuracy": "±(5 % of reading + 5 counts)",
+   "tol_text": "Specification p. 22: 427.0 to 473.0 µF at 90 % of range   (±(5 % of reading + 5 counts), resolution 0.1 µF; limits rounded inward to the display step)",
+   "applied": {
+    "value": 0.00045,
+    "frequency": null
+   },
+   "nominal": 0.00045,
+   "settle": 20,
+   "group": "VOHM",
+   "note": "Let the reading stabilize (up to 18 seconds, p. 12). The specification does not include test lead capacitance or the capacitance floor (up to 1.5 nF on the 50 nF range, p. 22 note 1): null the leads as you would on the bench if the lab practice does so (UNVERIFIED: the manual describes no REL step).",
+   "ref": "Spec #23",
+   "id": "1-23"
+  },
+  {
+   "table": "1",
+   "step": 24,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (dial: capacitance position)",
+   "range": "1000 µF",
+   "models": [
+    "101"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "test": "numeric",
+   "low": "850",
+   "high": "950",
+   "accuracy": "±(5 % of reading + 5 counts)",
+   "tol_text": "Specification p. 22: 850 to 950 µF at 90 % of range   (±(5 % of reading + 5 counts), resolution 1 µF; limits rounded inward to the display step)",
+   "applied": {
+    "value": 0.0009,
+    "frequency": null
+   },
+   "nominal": 0.0009,
+   "settle": 20,
+   "group": "VOHM",
+   "note": "Let the reading stabilize (up to 18 seconds, p. 12). The specification does not include test lead capacitance or the capacitance floor (up to 1.5 nF on the 50 nF range, p. 22 note 1): null the leads as you would on the bench if the lab practice does so (UNVERIFIED: the manual describes no REL step).",
+   "ref": "Spec #24",
+   "id": "1-24"
+  },
+  {
+   "table": "1",
+   "step": 25,
+   "section": "Frequency",
+   "switch": "Hz  (dial: Hz position)",
+   "range": "50.00 Hz",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "test": "numeric",
+   "low": "44.93",
+   "high": "45.07",
+   "accuracy": "±(0.1 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 44.93 to 45.07 Hz at 90 % of range   (±(0.1 % of reading + 3 counts), resolution 0.01 Hz; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.0,
+    "frequency": 45.0
+   },
+   "nominal": 45.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "50.00 Hz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step: the calibrator applies 5 V at 45 Hz. Specified from 10 Hz to 100 kHz (p. 22). The input level and waveform for the frequency counter are not given in the manual (UNVERIFIED).",
+   "ref": "Spec #25",
+   "id": "1-25"
+  },
+  {
+   "table": "1",
+   "step": 26,
+   "section": "Frequency",
+   "switch": "Hz  (dial: Hz position)",
+   "range": "500.0 Hz",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "test": "numeric",
+   "low": "449.3",
+   "high": "450.7",
+   "accuracy": "±(0.1 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 449.3 to 450.7 Hz at 90 % of range   (±(0.1 % of reading + 3 counts), resolution 0.1 Hz; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.0,
+    "frequency": 450.0
+   },
+   "nominal": 450.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "500.0 Hz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step: the calibrator applies 5 V at 450 Hz. Specified from 10 Hz to 100 kHz (p. 22). The input level and waveform for the frequency counter are not given in the manual (UNVERIFIED).",
+   "ref": "Spec #26",
+   "id": "1-26"
+  },
+  {
+   "table": "1",
+   "step": 27,
+   "section": "Frequency",
+   "switch": "Hz  (dial: Hz position)",
+   "range": "5.000 kHz",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "test": "numeric",
+   "low": "4.493",
+   "high": "4.507",
+   "accuracy": "±(0.1 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 4.493 to 4.507 kHz at 90 % of range   (±(0.1 % of reading + 3 counts), resolution 0.001 kHz; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.0,
+    "frequency": 4500.0
+   },
+   "nominal": 4500.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "5.000 kHz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step: the calibrator applies 5 V at 4.5 kHz. Specified from 10 Hz to 100 kHz (p. 22). The input level and waveform for the frequency counter are not given in the manual (UNVERIFIED).",
+   "ref": "Spec #27",
+   "id": "1-27"
+  },
+  {
+   "table": "1",
+   "step": 28,
+   "section": "Frequency",
+   "switch": "Hz  (dial: Hz position)",
+   "range": "50.00 kHz",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "test": "numeric",
+   "low": "44.93",
+   "high": "45.07",
+   "accuracy": "±(0.1 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 44.93 to 45.07 kHz at 90 % of range   (±(0.1 % of reading + 3 counts), resolution 0.01 kHz; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.0,
+    "frequency": 45000.0
+   },
+   "nominal": 45000.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "50.00 kHz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step: the calibrator applies 5 V at 45 kHz. Specified from 10 Hz to 100 kHz (p. 22). The input level and waveform for the frequency counter are not given in the manual (UNVERIFIED).",
+   "ref": "Spec #28",
+   "id": "1-28"
+  },
+  {
+   "table": "1",
+   "step": 29,
+   "section": "Frequency",
+   "switch": "Hz  (dial: Hz position)",
+   "range": "100.0 kHz",
+   "models": [
+    "101"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "test": "numeric",
+   "low": "89.7",
+   "high": "90.3",
+   "accuracy": "±(0.1 % of reading + 3 counts)",
+   "tol_text": "Specification p. 22: 89.7 to 90.3 kHz at 90 % of range   (±(0.1 % of reading + 3 counts), resolution 0.1 kHz; limits rounded inward to the display step)",
+   "applied": {
+    "value": 5.0,
+    "frequency": 90000.0
+   },
+   "nominal": 90000.0,
+   "no_freq_suffix": true,
+   "unc_kind": "FREQ",
+   "report_desc": "100.0 kHz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step: the calibrator applies 5 V at 90 kHz. Specified from 10 Hz to 100 kHz (p. 22). The input level and waveform for the frequency counter are not given in the manual (UNVERIFIED).",
+   "ref": "Spec #29",
+   "id": "1-29"
+  }
+ ]
+}

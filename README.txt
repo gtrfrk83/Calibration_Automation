@@ -292,6 +292,14 @@ Procedures/Fluke_77IV_Verification.py   (engine: handheld_dmm.py; spec: specs/fl
   Not included: the calibration ADJUSTMENT (Table 3, pp. 14-16), fuse test, diode test (it has no step in Table 2).
   Rebuild the spec after editing the table:  python3 specs/build_77_spec.py     Demo with:  python Procedures/Fluke_77IV_Verification.py --demo
 
+Fluke 101 digital multimeter (automated performance verification: lists on the Automated Calibrations tab)
+-------------------------------------------------------------------------------------------------
+Procedures/Fluke_101_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_101_pv.json built by specs/build_fluke_101_spec.py; diagrams: diagrams/README_fluke101.txt)
+  29 points, ONE per range at 90 % of the range (owner's choice; the 101 Users Manual has no calibration table): AC volts 6 (5.4 / 54 / 540 V at 60 and 400 Hz), DC volts 3, AC millivolts 2 (540 mV at 60 and 400 Hz),
+  ohms 6, diode test 1 (1.8 V), capacitance 6 (45 nF ... 900 uF), frequency 5 (5 V at 45 Hz ... 90 kHz). Limits = the published 1-year accuracy (Users Manual pp. 20 and 22) rounded inward to the display step.
+  No current points: the 101 has no current function. Duty cycle and continuity are not built. Calibrator: Fluke 5522A or 5560A (or by hand); readings are typed. Every point prints an uncertainty (and TAR / TUR).
+  Rebuild the spec:  python3 specs/build_fluke_101_spec.py     Demo with:  python Procedures/Fluke_101_Verification.py --demo
+
 Fluke 365 detachable jaw clamp meter (automated performance verification: lists on the Automated Calibrations tab)
 -------------------------------------------------------------------------------------------------
 Procedures/Fluke_365_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_365_pv.json built by specs/build_fluke_365_spec.py; diagrams: diagrams/README_fluke365.txt)

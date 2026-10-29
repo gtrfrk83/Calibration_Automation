@@ -313,6 +313,14 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - Still not verified: the 5560A square-wave commands (unchanged from the old 87V: WAVE / DUTY / DC_OFFSET not verified on the 5560A); the limits against the Users Manual accuracy (not supplied).
 - Square-wave and temperature points keep the old 87V mechanisms (compound WAVE/OUT/DC_OFFSET line, DUTY, read-backs, WAVE SINE restored; TEMP in degC). Tests: `tests/test_80v_points.py`.
 
+## Fluke 101 notes (branch `fluke-80-series-v`; simulated bench only, never run on hardware or a real UI)
+- Source: Fluke 101 Users Manual (Rev. 2, 12/22). It has NO calibration procedure or performance table, only the accuracy specification (printed pp. 20-22) and the dial (Figure 2, p. 6). Points are the owner's choice (2026-10-28): one per range at 90 % of range, AC volts and AC mV at 60 and 400 Hz (the manual's AC band is 40 to 500 Hz), frequency ranges at 90 % of range. 29 points, `specs/build_fluke_101_spec.py`.
+- Limits are COMPUTED, not printed: +/-(% of reading + counts x resolution) of the 1-year specification, full width (no 2:1 margin), rounded inward to the display step (low up, high down). Ranges / specs read from rendered page images twice.
+- No AC / DC current: the meter has only VΩ and COM (p. 3); the owner's 'same for AC current' request cannot be built. Duty cycle (1 % typical) and continuity were not asked for and are not built.
+- Diode test: Ω position, YELLOW button twice (p. 12); 1.8 V DC applied, limit 10 % of reading (no counts). Capacitance settles up to 18 s (settle 20 s); the manual describes no REL step.
+- UNVERIFIED: frequency input level / waveform (5 V sine used), capacitance and DC output commands on the calibrators (existing registry commands), dial / YELLOW button behaviour beyond the manual text, hook-up pictures (owner supplies `hook_fluke101_<cal>_VOHM.png`).
+- Shared files: `hookups.py` gains a `fluke101` meter (additive). No engine / driver change.
+
 ## Fluke 77 Series IV notes (branch `fluke-77`; checked on the simulated bench only, never run on hardware or a real UI)
 - Source: Model 77 Series IV Calibration Information (20 pp.), Table 2 Performance Tests, printed pp. 12-13 (35 steps); spec table pp. 4-6. Limits were read from rendered page images (260 dpi) twice;
   `specs/build_77_spec.py` additionally checks each limit against the accuracy table (+/-(% of reading + counts x resolution), to half a display step) and refuses to write the spec on a disagreement.

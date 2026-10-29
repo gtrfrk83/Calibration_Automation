@@ -69,6 +69,8 @@ Included
                             175 = 52 points, 177 = 51, 179 = 54 (adds 3 temperature points, TEMP kind, degC). Steps are numbered in table order (the tables print no numbers): ids 2-1..2-52 (175), 3-1..3-54 (177 / 179).
                             THREE printed values are corrected (step.printed_limits keeps the printed text; the report row Description says 'limits corrected'); format-only changes keep step.printed_text.
                             Frequency rows (AC / DC volts frequency) are sourced as AC volts and read in Hz / kHz: unc_kind FREQ (the Frequency - Measure CMC alone). build_170_spec.py checks every limit against the published accuracy and fails on a disagreement.
+  fluke_101_pv.json         Fluke 101 Users Manual (printed pp. 20-22): 29 points, one per range at 90 %, AC volts / AC mV at 60 and 400 Hz; limits computed from the published 1-year accuracy, rounded inward; ids 1-1 .. 1-29;
+                            written by build_fluke_101_spec.py; tested by tests/test_fluke_101_points.py.
   fluke_365_pv.json         Fluke 365 Detachable Jaw True-rms Clamp Meter Calibration Manual, Table 2 (printed pp. 7-8), 32 points (schema 3, written by build_fluke_365_spec.py from the page images, read twice):
                             AC volts 6, DC volts 7, ohms 7, AC amps 6, DC amps 6; ids 2-1 .. 2-32. The current rows list the CALIBRATOR current (applied.value 0.5 / 5 / 9.5 A) and the METER limits
                             (nominal 10 / 100 / 190 A: a 20-turn coil, 20 x); they carry the calibrator's current uncertainty at applied.value, unscaled (owner-chosen). groups{COIL_AUX, COIL_20A} are the spec's own cable-change prompts (calibrator low- / high-current
