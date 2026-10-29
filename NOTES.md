@@ -2243,3 +2243,19 @@ Order of work for every new two-way instrument (also in the new-calibration-proc
 7. First hardware run: no step-through (long tests). Optional smoke pass (one lowest-energy point per test, full speed), then the full run at normal speed, stopping on the first surprise (`surprise.py`); the command log is kept. 'Mark verified on hardware' asks whether a clean full run is on record.
 
 Pilot: Fluke 6060A (2026-10-29 bench session, all five instruments connected: 6060A, 8902A, 8563E, 96270A + NRP40T, 33xxx generator; read-only passes first). Order: `drivers/fluke_6060a.py`, `hp_8902a.py`, `hp_8563e.py`, then the 96270A power-meter methods and the generator. The other ~37 never-hardware-run procedures are left as they are until the pilot is judged.
+
+## Check an EMU calculator: fully fledged (owner request 2026-10-29)
+Standards Specs tab > Check an EMU (qtui/screens/standards_specs.CheckDialog, model emu_check_model.py). Every choice comes from the standard's own sheet (`emu_check_model.options`):
+- Function: only the kinds this standard's sheet can answer (DCV ... TEMP, plus conductance, DC / AC power, phase, time marks, RPM, light fc / lux / La / UV 365 nm,
+  RF level in dBm on the 96270A). Flatness, aberration, rise time and the receiver / analyzer 'OTHER' rows (dB re carrier, ratios) are not a test point here: the window says so.
+- The standard sources (output) or measures (input) the point: the measuring standards (3458A, 5790B, 34461A / 34465A, 8902A) now compute (before, every lookup was 'output'
+  and they returned nothing); a measured point is floored by the laboratory's Measure CMC.
+- Sheet function: the exact function (e.g. Voltage, AC [Sinewave], 4-wire / 2-wire resistance), or the default the procedures use.
+- Temperature: the sensor (thermocouple B C E J K L N R S T U, RTD Pt 385 100/200/500/1000 Ω, Pt 3916, Pt 3926, Pt 395, PtNi 385, Cu 427 - as the sheet lists them), with that
+  sensor's scope CMC as the floor; the nominal in °C, °F or K (resolution / Type A / reported as differences); the result in °C, plus °F when the point was given in °F.
+- Specification period (24 hr, 90 day, 1 yr, 2 yr ... as printed; default the standard's own).
+- The frequency box shows only when the chosen function's rows are specified by frequency.
+- The spec line selected in the table when the button is pressed fills the function, direction, sheet function / sensor, nominal (top of its range, °F for a °F row) and frequency.
+Nothing shared changed: the calculator restricts a copy of the standard (emu_check_model._Restricted) and calls uncertainty_budget.build / rf_level as the engines do.
+Tests: tests/test_emu_check_model.py (FullyFledged). The Qt window itself is compile-checked only here (PySide6 is not installable in the sandbox); its logic was run against
+stand-in widgets. Check it on the bench PC.
