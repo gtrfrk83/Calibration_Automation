@@ -1011,7 +1011,7 @@ class FakeScpi(Transport):
     def write(self, text):
         self.sent.append(text)
         t = text.strip()
-        u = t.upper()
+        u = re.sub(r'^PMET\d:', 'PMET:', t.upper())          # the driver sends PMET1: since the bench of 2026-10-29
         self._reply = None
         if u == '*IDN?':
             self._reply = 'Fluke,96270A,1,1'
@@ -1092,14 +1092,14 @@ class PowerMeterMode(_NoSleep):
         t, drv = self.make()
         ident = drv.select_power_meter(1e9, 'AUTO', single=True)
         self.assertEqual(ident, 'R&S,NRP40T,100001,1.0')
-        self.assertEqual(t.sent[:5], ['INST PMET', 'INST?', 'UNIT:POW DBM', 'UNIT:POW?', 'PMET:TRIG SING'])
-        self.assertIn('PMET:FREQ 1000000000', t.sent)
+        self.assertEqual(t.sent[:3], ['INST PMET', 'INST?', 'PMET1:TRIG SING'])          # no UNIT:POW in power-meter mode (bench 2026-10-29)
+        self.assertIn('PMET1:FREQ 1000000000', t.sent)
         self.assertEqual(t.state['INST'], 'PMETER')
         self.assertEqual(t.state['PMET:AVER'], 'AUTO')
         t2, drv2 = self.make()
         drv2.select_power_meter(5e8, '16', single=False)
-        self.assertIn('PMET:AVER 16', t2.sent)
-        self.assertIn('PMET:TRIG CONT', t2.sent)
+        self.assertIn('PMET1:AVER 16', t2.sent)
+        self.assertIn('PMET1:TRIG CONT', t2.sent)
 
     def test_no_sensor_is_refused(self):
         t, drv = self.make(sensor='NONE, NONE, NONE, NONE')
@@ -1111,7 +1111,7 @@ class PowerMeterMode(_NoSleep):
         orig = t.write
 
         def stubborn(text):
-            if text.startswith('PMET:AVER '):
+            if text.startswith('PMET1:AVER '):
                 t.sent.append(text)
                 t._reply = None
                 return
@@ -1119,17 +1119,17 @@ class PowerMeterMode(_NoSleep):
         t.write = stubborn
         with self.assertRaises(InstrumentError):
             drv.select_power_meter(1e9, '16')
-        self.assertEqual(sum(1 for s in t.sent if s.startswith('PMET:AVER ')), 1)
+        self.assertEqual(sum(1 for s in t.sent if s.startswith('PMET1:AVER ')), 1)
 
     def test_zero_is_asked_once_and_a_failure_names_the_error(self):
         t, drv = self.make()
         drv.zero()
-        self.assertEqual(t.sent, ['PMET:ZERO?'])
+        self.assertEqual(t.sent, ['PMET1:ZERO?'])
         t2, drv2 = self.make(zero='1')
         with self.assertRaises(InstrumentError) as ctx:
             drv2.zero()
         self.assertIn('error queue', str(ctx.exception))
-        self.assertEqual(t2.sent.count('PMET:ZERO?'), 1)
+        self.assertEqual(t2.sent.count('PMET1:ZERO?'), 1)
 
     def test_read_dbm(self):
         t, drv = self.make(reading='-9.87E+00')

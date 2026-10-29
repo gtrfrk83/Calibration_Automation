@@ -33,3 +33,12 @@ CONFIRMED: IP, M5, 7.1SP, T1, T3, read (ends at LF) -> "+0011111109E+01" CR LF, 
 display 111.11109. The 8902A does not assert EOI with a reading. The driver reads to LF (since 2026-10-28) and no longer sends a tune code before M5.
 The 8902A reads 10 to 20 Hz BELOW the 6060A's 111 111 100 Hz: one to two counts at 10 Hz. The two were most likely on separate time bases (4A-4 step a connects the
 6060A 10 MHz IN/OUT to the counter's reference input): to be checked before 4A-4 is judged (limit +/- 1 count).
+
+## 2026-10-29 step 5, 96270A power meter + R&S NRP40T on the 6060A at 120 MHz (2026-10-29_step5_96270a_power_meter.json)
+- The 96270A (firmware 1.17) sees the sensor: PMET1:IDN? -> "ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101". NRP40T support CONFIRMED on this unit.
+- INST PMET -> INST? PMET; PMET1:FREQ 120E6 -> 1.2E+8; PMET1:AVER AUTO -> AUTO; PMET1:TRIG CONT -> CONT; SYST:ERR? 0 throughout; OUTP? 0 throughout.
+- UNIT:POW? answers NONE in power-meter mode: the driver no longer sets or checks it. Readings are dBm.
+- PMET1:ZERO? -> 0 after 10.6 s (6060A RF off). RF off: -37.831 dBm.
+- 6060A -10 dBm -> -10.51 dBm (x3); 0 dBm -> -0.484 dBm (x3; front panel -0.49). Both inside the 4A-5 +/-1.5 dB.
+- INST SINE at the end -> SINE, OUTP? 0.
+Driver: PMET1: commands (as on the bench), continuous trigger by default (SING is UNVERIFIED), no UNIT:POW in power-meter mode.

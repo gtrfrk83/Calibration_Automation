@@ -115,23 +115,31 @@ PMETER_COMMANDS = {
                        'unavailable until one is selected again', kind='set', readback='inst.query', verified=True, ref=_rf('INSTrument[:SELect] PMETer', 32)),
     'pm.unit.set': Cmd('UNIT:POW {unit}', 'Power units (power meter)', 'DBM or W for the power commands of the SELECTED instrument (select PMETer first)',
                        placeholders={'unit': Placeholder('enum', '', 'DBM', enum=('DBM', 'W'))}, kind='set', readback='unit.query', verified=True, ref=_rf('UNIT:POWer', 47)),
-    'pm.freq.set': Cmd('PMET:FREQ {hz:.12g}', 'Power meter frequency', 'Frequency at which the sensor measures power (power-on 1E6 Hz). Sensor limits are UNVERIFIED (NRP40T not in the manual)',
+    'pm.freq.set': Cmd('PMET1:FREQ {hz:.12g}', 'Power meter frequency', 'Frequency at which the sensor measures power (power-on 1E6 Hz). Sensor limits are UNVERIFIED (NRP40T not in the manual)',
                        placeholders={'hz': Placeholder('float', '.12g', 1e9)}, kind='set', readback='pm.freq.query', verified=True, ref=_rf(':PMETer:FREQuency', 41)),
-    'pm.freq.query': Cmd('PMET:FREQ?', 'Power meter frequency', kind='query', verified=True, ref=_rf(':PMETer:FREQuency?', 41)),
-    'pm.aver.set': Cmd('PMET:AVER {n}', 'Power meter averaging', 'Readings averaged: AUTO or 1, 2, 4, 8 ... 32768',
+    'pm.freq.query': Cmd('PMET1:FREQ?', 'Power meter frequency', kind='query', verified=True, ref=_rf(':PMETer:FREQuency?', 41)),
+    'pm.aver.set': Cmd('PMET1:AVER {n}', 'Power meter averaging', 'Readings averaged: AUTO or 1, 2, 4, 8 ... 32768',
                        placeholders={'n': Placeholder('enum', '', 'AUTO', enum=('AUTO', '1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768'))},
                        kind='set', readback='pm.aver.query', verified=True, ref=_rf(':PMETer:AVERage', 41)),
-    'pm.aver.query': Cmd('PMET:AVER?', 'Power meter averaging', kind='query', verified=True, ref=_rf(':PMETer:AVERage?', 41)),
-    'pm.trig.set': Cmd('PMET:TRIG {mode}', 'Power meter trigger mode', 'SINGle: :READ? triggers one reading and returns it. CONTinuous: free running (power-on)',
+    'pm.aver.query': Cmd('PMET1:AVER?', 'Power meter averaging', kind='query', verified=True, ref=_rf(':PMETer:AVERage?', 41)),
+    'pm.trig.set': Cmd('PMET1:TRIG {mode}', 'Power meter trigger mode', 'SINGle: :READ? triggers one reading and returns it. CONTinuous: free running (power-on)',
                        placeholders={'mode': Placeholder('enum', '', 'SING', enum=('SING', 'CONT'))}, kind='set', readback='pm.trig.query', verified=True, ref=_rf(':PMETer:TRIGger', '41 and 42')),
-    'pm.trig.query': Cmd('PMET:TRIG?', 'Power meter trigger mode', kind='query', verified=True, ref=_rf(':PMETer:TRIGger?', 41)),
-    'pm.zero': Cmd('PMET:ZERO?', 'Zero the power sensor', 'Performs the input zero on the sensor (RF must be removed). Answers 0 for success and 1 for failure with an error message in the error queue. It ACTS, '
+    'pm.trig.query': Cmd('PMET1:TRIG?', 'Power meter trigger mode', kind='query', verified=True, ref=_rf(':PMETer:TRIGger?', 41)),
+    'pm.zero': Cmd('PMET1:ZERO?', 'Zero the power sensor', 'Performs the input zero on the sensor (RF must be removed). Answers 0 for success and 1 for failure with an error message in the error queue. It ACTS, '
                    'so it is never retried and never overridable', kind='query', risk='locked', verified=True, ref=_rf(':PMETer:ZERO?', 41)),
-    'pm.read': Cmd('PMET:READ?', 'Power meter reading', 'The next reading; in single-trigger mode it triggers one and returns it. Whether the value follows UNIT:POW is UNVERIFIED; 9.91E+37 means none',
+    'pm.read': Cmd('PMET1:READ?', 'Power meter reading', 'The next reading; in single-trigger mode it triggers one and returns it. Whether the value follows UNIT:POW is UNVERIFIED; 9.91E+37 means none',
                    kind='query', verified=True, ref=_rf(':PMETer:READ?', 41)),
-    'pm.idn': Cmd('PMET:IDN?', 'Power sensor identity', 'Make, model, serial number, firmware version of the sensor; NONE, NONE, NONE, NONE when no sensor is fitted. An R&S NRP40T is UNVERIFIED '
+    'pm.idn': Cmd('PMET1:IDN?', 'Power sensor identity', 'Make, model, serial number, firmware version of the sensor; NONE, NONE, NONE, NONE when no sensor is fitted. An R&S NRP40T is UNVERIFIED '
                   '(the manual does not mention it)', kind='query', verified=True, ref=_rf(':PMETer:IDN?', 41)),
 }
+# Bench 2026-10-29 (tools/bench/records, step 5): the 96270A (firmware 1.17) sees the NRP40T on sensor 1 ("ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101"); INST PMET,
+# PMET1:FREQ 120E6 (-> 1.2E+8), PMET1:AVER AUTO, PMET1:TRIG CONT each read back; PMET1:ZERO? -> 0 after 10.6 s; PMET1:READ? -> -1.051E+1 for the 6060A at -10 dBm and
+# -4.84E-1 at 0 dBm (dBm; the front panel showed -0.49); RF off: -3.7831E+1. In power-meter mode UNIT:POW? answers NONE, so the driver does not set or check it.
+import dataclasses as _dc
+for _k, _t in {'pm.inst.set': 'INST? -> PMET', 'pm.freq.set': 'PMET1:FREQ 120E6 -> 1.2E+8', 'pm.aver.set': 'AUTO -> AUTO', 'pm.trig.set': 'CONT -> CONT',
+               'pm.zero': '0 after 10.6 s', 'pm.read': '-1.051E+1 at -10 dBm, -4.84E-1 at 0 dBm (dBm)', 'pm.idn': 'ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101',
+               'pm.unit.set': 'NOT USED: in power-meter mode UNIT:POW? answers NONE'}.items():
+    PMETER_COMMANDS[_k] = _dc.replace(PMETER_COMMANDS[_k], ref=f'{PMETER_COMMANDS[_k].ref}; BENCH 2026-10-29 step 5: {_t}')
 RF_COMMANDS.update(PMETER_COMMANDS)
 PM_NO_READING = 9.0e37                       # :FETCh? answers 9.91E+37 when there is no reading (p. 41)
 
@@ -223,17 +231,14 @@ class Fluke96270A(Instrument):
     # ---- power-meter mode (ADDED; the Rohde & Schwarz NRP40T sensor is UNVERIFIED, see PMETER_COMMANDS) ---------------------------------------------------------
     PM_MIN_DBM, PM_MAX_DBM = -120.0, 50.0        # a reading outside this is not taken as dBm (a choice of this driver: the manual does not say whether READ? follows UNIT:POW)
 
-    def select_power_meter(self, frequency_hz: float | None = None, average: str = 'AUTO', single: bool = True) -> str:
-        """INST PMET (the output goes to standby, p. 32), UNIT:POW DBM, PMET:TRIG SING / CONT, PMET:AVER, PMET:FREQ (each read back and compared), then PMET:IDN?: it must name a sensor
+    def select_power_meter(self, frequency_hz: float | None = None, average: str = 'AUTO', single: bool = False) -> str:
+        """INST PMET (the output goes to standby, p. 32), PMET1:TRIG CONT (the bench-proven mode; SING is UNVERIFIED) or SING, PMET:AVER, PMET:FREQ (each read back and compared), then PMET:IDN?: it must name a sensor
         (NONE, NONE, NONE, NONE means none is fitted). Returns the sensor identity text (an NRP40T is UNVERIFIED). Use select_sine() to go back to the source."""
         self.send('pm.inst.set')
         reply = self.ask('inst.query').strip().strip('"').upper()
         if not reply.startswith('PMET'):
             raise InstrumentError(f'96270A did not select the power meter: INST? answered {reply!r}')
-        self.send('pm.unit.set', unit='DBM')
-        reply = self.ask('unit.query').strip().strip('"').upper()
-        if reply != 'DBM':
-            raise InstrumentError(f'96270A power-meter units DBM were not accepted: UNIT:POW? answered {reply!r}')
+        # no UNIT:POW here: in power-meter mode UNIT:POW? answers NONE and PMET1:READ? is in dBm (bench 2026-10-29, step 5)
         mode = 'SING' if single else 'CONT'
         self.send('pm.trig.set', mode=mode)
         reply = self.ask('pm.trig.query').strip().strip('"').upper()

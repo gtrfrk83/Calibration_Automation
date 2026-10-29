@@ -6509,25 +6509,22 @@
    ]
   },
   {
-   "call": "250000000.0",
-   "case": "Fluke96270A.select_power_meter",
+   "call": "250000000.0, 'AUTO', True",
+   "case": "Fluke96270A.select_power_meter[single]",
    "log": [
     "96270A|>>|INST PMET",
     "96270A|>>|INST?",
     "96270A|<<|PMETER",
-    "96270A|>>|UNIT:POW DBM",
-    "96270A|>>|UNIT:POW?",
-    "96270A|<<|DBM",
-    "96270A|>>|PMET:TRIG SING",
-    "96270A|>>|PMET:TRIG?",
+    "96270A|>>|PMET1:TRIG SING",
+    "96270A|>>|PMET1:TRIG?",
     "96270A|<<|SING",
-    "96270A|>>|PMET:AVER AUTO",
-    "96270A|>>|PMET:AVER?",
+    "96270A|>>|PMET1:AVER AUTO",
+    "96270A|>>|PMET1:AVER?",
     "96270A|<<|AUTO",
-    "96270A|>>|PMET:FREQ 250000000",
-    "96270A|>>|PMET:FREQ?",
+    "96270A|>>|PMET1:FREQ 250000000",
+    "96270A|>>|PMET1:FREQ?",
     "96270A|<<|250000000",
-    "96270A|>>|PMET:IDN?",
+    "96270A|>>|PMET1:IDN?",
     "96270A|<<|R&S,NRP40T,SIM100001,1.0",
     "96270A|>>|SYST:ERR?",
     "96270A|<<|0,\"No error\""
@@ -6546,43 +6543,106 @@
     ],
     [
      "W",
-     "UNIT:POW DBM"
+     "PMET1:TRIG SING"
     ],
     [
      "Q",
-     "UNIT:POW?",
-     "DBM"
-    ],
-    [
-     "W",
-     "PMET:TRIG SING"
-    ],
-    [
-     "Q",
-     "PMET:TRIG?",
+     "PMET1:TRIG?",
      "SING"
     ],
     [
      "W",
-     "PMET:AVER AUTO"
+     "PMET1:AVER AUTO"
     ],
     [
      "Q",
-     "PMET:AVER?",
+     "PMET1:AVER?",
      "AUTO"
     ],
     [
      "W",
-     "PMET:FREQ 250000000"
+     "PMET1:FREQ 250000000"
     ],
     [
      "Q",
-     "PMET:FREQ?",
+     "PMET1:FREQ?",
      "250000000"
     ],
     [
      "Q",
-     "PMET:IDN?",
+     "PMET1:IDN?",
+     "R&S,NRP40T,SIM100001,1.0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "1000000000.0",
+   "case": "Fluke96270A.select_power_meter[continuous, the default]",
+   "log": [
+    "96270A|>>|INST PMET",
+    "96270A|>>|INST?",
+    "96270A|<<|PMETER",
+    "96270A|>>|PMET1:TRIG CONT",
+    "96270A|>>|PMET1:TRIG?",
+    "96270A|<<|CONT",
+    "96270A|>>|PMET1:AVER AUTO",
+    "96270A|>>|PMET1:AVER?",
+    "96270A|<<|AUTO",
+    "96270A|>>|PMET1:FREQ 1000000000",
+    "96270A|>>|PMET1:FREQ?",
+    "96270A|<<|1000000000",
+    "96270A|>>|PMET1:IDN?",
+    "96270A|<<|R&S,NRP40T,SIM100001,1.0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.select_power_meter",
+   "result": "returned 'R&S,NRP40T,SIM100001,1.0'",
+   "wire": [
+    [
+     "W",
+     "INST PMET"
+    ],
+    [
+     "Q",
+     "INST?",
+     "PMETER"
+    ],
+    [
+     "W",
+     "PMET1:TRIG CONT"
+    ],
+    [
+     "Q",
+     "PMET1:TRIG?",
+     "CONT"
+    ],
+    [
+     "W",
+     "PMET1:AVER AUTO"
+    ],
+    [
+     "Q",
+     "PMET1:AVER?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "PMET1:FREQ 1000000000"
+    ],
+    [
+     "Q",
+     "PMET1:FREQ?",
+     "1000000000"
+    ],
+    [
+     "Q",
+     "PMET1:IDN?",
      "R&S,NRP40T,SIM100001,1.0"
     ],
     [
@@ -6599,19 +6659,16 @@
     "96270A|>>|INST PMET",
     "96270A|>>|INST?",
     "96270A|<<|PMETER",
-    "96270A|>>|UNIT:POW DBM",
-    "96270A|>>|UNIT:POW?",
-    "96270A|<<|DBM",
-    "96270A|>>|PMET:TRIG CONT",
-    "96270A|>>|PMET:TRIG?",
+    "96270A|>>|PMET1:TRIG CONT",
+    "96270A|>>|PMET1:TRIG?",
     "96270A|<<|CONT",
-    "96270A|>>|PMET:AVER 8",
-    "96270A|>>|PMET:AVER?",
+    "96270A|>>|PMET1:AVER 8",
+    "96270A|>>|PMET1:AVER?",
     "96270A|<<|8",
-    "96270A|>>|PMET:FREQ 1000000000",
-    "96270A|>>|PMET:FREQ?",
+    "96270A|>>|PMET1:FREQ 1000000000",
+    "96270A|>>|PMET1:FREQ?",
     "96270A|<<|1000000000",
-    "96270A|>>|PMET:IDN?",
+    "96270A|>>|PMET1:IDN?",
     "96270A|<<|R&S,NRP40T,SIM100001,1.0",
     "96270A|>>|SYST:ERR?",
     "96270A|<<|0,\"No error\""
@@ -6630,43 +6687,34 @@
     ],
     [
      "W",
-     "UNIT:POW DBM"
+     "PMET1:TRIG CONT"
     ],
     [
      "Q",
-     "UNIT:POW?",
-     "DBM"
-    ],
-    [
-     "W",
-     "PMET:TRIG CONT"
-    ],
-    [
-     "Q",
-     "PMET:TRIG?",
+     "PMET1:TRIG?",
      "CONT"
     ],
     [
      "W",
-     "PMET:AVER 8"
+     "PMET1:AVER 8"
     ],
     [
      "Q",
-     "PMET:AVER?",
+     "PMET1:AVER?",
      "8"
     ],
     [
      "W",
-     "PMET:FREQ 1000000000"
+     "PMET1:FREQ 1000000000"
     ],
     [
      "Q",
-     "PMET:FREQ?",
+     "PMET1:FREQ?",
      "1000000000"
     ],
     [
      "Q",
-     "PMET:IDN?",
+     "PMET1:IDN?",
      "R&S,NRP40T,SIM100001,1.0"
     ],
     [
@@ -6680,7 +6728,7 @@
    "call": "",
    "case": "Fluke96270A.zero",
    "log": [
-    "96270A|>>|PMET:ZERO?",
+    "96270A|>>|PMET1:ZERO?",
     "96270A|<<|0"
    ],
    "method": "Fluke96270A.zero",
@@ -6688,7 +6736,7 @@
    "wire": [
     [
      "Q",
-     "PMET:ZERO?",
+     "PMET1:ZERO?",
      "0"
     ]
    ]
@@ -6697,7 +6745,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|-9.9800E+00"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6705,7 +6753,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "-9.9800E+00"
     ]
    ]
@@ -6714,7 +6762,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[RF off]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|-9.0000E+01"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6722,7 +6770,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "-9.0000E+01"
     ]
    ]
@@ -6731,7 +6779,7 @@
    "call": "",
    "case": "Fluke96270A.zero[failed]",
    "log": [
-    "96270A|>>|PMET:ZERO?",
+    "96270A|>>|PMET1:ZERO?",
     "96270A|<<|1",
     "96270A|>>|SYST:ERR?",
     "96270A|<<|-221,\"Settings conflict: sensor not zeroed\""
@@ -6741,7 +6789,7 @@
    "wire": [
     [
      "Q",
-     "PMET:ZERO?",
+     "PMET1:ZERO?",
      "1"
     ],
     [
@@ -6856,19 +6904,16 @@
     "96270A|>>|INST PMET",
     "96270A|>>|INST?",
     "96270A|<<|PMETER",
-    "96270A|>>|UNIT:POW DBM",
-    "96270A|>>|UNIT:POW?",
-    "96270A|<<|DBM",
-    "96270A|>>|PMET:TRIG SING",
-    "96270A|>>|PMET:TRIG?",
-    "96270A|<<|SING",
-    "96270A|>>|PMET:AVER AUTO",
-    "96270A|>>|PMET:AVER?",
+    "96270A|>>|PMET1:TRIG CONT",
+    "96270A|>>|PMET1:TRIG?",
+    "96270A|<<|CONT",
+    "96270A|>>|PMET1:AVER AUTO",
+    "96270A|>>|PMET1:AVER?",
     "96270A|<<|AUTO",
-    "96270A|>>|PMET:FREQ 250000000",
-    "96270A|>>|PMET:FREQ?",
+    "96270A|>>|PMET1:FREQ 250000000",
+    "96270A|>>|PMET1:FREQ?",
     "96270A|<<|250000000",
-    "96270A|>>|PMET:IDN?",
+    "96270A|>>|PMET1:IDN?",
     "96270A|<<|NONE,NONE,NONE,NONE"
    ],
    "method": "Fluke96270A.select_power_meter",
@@ -6885,43 +6930,34 @@
     ],
     [
      "W",
-     "UNIT:POW DBM"
+     "PMET1:TRIG CONT"
     ],
     [
      "Q",
-     "UNIT:POW?",
-     "DBM"
+     "PMET1:TRIG?",
+     "CONT"
     ],
     [
      "W",
-     "PMET:TRIG SING"
+     "PMET1:AVER AUTO"
     ],
     [
      "Q",
-     "PMET:TRIG?",
-     "SING"
-    ],
-    [
-     "W",
-     "PMET:AVER AUTO"
-    ],
-    [
-     "Q",
-     "PMET:AVER?",
+     "PMET1:AVER?",
      "AUTO"
     ],
     [
      "W",
-     "PMET:FREQ 250000000"
+     "PMET1:FREQ 250000000"
     ],
     [
      "Q",
-     "PMET:FREQ?",
+     "PMET1:FREQ?",
      "250000000"
     ],
     [
      "Q",
-     "PMET:IDN?",
+     "PMET1:IDN?",
      "NONE,NONE,NONE,NONE"
     ]
    ]
@@ -6930,7 +6966,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[no reading]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|9.91E+37"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6938,7 +6974,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "9.91E+37"
     ]
    ]
@@ -6947,7 +6983,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[not plausible as dBm]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|1.0E-4"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6955,7 +6991,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "1.0E-4"
     ]
    ]
@@ -6964,7 +7000,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[below the floor]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|-300"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6972,7 +7008,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "-300"
     ]
    ]

@@ -42,7 +42,7 @@ class Sim96270AMeter(_SimBase):
         self._reply = self.handle(text.strip())
 
     def handle(self, text):
-        u = text.upper()
+        u = re.sub(r'^PMET\d:', 'PMET:', text.upper())          # PMET1: (what the driver sends since the bench of 2026-10-29) = PMET: (sensor 1 by default, manual p. 41)
         s = self.state
         if u == '*IDN?':
             return 'Fluke,96270A,SIM0001,1.0'
@@ -66,7 +66,7 @@ class Sim96270AMeter(_SimBase):
             s['UNIT'] = u.split()[1]
             return None
         if u == 'UNIT:POW?':
-            return s['UNIT']
+            return 'NONE' if s['INST'] == 'PMETER' else s['UNIT']        # bench 2026-10-29 step 5: NONE in power-meter mode
         if u in ('POW:OFFS:STAT 0', 'FREQ:OFFS:STAT 0'):
             return None
         if u in ('POW:OFFS:STAT?', 'FREQ:OFFS:STAT?'):
