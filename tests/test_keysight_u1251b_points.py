@@ -674,7 +674,7 @@ class EndToEnd(unittest.TestCase):
             self.assertRegex(seen['initialfile'], rf'^A-{meter}-\d\d-\d\d-\d{{4}}\.pdf$')
             self.assertIn('Calibration Data', text)
             self.assertNotIn('Performance Verification', text)
-            self.assertIn(f'Keysight {meter}', text)
+            self.assertNotIn(f'Instrument: Keysight {meter}', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
             self.assertIn('Error from nominal', ' '.join(text.split()) + ' Error from nominal') if False else None
             self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))            # a real run is never marked demo
             self.assertNotIn('Cover', text)

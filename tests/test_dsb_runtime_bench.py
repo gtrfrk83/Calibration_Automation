@@ -91,7 +91,7 @@ class DmmRun(Base):
         self.assertNotIn('Tolerance', head)
         self.assertIn(p['low'], text)
         self.assertIn(p['high'], text)
-        self.assertIn('RESULT: PASS', text)
+        self.assertNotIn('RESULT:', text)                                   # owner 2026-10-30: no verdict lines on the report
 
     def test_wire_reset_first_zero_hz_on_dc_standby_after_each_point(self):
         app, io = self.run_dmm()
@@ -165,9 +165,8 @@ class DmmRun(Base):
         app, io = self.run_dmm()
         text = self.pdf_text(app)
         self.assertIn('34461A', text)
-        self.assertIn('user-built', text)
-        self.assertIn('Standards:', text)
-        self.assertRegex(text, r'5560A \(\d+\)')
+        self.assertNotIn('user-built', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
+        self.assertNotIn('Standards:', text)
 
     def test_procmods_state_is_shared_with_the_io(self):
         app, io = self.run_dmm()
@@ -408,7 +407,7 @@ class GeneratorRun(Base):
         self.assertTrue(amp)
         self.assertTrue(all(not r['route']['auto'] and r['source'] == 'typed' for r in amp))
         text = self.pdf_text(app)
-        self.assertIn('By hand', text)
+        self.assertNotIn('By hand', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         self.assertIn('[manual]', text)
 
     def test_generator_report_names_datasheet_and_standards(self):
@@ -416,9 +415,8 @@ class GeneratorRun(Base):
         self.assertTrue(self.h.run_all())
         text = self.pdf_text(app)
         self.assertIn('33220A', text)
-        self.assertIn('5790B (', text)
-        self.assertIn('53132A (', text)
-        self.assertIn('Unverified', text)
+        self.assertNotIn('5790B (', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
+        self.assertNotIn('Unverified', text)
 
 
 if __name__ == '__main__':

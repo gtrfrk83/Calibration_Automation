@@ -228,7 +228,7 @@ class OldEvents(Base):
         self.assertIn('REBUILT 2026-10-22 from history rows, no original snapshot', text)
         for desc in ('10 V range', '100 V range', '1 kOhm'):       # report_pdf spells ohms 'Ohm' in the description column
             self.assertIn(desc, text)
-        self.assertIn('RESULT: OUT OF TOLERANCE', text)
+        self.assertNotIn('RESULT:', text)                                   # owner 2026-10-30: no verdict lines on the report
         self.assertNotIn('Same', text, 'As Left is not stored, so nothing is claimed about it')
         self.assertNotIn('N/A', text)
 

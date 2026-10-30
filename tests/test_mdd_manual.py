@@ -455,7 +455,7 @@ class StandardUncertainty(Fix):
         self.assertNotIn('[manual]', self.row_of(a, 'p0001')['Description'])
         txt = self.pdf_text(a)
         self.assertIn('Calibration Data', txt)
-        self.assertIn('Uncertainty: 5522A', txt)                                   # the header line names the standard
+        self.assertNotIn('Uncertainty: 5522A', txt)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         self.assertIn('k = 2', txt)
         self.assertIn(row['Uncertainty'].split()[0], txt)
         self.assertIn('N/A', txt)                                                  # waived points print N/A, not 0
@@ -636,7 +636,7 @@ class StandardUncertainty(Fix):
         self.assertIn('5522A (', unc)
         txt = self.pdf_text(a)
         self.assertIn('[5560A]', txt)
-        self.assertIn('5560A (1)', txt)
+        self.assertNotIn('5560A (1)', txt)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         # a run loaded from that progress gets the same choice back; a file without it clears it
         b = self.app('5522A')
         b.load_results(dict(data))

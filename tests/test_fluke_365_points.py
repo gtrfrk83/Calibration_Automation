@@ -429,7 +429,7 @@ class EndToEnd(unittest.TestCase):
         self.assertRegex(seen['initialfile'], r'^A-365-\d\d-\d\d-\d{4}\.pdf$')
         self.assertIn('Calibration Data', text)
         self.assertNotIn('Performance Verification', text)
-        self.assertIn('Fluke 365', text)
+        self.assertNotIn('Instrument: Fluke 365', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         flat = ' '.join(text.split())
         self.assertIn('200.0 A, 9.5 A x 20 turns', flat)
         self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))          # a real run is never marked demo

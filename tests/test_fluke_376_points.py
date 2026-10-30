@@ -623,7 +623,7 @@ class EndToEnd(unittest.TestCase):
         self.assertRegex(seen['initialfile'], r'^A-376-\d\d-\d\d-\d{4}\.pdf$')
         self.assertIn('Calibration Data', text)
         self.assertNotIn('Performance Verification', text)
-        self.assertIn('Fluke 376', text)
+        self.assertNotIn('Instrument: Fluke 376', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         flat = ' '.join(text.split())
         self.assertIn('Jaw, 18 A x 50 turns', flat)
         self.assertIn('iFlex, 18 A x 50 turns', flat)

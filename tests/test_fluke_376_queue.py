@@ -399,12 +399,9 @@ class Reports(Base):
             by[Path(w).name] = self.text(w)
         import ui_theme as ui
         ta, tb = by[ui.report_filename(self.A)], by[ui.report_filename(self.B)]
-        self.assertIn('iFlex tests', ta)
-        self.assertIn('Tested (iFlex supplied)', ' '.join(ta.split()))
-        self.assertNotIn('Not tested (no iFlex supplied)', ' '.join(ta.split()))
-        self.assertIn('iFlex tests', tb)
-        self.assertIn('Not tested (no iFlex supplied)', ' '.join(tb.split()))
-        self.assertNotIn('Tested (iFlex supplied)', ' '.join(tb.split()))
+        # owner 2026-10-30: the report header shows only the asset ID, serial number and report date - the iFlex line stays in the asset history, not on the PDF
+        self.assertNotIn('Tested (iFlex supplied)', ' '.join(ta.split()))
+        self.assertNotIn('Not tested (no iFlex supplied)', ' '.join(tb.split()))
         self.assertIn('iFlex simulated', ta)                                      # A has the iFlex rows
         self.assertIn('iFlex simulated', tb)                                      # B still has the simulation rows
         self.assertNotIn('iFlex with coil', tb)

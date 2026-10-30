@@ -174,7 +174,7 @@ class BuildOneWay(Fix):
         self.assertIn('Title:           Acme TM100 - Test meter', info)               # the same title as the other automated sheets (Make Model - title)
         import re
         self.assertRegex(self.seen.get('initialfile', ''), r'^A-100-\d{2}-\d{2}-\d{4}\.pdf$')       # named asset#-date (the engine's own file name, unchanged)
-        self.assertIn('Procedure status', txt)
+        self.assertNotIn('Procedure status', txt)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date (the DRAFT banner stays)
         self.assertNotIn('standards due', txt.lower())
 
     def test_declining_the_confirmation_runs_nothing(self):
@@ -225,7 +225,7 @@ class BuildOneWay(Fix):
         self.assertTrue(pages)
         for t in pages:
             self.assertNotIn('DRAFT: NOT APPROVED', t.upper())
-        self.assertIn('approved by Owner Name', ' '.join(self.pages(self.export(a, 'A-100-2026-10-28.pdf'))))
+        self.assertNotIn('approved by Owner Name', ' '.join(self.pages(self.export(a, 'A-100-2026-10-28.pdf'))))  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         self.assertFalse(next(r for r in dsb_manager.user_rows(root=self.us, db=self.reg) if r['uid'] == res.uid)['draft'])
         hist = gd.state(res.uid, self.reg).history
         self.assertEqual([h[0] for h in hist], ['built', 'approve'])

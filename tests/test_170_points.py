@@ -542,7 +542,7 @@ class EndToEnd(unittest.TestCase):
             self.assertRegex(seen['initialfile'], r'^A-17-\d\d-\d\d-\d{4}\.pdf$')
             self.assertIn('Calibration Data', text)
             self.assertNotIn('Performance Verification', text)
-            self.assertIn(f'Fluke {model}', text)
+            self.assertNotIn(f'Instrument: Fluke {model}', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
             flat = ' '.join(text.split())
             self.assertIn('99.99 kHz range (5 V applied)', flat)
             self.assertIn('999.9 Hz range (1 V applied)', flat)
