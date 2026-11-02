@@ -83,7 +83,7 @@ for _e, _name in (('truevolt', 'Truevolt'), ('dacq', '34970A / 34972A')):
     _t(_e, 'settle.freq', 3.0, 0.2, 120.0, f'{_name}: settle, frequency points')
     _t(_e, 'settle.ohm_high', 4.0, 0.2, 120.0, f'{_name}: settle, resistance ranges of 10 Mohm and above')
     _t(_e, 'settle.zero', 1.5, 0.2, 120.0, f'{_name}: settle before a zero-offset reading')
-    _t(_e, 'settle.default', 2.0, 0.2, 120.0, f'{_name}: settle, other points')
+    _t(_e, 'settle.default', 5.0 if _e == 'dacq' else 2.0, 0.2, 120.0, f'{_name}: settle, other points')     # dacq 5 s: owner 2026-11-02, readings were taken too fast
 _t('truevolt', 'settle.manual', 2.0, 0.2, 120.0, 'Truevolt: settle, manually connected standard')
 _t('truevolt', 'settle.ac_3hz', 9.0, 0.2, 120.0, 'Truevolt: settle, AC with the 3 Hz filter')
 _t('truevolt', 'settle.ac_20hz', 5.0, 0.2, 120.0, 'Truevolt: settle, AC with the 20 Hz filter')
