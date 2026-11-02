@@ -10,7 +10,7 @@ from qtui.bench_view import Form, table_has, table_select, table_selection, tabl
 def setup_window(self):
     """Theme, title and size of the main window."""
     import fluke6060a_verification as E
-    B.setup_window(self, f'Fluke {E.MODEL} | Performance Verification' + (' [DEMO]' if self.demo else ''), 1340, 860, 900, 660)
+    B.setup_window(self, f'Fluke {E.MODEL} | Performance Verification' + (f' ({E.VARIANT_LABEL})' if E.VARIANT_LABEL else '') + (' [DEMO]' if self.demo else ''), 1340, 860, 900, 660)
 
 
 def finish_window(self):
@@ -27,7 +27,7 @@ def build_ui(self):
     import fluke6060a_verification as E                      # the engine's module state (configure(model) can rebind it), read at call time
     LF_CHOICES, MODEL, POINTS, SPEC, TYPED_THD_TEXT, WARM_UP = E.LF_CHOICES, E.MODEL, E.POINTS, E.SPEC, E.TYPED_THD_TEXT, E.WARM_UP
     root = self.root
-    sh = self.shell = S.Shell(root, f'Fluke {MODEL}  -  Performance Verification',
+    sh = self.shell = S.Shell(root, f'Fluke {MODEL}  -  Performance Verification' + (f' ({E.VARIANT_LABEL})' if E.VARIANT_LABEL else ''),
                               f'Instruction Manual, Section 4A (4A-3 to 4A-8, 4A-11, 4A-12)  |  {len(POINTS)} points in the spec  |  GPIB', demo=self.demo,
                               on_section=self.pick_section, version='spec v1')
     self.status = sh.status_var

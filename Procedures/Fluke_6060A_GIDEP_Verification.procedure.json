@@ -1,0 +1,69 @@
+{
+ "schema": 1,
+ "id": "Fluke_6060A_GIDEP_Verification",
+ "name": "Fluke 6060A/AN Signal Generator Performance Verification, GIDEP T.O. 33K3-4-911-1 (GPIB)",
+ "manufacturer": "Fluke",
+ "model": "6060A",
+ "category": "RF Signal Generator",
+ "version": "1",
+ "order": 79,
+ "description": "Automated performance verification of the Fluke 6060A / 6060A-AN from the GIDEP calibration procedure T.O. 33K3-4-911-1 (220 test points): self test, reference oscillator, frequency accuracy (Tables 2, 3), amplitude (Tables 4, 5), internal modulation, AM depth and distortion (Tables 6, 7), FM (Table 8), deviation meter (Tables 9, 10, typed readings), harmonics (Table 11), spurious (Table 12), residual FM and AM. The document's instruments (53132A, E4418B, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (HP 8902A, Fluke 96270A + NRP40T, HP 8563E); every replacement is flagged UNVERIFIED on the point.",
+ "launcher": "Procedures/Fluke_6060A_GIDEP_Verification.py",
+ "engine": [
+  "fluke6060a_verification.py"
+ ],
+ "drivers": [
+  "fluke_6060a",
+  "hp_8902a",
+  "hp_8563e",
+  "gpib_address",
+  "reference_instruments",
+  "keysight_332xx"
+ ],
+ "specs": [
+  "specs/fluke_6060a_gidep_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_6060A_GIDEP_Verification.py",
+   "fluke6060a_verification.py",
+   "fluke6060a_view_qt.py",
+   "qtui/bench_view.py",
+   "ui_port.py",
+   "procspec.py",
+   "manual_override.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/gpib_address.py",
+   "drivers/fluke_6060a.py",
+   "drivers/hp_8902a.py",
+   "drivers/hp_8563e.py",
+   "drivers/reference_instruments.py",
+   "drivers/keysight_332xx.py"
+  ],
+  "spec": [
+   "specs/fluke_6060a_gidep_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_6060A"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_6060A_GIDEP_Verification.py",
+  "Procedures/Fluke_6060A_GIDEP_Verification.procedure.json",
+  "specs/fluke_6060a_gidep_pv.json",
+  "drivers/fluke_6060a.py",
+  "drivers/hp_8902a.py",
+  "drivers/hp_8563e.py",
+  "drivers/gpib_address.py",
+  "drivers/simulated_6060a.py",
+  "drivers/simulated_8902a.py",
+  "drivers/simulated_8563e.py",
+  "drivers/simulated_96270a.py",
+  "tests/test_fluke6060a_gidep.py"
+ ]
+}
