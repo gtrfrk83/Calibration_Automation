@@ -36,7 +36,7 @@ COVERAGE = {
 }
 COVERAGE.pop('gpib_address')                                             # a helper module with no Instrument class: it only appears in LINT_FILES
 
-PM_COVERED = ['select_power_meter', 'zero', 'read_dbm', 'select_sine']     # added to COVERAGE['reference_instruments']['Fluke96270A']['covered'] by golden_capture
+PM_COVERED = ['select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm']     # added to COVERAGE['reference_instruments']['Fluke96270A']['covered'] by golden_capture
 
 
 def _source(bench, mhz=250.0, dbm=-10.0, on=True, **extra):
@@ -235,6 +235,9 @@ def cases_pmeter(c):
     t.zero_reply = '1'
     c.run('Fluke96270A.zero[failed]', pm.zero)
     c.run('Fluke96270A.select_sine', pm.select_sine)
+    c.run('Fluke96270A.setup_fm', pm.setup_fm, 250e6, 7.0, 100e3, 4000.0)
+    c.run('Fluke96270A.setup_fm[above the 96270A deviation limit]', pm.setup_fm, 250e6, 7.0, 370e3, 4000.0)
+    c.run('Fluke96270A.select_sine[after FM]', pm.select_sine)
     nosensor = c.inst(Fluke96270A, Sim96270AMeter(bench, sensor='NONE,NONE,NONE,NONE'), label='96270A')
     c.run('Fluke96270A.select_power_meter[no sensor]', nosensor.select_power_meter, 250e6)
     implausible = c.inst(Fluke96270A, Scripted([(r'^PMET1:READ\?', '9.91E+37')]), label='96270A')

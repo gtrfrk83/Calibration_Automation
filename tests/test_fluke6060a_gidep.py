@@ -16,6 +16,7 @@ from tests import test_fluke6060a_points as T  # noqa: E402  (the simulated-benc
 
 import fluke6060a_verification as E  # noqa: E402
 import manual_override  # noqa: E402
+from drivers.simulated_6060a import rf_state  # noqa: E402
 
 GIDEP_SPEC = ROOT / 'specs' / 'fluke_6060a_gidep_pv.json'
 SPEC = json.loads(GIDEP_SPEC.read_text(encoding='utf-8'))
@@ -99,12 +100,18 @@ class SpecTests(unittest.TestCase):
         self.assertEqual(fm[(520, 380.0)], (361000.0, 399000.0))
         self.assertEqual(fm[(250, 100.0)], (95000.0, 105000.0))
 
-    def test_deviation_meter_tables_9_and_10_are_typed_with_the_printed_limits(self):
+    def test_deviation_meter_tables_9_and_10_use_the_96270a_fm_and_the_printed_limits(self):
         dm = [p for p in points() if p['func'] == 'DEVMETER']
         self.assertEqual(len(dm), 54)
-        self.assertEqual({(p['low'], p['high']) for p in dm if 'Table 9' in p['page']}, {(-3.0, 3.0)})
-        self.assertEqual({(p['low'], p['high']) for p in dm if 'Table 10' in p['page']}, {(-30.0, 30.0)})
-        self.assertTrue(all(p['meas'] == 'manual' and 'gen' not in p for p in dm))
+        for p in dm:
+            lim = 3.0 if 'Table 9' in p['page'] else 30.0
+            self.assertEqual((p['meas'], p['unit'], p['group']), ('devmeter', 'kHz', 'DEVM'))
+            self.assertEqual((p['low'], p['nominal'], p['high']), (p['fmsrc']['dev_khz'] - lim, p['fmsrc']['dev_khz'], p['fmsrc']['dev_khz'] + lim))
+            self.assertEqual(p['fmsrc']['level_dbm'], 7)
+            self.assertNotIn('gen', p)
+        self.assertEqual({p['fmsrc']['carrier_mhz'] for p in dm}, {30.0, 250.0, 500.0})
+        self.assertEqual({p['fmsrc']['rate_hz'] for p in dm}, {100.0, 4000.0, 8000.0})
+        self.assertEqual(sorted({p['fmsrc']['dev_khz'] for p in dm}), [10.0, 30.0, 47.0, 100.0, 300.0, 370.0])
 
     def test_spectral_purity_tables_11_and_12(self):
         harm = {p['gen']['freq_mhz']: p['high'] for p in points() if p['func'] == 'HARMONIC'}
@@ -166,10 +173,13 @@ class GidepEngine(GidepBench):
         self.assertEqual(len(E.POINTS), 220)
         self.assertEqual(E.SPEC['source']['limits_text'], 'GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)')
 
-    def test_points_the_driver_cannot_program_are_listed_not_tested(self):
+    def test_points_the_instruments_cannot_program_are_listed_not_tested(self):
         nt = [p for p in E.POINTS if p['not_tested']]
-        self.assertEqual([p['ref'] for p in nt], ['4.7 Table 11 harmonics 0.01 MHz'])         # below the 0.1 MHz the driver programs
-        self.assertTrue(nt[0]['unavailable'].startswith('not tested'))
+        self.assertEqual(len(nt), 7)
+        self.assertEqual([p['ref'] for p in nt if p['func'] == 'HARMONIC'], ['4.7 Table 11 harmonics 0.01 MHz'])          # below the 0.1 MHz the driver programs
+        dm = [p for p in nt if p['func'] == 'DEVMETER']
+        self.assertEqual(sorted((p['fmsrc']['carrier_mhz'], p['fmsrc']['dev_khz']) for p in dm), [(30.0, 370.0)] * 3 + [(250.0, 370.0)] * 3)      # 96270A Table 3-26: 300 kHz at 30 and 250 MHz
+        self.assertTrue(all(p['unavailable'].startswith('not tested') for p in nt))
 
     def test_fm_above_99_9_khz_is_allowed_by_the_spec_option_and_stays_flagged(self):
         self.assertEqual(E.SPEC['options']['fm_max_khz'], 500.0)
@@ -188,7 +198,7 @@ class GidepEngine(GidepBench):
     def test_every_point_passes_on_the_simulated_bench_and_rf_is_off_after_each(self):
         self.run_points('', seconds=3000)
         self.assertEqual(self.errors(), [])
-        self.assertEqual(len(self.app.found), 219)
+        self.assertEqual(len(self.app.found), 213)
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 
@@ -197,6 +207,11 @@ class GidepEngine(GidepBench):
         found = {E.POINTS[int(k) - 1]['ref']: r for k, r in self.app.found.items()}
         self.assertEqual(len(found), 2)
         self.assertTrue(all(r['manual'] and r['result'] == 'PASS' for r in found.values()))
+        self.assertFalse(rf_state(self.bench)['rf_on'])                                    # the 6060A RF stayed off
+        self.assertEqual(self.pm.state['OUTP'], '0')                                       # the 96270A output is off again after the deviation-meter point
+        self.assertEqual(self.pm.state['INST'], 'SINE')
+        self.assertIn('FM:DEV 10000', self.pm.sent)
+        self.assertIn('FM:INT:FREQ 100', self.pm.sent)
         self.app.mo_ask = lambda p, **k: manual_override.parse_reading(p, '10.001')       # 10.001 MHz: outside +/-6 ppm
         self.app.found.clear(); self.app.results.clear()
         self.run_points(refs=['4.1.5 10 MHz reference output'])

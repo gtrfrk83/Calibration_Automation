@@ -15,7 +15,7 @@
   "harm_count": 4
  },
  "discrepancies": [
-  "The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The deviation-meter checks (4.6) and the reference-oscillator frequency (4.1.5) need a signal generator / counter that this program does not drive: those readings are typed.",
+  "The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) needs a counter this program does not drive: that reading is typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.",
   "Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.",
   "Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.",
   "The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.",
@@ -3859,20 +3859,27 @@
    "id": "G-4.6-T9",
    "title": "Deviation meter, 50 kHz range (Table 9)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "SPCL 6,1 and the 50 kHz deviation range. A signal generator (the document uses the E8257D) with FM, through a power splitter to the 8902A / receiver and to the 6060A DEVIATION METER INPUT. Each point is typed: 6060A Modulation Display reading minus the receiver reading, in kHz.",
+   "setup": "SPCL 6,1 and the 50 kHz deviation range (400/1000 switch). The 96270A FM output (+7 dBm) goes to the 6060A DEVIATION METER INPUT; the program sets its carrier, rate and deviation, and the technician types the 6060A Modulation Display deviation in kHz.",
    "group": "DEVM",
    "points": [
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 100 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 100 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 10 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3881,15 +3888,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 100 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 100 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 30 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3898,15 +3912,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 100 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 100 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 47 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3915,16 +3936,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 4000 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 4000 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 10 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3933,16 +3961,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 4000 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 4000 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 30 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3951,16 +3986,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 4000 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 4000 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 47 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3969,15 +4011,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 8000 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 8000 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 10 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -3986,15 +4035,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 8000 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 8000 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 30 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4003,15 +4059,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 8000 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 8000 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 47 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4020,15 +4083,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 100 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 100 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 10 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4037,15 +4107,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 100 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 100 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 30 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4054,15 +4131,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 100 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 100 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 47 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4071,16 +4155,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 4000 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 4000 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 10 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4089,16 +4180,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 4000 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 4000 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 30 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4107,16 +4205,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 4000 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 4000 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 47 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4125,15 +4230,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 8000 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 8000 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 10 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4142,15 +4254,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 8000 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 8000 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 30 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4159,15 +4278,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 8000 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 8000 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 47 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4176,15 +4302,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 100 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 100 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 10 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4193,15 +4326,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 100 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 100 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 30 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4210,15 +4350,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 100 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 100 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 47 kHz deviation at 100 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4227,16 +4374,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 4000 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 4000 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 10 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4245,16 +4399,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 4000 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 4000 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 30 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4263,16 +4424,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 4000 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 4000 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 47 kHz deviation at 4000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4281,15 +4449,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 8000 Hz, 10 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 8000 Hz, 10 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 10.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 10.0,
+     "low": 7.0,
+     "high": 13.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 10 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 10 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 10 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4298,15 +4473,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 8000 Hz, 30 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 8000 Hz, 30 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 30.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 30.0,
+     "low": 27.0,
+     "high": 33.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 30 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 30 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 30 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4315,15 +4497,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 8000 Hz, 47 kHz deviation: display minus reference (kHz, Table 9)",
-     "nominal": 0.0,
-     "low": -3.0,
-     "high": 3.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 8000 Hz, 47 kHz deviation: 6060A display (kHz, Table 9)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 47.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 47.0,
+     "low": 44.0,
+     "high": 50.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 47 kHz (HP 50 Hz and LP 3 kHz). On the 6060A (50 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-3 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 47 kHz deviation at 8000 Hz (output ON). On the 6060A (50 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 47 kHz +/-3 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 9",
@@ -4336,20 +4525,27 @@
    "id": "G-4.6-T10",
    "title": "Deviation meter, 500 kHz range (Table 10)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "SPCL 6,1 and the 500 kHz deviation range. A signal generator (the document uses the E8257D) with FM, through a power splitter to the 8902A / receiver and to the 6060A DEVIATION METER INPUT. Each point is typed: 6060A Modulation Display reading minus the receiver reading, in kHz.",
+   "setup": "SPCL 6,1 and the 500 kHz deviation range (400/1000 switch). The 96270A FM output (+7 dBm) goes to the 6060A DEVIATION METER INPUT; the program sets its carrier, rate and deviation, and the technician types the 6060A Modulation Display deviation in kHz.",
    "group": "DEVM",
    "points": [
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 100 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 100 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 100 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4358,15 +4554,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 100 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 100 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 300 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4375,15 +4578,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 100 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 100 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 370 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4392,16 +4603,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 4000 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 4000 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 100 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4410,16 +4628,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 4000 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 4000 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 300 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4428,16 +4653,24 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 4000 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 4000 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 370 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference.",
+      "The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4446,15 +4679,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 8000 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 8000 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 100 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4463,15 +4703,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 8000 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 8000 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 300 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4480,15 +4727,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 30 MHz, rate 8000 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 30 MHz, rate 8000 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 30.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 30 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 30 MHz, +7 dBm, FM 370 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4497,15 +4752,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 100 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 100 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 100 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4514,15 +4776,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 100 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 100 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 300 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4531,15 +4800,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 100 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 100 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 370 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4548,16 +4825,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 4000 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 4000 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 100 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4566,16 +4850,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 4000 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 4000 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 300 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4584,16 +4875,24 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 4000 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 4000 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 370 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference.",
+      "The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4602,15 +4901,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 8000 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 8000 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 100 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4619,15 +4925,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 8000 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 8000 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 300 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4636,15 +4949,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 250 MHz, rate 8000 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 250 MHz, rate 8000 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 250.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 250 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 250 MHz, +7 dBm, FM 370 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4653,15 +4974,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 100 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 100 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 100 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4670,15 +4998,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 100 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 100 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 300 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4687,15 +5022,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 100 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 100 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 100.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 100 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 370 kHz deviation at 100 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4704,16 +5046,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 4000 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 4000 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 100 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4722,16 +5071,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 4000 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 4000 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 300 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4740,16 +5096,23 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 4000 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 4000 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 4000.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 4000 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP 300 Hz and LP 15 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 370 kHz deviation at 4000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit.",
-      "Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.",
+      "Footnote *: the document's receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4758,15 +5121,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 8000 Hz, 100 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 8000 Hz, 100 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 100.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 100.0,
+     "low": 70.0,
+     "high": 130.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 100 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 100 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 100 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4775,15 +5145,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 8000 Hz, 300 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 8000 Hz, 300 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 300.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 300.0,
+     "low": 270.0,
+     "high": 330.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 300 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 300 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 300 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",
@@ -4792,15 +5169,22 @@
     },
     {
      "func": "DEVMETER",
-     "meas": "manual",
-     "description": "Deviation meter 500 MHz, rate 8000 Hz, 370 kHz deviation: display minus reference (kHz, Table 10)",
-     "nominal": 0.0,
-     "low": -30.0,
-     "high": 30.0,
+     "meas": "devmeter",
+     "description": "Deviation meter 500 MHz, rate 8000 Hz, 370 kHz deviation: 6060A display (kHz, Table 10)",
+     "fmsrc": {
+      "carrier_mhz": 500.0,
+      "level_dbm": 7,
+      "dev_khz": 370.0,
+      "rate_hz": 8000.0
+     },
+     "nominal": 370.0,
+     "low": 340.0,
+     "high": 400.0,
      "unit": "kHz",
-     "manual_prompt": "Set the FM generator to 500 MHz (+7 dBm), rate 8000 Hz, and trim the deviation until the reference receiver reads 370 kHz (HP None and LP 3 kHz). On the 6060A (500 kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-30 kHz.",
+     "manual_prompt": "The 96270A is sending 500 MHz, +7 dBm, FM 370 kHz deviation at 8000 Hz (output ON). On the 6060A (500 kHz range, SPCL 6,1) read the Modulation Display deviation and type it in kHz. Limit: 370 kHz +/-30 kHz.",
      "flags": [
-      "Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the \"display minus receiver\" difference is this procedure's way of recording the printed +/- limit."
+      "UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference (its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.",
+      "UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware."
      ],
      "group": "DEVM",
      "page": "T.O. 33K3-4-911-1 para 4.6 Table 10",

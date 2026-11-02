@@ -1058,7 +1058,7 @@ class FakeScpi(Transport):
         elif u == 'SYST:ERR?':
             self._reply = self.errors.pop(0) if self.errors else '0,"No error"'
         elif u.startswith('INST '):
-            self.state['INST'] = {'PMET': 'PMETER', 'SINE': 'SINE'}[u.split()[1]]
+            self.state['INST'] = {'PMET': 'PMETER', 'SINE': 'SINE', 'FM': 'FM'}[u.split()[1]]
             self.state['OUTP'] = '0'
         elif u == 'INST?':
             self._reply = self.state['INST']
@@ -1072,6 +1072,12 @@ class FakeScpi(Transport):
             self._reply = '0'
         elif u == 'OUTP OFF':
             self.state['OUTP'] = '0'
+        elif u == 'OUTP ON':
+            self.state['OUTP'] = '1'
+        elif re.match(r'(FREQ|POW|FM:STAT|FM:DEV|FM:INT:FREQ) \S+$', u):
+            self.state['FM_' + u.split()[0]] = u.split()[1]
+        elif u in ('FREQ?', 'POW?', 'FM:STAT?', 'FM:DEV?', 'FM:INT:FREQ?') and 'FM_' + u[:-1] in self.state:
+            self._reply = self.state['FM_' + u[:-1]]
         elif u == 'OUTP?':
             self._reply = self.state['OUTP']
         elif u.startswith('PMET:') and ' ' in u:
@@ -1115,7 +1121,7 @@ class PowerMeterMode(_NoSleep):
     def test_the_existing_rf_commands_are_unchanged(self):
         for key, template in ORIGINAL_RF_COMMANDS.items():
             self.assertEqual(RF_COMMANDS[key].template, template, key)
-        self.assertEqual(sorted(k for k in RF_COMMANDS if k not in ORIGINAL_RF_COMMANDS), sorted(reference_instruments.PMETER_COMMANDS))
+        self.assertEqual(sorted(k for k in RF_COMMANDS if k not in ORIGINAL_RF_COMMANDS), sorted({**reference_instruments.PMETER_COMMANDS, **reference_instruments.FM_COMMANDS}))
         self.assertEqual(cmdreg.lint_registry(RF_COMMANDS), [])
 
     def test_the_new_commands_have_pages_and_the_unverified_ones_are_listed(self):
@@ -1125,6 +1131,30 @@ class PowerMeterMode(_NoSleep):
         self.assertIn('NRP40T', reference_instruments.PMETER_COMMANDS['pm.idn'].description)
         self.assertIn('UNVERIFIED', reference_instruments.PMETER_COMMANDS['pm.idn'].description)
         self.assertEqual(reference_instruments.PMETER_COMMANDS['pm.zero'].risk, 'locked')
+
+    def test_fm_mode_commands_have_manual_pages_and_the_sequence_is_read_back(self):
+        for key, cmd in reference_instruments.FM_COMMANDS.items():
+            self.assertTrue(cmd.ref and 'p. ' in cmd.ref and 'NOT run on hardware' in cmd.ref, key)
+        t = FakeScpi()
+        drv = Fluke96270A(t, CommandLog())
+        drv.connect()
+        t.sent.clear()
+        drv.setup_fm(250e6, 7.0, 100e3, 4000.0)
+        self.assertEqual([c for c in t.sent if not c.endswith('?')], ['OUTP OFF', 'INST FM', 'UNIT:POW DBM', 'POW 7.000', 'FREQ 250000000', 'FM:STAT 1', 'FM:DEV 100000', 'FM:INT:FREQ 4000'])
+        self.assertEqual(t.state['INST'], 'FM')
+
+    def test_fm_limits_of_the_operator_manual_are_checked_before_anything_is_sent(self):
+        self.assertEqual(reference_instruments.fm_max_deviation_hz(30e6), 300e3)
+        self.assertEqual(reference_instruments.fm_max_deviation_hz(100e6), 750e3)
+        self.assertAlmostEqual(reference_instruments.fm_max_deviation_hz(500e6), 600e3)
+        t = FakeScpi()
+        drv = Fluke96270A(t, CommandLog())
+        drv.connect()
+        t.sent.clear()
+        for args in ((30e6, 7.0, 370e3, 100.0), (250e6, 7.0, 370e3, 100.0), (8e6, 7.0, 1e3, 100.0), (30e6, 7.0, 1e3, 400e3)):
+            with self.assertRaises(InstrumentError):
+                drv.setup_fm(*args)
+        self.assertEqual(t.sent, [])
 
     def test_select_power_meter_sequence_and_read_back(self):
         t, drv = self.make()

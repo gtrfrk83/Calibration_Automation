@@ -6778,6 +6778,232 @@
    ]
   },
   {
+   "call": "250000000.0, 7.0, 100000.0, 4000.0",
+   "case": "Fluke96270A.setup_fm",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FM",
+    "96270A|>>|INST?",
+    "96270A|<<|FM",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|POW 7.000",
+    "96270A|>>|POW?",
+    "96270A|<<|7.000",
+    "96270A|>>|FREQ 250000000",
+    "96270A|>>|FREQ?",
+    "96270A|<<|250000000",
+    "96270A|>>|FM:STAT 1",
+    "96270A|>>|FM:STAT?",
+    "96270A|<<|1",
+    "96270A|>>|FM:DEV 100000",
+    "96270A|>>|FM:DEV?",
+    "96270A|<<|100000",
+    "96270A|>>|FM:INT:FREQ 4000",
+    "96270A|>>|FM:INT:FREQ?",
+    "96270A|<<|4000",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.setup_fm",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FM"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FM"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "POW 7.000"
+    ],
+    [
+     "Q",
+     "POW?",
+     "7.000"
+    ],
+    [
+     "W",
+     "FREQ 250000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "250000000"
+    ],
+    [
+     "W",
+     "FM:STAT 1"
+    ],
+    [
+     "Q",
+     "FM:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "FM:DEV 100000"
+    ],
+    [
+     "Q",
+     "FM:DEV?",
+     "100000"
+    ],
+    [
+     "W",
+     "FM:INT:FREQ 4000"
+    ],
+    [
+     "Q",
+     "FM:INT:FREQ?",
+     "4000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0, 7.0, 370000.0, 4000.0",
+   "case": "Fluke96270A.setup_fm[above the 96270A deviation limit]",
+   "log": [],
+   "method": "Fluke96270A.setup_fm",
+   "result": "raised InstrumentError: 96270A FM deviation 370 kHz is outside 0.01 to 300 kHz at 250 MHz (Operator Manual Table 3-26)",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.select_sine[after FM]",
+   "log": [
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.select_sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
    "call": "250000000.0",
    "case": "Fluke96270A.select_power_meter[no sensor]",
    "log": [

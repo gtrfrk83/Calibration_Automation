@@ -48,11 +48,11 @@ DEFAULT_RF_ADDR = 'GPIB0::4::INSTR'                        # the 96270A: the sam
 NO_LF = 'None (I set the generator by hand)'
 LF_CHOICES = {NO_LF: None, 'Keysight 33210A': drivers.Keysight33210A, 'Keysight 33220A': drivers.Keysight33220A, 'Keysight 33250A': drivers.Keysight33250A}
 LF_VRMS = 0.7071                                          # test 3 and 6: "0.7071 V rms as read by the DVM" (UNVERIFIED: the generator is set to this into High Z; check the DVM)
-MEAS = ('selftest', 'freq_count', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'derived')
+MEAS = ('selftest', 'freq_count', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'devmeter', 'derived')
 GROUP_TITLE = {'POWERON': 'Power-on self test', 'RX': '6060A RF OUTPUT to the 8902A RF INPUT', 'RXPWR': '6060A RF OUTPUT to the 11722A sensor module (8902A RF power)',
                'PM': '6060A RF OUTPUT to the NRP40T sensor on the 96270A', 'SA': '6060A RF OUTPUT to the 8563E', 'EXT1K': '8902A and LF generator at 1 kHz (external modulation)',
                'EXT10K': '8902A and LF generator at 10 kHz (external modulation)', 'EXT400': '8902A and LF generator at 400 Hz (external modulation)',
-               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'DEVM': 'FM signal generator to the 6060A DEVIATION METER INPUT (typed readings)'}
+               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'DEVM': '96270A FM output to the 6060A DEVIATION METER INPUT (typed readings)'}
 WARM_UP = ('The 8902A needs 30 minutes of warm-up before its power, AM and FM calibrations (8902A manual), and the 8563E and the 6060A should be on long enough to be stable. '
            'The program does not wait for it.')
 TYPED_THD_TEXT = ('Test 6: THD at 10 kHz is typed from your own distortion analyzer (the 8902A measures distortion only at 1 kHz and 400 Hz). Untick to leave those 17 points out.')
@@ -82,8 +82,10 @@ def load_spec(path=None):
                 raise SpecError(f'{where}: low must not be above high')
             if not p['low'] <= p['nominal'] <= p['high']:
                 raise SpecError(f'{where}: limits do not contain the nominal')
-            if p['meas'] not in ('selftest', 'derived', 'manual') and 'gen' not in p:
+            if p['meas'] not in ('selftest', 'derived', 'manual', 'devmeter') and 'gen' not in p:
                 raise SpecError(f'{where}: a measured point needs a generator setting')
+            if p['meas'] == 'devmeter' and 'fmsrc' not in p:
+                raise SpecError(f'{where}: a deviation-meter point needs an fmsrc (the 96270A FM setting)')
     for s in spec['sections']:
         for p in s['points']:
             if p['meas'] == 'derived' and not all(r in refs for r in p['derive']['inputs']):
@@ -148,6 +150,11 @@ def apply_options(points, typed_thd, max_mhz=1050.0):
         if (p.get('gen') or {}).get('freq_mhz') is not None and float(p['gen']['freq_mhz']) < drivers.fluke_6060a.MIN_MHZ - 1e-9:      # the driver's frequency command is verified from 0.1 MHz (p. 2-15)
             p['not_tested'] = True
             p['unavailable'] = f'not tested: {float(p["gen"]["freq_mhz"]) * 1000:g} kHz is below the 0.1 MHz the 6060A driver programs (p. 2-15)'
+        src = p.get('fmsrc')
+        if src and drivers.reference_instruments.fm_max_deviation_hz(src['carrier_mhz'] * 1e6) < src['dev_khz'] * 1e3 - 1e-6:      # the 96270A's own FM limit (Operator Manual Table 3-26)
+            p['not_tested'] = True
+            p['unavailable'] = (f'not tested: the 96270A cannot generate {src["dev_khz"]:g} kHz deviation at {src["carrier_mhz"]:g} MHz '
+                                f'(its limit is {drivers.reference_instruments.fm_max_deviation_hz(src["carrier_mhz"] * 1e6) / 1e3:g} kHz, Operator Manual Table 3-26)')
         khz = ((p.get('gen') or {}).get('fm') or {}).get('khz')
         if khz is not None and float(khz) > ((SPEC.get('options') or {}).get('fm_max_khz') or drivers.fluke_6060a.MAX_FM_KHZ) + 1e-9:          # the driver's FM command is verified to 99.9 kHz only (p. 2-21): a larger deviation is not programmed
             p['not_tested'] = True
@@ -283,6 +290,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """What the program remembers about the instruments; forgotten at every reset (the reset puts them back to defaults)."""
         self._mod_on = False
         self._pm_key = None
+        self._fm_on = False
         self._lf_set = None
         self._lf_on = False
         self._tb_checked = False
@@ -303,8 +311,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         try:
             self.gen.end_point()
         finally:
-            self.lf_off()
+            try:
+                self.fm_source_off()
+            finally:
+                self.lf_off()
 
+    def fm_source_off(self):
+        """After a deviation-meter point: the 96270A output OFF (read back; SafetyError when it is not off) and the source back to the leveled sine; the power meter is selected again at the next level point."""
+        if not getattr(self, '_fm_on', False) or self.pm is None:
+            return
+        self._fm_on = False
+        self._pm_key = None
+        self.pm.output(False)
+        self.pm.select_sine()
     def lf_off(self):
         if self.lf is not None and self._lf_on:
             try:
@@ -374,7 +393,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         if p['meas'] == 'level_pm': return self.pm_param('f6060a.settle.pm', PM_SETTLE_S)
         if p['meas'] in ('harmonic', 'spur'): return self.pm_param('f6060a.settle.sa', SA_SETTLE_S)
-        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
+        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count', 'devmeter'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
         return self.pm_param('f6060a.settle.default', DEFAULT_SETTLE_S)
 
     def _need(self, name, what):
@@ -409,6 +428,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         kind = p['meas']
         if kind in ('derived', 'selftest'):
             raise InstrumentError(f'{p["ref"]} is not measured by the instruments')
+        if kind == 'devmeter':                                     # the 96270A makes the FM; the technician types the 6060A's own deviation display (the 6060A RF stays off)
+            pm, src = self._need('pm', '96270A'), p['fmsrc']
+            self._fm_on = True
+            pm.setup_fm(src['carrier_mhz'] * 1e6, src['level_dbm'], src['dev_khz'] * 1e3, src['rate_hz'])
+            pm.output(True)
+            time.sleep(self.settle(p))
+            return TypedPoint(p.get('manual_prompt') or 'Read the 6060A Modulation Display deviation and type it in kHz.')
         if kind == 'manual':                                       # the reading comes from the technician's own instrument (nothing is programmed, no RF is switched on)
             return TypedPoint(p.get('manual_prompt') or 'Read your instrument and type the value.')
         needs = {'freq_count': ('rx', '8902A'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
@@ -597,10 +623,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
     def is_manual(self, p):
-        return p['meas'] in ('thd_typed', 'manual')   # the reading is typed from the technician's own analyzer / instrument
+        return p['meas'] in ('thd_typed', 'manual', 'devmeter')   # the reading is typed from the technician's own analyzer / instrument
 
     def manual_reason(self, p):
-        if p['meas'] == 'manual':
+        if p['meas'] in ('manual', 'devmeter'):
             return p.get('manual_prompt') or 'Read your instrument and type the value.'
         return 'The 8902A measures audio distortion only at 1 kHz and 400 Hz: read your own distortion analyzer.'
 
@@ -689,9 +715,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if g == 'REFOSC':
             return ('6060A rear panel 10 MHz IN/OUT to the frequency counter input (50 ohm), REF INT/EXT switch to INT. Read the counter and type the frequency in Hz. The 6060A RF output is not used.')
         if g == 'DEVM':
-            return ('Signal generator RF OUTPUT to a power splitter; one splitter output to the 8902A RF INPUT, the other to the 6060A DEVIATION METER INPUT. On the 6060A press SPCL 6, 1 and select the '
-                    'deviation range the point says. Set the generator carrier, FM rate and deviation as the point says, trim the deviation until the 8902A shows the nominal value, then type '
-                    '(6060A display minus 8902A reading) in kHz. The program does not control the generator or the 8902A for these points.')
+            return ('96270A leveling-head RF OUTPUT to the 6060A DEVIATION METER INPUT (the 6060A RF OUTPUT is not used). On the 6060A press SPCL 6, 1 and set the 400/1000 switch to the deviation range the '
+                    'point says (50 kHz or 500 kHz). The program sets the 96270A carrier, level (+7 dBm), FM rate and deviation (each read back), switches its output ON for the point, and asks you to type the 6060A '
+                    'Modulation Display deviation in kHz; it switches the output OFF afterwards. With no 96270A connected, set an FM source by hand to the values on the point.')
         if g == 'RXPWR':
             return ('6060A RF OUTPUT to the 11722A power sensor module connected to the 8902A SENSOR input (RF power, M4). The sensor module\'s calibration-factor table must already be loaded '
                     'in the 8902A (UNVERIFIED: this program does not enter it).')

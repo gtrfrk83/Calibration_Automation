@@ -49,6 +49,12 @@ SPUR_LIMIT_DBC = -35
 RESFM_MHZ, RESFM_DBM, RESFM_MAX_HZ = 520, 13, 200                                                     # 4.8
 RESAM_DBM, RESAM_MAX_PCT = 9, 0.1                                                                     # 4.9 (the frequency stays at 520 MHz)
 COUNT_RES_HZ = 10
+DEVM_LEVEL_DBM = 7          # 4.6.3: the signal is set to 7 dBm
+
+
+def fm_limit_hz(carrier_mhz):
+    """The largest FM deviation the 96270A allows (Operator Manual Table 3-26)."""
+    return 300e3 if carrier_mhz <= 31.4375 else 750e3 if carrier_mhz <= 125.75 else 0.0012 * carrier_mhz * 1e6
 FM_MAX_KHZ = 500.0          # Table 1: FM 1 to 500 kHz deviation (owner, 2026-11-02: allow deviations above the manual's 99.9 kHz on this procedure)
 
 UNV = 'UNVERIFIED: the document names a different instrument; the choice of the lab\'s bench instrument for this step is this procedure\'s.'
@@ -171,22 +177,25 @@ def build_spec():
                 gen=dict(freq_mhz=num(fm), level_dbm=FM_LEVEL_DBM, fm=dict(khz=float(dev), src='int', rate_hz=1000.0)), rx=dict(detector=1, hp=2, lp=1), nominal=float(dev * 1000), low=f(D(lo) * 1000), high=f(D(hi) * 1000), unit='Hz',
                 flags=[UNV + ' (MMR FM deviation, HP 300 Hz, LP 3 kHz -> 8902A detector D1 peak+, H2, L1).', 'UNVERIFIED: the detector is not printed; peak+ is used.'] + (['UNVERIFIED: the Instruction Manual limits FM deviation to 99.9 kHz (Table 2-5, p. 2-21); the document (Table 1) gives the 6060A/AN 1 to 500 kHz, and the owner asked for the larger deviations (2026-11-02). The command is sent as FM<kHz>KZ and read back; the unit\'s own range error stops the point if it refuses.'] if dev > 99.9 else []))
 
-    # 4.6 deviation meter
+    # 4.6 deviation meter: the 96270A (FM instrument) replaces the document's E8257D + receiver; the technician types the 6060A's own Modulation Display reading
     for tno, tb in ((9, TABLE9), (10, TABLE10)):
         s = section(f'G-4.6-T{tno}', f'Deviation meter, {tb["range_khz"]} kHz range (Table {tno})',
-                    f'SPCL 6,1 and the {tb["range_khz"]} kHz deviation range. A signal generator (the document uses the E8257D) with FM, through a power splitter to the 8902A / receiver and to the 6060A DEVIATION METER INPUT. '
-                    'Each point is typed: 6060A Modulation Display reading minus the receiver reading, in kHz.', 'DEVM')
+                    f'SPCL 6,1 and the {tb["range_khz"]} kHz deviation range (400/1000 switch). The 96270A FM output (+{DEVM_LEVEL_DBM} dBm) goes to the 6060A DEVIATION METER INPUT; the program sets its carrier, rate and deviation, '
+                    'and the technician types the 6060A Modulation Display deviation in kHz.', 'DEVM')
         for fm in tb['freqs']:
             for rate in tb['rates']:
                 for dev in tb['devs']:
                     star = rate == 4000
-                    filt = 'HP 300 Hz and LP 15 kHz' if star else ('HP 50 Hz and LP 3 kHz' if tno == 9 else 'HP None and LP 3 kHz')
-                    add(s, f'4.6 Table {tno}', tag=f'{fm} MHz {rate} Hz {dev} kHz', func='DEVMETER', meas='manual', description=f'Deviation meter {fm} MHz, rate {rate} Hz, {dev} kHz deviation: display minus reference (kHz, Table {tno})',
-                        nominal=0.0, low=-float(tb['limit']), high=float(tb['limit']), unit='kHz',
-                        manual_prompt=(f'Set the FM generator to {fm} MHz (+7 dBm), rate {rate} Hz, and trim the deviation until the reference receiver reads {dev} kHz ({filt}). '
-                                       f'On the 6060A ({tb["range_khz"]} kHz range) read the Modulation Display deviation and type (display minus receiver) in kHz. Limit +/-{tb["limit"]} kHz.'),
-                        flags=['Typed reading: the document uses an E8257D FM generator and a microwave measurement receiver; neither is driven by this program. UNVERIFIED: the "display minus receiver" difference is this procedure\'s way of recording the printed +/- limit.'] +
-                        (['Footnote *: the receiver high-pass filter is 300 Hz and the low-pass filter 15 kHz at the 4 kHz rate.'] if star else []))
+                    add(s, f'4.6 Table {tno}', tag=f'{fm} MHz {rate} Hz {dev} kHz', func='DEVMETER', meas='devmeter', description=f'Deviation meter {fm} MHz, rate {rate} Hz, {dev} kHz deviation: 6060A display (kHz, Table {tno})',
+                        fmsrc=dict(carrier_mhz=float(fm), level_dbm=DEVM_LEVEL_DBM, dev_khz=float(dev), rate_hz=float(rate)),
+                        nominal=float(dev), low=float(dev - tb['limit']), high=float(dev + tb['limit']), unit='kHz',
+                        manual_prompt=(f'The 96270A is sending {fm} MHz, +{DEVM_LEVEL_DBM} dBm, FM {dev} kHz deviation at {rate} Hz (output ON). On the 6060A ({tb["range_khz"]} kHz range, SPCL 6,1) read the '
+                                       f'Modulation Display deviation and type it in kHz. Limit: {dev} kHz +/-{tb["limit"]} kHz.'),
+                        flags=['UNVERIFIED: the document applies the signal from an E8257D through a splitter and judges the 6060A display against a microwave measurement receiver; here the 96270A FM output is the reference '
+                               '(its FM accuracy is not read from the Remote Programmers Manual), so the limit is the set deviation +/- the printed limit. The 6060A display is typed.',
+                               'UNVERIFIED: the 96270A FM commands (INST FM, FM:STAT, FM:DEV in Hz, FM:INT:FREQ in Hz) were read on pages 32, 35, 36, 38 and 59 of the Remote Programmers Manual; nothing has run on hardware.'] +
+                              (['Footnote *: the document\'s receiver filters were 300 Hz and 15 kHz at the 4 kHz rate; not applicable with the 96270A as the reference.'] if star else []) +
+                              (['The 96270A limits FM deviation to 300 kHz at 9 to 31.4375 MHz and to 0.12 % of the carrier above 125.75 MHz (Operator Manual Table 3-26): this point is listed as NOT TESTED.'] if dev * 1000 > fm_limit_hz(fm) else []))
 
     # 4.7 spectral purity
     s = section('G-4.7a', 'Spectral purity: harmonics (Table 11)', f'RF OUTPUT to the 8563E RF INPUT. +{HARM_LEVEL_DBM} dBm, spectrum analyzer input attenuation 40 dB in the document (the program sets its own range). Harmonics at the first four harmonic signals.', 'SA')
@@ -234,7 +243,7 @@ def build_spec():
         options=dict(count_resolution_hz=COUNT_RES_HZ, fm_max_khz=FM_MAX_KHZ),
         constants=dict(harm_count=HARM_COUNT),
         discrepancies=[
-            'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The deviation-meter checks (4.6) and the reference-oscillator frequency (4.1.5) need a signal generator / counter that this program does not drive: those readings are typed.',
+            'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) needs a counter this program does not drive: that reading is typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.',
             'Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.',
             'Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.',
             'The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.',
