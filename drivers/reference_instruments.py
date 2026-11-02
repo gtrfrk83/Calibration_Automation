@@ -178,6 +178,36 @@ def fm_max_deviation_hz(carrier_hz: float) -> float:
     if carrier_hz <= 125.75e6:
         return 750e3
     return 0.0012 * carrier_hz
+# ---- Fluke 96270A AM mode (AM logical instrument): ADDED subset for the HP 8591A sweep-time and span checks (owner, 2026-11-02: "sweep-time AM uses the 96270A internal AM"). The command text was read on the
+# RENDERED pages of the 96000 Series Remote Programmers Manual (Rev. 1, 10/14): INSTrument p. 32, POWer p. 35, FREQuency p. 36, AM subsystem p. 37 ([:SOURce]:AM:STATe, AM[:DEPTh] (*RST 30.0 %),
+# AM:INTernal:FREQuency (*RST 1000 Hz), AM:SHAPe {SINE|TRIangle|EXTernal}). Nothing has run on hardware. NOT verified (flagged in the report): the unit of the AM:DEPT? / AM:INT:FREQ? replies (the
+# manual shows %, Hz in its *RST column; each reply is compared in %, Hz and a mismatch is a loud error), the AM accuracy of the source, and that the 96270A accepts a carrier of 500 MHz with the AM
+# instrument selected (the Operator Manual limits the AM carrier to 50 kHz to 4.024 GHz and the modulation rate to 1 Hz to 220 kHz up to a 125.75 MHz carrier: not read here).
+AM_COMMANDS = {
+    'am.inst.set': Cmd('INST AM', 'Select the AM instrument', 'AM is a logical instrument of the 96270A; selecting it puts the output into standby and makes the other logical instruments unavailable '
+                       'until one is selected again', kind='set', readback='inst.query', verified=True, ref=_rf('INSTrument[:SELect] AM', 32)),
+    'am.freq.set': Cmd('FREQ {hz:.12g}', 'AM carrier frequency', 'Carrier of the AM instrument, Hz', placeholders={'hz': Placeholder('float', '.12g', 5e8)}, kind='set', readback='freq.query',
+                       verified=True, ref=_rf('[:SOURce]:FREQuency[:CW|FIXed]', 36)),
+    'am.pow.set': Cmd('POW {dbm:.3f}', 'AM carrier level', 'dBm (UNIT:POW DBM is set and read back first)', placeholders={'dbm': Placeholder('float', '.3f', -10.0)}, kind='set',
+                      readback='level.query', verified=True, ref=_rf('[:SOURce]:POWer[:LEVel]', 35)),
+    'am.state.set': Cmd('AM:STAT {on}', 'AM on', '1 = the output has an AM component, 0 = none', placeholders={'on': Placeholder('enum', '', '1', enum=('0', '1'))}, kind='set',
+                        readback='am.state.query', verified=True, ref=_rf('[:SOURce]:AM:STATe', 37)),
+    'am.state.query': Cmd('AM:STAT?', 'AM state', kind='query', verified=True, ref=_rf('[:SOURce]:AM:STATe?', 37)),
+    'am.depth.set': Cmd('AM:DEPT {pct:.4g}', 'AM depth', 'Percent (*RST 30.0 %). 0.1 to 99 % per the Operator Manual (UNVERIFIED here)', placeholders={'pct': Placeholder('float', '.4g', 50.0)}, kind='set',
+                        readback='am.depth.query', verified=True, ref=_rf('[:SOURce]:AM[:DEPTh]', 37)),
+    'am.depth.query': Cmd('AM:DEPT?', 'AM depth', 'Unit of the reply is UNVERIFIED (compared in percent)', kind='query', verified=True, ref=_rf('[:SOURce]:AM[:DEPTh]?', 37)),
+    'am.rate.set': Cmd('AM:INT:FREQ {hz:.9g}', 'AM modulation rate', 'Internal modulation rate in Hz (*RST 1000 Hz); 1 Hz to 220 kHz per the Operator Manual (UNVERIFIED here)',
+                       placeholders={'hz': Placeholder('float', '.9g', 1e3)}, kind='set', readback='am.rate.query', verified=True, ref=_rf('[:SOURce]:AM:INTernal:FREQuency', 37)),
+    'am.rate.query': Cmd('AM:INT:FREQ?', 'AM modulation rate', 'Unit of the reply is UNVERIFIED (compared in Hz)', kind='query', verified=True, ref=_rf('[:SOURce]:AM:INTernal:FREQuency?', 37)),
+    'am.shape.set': Cmd('AM:SHAP {shape}', 'AM modulation shape', 'SINE (*RST), TRIangle or EXTernal',
+                        placeholders={'shape': Placeholder('enum', '', 'TRI', enum=('SINE', 'TRI', 'EXT'))}, kind='set', readback='am.shape.query', verified=True, ref=_rf('[:SOURce]:AM:SHAPe', 37)),
+    'am.shape.query': Cmd('AM:SHAP?', 'AM modulation shape', 'Reply text UNVERIFIED: matched on its first three letters', kind='query', verified=True, ref=_rf('[:SOURce]:AM:SHAPe?', 37)),
+}
+for _k, _c in list(AM_COMMANDS.items()):
+    AM_COMMANDS[_k] = _dc.replace(_c, ref=f'{_c.ref}. NOT run on hardware')
+RF_COMMANDS.update(AM_COMMANDS)
+AM_RATE_MIN_HZ, AM_RATE_MAX_HZ, AM_DEPTH_MIN_PCT, AM_DEPTH_MAX_PCT = 1.0, 220e3, 0.1, 99.0          # Operator Manual (AM instrument), not read from the remote manual
+AM_CARRIER_MIN_HZ, AM_CARRIER_MAX_HZ = 50e3, 4.024e9
 PM_NO_READING = 9.0e37                       # :FETCh? answers 9.91E+37 when there is no reading (p. 41)
 
 
@@ -332,6 +362,46 @@ class Fluke96270A(Instrument):
         if not math.isclose(got, rate_hz, rel_tol=1e-4):
             raise InstrumentError(f'96270A FM rate set {rate_hz:g} Hz, reports {got:g} (UNVERIFIED: the unit of the FM:INT:FREQ? reply is not in the manual)')
         self.check_error('FM setup')
+
+    def setup_am(self, carrier_hz: float, level_dbm: float, depth_pct: float, rate_hz: float, shape: str = 'TRI') -> None:
+        """INST AM (the output goes to standby, p. 32), UNIT:POW DBM, POW, FREQ, AM:SHAP, AM:STAT 1, AM:DEPT, AM:INT:FREQ, each read back and compared, then SYST:ERR?. The output stays OFF: call output(True).
+        Refuses a carrier, rate or depth outside the limits of the Operator Manual before anything is sent (a rate below 1 Hz cannot be made). Never retried. select_sine() goes back to the source."""
+        if not AM_CARRIER_MIN_HZ <= carrier_hz <= AM_CARRIER_MAX_HZ:
+            raise InstrumentError(f'96270A AM carrier {carrier_hz / 1e6:g} MHz is outside 50 kHz to 4.024 GHz')
+        if not AM_RATE_MIN_HZ <= rate_hz <= AM_RATE_MAX_HZ:
+            raise InstrumentError(f'96270A AM rate {rate_hz:g} Hz is outside 1 Hz to 220 kHz')
+        if not AM_DEPTH_MIN_PCT <= depth_pct <= AM_DEPTH_MAX_PCT:
+            raise InstrumentError(f'96270A AM depth {depth_pct:g} % is outside 0.1 to 99 %')
+        self.output(False)
+        self.send('am.inst.set')
+        reply = self.ask('inst.query').strip().strip('"').upper()
+        if reply != 'AM':
+            raise InstrumentError(f'96270A did not select the AM instrument: INST? answered {reply!r}')
+        self._set_and_check('unit.set', 'unit.query', lambda r: r.strip().strip('"').upper() == 'DBM', 'power units DBM (AM)')
+        self.send('am.pow.set', dbm=level_dbm)
+        lvl = float(self.ask('level.query').strip().split()[0])
+        if abs(lvl - level_dbm) > 0.01:
+            raise InstrumentError(f'96270A AM level set {level_dbm:g} dBm, reports {lvl:g} dBm')
+        self.send('am.freq.set', hz=carrier_hz)
+        got = float(self.ask('freq.query').strip().split()[0])
+        if not math.isclose(got, carrier_hz, rel_tol=1e-6):
+            raise InstrumentError(f'96270A AM carrier set {carrier_hz:g}, reports {got:g}')
+        self.send('am.shape.set', shape=shape)
+        reply = self.ask('am.shape.query').strip().strip('"').upper()
+        if reply[:3] != shape.upper()[:3]:
+            raise InstrumentError(f'96270A AM shape {shape} was not accepted: AM:SHAP? answered {reply!r}')
+        self.send('am.state.set', on='1')
+        if not _bool_reply(self.ask('am.state.query')):
+            raise InstrumentError('96270A did not confirm AM on (AM:STAT? answered off)')
+        self.send('am.depth.set', pct=depth_pct)
+        got = float(self.ask('am.depth.query').strip().split()[0])
+        if not math.isclose(got, depth_pct, rel_tol=1e-4):
+            raise InstrumentError(f'96270A AM depth set {depth_pct:g} %, reports {got:g} (UNVERIFIED: the unit of the AM:DEPT? reply is not in the manual)')
+        self.send('am.rate.set', hz=rate_hz)
+        got = float(self.ask('am.rate.query').strip().split()[0])
+        if not math.isclose(got, rate_hz, rel_tol=1e-4):
+            raise InstrumentError(f'96270A AM rate set {rate_hz:g} Hz, reports {got:g} (UNVERIFIED: the unit of the AM:INT:FREQ? reply is not in the manual)')
+        self.check_error('AM setup')
 
     def select_sine(self):
         """Back to the leveled-sine source: the known state again (SINE, dBm, offsets off, output OFF), each read back."""

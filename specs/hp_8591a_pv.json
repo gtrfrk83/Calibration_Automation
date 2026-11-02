@@ -1,0 +1,3734 @@
+{
+ "schema": 1,
+ "kind": "spectrum-analyzer-pv",
+ "model": "8591A",
+ "source": {
+  "cite": "T.O. 33K3-4-2864-1, Calibration Procedure for Spectrum Analyzer 8591A (Hewlett-Packard), 30 May 2012",
+  "limits_text": "USAF T.O. 33K3-4-2864-1 (HP 8591A)",
+  "note": "Points and limits are the document's own tables. Its measuring instruments (sweeper, power meter, counter, synthesizer, step attenuators, function and signal generators) are replaced by the Fluke 96270A (leveled sine, internal AM, NRP40T power-meter mode); each replacement is flagged UNVERIFIED on the point. The Calibration Performance Table is \"Not Required\". The self-calibration (3.3) and the display-line readings of 4.12 are prompts / typed readings."
+ },
+ "options": {
+  "am_rate_min_hz": 1.0
+ },
+ "constants": {},
+ "discrepancies": [
+  "Table 3 limits are 0.8 x the sweep time (8 modulation periods), but step 4.5.11 says the marker delta must be \"on the eighth signal peak\" (7 periods would be 0.7 x). The limits are used as printed; 8 periods are measured.",
+  "The -10 dB row (0 dBm applied) is printed in both Table 4 and Table 5 with the same limits; both are kept.",
+  "Table 1 lists a relative flatness of 1.0 dB; paragraph 4.11.31.4 gives 2.0 dB for the most positive minus the most negative value. 2.0 dB is used.",
+  "Table 1 gives the frequency reference aging for the standard unit as < 2 x 10^-6 per year; the paragraph limits 299.99925 to 300.00075 MHz are +/-2.5 ppm and are used as printed.",
+  "The document's measuring instruments are replaced by the 96270A (sweeper, power meter, counter, synthesizer, step attenuators, signal and function generators); see the flags. The 436A / 8481A power-meter step of 4.1 and 4.11 and the 3 dB attenuator of 4.1.2 have no equivalent here.",
+  "The 50 s and 100 s sweep-time rows need a 0.2 Hz and a 0.1 Hz modulation; the 96270A internal AM goes down to 1 Hz only (Operator Manual), so those two rows are listed as NOT TESTED.",
+  "Figures 1 to 4 are not reproduced; hook-up diagrams are supplied by the owner as PNG files in diagrams/ (hook_8591A_<GROUP>.png)."
+ ],
+ "sections": [
+  {
+   "id": "H-3",
+   "title": "Preliminary: analyzer self-calibration",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "Warm up 30 minutes, then run the analyzer's own self-calibration from its front panel (User's Guide, \"Improving Accuracy With Self-Calibration Routines\").",
+   "group": "SELFCAL",
+   "points": [
+    {
+     "func": "SELFCAL",
+     "meas": "selfcal",
+     "description": "Self-calibration routines run after the 30 minute warm-up (1 = done)",
+     "nominal": 1.0,
+     "low": 1.0,
+     "high": 1.0,
+     "unit": "",
+     "flags": [
+      "Prompt-based pass / fail: \"the performance of the TI is only specified after the TI calibration routines have been run\". The program never sends a calibration command to the analyzer (bench-first rule); you run the routines from the front panel and answer yes or no. The reading is 1 for done and 0 for not done."
+     ],
+     "group": "SELFCAL",
+     "page": "T.O. 33K3-4-2864-1 para 3.3",
+     "section": "H-3",
+     "ref": "3.3 self-calibration"
+    }
+   ]
+  },
+  {
+   "id": "H-4.1",
+   "title": "Calibrator output (CAL OUT)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.1: the analyzer CAL OUT (300 MHz, -20 dBm) is measured with the NRP40T sensor on the 96270A and with a frequency counter.",
+   "group": "CALPM",
+   "points": [
+    {
+     "func": "CALOUT",
+     "meas": "calout_pm",
+     "description": "CAL OUT amplitude, 300 MHz (-20 dBm)",
+     "pm": {
+      "freq_hz": 300000000.0
+     },
+     "zero_key": "CALOUT",
+     "nominal": -20.0,
+     "low": -20.4,
+     "high": -19.6,
+     "unit": "dBm",
+     "flags": [
+      "UNVERIFIED substitution: the document compares the CAL OUT peak with a synthesized sweeper through a 3 dB attenuator and then measures the SWEEPER with a 436A power meter + 8481A. Here the NRP40T on the 96270A (power-meter mode) measures the CAL OUT directly with no attenuator, which needs the CAL OUT level the document calls -20 dBm to be inside the sensor's range (the NRP40T thermal sensor stops at -35 dBm).",
+      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode. The sensor is zeroed with nothing connected to it (a prompt) and then connected to CAL OUT."
+     ],
+     "group": "CALPM",
+     "page": "T.O. 33K3-4-2864-1 para 4.1.1 to 4.1.8",
+     "section": "H-4.1",
+     "ref": "4.1.1 to 4.1.8 CAL OUT level"
+    }
+   ]
+  },
+  {
+   "id": "H-4.1b",
+   "title": "Calibrator output frequency (typed counter reading)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.1.10 to 4.1.14: 10 MHz frequency standard to the counter EXT FREQ STD input; counter to CAL OUT (50 ohm).",
+   "group": "CALCTR",
+   "points": [
+    {
+     "func": "CALFREQ",
+     "meas": "calout_ctr",
+     "opt": "std",
+     "description": "CAL OUT frequency, 300 MHz (standard reference): counter reading",
+     "nominal": 300000000.0,
+     "low": 299999250.0,
+     "high": 300000750.0,
+     "unit": "Hz",
+     "manual_prompt": "Read the frequency counter on the analyzer CAL OUT (standard frequency reference) and type the frequency in Hz (limits 299999250 to 300000750 Hz).",
+     "flags": [
+      "Typed reading (owner, 2026-11-02): no counter is driven by this program. The limits are the printed 299.99925 to 300.00075 MHz.",
+      "Choose the reference option of the unit under test in the settings; the other point is not run."
+     ],
+     "group": "CALCTR",
+     "page": "T.O. 33K3-4-2864-1 para 4.1.13",
+     "section": "H-4.1b",
+     "ref": "4.1.13 CAL OUT frequency (standard)"
+    },
+    {
+     "func": "CALFREQ",
+     "meas": "calout_ctr",
+     "opt": "004",
+     "description": "CAL OUT frequency, 300 MHz (OPT 004 reference): counter reading",
+     "nominal": 300000000.0,
+     "low": 299999967.0,
+     "high": 300000033.0,
+     "unit": "Hz",
+     "manual_prompt": "Read the frequency counter on the analyzer CAL OUT (OPT 004 frequency reference) and type the frequency in Hz (limits 299999967 to 300000033 Hz).",
+     "flags": [
+      "Typed reading (owner, 2026-11-02): no counter is driven by this program. The limits are the printed 299.999967 to 300.000033 MHz (OPT 004).",
+      "Choose the reference option of the unit under test in the settings; the other point is not run."
+     ],
+     "group": "CALCTR",
+     "page": "T.O. 33K3-4-2864-1 para 4.1.13",
+     "section": "H-4.1b",
+     "ref": "4.1.13 CAL OUT frequency (OPT 004)"
+    }
+   ]
+  },
+  {
+   "id": "H-4.2",
+   "title": "Frequency readout accuracy",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.2.1: 96270A RF OUTPUT to the analyzer INPUT 50 ohm (the document also ties the 10 MHz references together; the 96270A has no 10 MHz connection used here). 1.5 GHz at -10 dBm, center 1.5 GHz, MKPK HI, marker frequency.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "FREQRO",
+     "meas": "freq_marker",
+     "description": "Marker frequency at 1.5 GHz, span 20 MHz (-10 dBm)",
+     "src": {
+      "freq_hz": 1500000000.0,
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 1500000000.0,
+      "span_hz": 20000000.0
+     },
+     "nominal": 1500000000.0,
+     "low": 1499380000.0,
+     "high": 1500620000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B synthesized sweeper -> 96270A).",
+      "The 96270A is not locked to the analyzer's 10 MHz reference here (the document's Figure 1 does); its own frequency accuracy is not read from the manual, so the reading includes the source error. UNVERIFIED."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.2.3 to 4.2.11",
+     "section": "H-4.2",
+     "ref": "4.2.3 to 4.2.11 1.5 GHz span 20 MHz"
+    },
+    {
+     "func": "FREQRO",
+     "meas": "freq_marker",
+     "description": "Marker frequency at 1.5 GHz, span 10 MHz (-10 dBm)",
+     "src": {
+      "freq_hz": 1500000000.0,
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 1500000000.0,
+      "span_hz": 10000000.0
+     },
+     "nominal": 1500000000.0,
+     "low": 1499680000.0,
+     "high": 1500320000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B synthesized sweeper -> 96270A).",
+      "The 96270A is not locked to the analyzer's 10 MHz reference here (the document's Figure 1 does); its own frequency accuracy is not read from the manual, so the reading includes the source error. UNVERIFIED."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.2.3 to 4.2.11",
+     "section": "H-4.2",
+     "ref": "4.2.3 to 4.2.11 1.5 GHz span 10 MHz"
+    },
+    {
+     "func": "FREQRO",
+     "meas": "freq_marker",
+     "description": "Marker frequency at 1.5 GHz, span 1 MHz (-10 dBm)",
+     "src": {
+      "freq_hz": 1500000000.0,
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 1500000000.0,
+      "span_hz": 1000000.0
+     },
+     "nominal": 1500000000.0,
+     "low": 1499968000.0,
+     "high": 1500032000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B synthesized sweeper -> 96270A).",
+      "The 96270A is not locked to the analyzer's 10 MHz reference here (the document's Figure 1 does); its own frequency accuracy is not read from the manual, so the reading includes the source error. UNVERIFIED."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.2.3 to 4.2.11",
+     "section": "H-4.2",
+     "ref": "4.2.3 to 4.2.11 1.5 GHz span 1 MHz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.3",
+   "title": "Noise sidebands",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.3.1: 96270A RF OUTPUT to the analyzer INPUT, 500 MHz at 0 dBm. Center 500 MHz, span 200 kHz, RBW 1 kHz, VBW 30 Hz; the carrier peak is the reference.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "NOISESB",
+     "meas": "noise_sb",
+     "description": "Noise sideband at +10 kHz from a 500 MHz carrier, below the carrier, limit < -60 dBc (RBW 1 kHz)",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "offset_hz": 10000.0
+     },
+     "nominal": -60.0,
+     "low": -200.0,
+     "high": -60.0,
+     "strict_high": true,
+     "unit": "dBc",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator, SSB noise < -120 dBc/Hz -> 96270A).",
+      "UNVERIFIED: the 96270A's own phase noise at 10 and 30 kHz offset is not read from the manual; if it is not well below the analyzer's the reading is the source's noise, not the analyzer's.",
+      "The document marks the signal with MKR DELTA at +/- offset; the program uses MKPK HI, MKD, MKN <frequency> and MKA? (the delta amplitude)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.3.4 to 4.3.12",
+     "section": "H-4.3",
+     "ref": "4.3.4 to 4.3.12 +10 kHz"
+    },
+    {
+     "func": "NOISESB",
+     "meas": "noise_sb",
+     "description": "Noise sideband at -10 kHz from a 500 MHz carrier, below the carrier, limit < -60 dBc (RBW 1 kHz)",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "offset_hz": -10000.0
+     },
+     "nominal": -60.0,
+     "low": -200.0,
+     "high": -60.0,
+     "strict_high": true,
+     "unit": "dBc",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator, SSB noise < -120 dBc/Hz -> 96270A).",
+      "UNVERIFIED: the 96270A's own phase noise at 10 and 30 kHz offset is not read from the manual; if it is not well below the analyzer's the reading is the source's noise, not the analyzer's.",
+      "The document marks the signal with MKR DELTA at +/- offset; the program uses MKPK HI, MKD, MKN <frequency> and MKA? (the delta amplitude)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.3.4 to 4.3.12",
+     "section": "H-4.3",
+     "ref": "4.3.4 to 4.3.12 -10 kHz"
+    },
+    {
+     "func": "NOISESB",
+     "meas": "noise_sb",
+     "description": "Noise sideband at +30 kHz from a 500 MHz carrier, below the carrier, limit < -70 dBc (RBW 1 kHz)",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "offset_hz": 30000.0
+     },
+     "nominal": -70.0,
+     "low": -200.0,
+     "high": -70.0,
+     "strict_high": true,
+     "unit": "dBc",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator, SSB noise < -120 dBc/Hz -> 96270A).",
+      "UNVERIFIED: the 96270A's own phase noise at 10 and 30 kHz offset is not read from the manual; if it is not well below the analyzer's the reading is the source's noise, not the analyzer's.",
+      "The document marks the signal with MKR DELTA at +/- offset; the program uses MKPK HI, MKD, MKN <frequency> and MKA? (the delta amplitude)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.3.4 to 4.3.12",
+     "section": "H-4.3",
+     "ref": "4.3.4 to 4.3.12 +30 kHz"
+    },
+    {
+     "func": "NOISESB",
+     "meas": "noise_sb",
+     "description": "Noise sideband at -30 kHz from a 500 MHz carrier, below the carrier, limit < -70 dBc (RBW 1 kHz)",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "offset_hz": -30000.0
+     },
+     "nominal": -70.0,
+     "low": -200.0,
+     "high": -70.0,
+     "strict_high": true,
+     "unit": "dBc",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator, SSB noise < -120 dBc/Hz -> 96270A).",
+      "UNVERIFIED: the 96270A's own phase noise at 10 and 30 kHz offset is not read from the manual; if it is not well below the analyzer's the reading is the source's noise, not the analyzer's.",
+      "The document marks the signal with MKR DELTA at +/- offset; the program uses MKPK HI, MKD, MKN <frequency> and MKA? (the delta amplitude)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.3.4 to 4.3.12",
+     "section": "H-4.3",
+     "ref": "4.3.4 to 4.3.12 -30 kHz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.4",
+   "title": "Frequency span accuracy (Table 2)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.4.1: 96270A RF OUTPUT to the analyzer INPUT. Center and span as Table 2. The document puts the signal on the 9th and the 1st graticule line by adjusting the sweeper; the program sets the source to the frequencies of those two lines and reads the displayed position of the peak on both.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 1800 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 1800000000.0
+     },
+     "nominal": 1440000000.0,
+     "low": 1386000000.0,
+     "high": 1494000000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 1800 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 1000 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 1000000000.0
+     },
+     "nominal": 800000000.0,
+     "low": 770000000.0,
+     "high": 830000000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 1000 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 500 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 500000000.0
+     },
+     "nominal": 400000000.0,
+     "low": 385000000.0,
+     "high": 415000000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 500 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 100 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 100000000.0
+     },
+     "nominal": 80000000.0,
+     "low": 77000000.0,
+     "high": 83000000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 100 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 50 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 50000000.0
+     },
+     "nominal": 40000000.0,
+     "low": 38500000.0,
+     "high": 41500000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 50 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 20 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 20000000.0
+     },
+     "nominal": 16000000.0,
+     "low": 15400000.0,
+     "high": 16600000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 20 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 10 MHz: source frequency difference between graticule lines 9 and 1 (center 70 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 70000000.0,
+      "span_hz": 10000000.0
+     },
+     "nominal": 8000000.0,
+     "low": 7800000.0,
+     "high": 8200000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 10 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 5 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 5000000.0
+     },
+     "nominal": 4000000.0,
+     "low": 3900000.0,
+     "high": 4100000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 5 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 2 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 2000000.0
+     },
+     "nominal": 1600000.0,
+     "low": 1560000.0,
+     "high": 1640000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 2 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 1 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 1000000.0
+     },
+     "nominal": 800000.0,
+     "low": 780000.0,
+     "high": 820000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 1 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 0.5 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 500000.0
+     },
+     "nominal": 400000.0,
+     "low": 390000.0,
+     "high": 410000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 0.5 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 0.2 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 200000.0
+     },
+     "nominal": 160000.0,
+     "low": 156000.0,
+     "high": 164000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 0.2 MHz"
+    },
+    {
+     "func": "SPAN",
+     "meas": "span_cal",
+     "description": "Span 0.1 MHz: source frequency difference between graticule lines 9 and 1 (center 900 MHz)",
+     "src": {
+      "level_dbm": -10.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 100000.0
+     },
+     "nominal": 80000.0,
+     "low": 78000.0,
+     "high": 82000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper -> 96270A).",
+      "UNVERIFIED method: the document tunes the sweeper until the signal sits on graticule line 9, records the frequency, then line 1, and takes the difference. The program sets the source at the nominal frequencies of the two lines, reads the displayed position of the signal peak (401-point trace, parabolic interpolation) and reports the frequency difference that would put the peak exactly 320 points apart: difference x 320 / measured separation in points. The trace read-out (TDF P, TRA?) is UNVERIFIED on the real analyzer."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.4 Table 2",
+     "section": "H-4.4",
+     "ref": "4.4 Table 2 span 0.1 MHz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.5",
+   "title": "Sweep time accuracy (Table 3)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.5.1: 96270A RF OUTPUT to the analyzer INPUT, 500 MHz at -10 dBm, 96270A internal AM (triangle, 80 %) at the rate in Table 3. Analyzer: center 500 MHz, zero span, RBW 3 MHz, linear scale, the sweep time of the row.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 0.02 s: time of 8 modulation periods at 500 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 500.0,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 0.02
+     },
+     "nominal": 0.016,
+     "low": 0.0154,
+     "high": 0.0166,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 0.02 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 0.05 s: time of 8 modulation periods at 200 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 200.0,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 0.05
+     },
+     "nominal": 0.04,
+     "low": 0.0385,
+     "high": 0.0415,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 0.05 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 0.1 s: time of 8 modulation periods at 100 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 100.0,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 0.1
+     },
+     "nominal": 0.08,
+     "low": 0.077,
+     "high": 0.083,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 0.1 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 0.5 s: time of 8 modulation periods at 20 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 20.0,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 0.5
+     },
+     "nominal": 0.4,
+     "low": 0.385,
+     "high": 0.415,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 0.5 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 1 s: time of 8 modulation periods at 10 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 10.0,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 1.0
+     },
+     "nominal": 0.8,
+     "low": 0.77,
+     "high": 0.83,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 1 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 10 s: time of 8 modulation periods at 1 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 1.0,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 10.0
+     },
+     "nominal": 8.0,
+     "low": 7.7,
+     "high": 8.3,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 10 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 50 s: time of 8 modulation periods at 0.2 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 0.2,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 50.0
+     },
+     "nominal": 40.0,
+     "low": 38.5,
+     "high": 41.5,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here).",
+      "The 96270A internal AM rate has a minimum of 1 Hz (Operator Manual): this row (a rate below 1 Hz) cannot be made and is listed as NOT TESTED."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 50 s"
+    },
+    {
+     "func": "SWEEPTIME",
+     "meas": "sweep_time",
+     "description": "Sweep time 100 s: time of 8 modulation periods at 0.1 Hz",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -10.0
+     },
+     "am": {
+      "rate_hz": 0.1,
+      "depth_pct": 80.0,
+      "shape": "TRI"
+     },
+     "ti": {
+      "st_s": 100.0
+     },
+     "nominal": 80.0,
+     "low": 77.0,
+     "high": 83.0,
+     "unit": "s",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8640B signal generator + 3325B function generator -> the 96270A internal AM; the 8640B amplitude control for a mid-screen display is not needed).",
+      "The document uses the video trigger and the marker delta on the eighth peak; the program takes one free-run zero-span sweep, finds the rising mid-level crossings of the envelope on the 401-point trace and reports 8 x the mean crossing spacing x sweep time / 400 (UNVERIFIED method; it needs the modulation period to be known well, 96270A AM rate accuracy is not read here).",
+      "The 96270A internal AM rate has a minimum of 1 Hz (Operator Manual): this row (a rate below 1 Hz) cannot be made and is listed as NOT TESTED."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.5 Table 3",
+     "section": "H-4.5",
+     "ref": "4.5 Table 3 sweep 100 s"
+    }
+   ]
+  },
+  {
+   "id": "H-4.6a",
+   "title": "Scale fidelity, log (Tables 4 and 5)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.6.2: 96270A RF OUTPUT to the analyzer INPUT, 50 MHz. The analyzer is at 0 dBm reference level, 10 dB/division. The reference signal (0 dBm at the analyzer input) is measured, then the source is lowered in steps; the marker amplitude change from the reference is read.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -2 dB from the 0 dBm reference level (Table 4)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -2.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -2.0,
+     "low": -2.2,
+     "high": -1.8,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 4",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 4 -2 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -4 dB from the 0 dBm reference level (Table 4)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -4.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -4.0,
+     "low": -4.4,
+     "high": -3.6,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 4",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 4 -4 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -6 dB from the 0 dBm reference level (Table 4)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -6.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -6.0,
+     "low": -6.6,
+     "high": -5.4,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 4",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 4 -6 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -8 dB from the 0 dBm reference level (Table 4)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -8.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -8.0,
+     "low": -8.75,
+     "high": -7.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 4",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 4 -8 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -10 dB from the 0 dBm reference level (Table 4)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -10.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -10.0,
+     "low": -10.75,
+     "high": -9.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone.",
+      "The document prints the -10 dB row (0 dBm applied) in both Table 4 and Table 5 with the same limits; both are kept."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 4",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 4 -10 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -10 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -10.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -10.0,
+     "low": -10.75,
+     "high": -9.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone.",
+      "The document prints the -10 dB row (0 dBm applied) in both Table 4 and Table 5 with the same limits; both are kept."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -10 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -20 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -20.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -20.0,
+     "low": -20.75,
+     "high": -19.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -20 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -30 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -30.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -30.0,
+     "low": -30.75,
+     "high": -29.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -30 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -40 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -40.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -40.0,
+     "low": -40.75,
+     "high": -39.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -40 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -50 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -50.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -50.0,
+     "low": -50.75,
+     "high": -49.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -50 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -60 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -60.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -60.0,
+     "low": -60.75,
+     "high": -59.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -60 dB"
+    },
+    {
+     "func": "SCALELOG",
+     "meas": "scale_log",
+     "description": "Log scale fidelity -70 dB from the 0 dBm reference level (Table 5)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -70.0,
+      "ref_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": -70.0,
+     "low": -71.0,
+     "high": -69.0,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer + 8494B / 8496B step attenuators -> 96270A level steps; the \"Applied\" column is the synthesizer level before a 10 dB attenuator: the analyzer input is the Applied level minus 10 dB).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The reading is the marker amplitude at the lowered level minus the marker amplitude at the reference level (the document's MKR delta); both are read in the same point, so a point can be re-run alone."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 5",
+     "section": "H-4.6a",
+     "ref": "4.6 Table 5 -70 dB"
+    }
+   ]
+  },
+  {
+   "id": "H-4.6b",
+   "title": "Scale fidelity, linear (Table 6)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.6.19: linear scale. The reference signal is set to a marker reading of 223.6 mV +/-0.4 mV, then lowered in 3 dB steps; the marker voltage is read (AUNITS V).",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "SCALELIN",
+     "meas": "scale_lin",
+     "description": "Linear scale fidelity 70.7 % of the reference level (-3 dB below 223.6 mV)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -3.0,
+      "ref_dbm": 0.0,
+      "ref_v": 0.2236
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": 0.15809,
+     "low": 0.15098,
+     "high": 0.1652,
+     "unit": "V",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A + step attenuators -> 96270A).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "UNVERIFIED: that the marker (MKA?) and the trace answer in volts when AUNITS V is set (the TDF page says so for trace data)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 6",
+     "section": "H-4.6b",
+     "ref": "4.6 Table 6 70.7 %"
+    },
+    {
+     "func": "SCALELIN",
+     "meas": "scale_lin",
+     "description": "Linear scale fidelity 50 % of the reference level (-6 dB below 223.6 mV)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -6.0,
+      "ref_dbm": 0.0,
+      "ref_v": 0.2236
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": 0.1118,
+     "low": 0.10469,
+     "high": 0.11891,
+     "unit": "V",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A + step attenuators -> 96270A).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "UNVERIFIED: that the marker (MKA?) and the trace answer in volts when AUNITS V is set (the TDF page says so for trace data)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 6",
+     "section": "H-4.6b",
+     "ref": "4.6 Table 6 50 %"
+    },
+    {
+     "func": "SCALELIN",
+     "meas": "scale_lin",
+     "description": "Linear scale fidelity 35.48 % of the reference level (-9 dB below 223.6 mV)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -9.0,
+      "ref_dbm": 0.0,
+      "ref_v": 0.2236
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": 0.07933,
+     "low": 0.07222,
+     "high": 0.08644,
+     "unit": "V",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A + step attenuators -> 96270A).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "UNVERIFIED: that the marker (MKA?) and the trace answer in volts when AUNITS V is set (the TDF page says so for trace data)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 6",
+     "section": "H-4.6b",
+     "ref": "4.6 Table 6 35.48 %"
+    },
+    {
+     "func": "SCALELIN",
+     "meas": "scale_lin",
+     "description": "Linear scale fidelity 25 % of the reference level (-12 dB below 223.6 mV)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "scale": {
+      "step_db": -12.0,
+      "ref_dbm": 0.0,
+      "ref_v": 0.2236
+     },
+     "ti": {
+      "cf_hz": 50000000.0
+     },
+     "nominal": 0.0559,
+     "low": 0.04879,
+     "high": 0.06301,
+     "unit": "V",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A + step attenuators -> 96270A).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "UNVERIFIED: that the marker (MKA?) and the trace answer in volts when AUNITS V is set (the TDF page says so for trace data)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.6 Table 6",
+     "section": "H-4.6b",
+     "ref": "4.6 Table 6 25 %"
+    }
+   ]
+  },
+  {
+   "id": "H-4.7",
+   "title": "Input attenuator (Table 7)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.7.1: 96270A RF OUTPUT to the analyzer INPUT, 50 MHz. Span 100 kHz, RBW 10 kHz, VBW 100 Hz, log 1 dB/division. Each row raises the source level, the reference level and the input attenuation by 10 dB together; the displayed level should not change.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "ATTEN",
+     "meas": "atten",
+     "description": "Input attenuator 20 dB (reference level -60 dBm), relative to 10 dB",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -62.5,
+      "ref_level_dbm": -72.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -60.0,
+      "at_db": 20,
+      "ref_rl_dbm": -70.0,
+      "ref_at_db": 10
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 20 dB set for 2 to 3 divisions below the reference level -> the source level that puts the peak 2.5 dB below the first reference level, -72.5 dBm at the analyzer).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The document's MKR delta of +/-0.5 dB is the displayed change after the source step of +10 dB is accounted for; the program reports (marker change) minus (source level change), which is 0 for a perfect analyzer (UNVERIFIED reading of the table)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.7 Table 7",
+     "section": "H-4.7",
+     "ref": "4.7 Table 7 20 dB"
+    },
+    {
+     "func": "ATTEN",
+     "meas": "atten",
+     "description": "Input attenuator 30 dB (reference level -50 dBm), relative to 10 dB",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -52.5,
+      "ref_level_dbm": -72.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -50.0,
+      "at_db": 30,
+      "ref_rl_dbm": -70.0,
+      "ref_at_db": 10
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 20 dB set for 2 to 3 divisions below the reference level -> the source level that puts the peak 2.5 dB below the first reference level, -72.5 dBm at the analyzer).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The document's MKR delta of +/-0.5 dB is the displayed change after the source step of +10 dB is accounted for; the program reports (marker change) minus (source level change), which is 0 for a perfect analyzer (UNVERIFIED reading of the table)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.7 Table 7",
+     "section": "H-4.7",
+     "ref": "4.7 Table 7 30 dB"
+    },
+    {
+     "func": "ATTEN",
+     "meas": "atten",
+     "description": "Input attenuator 40 dB (reference level -40 dBm), relative to 10 dB",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -42.5,
+      "ref_level_dbm": -72.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -40.0,
+      "at_db": 40,
+      "ref_rl_dbm": -70.0,
+      "ref_at_db": 10
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 20 dB set for 2 to 3 divisions below the reference level -> the source level that puts the peak 2.5 dB below the first reference level, -72.5 dBm at the analyzer).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The document's MKR delta of +/-0.5 dB is the displayed change after the source step of +10 dB is accounted for; the program reports (marker change) minus (source level change), which is 0 for a perfect analyzer (UNVERIFIED reading of the table)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.7 Table 7",
+     "section": "H-4.7",
+     "ref": "4.7 Table 7 40 dB"
+    },
+    {
+     "func": "ATTEN",
+     "meas": "atten",
+     "description": "Input attenuator 50 dB (reference level -30 dBm), relative to 10 dB",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -32.5,
+      "ref_level_dbm": -72.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -30.0,
+      "at_db": 50,
+      "ref_rl_dbm": -70.0,
+      "ref_at_db": 10
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 20 dB set for 2 to 3 divisions below the reference level -> the source level that puts the peak 2.5 dB below the first reference level, -72.5 dBm at the analyzer).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The document's MKR delta of +/-0.5 dB is the displayed change after the source step of +10 dB is accounted for; the program reports (marker change) minus (source level change), which is 0 for a perfect analyzer (UNVERIFIED reading of the table)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.7 Table 7",
+     "section": "H-4.7",
+     "ref": "4.7 Table 7 50 dB"
+    },
+    {
+     "func": "ATTEN",
+     "meas": "atten",
+     "description": "Input attenuator 60 dB (reference level -20 dBm), relative to 10 dB",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -22.5,
+      "ref_level_dbm": -72.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -20.0,
+      "at_db": 60,
+      "ref_rl_dbm": -70.0,
+      "ref_at_db": 10
+     },
+     "nominal": 0.0,
+     "low": -0.75,
+     "high": 0.75,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 20 dB set for 2 to 3 divisions below the reference level -> the source level that puts the peak 2.5 dB below the first reference level, -72.5 dBm at the analyzer).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "The document's MKR delta of +/-0.5 dB is the displayed change after the source step of +10 dB is accounted for; the program reports (marker change) minus (source level change), which is 0 for a perfect analyzer (UNVERIFIED reading of the table)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.7 Table 7",
+     "section": "H-4.7",
+     "ref": "4.7 Table 7 60 dB"
+    }
+   ]
+  },
+  {
+   "id": "H-4.8",
+   "title": "Reference level (Table 8)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.8.1: 96270A RF OUTPUT to the analyzer INPUT, 50 MHz, span 50 kHz, RBW 3 kHz, VBW 30 Hz, log 1 dB/division. Each row changes the source level and the reference level together; the displayed level should not change. The reference row is reference level -20 dBm.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -10 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -11.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -10.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor.",
+      "Table 8 lists -10, 0, +10 dBm applied before the lower values; all rows are measured against the -20 dBm reference row."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -10 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level 0 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -1.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": 0.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL 0 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -30 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -31.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -30.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -30 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -40 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -41.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -40.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -40 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -50 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -51.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -50.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -50 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -60 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -61.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -60.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -1.25,
+     "high": 1.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -60 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -70 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -71.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -70.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -1.25,
+     "high": 1.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -70 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -80 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -81.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -80.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -1.25,
+     "high": 1.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -80 dBm"
+    },
+    {
+     "func": "REFLEVEL",
+     "meas": "reflevel",
+     "description": "Reference level -90 dBm, relative to -20 dBm",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -91.5,
+      "ref_level_dbm": -21.5
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rl_dbm": -90.0,
+      "ref_rl_dbm": -20.0
+     },
+     "nominal": 0.0,
+     "low": -1.25,
+     "high": 1.25,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (step attenuators 10 dB, peak 1 to 2 divisions below the reference level -> the source level that puts the peak 1.5 dB below it, -21.5 dBm at the analyzer for the first row).",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed.",
+      "As in 4.7 the reading is (marker change) minus (source level change) (UNVERIFIED reading). Rows below about -90 dBm of source level sit close to the analyzer noise floor."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.8 Table 8",
+     "section": "H-4.8",
+     "ref": "4.8 Table 8 RL -90 dBm"
+    }
+   ]
+  },
+  {
+   "id": "H-4.9",
+   "title": "Resolution bandwidth switching (Table 9)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.9.1: analyzer CAL OUT to the analyzer INPUT 50 ohm. Center 300 MHz, log 1 dB/division, VBW 1 kHz. The 3 kHz filter at 50 kHz span is the reference.",
+   "group": "CALIN",
+   "points": [
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 1 kHz relative to 3 kHz (span 50 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 1000.0,
+      "span_hz": 50000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.5,
+     "high": 0.5,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 1000 Hz"
+    },
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 10 kHz relative to 3 kHz (span 50 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 10000.0,
+      "span_hz": 50000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.4,
+     "high": 0.4,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 10000 Hz"
+    },
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 30 kHz relative to 3 kHz (span 500 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 30000.0,
+      "span_hz": 500000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.4,
+     "high": 0.4,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 30000 Hz"
+    },
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 100 kHz relative to 3 kHz (span 500 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 100000.0,
+      "span_hz": 500000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.4,
+     "high": 0.4,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 100000 Hz"
+    },
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 300 kHz relative to 3 kHz (span 5000 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 300000.0,
+      "span_hz": 5000000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.4,
+     "high": 0.4,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 300000 Hz"
+    },
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 1000 kHz relative to 3 kHz (span 10000 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 1000000.0,
+      "span_hz": 10000000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.4,
+     "high": 0.4,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 1e+06 Hz"
+    },
+    {
+     "func": "RBWSW",
+     "meas": "rbw_switch",
+     "description": "Resolution bandwidth switching, 3000 kHz relative to 3 kHz (span 10000 kHz)",
+     "ti": {
+      "cf_hz": 300000000.0,
+      "rb_hz": 3000000.0,
+      "span_hz": 10000000.0,
+      "ref_rb_hz": 3000.0,
+      "ref_span_hz": 50000.0
+     },
+     "nominal": 0.0,
+     "low": -0.4,
+     "high": 0.4,
+     "unit": "dB",
+     "flags": [
+      "The 300 MHz CAL OUT signal is the document's source here too (no 96270A needed); both bandwidths are measured in the same point.",
+      "The document turns SIGNAL TRACK on and waits for AUTO ZOOM; the program centres on the signal itself (CF / SP / MKPK HI / MKF?, each setting read back) because the signal frequency is known and fixed."
+     ],
+     "group": "CALIN",
+     "page": "T.O. 33K3-4-2864-1 para 4.9 Table 9",
+     "section": "H-4.9",
+     "ref": "4.9 Table 9 RBW 3e+06 Hz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.10",
+   "title": "Resolution bandwidth accuracy (Table 10)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.10.1: 96270A RF OUTPUT to the analyzer INPUT, 50 MHz at 0 dBm, log 1 dB/division. The -3 dB bandwidth of the filter is read.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 3000 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 3000000.0
+     },
+     "nominal": 3000000.0,
+     "low": 2400000.0,
+     "high": 3600000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 3e+06 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 1000 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 1000000.0
+     },
+     "nominal": 1000000.0,
+     "low": 800000.0,
+     "high": 1200000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 1e+06 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 300 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 300000.0
+     },
+     "nominal": 300000.0,
+     "low": 240000.0,
+     "high": 360000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 300000 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 100 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 100000.0
+     },
+     "nominal": 100000.0,
+     "low": 80000.0,
+     "high": 120000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 100000 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 30 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 30000.0
+     },
+     "nominal": 30000.0,
+     "low": 24000.0,
+     "high": 36000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 30000 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 10 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 10000.0
+     },
+     "nominal": 10000.0,
+     "low": 8000.0,
+     "high": 12000.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 10000 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 3 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 3000.0
+     },
+     "nominal": 3000.0,
+     "low": 2400.0,
+     "high": 3600.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 3000 Hz"
+    },
+    {
+     "func": "RBWBW",
+     "meas": "rbw_bw",
+     "description": "Resolution bandwidth 1 kHz: -3 dB width",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": 0.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "rb_hz": 1000.0
+     },
+     "nominal": 1000.0,
+     "low": 800.0,
+     "high": 1200.0,
+     "unit": "Hz",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A -> 96270A).",
+      "UNVERIFIED method: the document adjusts the knob until the delta marker is at -3 dB on each side of the peak; the program reads the 401-point trace and interpolates the two -3 dB crossings (span 6 x RBW, VBW = RBW / 10, at least 30 Hz; shown at 2 dB/division with a +5 dBm reference level so both -3 dB points are on screen, not the document's 1 dB/division). The MKBW command (-3 dB width) exists in the language but its read-out is not described, so it is not used."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.10 Table 10",
+     "section": "H-4.10",
+     "ref": "4.10 Table 10 RBW 1000 Hz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.11a",
+   "title": "Frequency response 50 to 1800 MHz (Table 11)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.11.1: 96270A RF OUTPUT to the analyzer INPUT, -20 dBm. Analyzer: span 5 MHz, log 1 dB/division, reference level fixed. Each frequency is compared with 300 MHz at the same level.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 50 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 50000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 50000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 50 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 100 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 100000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 100000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 100 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 150 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 150000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 150000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 150 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 200 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 200000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 200000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 200 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 250 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 250000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 250000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 250 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 300 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 300000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 300000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow.",
+      "300 MHz is the reference frequency: its reading is the repeatability of two measurements (about 0 dB)."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 300 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 350 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 350000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 350000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 350 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 400 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 400000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 400000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 400 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 450 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 450000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 450000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 450 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 500 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 500000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 500000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 500 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 550 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 550000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 550000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 550 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 600 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 600000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 600000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 600 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 650 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 650000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 650000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 650 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 700 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 700000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 700000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 700 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 750 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 750000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 750000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 750 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 800 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 800000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 800000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 800 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 850 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 850000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 850000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 850 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 900 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 900000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 900000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 900 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 950 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 950000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 950000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 950 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1000 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1000000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1000000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1000 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1050 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1050000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1050000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1050 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1100 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1100000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1100000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1100 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1150 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1150000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1150000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1150 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1200 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1200000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1200000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1200 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1250 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1250000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1250000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1250 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1300 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1300000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1300000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1300 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1350 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1350000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1350000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1350 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1400 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1400000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1400000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1400 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1450 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1450000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1450000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1450 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1500 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1500000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1500000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1500 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1550 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1550000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1550000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1550 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1600 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1600000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1600000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1600 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1650 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1650000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1650000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1650 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1700 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1700000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1700000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1700 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1750 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1750000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1750000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1750 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1800 MHz relative to 300 MHz (Table 11)",
+     "src": {
+      "freq_hz": 1800000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1800000000.0,
+      "span_hz": 5000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (8340B sweeper + 11667A splitter + 436A / 8481A power meter -> 96270A leveled output assumed flat).",
+      "UNVERIFIED: the document measures the source power with a power meter at each frequency; this procedure trusts the 96270A's level flatness (not read here), so the result includes the source flatness error. The reference is the 96270A at 300 MHz and the same level, not the analyzer CAL OUT.",
+      "The document records the response of each row and judges the most positive and the most negative values (4.11.31); each row is also judged against +/-1.5 dB, which is the same test, and the three derived rows follow."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 11",
+     "section": "H-4.11a",
+     "ref": "4.11 Table 11 1800 MHz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.11b",
+   "title": "Frequency response below 50 MHz (Table 12)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.11.19: 96270A RF OUTPUT to the analyzer INPUT, -20 dBm. The 96270A (not a 3335A) covers 9 kHz to 20 MHz. Each frequency is compared with 300 MHz at the same level; the table's column 4 (relative to 300 MHz) is measured directly.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 20 MHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 20000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 20000000.0,
+      "span_hz": 1000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 20 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 10 MHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 10000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 10000000.0,
+      "span_hz": 1000000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 10 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 5 MHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 5000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 5000000.0,
+      "span_hz": 500000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 5 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 1 MHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 1000000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 1000000.0,
+      "span_hz": 100000.0,
+      "rb_hz": 3000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 1 MHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 200 kHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 200000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 200000.0,
+      "span_hz": 20000.0,
+      "rb_hz": 1000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 200 kHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 50 kHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 50000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 50000.0,
+      "span_hz": 5000.0,
+      "rb_hz": 1000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 50 kHz"
+    },
+    {
+     "func": "FRESP",
+     "meas": "freq_resp",
+     "description": "Frequency response at 9 kHz relative to 300 MHz (Table 12)",
+     "src": {
+      "freq_hz": 9000.0,
+      "level_dbm": -20.0,
+      "ref_freq_hz": 300000000.0
+     },
+     "ti": {
+      "cf_hz": 9000.0,
+      "span_hz": 2000.0,
+      "rb_hz": 1000.0,
+      "rl_dbm": -15.0
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "UNVERIFIED: the document names a different instrument for this signal; the Fluke 96270A (leveled sine, no step attenuators) is this procedure's choice. The 96270A's own amplitude / frequency accuracy and phase noise are not read here and are assumed good enough for the limit. (3335A frequency synthesizer -> 96270A, which the owner confirmed covers these frequencies).",
+      "The document records column 2 (synthesizer amplitude), column 3 (relative to 50 MHz) and column 4 (relative to 300 MHz by adding the 50 MHz power-meter value); the program measures column 4 directly (the analyzer reading at the frequency minus its reading at 300 MHz, both at -20 dBm). The span (and 1 kHz RBW below 1 MHz) is \"as required\" in the document: this procedure's choice.",
+      "UNVERIFIED: the 8591A at 9 kHz sits close to its LO feedthrough at 0 Hz; the reading may be disturbed."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11 Table 12",
+     "section": "H-4.11b",
+     "ref": "4.11 Table 12 9 kHz"
+    }
+   ]
+  },
+  {
+   "id": "H-4.11c",
+   "title": "Frequency response: most positive, most negative, total (4.11.31)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "Computed from the rows of Tables 11 and 12.",
+   "group": "SRC",
+   "points": [
+    {
+     "func": "FRESPMAX",
+     "meas": "derived",
+     "description": "Frequency response: most positive value relative to 300 MHz (limit +1.5 dB)",
+     "derive": {
+      "kind": "extreme",
+      "op": "max",
+      "inputs": [
+       "4.11 Table 11 50 MHz",
+       "4.11 Table 11 100 MHz",
+       "4.11 Table 11 150 MHz",
+       "4.11 Table 11 200 MHz",
+       "4.11 Table 11 250 MHz",
+       "4.11 Table 11 300 MHz",
+       "4.11 Table 11 350 MHz",
+       "4.11 Table 11 400 MHz",
+       "4.11 Table 11 450 MHz",
+       "4.11 Table 11 500 MHz",
+       "4.11 Table 11 550 MHz",
+       "4.11 Table 11 600 MHz",
+       "4.11 Table 11 650 MHz",
+       "4.11 Table 11 700 MHz",
+       "4.11 Table 11 750 MHz",
+       "4.11 Table 11 800 MHz",
+       "4.11 Table 11 850 MHz",
+       "4.11 Table 11 900 MHz",
+       "4.11 Table 11 950 MHz",
+       "4.11 Table 11 1000 MHz",
+       "4.11 Table 11 1050 MHz",
+       "4.11 Table 11 1100 MHz",
+       "4.11 Table 11 1150 MHz",
+       "4.11 Table 11 1200 MHz",
+       "4.11 Table 11 1250 MHz",
+       "4.11 Table 11 1300 MHz",
+       "4.11 Table 11 1350 MHz",
+       "4.11 Table 11 1400 MHz",
+       "4.11 Table 11 1450 MHz",
+       "4.11 Table 11 1500 MHz",
+       "4.11 Table 11 1550 MHz",
+       "4.11 Table 11 1600 MHz",
+       "4.11 Table 11 1650 MHz",
+       "4.11 Table 11 1700 MHz",
+       "4.11 Table 11 1750 MHz",
+       "4.11 Table 11 1800 MHz",
+       "4.11 Table 12 20 MHz",
+       "4.11 Table 12 10 MHz",
+       "4.11 Table 12 5 MHz",
+       "4.11 Table 12 1 MHz",
+       "4.11 Table 12 200 kHz",
+       "4.11 Table 12 50 kHz",
+       "4.11 Table 12 9 kHz"
+      ]
+     },
+     "nominal": 0.0,
+     "low": -200.0,
+     "high": 1.5,
+     "unit": "dB",
+     "flags": [
+      "Computed: the most positive reading of Tables 11 and 12."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11.31.1",
+     "section": "H-4.11c",
+     "ref": "4.11.31.1 most positive"
+    },
+    {
+     "func": "FRESPMIN",
+     "meas": "derived",
+     "description": "Frequency response: most negative value relative to 300 MHz (limit -1.5 dB)",
+     "derive": {
+      "kind": "extreme",
+      "op": "min",
+      "inputs": [
+       "4.11 Table 11 50 MHz",
+       "4.11 Table 11 100 MHz",
+       "4.11 Table 11 150 MHz",
+       "4.11 Table 11 200 MHz",
+       "4.11 Table 11 250 MHz",
+       "4.11 Table 11 300 MHz",
+       "4.11 Table 11 350 MHz",
+       "4.11 Table 11 400 MHz",
+       "4.11 Table 11 450 MHz",
+       "4.11 Table 11 500 MHz",
+       "4.11 Table 11 550 MHz",
+       "4.11 Table 11 600 MHz",
+       "4.11 Table 11 650 MHz",
+       "4.11 Table 11 700 MHz",
+       "4.11 Table 11 750 MHz",
+       "4.11 Table 11 800 MHz",
+       "4.11 Table 11 850 MHz",
+       "4.11 Table 11 900 MHz",
+       "4.11 Table 11 950 MHz",
+       "4.11 Table 11 1000 MHz",
+       "4.11 Table 11 1050 MHz",
+       "4.11 Table 11 1100 MHz",
+       "4.11 Table 11 1150 MHz",
+       "4.11 Table 11 1200 MHz",
+       "4.11 Table 11 1250 MHz",
+       "4.11 Table 11 1300 MHz",
+       "4.11 Table 11 1350 MHz",
+       "4.11 Table 11 1400 MHz",
+       "4.11 Table 11 1450 MHz",
+       "4.11 Table 11 1500 MHz",
+       "4.11 Table 11 1550 MHz",
+       "4.11 Table 11 1600 MHz",
+       "4.11 Table 11 1650 MHz",
+       "4.11 Table 11 1700 MHz",
+       "4.11 Table 11 1750 MHz",
+       "4.11 Table 11 1800 MHz",
+       "4.11 Table 12 20 MHz",
+       "4.11 Table 12 10 MHz",
+       "4.11 Table 12 5 MHz",
+       "4.11 Table 12 1 MHz",
+       "4.11 Table 12 200 kHz",
+       "4.11 Table 12 50 kHz",
+       "4.11 Table 12 9 kHz"
+      ]
+     },
+     "nominal": 0.0,
+     "low": -1.5,
+     "high": 200.0,
+     "unit": "dB",
+     "flags": [
+      "Computed: the most negative reading of Tables 11 and 12."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11.31.2",
+     "section": "H-4.11c",
+     "ref": "4.11.31.2 most negative"
+    },
+    {
+     "func": "FRESPPP",
+     "meas": "derived",
+     "description": "Frequency response: most positive minus most negative (limit 2.0 dB)",
+     "derive": {
+      "kind": "extreme",
+      "op": "range",
+      "inputs": [
+       "4.11 Table 11 50 MHz",
+       "4.11 Table 11 100 MHz",
+       "4.11 Table 11 150 MHz",
+       "4.11 Table 11 200 MHz",
+       "4.11 Table 11 250 MHz",
+       "4.11 Table 11 300 MHz",
+       "4.11 Table 11 350 MHz",
+       "4.11 Table 11 400 MHz",
+       "4.11 Table 11 450 MHz",
+       "4.11 Table 11 500 MHz",
+       "4.11 Table 11 550 MHz",
+       "4.11 Table 11 600 MHz",
+       "4.11 Table 11 650 MHz",
+       "4.11 Table 11 700 MHz",
+       "4.11 Table 11 750 MHz",
+       "4.11 Table 11 800 MHz",
+       "4.11 Table 11 850 MHz",
+       "4.11 Table 11 900 MHz",
+       "4.11 Table 11 950 MHz",
+       "4.11 Table 11 1000 MHz",
+       "4.11 Table 11 1050 MHz",
+       "4.11 Table 11 1100 MHz",
+       "4.11 Table 11 1150 MHz",
+       "4.11 Table 11 1200 MHz",
+       "4.11 Table 11 1250 MHz",
+       "4.11 Table 11 1300 MHz",
+       "4.11 Table 11 1350 MHz",
+       "4.11 Table 11 1400 MHz",
+       "4.11 Table 11 1450 MHz",
+       "4.11 Table 11 1500 MHz",
+       "4.11 Table 11 1550 MHz",
+       "4.11 Table 11 1600 MHz",
+       "4.11 Table 11 1650 MHz",
+       "4.11 Table 11 1700 MHz",
+       "4.11 Table 11 1750 MHz",
+       "4.11 Table 11 1800 MHz",
+       "4.11 Table 12 20 MHz",
+       "4.11 Table 12 10 MHz",
+       "4.11 Table 12 5 MHz",
+       "4.11 Table 12 1 MHz",
+       "4.11 Table 12 200 kHz",
+       "4.11 Table 12 50 kHz",
+       "4.11 Table 12 9 kHz"
+      ]
+     },
+     "nominal": 0.0,
+     "low": 0.0,
+     "high": 2.0,
+     "unit": "dB",
+     "flags": [
+      "Computed: 4.11.31.3, the most positive minus the most negative value. Table 1 also lists a relative flatness of 1.0 dB; the procedure text gives 2.0 dB."
+     ],
+     "group": "SRC",
+     "page": "T.O. 33K3-4-2864-1 para 4.11.31.3",
+     "section": "H-4.11c",
+     "ref": "4.11.31.3 total"
+    }
+   ]
+  },
+  {
+   "id": "H-4.12",
+   "title": "Displayed average noise level (typed)",
+   "page": "T.O. 33K3-4-2864-1",
+   "setup": "4.12.1: analyzer CAL OUT to the INPUT for the reference-level offset (4.12.2 to 4.12.6), then the 50 ohm termination on the INPUT. The display-line readings are typed.",
+   "group": "DANL",
+   "points": [
+    {
+     "func": "DANL",
+     "meas": "manual",
+     "description": "Displayed average noise level, LO region, 1 kHz RBW, 30 Hz VBW (400 kHz and up) (limit -115 dBm)",
+     "nominal": -115.0,
+     "low": -200.0,
+     "high": -115.0,
+     "unit": "dBm",
+     "manual_prompt": "Follow the document's step 4.12.13 on the analyzer: set the display line on the average noise trace, ignoring residual responses, and type the display-line amplitude in dBm (must be -115 dBm or lower). The reference-level offset of 4.12.2 to 4.12.6 and the termination on the INPUT come first (see the setup note).",
+     "flags": [
+      "Typed reading: the document sets a display line by eye on the average noise trace; no automatic average-noise measurement is built (the analyzer's LO feedthrough and residual responses need the operator's judgement). The limit is read as \"the display line must be at or below the stated level\".",
+      "The reference-level offset the document enters (4.12.6) is an operator step; set it back to 0 dB afterwards."
+     ],
+     "group": "DANL",
+     "page": "T.O. 33K3-4-2864-1 para 4.12.13",
+     "section": "H-4.12",
+     "ref": "4.12.13 noise level"
+    },
+    {
+     "func": "DANL",
+     "meas": "manual",
+     "description": "Displayed average noise level, LO region, 3 kHz RBW after MKR -> REF LVL, 30 Hz VBW (limit -115 dBm)",
+     "nominal": -115.0,
+     "low": -200.0,
+     "high": -115.0,
+     "unit": "dBm",
+     "manual_prompt": "Follow the document's step 4.12.20 on the analyzer: set the display line on the average noise trace, ignoring residual responses, and type the display-line amplitude in dBm (must be -115 dBm or lower). The reference-level offset of 4.12.2 to 4.12.6 and the termination on the INPUT come first (see the setup note).",
+     "flags": [
+      "Typed reading: the document sets a display line by eye on the average noise trace; no automatic average-noise measurement is built (the analyzer's LO feedthrough and residual responses need the operator's judgement). The limit is read as \"the display line must be at or below the stated level\".",
+      "The reference-level offset the document enters (4.12.6) is an operator step; set it back to 0 dB afterwards."
+     ],
+     "group": "DANL",
+     "page": "T.O. 33K3-4-2864-1 para 4.12.20",
+     "section": "H-4.12",
+     "ref": "4.12.20 noise level"
+    },
+    {
+     "func": "DANL",
+     "meas": "manual",
+     "description": "Displayed average noise level, 1 MHz to 1.5 GHz at the frequency of the highest response (4.12.25) (limit -115 dBm)",
+     "nominal": -115.0,
+     "low": -200.0,
+     "high": -115.0,
+     "unit": "dBm",
+     "manual_prompt": "Follow the document's step 4.12.29 on the analyzer: set the display line on the average noise trace, ignoring residual responses, and type the display-line amplitude in dBm (must be -115 dBm or lower). The reference-level offset of 4.12.2 to 4.12.6 and the termination on the INPUT come first (see the setup note).",
+     "flags": [
+      "Typed reading: the document sets a display line by eye on the average noise trace; no automatic average-noise measurement is built (the analyzer's LO feedthrough and residual responses need the operator's judgement). The limit is read as \"the display line must be at or below the stated level\".",
+      "The reference-level offset the document enters (4.12.6) is an operator step; set it back to 0 dB afterwards."
+     ],
+     "group": "DANL",
+     "page": "T.O. 33K3-4-2864-1 para 4.12.29",
+     "section": "H-4.12",
+     "ref": "4.12.29 noise level"
+    },
+    {
+     "func": "DANL",
+     "meas": "manual",
+     "description": "Displayed average noise level, 1.5 GHz to 1.8 GHz at the highest response (limit -113 dBm)",
+     "nominal": -113.0,
+     "low": -200.0,
+     "high": -113.0,
+     "unit": "dBm",
+     "manual_prompt": "Follow the document's step 4.12.33 on the analyzer: set the display line on the average noise trace, ignoring residual responses, and type the display-line amplitude in dBm (must be -113 dBm or lower). The reference-level offset of 4.12.2 to 4.12.6 and the termination on the INPUT come first (see the setup note).",
+     "flags": [
+      "Typed reading: the document sets a display line by eye on the average noise trace; no automatic average-noise measurement is built (the analyzer's LO feedthrough and residual responses need the operator's judgement). The limit is read as \"the display line must be at or below the stated level\".",
+      "The reference-level offset the document enters (4.12.6) is an operator step; set it back to 0 dB afterwards."
+     ],
+     "group": "DANL",
+     "page": "T.O. 33K3-4-2864-1 para 4.12.33",
+     "section": "H-4.12",
+     "ref": "4.12.33 noise level"
+    }
+   ]
+  }
+ ]
+}

@@ -206,7 +206,7 @@ COVERAGE = {
                              no_command=['reading_timeout', 'acal_timeout', 'acal_info']),      # pure arithmetic / tables
     },
     'reference_instruments': {
-        'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup', 'select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm'], no_command=[]),   # the last five: the power-meter subset (cases in the fluke_6060a fixture)
+        'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup', 'select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm', 'setup_am'], no_command=[]),   # setup_am: cases in the hp_8591a fixture; the last five before it: the power-meter subset (cases in the fluke_6060a fixture)
         'AgilentAFG': dict(covered=['connect', 'sine', 'square', 'output', 'cleanup'], no_command=['max_hz']),   # property
         'ReferenceMeter': dict(covered=['connect', 'frequency', 'ac_rms', 'power', 'dc'], no_command=[]),
     },
@@ -228,6 +228,8 @@ from tests import golden_5491b as _g5491b  # noqa: E402  (B&K 5491B driver cases
 COVERAGE['bk_5491b'] = _g5491b.COVERAGE
 from tests import golden_6060a as _g6060a  # noqa: E402  (Fluke 6060A, HP 8902A, HP 8563E drivers and the 96270A power-meter methods)
 COVERAGE['fluke_6060a'] = _g6060a.COVERAGE
+from tests import golden_8591a as _g8591a  # noqa: E402  (HP 8591A driver and the 96270A AM method)
+COVERAGE['hp_8591a'] = _g8591a.COVERAGE
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
@@ -236,6 +238,7 @@ LINT_FILES.append('tektronix_tbs2000b')
 LINT_FILES.append('keysight_53220a')
 LINT_FILES.append('bk_5491b')
 LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address']
+LINT_FILES.append('hp_8591a')
 LINT_FILES += ['tektronix_tbs1000', 'tektronix_tbs1000c']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
@@ -1783,6 +1786,7 @@ DRIVER_CASES['tektronix_tbs2000b'] = _tbs2000b.driver_cases
 DRIVER_CASES['keysight_53220a'] = _g53220a.driver_cases
 DRIVER_CASES['bk_5491b'] = _g5491b.driver_cases
 DRIVER_CASES['fluke_6060a'] = _g6060a.driver_cases
+DRIVER_CASES['hp_8591a'] = _g8591a.driver_cases
 
 
 # ==== APPEND-ONLY BLOCK, 3 Series MDO (drivers/tektronix_mdo3.py; branch tektronix-mdo3): its own fixtures tektronix_mdo3.json / engine_mdo3.json ======

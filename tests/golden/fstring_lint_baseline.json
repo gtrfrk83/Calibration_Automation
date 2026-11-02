@@ -96,6 +96,14 @@
    "query_retry_f": 0,
    "write_f": 0
   },
+  "hp_8591a": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
   "hp_8902a": {
    "concat_f": 0,
    "format_f": 0,

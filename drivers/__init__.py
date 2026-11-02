@@ -23,6 +23,7 @@ from .bk_5491b import BK5491B
 from .fluke_6060a import Fluke6060A
 from .hp_8902a import HP8902A, RecalRequired
 from .hp_8563e import HP8563E
+from .hp_8591a import HP8591A
 from .tektronix_mdo4000c import TektronixMDO4000C
 from .tektronix_mdo3 import TektronixMDO3
 from .tektronix_tds2000c import TektronixTDS2000C
