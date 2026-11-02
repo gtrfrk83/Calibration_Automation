@@ -23,16 +23,17 @@ AC_KINDS = ('ACV', 'ACI')
 
 # Plug-in module channel plan for the verification (Service Guide pp. 69, 76, 80-87)
 MODULE_CHANNELS = {
-    '34901A': dict(short=9, input=10, current=21, pair_offset=10, volts=1, ohm_short=3),     # 4-wire pairs: channel n with n + 10
-    '34902A': dict(short=7, input=8, current=None, pair_offset=8, volts=1, ohm_short=3),     # 4-wire pairs: channel n with n + 8; no current input
+    '34901A': dict(short=9, input=10, current=21, pair_offset=10, volts=1, ohm_short=3, tc=2),     # 4-wire pairs: channel n with n + 10
+    '34902A': dict(short=7, input=8, current=None, pair_offset=8, volts=1, ohm_short=3, tc=2),     # 4-wire pairs: channel n with n + 8; no current input
 }
 # 'ohm_short' = channel 3: the copper short for the 4-wire and 2-wire ohms zero points (4-wire partner channel 13), owner 2026-11-02.
+# 'tc' = channel 2: the type J thermocouple point (owner, 2026-11-02).
 # 'volts' = channel 1: the 34970A and 34972A procedures read DC volts, AC volts, frequency and gain-ohms points (4-wire sense on channel 11) on channel 1
 # of the module (owner, 2026-11-02), not the Service Guide's 'input' channel (34901A ch 10, 34902A ch 8).
 
 
 def channel_for(module: str, slot: int, role: str) -> int:
-    """Channel number (slot*100 + n) for 'short', 'input', 'current', 'volts' or 'ohm_short' on the given module and slot (1-3)."""
+    """Channel number (slot*100 + n) for 'short', 'input', 'current', 'volts', 'ohm_short' or 'tc' on the given module and slot (1-3)."""
     plan = MODULE_CHANNELS[module]
     n = plan[role]
     if n is None:
@@ -65,6 +66,11 @@ def _nplc(kind):
                placeholders={'plc': Placeholder('float', 'g', 10.0), **_CH}, kind='set', verified=True, ref=_REF)
 
 
+def _conf_temp():
+    return Cmd('CONF:TEMP TC,{tc_type},{ch}', 'Configure thermocouple temperature', 'CONF:TEMP TC,<type> on the channel. Not verified on a 34970A/34972A (manual not available to the session that wrote this)',
+               placeholders={'tc_type': Placeholder('str', '', 'J'), **_CH}, kind='set', verified=False)
+
+
 def _band(kind):
     node = CONF_NODE[kind]
     return Cmd(node + ':BAND {hz:g},{ch}', f'{kind} detector bandwidth', 'AC filter 3, 20 or 200 Hz on the channel. Not verified on a 34970A/34972A',
@@ -93,6 +99,9 @@ COMMANDS = {
     'rout.scan': Cmd('ROUT:SCAN {ch}', 'Select the scan channel', 'Single-channel scan. Not verified on a 34970A/34972A', placeholders=dict(_CH),
                      kind='set', verified=False),
     'trig.sour': Cmd('TRIG:SOUR IMM', 'Trigger source', 'Immediate trigger', kind='set', verified=True, ref=_REF),
+    'conf.temp': _conf_temp(),
+    'nplc.temp': Cmd('TEMP:NPLC {plc:g},{ch}', 'Temperature integration time (PLC)', '10 PLC. Not verified on a 34970A/34972A',
+                     placeholders={'plc': Placeholder('float', 'g', 10.0), **_CH}, kind='set', verified=False),
     'read': Cmd('READ?', 'Take a reading', 'One scan of the selected channel. Not verified on a 34970A/34972A', kind='query', verified=False),
     'err.query': Cmd('SYST:ERR?', 'Error queue', 'Oldest error; reading removes it (error-queue path, never overridable)', kind='query',
                      risk='locked', verified=True, ref=_REF),
@@ -109,7 +118,7 @@ class KeysightDacq(Instrument):
     # 34970A RS-232 factory defaults: 57600 baud, 8 data bits, no parity, 1 stop bit, XON/XOFF; <NL> terminates
     SERIAL = SerialSettings(baud=57600, data_bits=8, parity='none', stop_bits=1,
                             write_termination='\n', read_termination='\n', flow_control='xon_xoff')
-    SUPPORTED = tuple(CONF_NODE) + ('FREQ',)
+    SUPPORTED = tuple(CONF_NODE) + ('FREQ', 'TEMP')
     REMOTE_ON_CONNECT = False       # 34970A over RS-232 is put into remote with SYST:REM
 
     def _reset_extra(self):
@@ -159,6 +168,9 @@ class KeysightDacq(Instrument):
             self.send('conf.freq', nominal=point['nominal'], ch=ch)
             self.send('freq.volt.rang', range=rng, ch=ch)
             self.send('freq.aper', ch=ch)
+        elif kind == 'TEMP':
+            self.send('conf.temp', tc_type=point.get('tc_type') or 'J', ch=ch)           # thermocouple, in degrees C (the 34970A/34972A default unit)
+            self.send('nplc.temp', plc=point.get('plc') or 10, ch=ch)
         elif kind in CONF_NODE:
             self.send('conf.' + kind.lower(), range=rng, ch=ch)
             if kind in NPLC_KINDS:

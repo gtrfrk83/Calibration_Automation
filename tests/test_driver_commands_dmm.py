@@ -204,7 +204,7 @@ class Describe(unittest.TestCase):
         self.assertEqual(counts(Fluke8846A), dict(total=21, normal=11, output=0, locked=10, verified=9, unverified=12))
         self.assertEqual(counts(Agilent34401A), dict(total=16, normal=12, output=0, locked=4, verified=10, unverified=6))
         self.assertEqual(counts(Keysight34470A), dict(total=26, normal=22, output=0, locked=4, verified=22, unverified=4))
-        self.assertEqual(counts(Keysight34970A), dict(total=25, normal=21, output=0, locked=4, verified=18, unverified=7))
+        self.assertEqual(counts(Keysight34970A), dict(total=27, normal=23, output=0, locked=4, verified=18, unverified=9))   # +conf.temp, nplc.temp (type J thermocouple point, unverified)
         self.assertEqual(counts(Keysight34972A), counts(Keysight34970A))
 
 

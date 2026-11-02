@@ -43,9 +43,9 @@ CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('55
 PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even parity': (7, 'even'), '7 data bits, odd parity': (7, 'odd')}
 FLOW = {'XON/XOFF (instrument default)': 'xon_xoff', 'None': 'none', 'RTS/CTS': 'rts_cts'}
 BAUDS = ['57600', '115200', '38400', '19200', '9600', '4800', '2400', '1200']
-GROUPS = ('ZERO_SHORT', 'ZERO_SHORT_OHM', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ')
+GROUPS = ('ZERO_SHORT', 'ZERO_SHORT_OHM', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ', 'TEMP')
 GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_SHORT_OHM': 'Shorted channel 3 (ohms zero)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
-               'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI': 'DC current', 'ACV': 'AC volts', 'ACI': 'AC current', 'FREQ': 'Frequency'}
+               'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI': 'DC current', 'ACV': 'AC volts', 'ACI': 'AC current', 'FREQ': 'Frequency', 'TEMP': 'Type J thermocouple'}
 
 
 def configure(model):
@@ -204,6 +204,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
         elif k in ('OHM2', 'OHM4'): self.cal.set_output_ohms(v)
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], v)
+        elif k == 'TEMP': self.cal.set_output_temperature(v, p.get('tc_type') or 'J')      # thermocouple simulation (5520A / 5522A / 5560A drivers)
         surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)   # the calibrator refuses outputs it cannot make; never operate then (so no Continue)
         self.cal.operate_unverified()
         time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
@@ -386,6 +387,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g == 'OHM2':
             return (f'2-wire: calibrator {out} to channel {ch} HI / LO (the median-length path). Calibrator external sense OFF; '
                     'use its 2-wire compensation if it offers it.')
+        if g == 'TEMP':
+            return (f'Type {p.get("tc_type", "J")} thermocouple wire (miniature connector to the calibrator TC output, bare leads to the module) from the calibrator TC OUTPUT '
+                    f'to channel {ch} HI / LO, observing the polarity (J: white +, red -). Allow the junctions to stabilise. The calibrator simulates {p["nominal"]:g} \u00b0C.')
         if g in ('DCI', 'ACI'):
             amps = 'VI AUX output and OUTPUT LO' if five60 else 'AUX HI and AUX LO'
             return f'Calibrator {amps} to the current channel {ch} (HI / LO). Check the calibrator range and the fuse first.'

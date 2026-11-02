@@ -977,6 +977,168 @@
    ]
   },
   {
+   "call": "{'description': 'Type J thermocouple temperature 0 °C', 'error': 1.0, 'group': 'TEMP', 'id': 73, 'kind': 'TEMP', 'limits': {'1y': 1.0, '24h': 1.0, '90d': 1.0}, 'nominal': 0.0, 'note': 'UNVERIFIED: not in the Service Guide tables; 0 degC, +/-1 degC set by the owner (2026-11-02). The calibrator (5520A / 5522A / 5560A) simulates the thermocouple.', 'optional': False, 'page': 'n/a', 'plc': 10, 'quick': False, 'range': 0.0, 'role': 'tc', 'section': 'temp_j', 'section_title': 'Type J thermocouple temperature', 'settle_s': 10.0, 'setup': 'Calibrator thermocouple simulation, type J, to channel 2 HI / LO (owner, 2026-11-02; not a Service Guide test).', 'source': 'calibrator', 'tc_type': 'J', 'terminal': 'FRONT', 'unit': '°C'}",
+   "case": "dacq_verification.IO.measure[TEMP#73]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:TEMP TC,J,(@202)",
+    "34972A|>>|TEMP:NPLC 10,(@202)",
+    "34972A|>>|ROUT:SCAN (@202)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|TSENS_TYPE TC",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|OUT 0CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|TC_TYPE J",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|TC_TYPE?",
+    "5560A|<<|J",
+    "5560A|>>|OUT 0CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+0.000000000E+00",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:TEMP TC,J,(@202)"
+    ],
+    [
+     "W",
+     "TEMP:NPLC 10,(@202)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@202)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "TSENS_TYPE TC"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "W",
+     "OUT 0CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "TC_TYPE J"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "TC_TYPE?",
+     "J"
+    ],
+    [
+     "W",
+     "OUT 0CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     10.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+0.000000000E+00"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
    "call": "",
    "case": "dacq_verification.IO.close",
    "log": [

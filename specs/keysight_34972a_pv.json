@@ -30,7 +30,8 @@
    "current": 21,
    "pair_offset": 10,
    "volts": 1,
-   "ohm_short": 3
+   "ohm_short": 3,
+   "tc": 2
   },
   "34902A": {
    "short": 7,
@@ -38,7 +39,8 @@
    "current": null,
    "pair_offset": 8,
    "volts": 1,
-   "ohm_short": 3
+   "ohm_short": 3,
+   "tc": 2
   }
  },
  "general": [
@@ -1246,6 +1248,32 @@
     }
    ],
    "optional": true
+  },
+  {
+   "id": "temp_j",
+   "title": "Type J thermocouple temperature",
+   "page": "n/a",
+   "setup": "Calibrator thermocouple simulation, type J, to channel 2 HI / LO (owner, 2026-11-02; not a Service Guide test).",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "TEMP",
+     "nominal": 0.0,
+     "range": 0.0,
+     "limits": {
+      "24h": 1.0,
+      "90d": 1.0,
+      "1y": 1.0
+     },
+     "quick": false,
+     "group": "TEMP",
+     "role": "tc",
+     "tc_type": "J",
+     "plc": 10,
+     "settle_s": 10.0,
+     "note": "UNVERIFIED: not in the Service Guide tables; 0 degC, +/-1 degC set by the owner (2026-11-02). The calibrator (5520A / 5522A / 5560A) simulates the thermocouple."
+    }
+   ]
   }
  ]
 }

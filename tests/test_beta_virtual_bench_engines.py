@@ -123,6 +123,22 @@ class Dacq(Base):
             self.assertIn('channel 203', app.setup_text(ohm[0]))
             self.assertIn('213', app.setup_text(ohm[0]))
 
+    def test_type_j_thermocouple_point_is_last_on_channel_2_zero_c_plus_minus_1(self):
+        # owner 2026-11-02: a type J thermocouple point on channel 2 at the end, 0 degC +/- 1 degC, sourced by the calibrator's thermocouple simulation
+        import dacq_verification as D
+        for model in ('34970A', '34972A'):
+            D.configure(model)
+            p = D.POINTS[-1]
+            self.assertEqual((p['kind'], p['tc_type'], p['nominal'], p['error'], p['group'], p['role']), ('TEMP', 'J', 0.0, 1.0, 'TEMP', 'tc'))
+            self.assertEqual(D.channel_for('34901A', 2, p['role']), 202)
+        app = self.make()
+        self.assertTrue(self.hn.run_all())
+        wire = [t for _i, t in VH.wire(app.io)]
+        self.assertTrue(any('CONF:TEMP TC,J,(@202)' in t for t in wire), wire[-12:])
+        self.assertTrue(any('OUT 0CEL' in t for t in wire))
+        last = D.POINTS[-1]['id']
+        self.assertIn(last, [int(k) for k in app.found])           # the optional sections are skipped; the thermocouple point is not optional
+
 
 class Agilent34401A(Base):
     def make(self):

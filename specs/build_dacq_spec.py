@@ -8,6 +8,7 @@ Each point carries a 'role' that the procedure turns into a channel for the plug
     short    channel with the low-thermal short (34901A ch 9, 34902A ch 7); 4-wire pairs use the partner channel (+10 / +8)
     input    channel the calibrator is connected to (34901A ch 10, 34902A ch 8)
     current  34901A ch 21 (current input); the 34902A has none, so current points are skipped with that module
+    tc       channel 2 (both modules): the type J thermocouple point, the last point (owner, 2026-11-02; 0 degC +/-1 degC, calibrator thermocouple simulation)
     ohm_short channel 3 (both modules): the copper short of the 4-wire / 2-wire ohms zero points (4-wire partner channel 13; owner 2026-11-02); group ZERO_SHORT_OHM
     volts    channel 1 (both modules): the DC volts, AC volts, frequency and gain-ohms points (owner, 2026-11-02; ohms force on 1, sense on 11); both models (34970A and 34972A, owner 2026-11-02)
 and a 'group' = the hook-up (diagram) key.
@@ -96,6 +97,8 @@ def sections(model='34970A'):
                **({'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).'} if v == 0.01 else {}))
             for v, f, rng, l in [(a, b, c, d) for a, b, c, d in FREQ]]
     opt_ac = [pt('ACV', v, rng, l, 'ACV', vrole, frequency=f, filter_hz=3, opt='ac') for v, f, rng, l in OPT_AC]
+    temp_j = [pt('TEMP', 0.0, 0.0, (1.0, 1.0, 1.0), 'TEMP', 'tc', tc_type='J', plc=10, settle_s=10.0,
+                 note='UNVERIFIED: not in the Service Guide tables; 0 degC, +/-1 degC set by the owner (2026-11-02). The calibrator (5520A / 5522A / 5560A) simulates the thermocouple.')]
     for p in z2w + gain_r2:
         p['opt'] = 'ohm2'
 
@@ -118,6 +121,7 @@ def sections(model='34970A'):
         sec('zero_ohm2', '2-wire ohms zero (optional)', '81', 'Short on the input channel. The calibrator is not used.', z2w[:], source='none', optional=True),
         sec('ohm2', '2-wire ohms gain (optional)', '83', f'Calibrator resistance output, 2-wire, to {vch} HI / LO.', gain_r2, optional=True),
         sec('opt_ac', 'Optional AC tests', '87', f'Calibrator AC voltage output to {vch} HI / LO.', opt_ac, optional=True),
+        sec('temp_j', 'Type J thermocouple temperature', 'n/a', 'Calibrator thermocouple simulation, type J, to channel 2 HI / LO (owner, 2026-11-02; not a Service Guide test).', temp_j),
     ]
 
 
@@ -130,8 +134,8 @@ def spec(model, interface):
         'periods': PERIODS, 'default_period': '1y',
         'equipment': {'multiplexer': 'Keysight 34901A 20-channel multiplexer in slot 200 (34902A: no current tests)', 'calibrator': 'Fluke 5560A or 5522A (manual lists the 5700A)',
                       'zero': 'Low-thermal copper shorts on the input channels'},
-        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, 'volts': 1, 'ohm_short': 3},
-                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, 'volts': 1, 'ohm_short': 3}},
+        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, 'volts': 1, 'ohm_short': 3, 'tc': 2},
+                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, 'volts': 1, 'ohm_short': 3, 'tc': 2}},
         'general': ['Ambient 18-28 C (ideally 23 +/- 1 C), humidity below 80 %.',
                     'Warm up 2 hours with a copper short connected and the multiplexer installed before verification.',
                     'Use shielded twisted-pair PTFE cable, as short as possible; connect the shield to the source LO and the calibrator LO to earth ground except where noted.',
