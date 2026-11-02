@@ -198,7 +198,7 @@ class EnginesCallTheStartupHelper(unittest.TestCase):
         self.assertNotIn('reset', [c for _l, c in calls_in(next(find_function(tree, 'enter_calibration')))])     # the reset is never between the notice and the points
 
     def test_every_procedure_launcher_uses_a_checked_engine(self):
-        engine_mods = {Path(r).stem for r in ENGINES} | {'WaveSurfer_WS4104HD', 'Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment', 'Fluke_8808A_Adjustment'}
+        engine_mods = {Path(r).stem for r in ENGINES} | {'WaveSurfer_WS4104HD', 'Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment', 'Fluke_8808A_Adjustment', 'HP_8902A_Cal_Factors'}
         for path in sorted((ROOT / 'Procedures').glob('*.py')):
             tree = ast.parse(path.read_text(encoding='utf-8'))
             imported = set()

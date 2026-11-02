@@ -2277,3 +2277,27 @@ The lab's 6060A on the bench only reaches 520 MHz (other units may cover the man
 error / sum takes the highest frequency of its inputs) are not run and are listed on the report as "NOT TESTED: above this unit's 520 MHz range" with their
 limits and no reading (owner decision: keep, mark not tested). With 520 MHz: 172 of the 470 points (4A-4 5, 4A-5 32, 4A-6 16, 4A-7 2, 4A-8 48, 4A-11 2,
 modulation tests 3, 4, 6 and 8: 67). The report header says 'Frequency range: 0.1 to 520 MHz (this unit)'.
+
+## HP 8902A power sensor cal factors (owner request 2026-11-02; adjustment kind, `Procedures/HP_8902A_Cal_Factors.py`; simulated 8902A only, never run on a real receiver)
+Enters the 11722A (or other) sensor's cal-factor table into the 8902A: reference cal factor (the 50 MHz label value) and up to 16 frequency / cal-factor pairs, with the driver's
+existing locked, verified `cf.ref` / `cf.pair` (37.3SP ... CF; manual pp. 3-75 / 124, 3-78 / 127, 3-87 / 136). Logic `hp8902a_calfactors.py` (no toolkit), window
+`hp8902a_calfactors_view_qt.py`, saved sensor tables `sensor_cal_factor_store.py` (NEW tables `sensor_cal_factor_tables` / `sensor_cal_factor_pairs` in lab_registry.sqlite3 only),
+audit through `adjustment_audit.py`. Sidecar order 80, Adjustment tab, category "RF Measuring Receiver Adjustment".
+- Validation (nothing is sent until all pass; every problem is listed): reference and pair cal factors 40 to 120 % in 0.1 % steps, frequency above 0 and up to 42 GHz in 50 kHz steps
+  (rendered p. 3-82 / 131 "Specifications for Cal-Factor Entry"), no duplicate frequency (MHz / GHz / kHz suffixes are folded), at most 16 pairs (17 entries with the reference), at least one
+  pair (the reference alone leaves Error 15). No ordering rule: the receiver orders the table itself (p. 3-78 / 127); the program sends ascending and shows the list sorted.
+- Flow: Connect (nothing changes) -> Start record and read table (M4, 37.4SP entries, 37.5SP CF reference, 37.6SP FR / CF per pair, then 37.0SP; reads only) -> type or load the list ->
+  Check my list -> Enter table: notice that this CHANGES the stored table, the exact list and the entries that will be removed, and the operator must TYPE `ENTER`; any other text sends nothing.
+- Writes, each sent ONCE and never retried: reference (read back with 37.5SP CF, +/-0.05 %), then every stale entry of the receiver that is not in the list as 0 % (count must drop by one),
+  then each pair (count must grow by one, or stay when the frequency was already there). The first mismatch / error / code error stops the run (status STOPPED, "may be partly changed").
+  Then the whole table is read back: PASS / FAIL per entry, extra entries, entry count (status ENTERED_VERIFIED or ENTERED_NOT_VERIFIED). The table-clear functions 37.7 / 37.9 are never sent.
+  "Remove entries that are not in my list" is ticked by default; unticked, the other entries stay (and the list is refused up front when the union would exceed 16 pairs).
+- The reference of a table that cannot be read is not written: if the pre-read fails the entry is not started (no read-back = no write).
+- Report: like Keithley_2000_Adjustment there is no PDF; the record is adjustment_runs / adjustment_events (instrument "HP 8902A cal factors", scope = sensor model and serial).
+  Demo: simulated 8902A, in-memory audit and sensor tables (nothing persisted, every row demo=1), no export.
+- New driver methods (no existing command changed): `recall_cal_factor_table`, `restore_automatic_cal_factors` (37.0SP, verified), `remove_cal_factor`, new command `cf.recall.freq` (37.6SP FR,
+  UNVERIFIED). The simulator learned 37.6SP / FR / CF / 37.0SP; its behaviour for the 6060A tests is unchanged.
+- UNVERIFIED: how the 8902A returns the value behind 37.4SP / 37.5SP / 37.6SP + FR / CF over HP-IB (the manual's example program on p. 3-87 / 136 reads them with ENTER, the frequency in Hz);
+  that 37.4SP counts the reference (pairs = count - 1; the example program loops to the count); that CF after 37.6SP FR shows the same pair; that the cal-factor / frequency steps
+  (0.1 % / 50 kHz) are strict entry rules and not only display resolutions. Microwave sensor modules (27.1SP) are not handled. The Qt window was not run here (PySide6 is not installable in the sandbox).
+Tests: tests/test_hp8902a_calfactors.py.
