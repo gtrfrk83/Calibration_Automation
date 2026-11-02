@@ -420,13 +420,13 @@
    ]
   },
   {
-   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 22, 'kind': 'OHM4', 'limits': {'1y': 0.014, '24h': 0.006500000000000001, '90d': 0.012}, 'nominal': 100, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 100, 'role': 'input', 'section': 'ohm4', 'section_title': '4-wire ohms gain', 'setup': 'Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 22, 'kind': 'OHM4', 'limits': {'1y': 0.014, '24h': 0.006500000000000001, '90d': 0.012}, 'nominal': 100, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 100, 'role': 'volts', 'section': 'ohm4', 'section_title': '4-wire ohms gain', 'setup': 'Calibrator resistance output, 4-wire: force to channel 1, sense to its 4-wire partner channel (channel 11).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM4#22]",
    "log": [
     "5560A|>>|STBY",
-    "34972A|>>|CONF:FRES 100,(@210)",
-    "34972A|>>|FRES:NPLC 10,(@210)",
-    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|CONF:FRES 100,(@201)",
+    "34972A|>>|FRES:NPLC 10,(@201)",
+    "34972A|>>|ROUT:SCAN (@201)",
     "34972A|>>|TRIG:SOUR IMM",
     "34972A|>>|SYST:ERR?",
     "34972A|<<|+0,\"No error\"",
@@ -449,15 +449,15 @@
     ],
     [
      "W",
-     "CONF:FRES 100,(@210)"
+     "CONF:FRES 100,(@201)"
     ],
     [
      "W",
-     "FRES:NPLC 10,(@210)"
+     "FRES:NPLC 10,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -895,13 +895,13 @@
    ]
   },
   {
-   "call": "{'description': '2-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 1.014, 'group': 'OHM2', 'id': 57, 'kind': 'OHM2', 'limits': {'1y': 1.014, '24h': 1.0065, '90d': 1.012}, 'nominal': 100, 'note': '2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.', 'opt': 'ohm2', 'optional': True, 'page': '83', 'plc': 10, 'quick': False, 'range': 100, 'role': 'input', 'section': 'ohm2', 'section_title': '2-wire ohms gain (optional)', 'setup': 'Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': '2-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 1.014, 'group': 'OHM2', 'id': 57, 'kind': 'OHM2', 'limits': {'1y': 1.014, '24h': 1.0065, '90d': 1.012}, 'nominal': 100, 'note': '2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.', 'opt': 'ohm2', 'optional': True, 'page': '83', 'plc': 10, 'quick': False, 'range': 100, 'role': 'volts', 'section': 'ohm2', 'section_title': '2-wire ohms gain (optional)', 'setup': 'Calibrator resistance output, 2-wire, to channel 1 HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM2#57]",
    "log": [
     "5560A|>>|STBY",
-    "34972A|>>|CONF:RES 100,(@210)",
-    "34972A|>>|RES:NPLC 10,(@210)",
-    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|CONF:RES 100,(@201)",
+    "34972A|>>|RES:NPLC 10,(@201)",
+    "34972A|>>|ROUT:SCAN (@201)",
     "34972A|>>|TRIG:SOUR IMM",
     "34972A|>>|SYST:ERR?",
     "34972A|<<|+0,\"No error\"",
@@ -924,15 +924,15 @@
     ],
     [
      "W",
-     "CONF:RES 100,(@210)"
+     "CONF:RES 100,(@201)"
     ],
     [
      "W",
-     "RES:NPLC 10,(@210)"
+     "RES:NPLC 10,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",

@@ -387,7 +387,7 @@
    "id": "ohm4",
    "title": "4-wire ohms gain",
    "page": "82",
-   "setup": "Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.",
+   "setup": "Calibrator resistance output, 4-wire: force to channel 1, sense to its 4-wire partner channel (channel 11).",
    "source": "calibrator",
    "points": [
     {
@@ -401,7 +401,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -415,7 +415,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -429,7 +429,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -443,7 +443,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -457,7 +457,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -471,7 +471,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -485,7 +485,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "Verify only, no adjustment required (manual footnote c)."
     }
@@ -973,7 +973,7 @@
    "id": "ohm2",
    "title": "2-wire ohms gain (optional)",
    "page": "83",
-   "setup": "Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).",
+   "setup": "Calibrator resistance output, 2-wire, to channel 1 HI / LO.",
    "source": "calibrator",
    "points": [
     {
@@ -987,7 +987,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1003,7 +1003,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1019,7 +1019,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1035,7 +1035,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1051,7 +1051,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1067,7 +1067,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1083,7 +1083,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
