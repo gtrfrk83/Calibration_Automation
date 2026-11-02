@@ -97,6 +97,16 @@ class Dacq(Base):
         self.assertTrue(self.hn.run_all())
         self.fast_is_old(app)
 
+    def test_high_voltage_question_is_asked_once_per_run(self):
+        # owner 2026-11-02: only the first high-voltage point asks; the rest of the run is covered by that answer
+        app = self.make()
+        self.assertTrue(self.hn.run_all())
+        import dacq_verification as D
+        hv_points = [p for p in D.POINTS if p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 100]
+        self.assertGreater(len(hv_points), 1)
+        asks = [d for d in self.hn.dialogs if d[0] == 'box' and d[1] == 'askyesno' and d[2] == 'HIGH VOLTAGE']
+        self.assertEqual(len(asks), 1, asks)
+
 
 class Agilent34401A(Base):
     def make(self):

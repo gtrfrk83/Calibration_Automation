@@ -493,6 +493,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.fast_demo and self.io is None: self.test_connections()
         if not self.fast_demo and self.io is None: return
         self.mo_reset_run()
+        self._hv_acked = False                                   # a new run asks the high-voltage question again
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
@@ -526,9 +527,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         key = p['group']
         if not self.fast_demo and key != previous and not self._prompt_setup(p):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
-        if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 100:
+        if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 100 and not getattr(self, '_hv_acked', False):
+            # owner 2026-11-02: the high-voltage question is asked once per run, at the first high-voltage point; answering Yes covers the rest of the run
             if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
+            self._hv_acked = True
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
