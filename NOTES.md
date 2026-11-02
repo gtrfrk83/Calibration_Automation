@@ -2222,7 +2222,7 @@ Owner decision: the Tk build is gone; the suite is Qt only.
 T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedure, own spec `specs/fluke_6060a_gidep_pv.json` (builder `specs/build_fluke_6060a_gidep_spec.py`, 220 points), own settings / progress / procmods key `6060A-gidep` (engine `main(spec_path, state_key, variant_label)`).
 - New engine point kind `manual` (typed reading, no RF): the 10 MHz reference (counter) and the deviation-meter checks (Tables 9, 10: display minus reference, kHz) and the three sub-kHz spurs.
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
-- Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics) and FM deviation above 99.9 kHz (Table 8, 100/250/380 kHz).
+- Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
 
 ## Manual entry on every two-way engine (branch manual-entry-all)

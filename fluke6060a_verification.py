@@ -149,9 +149,9 @@ def apply_options(points, typed_thd, max_mhz=1050.0):
             p['not_tested'] = True
             p['unavailable'] = f'not tested: {float(p["gen"]["freq_mhz"]) * 1000:g} kHz is below the 0.1 MHz the 6060A driver programs (p. 2-15)'
         khz = ((p.get('gen') or {}).get('fm') or {}).get('khz')
-        if khz is not None and float(khz) > drivers.fluke_6060a.MAX_FM_KHZ + 1e-9:          # the driver's FM command is verified to 99.9 kHz only (p. 2-21): a larger deviation is not programmed
+        if khz is not None and float(khz) > ((SPEC.get('options') or {}).get('fm_max_khz') or drivers.fluke_6060a.MAX_FM_KHZ) + 1e-9:          # the driver's FM command is verified to 99.9 kHz only (p. 2-21): a larger deviation is not programmed
             p['not_tested'] = True
-            p['unavailable'] = f'not tested: {float(khz):g} kHz deviation is above the 99.9 kHz the 6060A driver programs (Table 2-5, p. 2-21)'
+            p['unavailable'] = f'not tested: {float(khz):g} kHz deviation is above the 99.9 kHz the 6060A driver programs (Table 2-5, p. 2-21) and this spec allows no more'
         p['error'] = float(f"{max(p['nominal'] - p['low'], p['high'] - p['nominal']):.9g}")
 
 
@@ -452,7 +452,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             gen.am(am['pct'], source=am['src'], rate_hz=am.get('rate_hz', 1000), input_applied=am.get('input_applied', True))
             self._mod_on = True
         if fm:
-            gen.fm(fm['khz'], source=fm['src'], rate_hz=fm.get('rate_hz', 1000))
+            gen.fm(fm['khz'], source=fm['src'], rate_hz=fm.get('rate_hz', 1000), max_khz=(SPEC.get('options') or {}).get('fm_max_khz'))
             self._mod_on = True
 
     def _pm_ready(self, p):

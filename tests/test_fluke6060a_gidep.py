@@ -152,6 +152,7 @@ class GidepBench(T.Bench):
         self.addCleanup(lambda: (setattr(E, 'SPEC_PATH', old[0]), setattr(E, 'STATE_KEY', old[1]), setattr(E, 'VARIANT_LABEL', old[2]), E.configure()))
         E.SPEC_PATH, E.STATE_KEY, E.VARIANT_LABEL = GIDEP_SPEC, '6060A-gidep', 'GIDEP T.O. 33K3-4-911-1'
         super().setUp()
+        self.t6.fm_max_khz = 500.0                                       # the simulated unit accepts the document's 500 kHz range
 
         def ask(p, **k):                                               # a typed reading in the middle of the limits, in the unit the entry box shows
             _lim, _unit, scale = manual_override.entry_scale(p)
@@ -167,15 +168,27 @@ class GidepEngine(GidepBench):
 
     def test_points_the_driver_cannot_program_are_listed_not_tested(self):
         nt = [p for p in E.POINTS if p['not_tested']]
-        self.assertEqual(len(nt), 7)
-        self.assertEqual(sorted(p['ref'] for p in nt if p['func'] == 'HARMONIC'), ['4.7 Table 11 harmonics 0.01 MHz'])
-        self.assertEqual(sorted(p['gen']['fm']['khz'] for p in nt if p['func'] == 'FMDEV'), [100.0, 100.0, 250.0, 250.0, 380.0, 380.0])
-        self.assertTrue(all(p['unavailable'].startswith('not tested') for p in nt))
+        self.assertEqual([p['ref'] for p in nt], ['4.7 Table 11 harmonics 0.01 MHz'])         # below the 0.1 MHz the driver programs
+        self.assertTrue(nt[0]['unavailable'].startswith('not tested'))
+
+    def test_fm_above_99_9_khz_is_allowed_by_the_spec_option_and_stays_flagged(self):
+        self.assertEqual(E.SPEC['options']['fm_max_khz'], 500.0)
+        big = [p for p in E.POINTS if p['func'] == 'FMDEV' and p['gen']['fm']['khz'] > 99.9]
+        self.assertEqual(sorted(p['gen']['fm']['khz'] for p in big), [100.0, 100.0, 250.0, 250.0, 380.0, 380.0])
+        for p in big:
+            self.assertFalse(p['not_tested'])
+            self.assertTrue(any('UNVERIFIED' in f and '99.9 kHz' in f for f in p['flags']))
+
+    def test_the_instruction_manual_procedure_still_stops_at_99_9_khz(self):
+        from drivers.fluke_6060a import Fluke6060A
+        from drivers.base import InstrumentError
+        with self.assertRaises(InstrumentError):
+            Fluke6060A.fm(mock.Mock(low_rate_fm=False), 100.0)
 
     def test_every_point_passes_on_the_simulated_bench_and_rf_is_off_after_each(self):
         self.run_points('', seconds=3000)
         self.assertEqual(self.errors(), [])
-        self.assertEqual(len(self.app.found), 213)
+        self.assertEqual(len(self.app.found), 219)
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 

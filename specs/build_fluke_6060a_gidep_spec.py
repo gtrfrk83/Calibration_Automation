@@ -49,6 +49,7 @@ SPUR_LIMIT_DBC = -35
 RESFM_MHZ, RESFM_DBM, RESFM_MAX_HZ = 520, 13, 200                                                     # 4.8
 RESAM_DBM, RESAM_MAX_PCT = 9, 0.1                                                                     # 4.9 (the frequency stays at 520 MHz)
 COUNT_RES_HZ = 10
+FM_MAX_KHZ = 500.0          # Table 1: FM 1 to 500 kHz deviation (owner, 2026-11-02: allow deviations above the manual's 99.9 kHz on this procedure)
 
 UNV = 'UNVERIFIED: the document names a different instrument; the choice of the lab\'s bench instrument for this step is this procedure\'s.'
 
@@ -168,7 +169,7 @@ def build_spec():
         for dev, lo, hi in rows:
             add(s, '4.5 Table 8', tag=f'{nm} {dev} kHz', func='FMDEV', meas='fm_dev', description=f'FM deviation {dev} kHz at {nm} (INT FM 1 kHz, +{FM_LEVEL_DBM} dBm)',
                 gen=dict(freq_mhz=num(fm), level_dbm=FM_LEVEL_DBM, fm=dict(khz=float(dev), src='int', rate_hz=1000.0)), rx=dict(detector=1, hp=2, lp=1), nominal=float(dev * 1000), low=f(D(lo) * 1000), high=f(D(hi) * 1000), unit='Hz',
-                flags=[UNV + ' (MMR FM deviation, HP 300 Hz, LP 3 kHz -> 8902A detector D1 peak+, H2, L1).', 'UNVERIFIED: the detector is not printed; peak+ is used.'] + (['The 6060A driver programs FM deviation only up to 99.9 kHz (Table 2-5, p. 2-21): this point is listed as NOT TESTED (Table 1 gives the 6060A/AN 1 to 500 kHz).'] if dev > 99.9 else []))
+                flags=[UNV + ' (MMR FM deviation, HP 300 Hz, LP 3 kHz -> 8902A detector D1 peak+, H2, L1).', 'UNVERIFIED: the detector is not printed; peak+ is used.'] + (['UNVERIFIED: the Instruction Manual limits FM deviation to 99.9 kHz (Table 2-5, p. 2-21); the document (Table 1) gives the 6060A/AN 1 to 500 kHz, and the owner asked for the larger deviations (2026-11-02). The command is sent as FM<kHz>KZ and read back; the unit\'s own range error stops the point if it refuses.'] if dev > 99.9 else []))
 
     # 4.6 deviation meter
     for tno, tb in ((9, TABLE9), (10, TABLE10)):
@@ -230,7 +231,7 @@ def build_spec():
         source=dict(cite=f'{DOC}, Calibration Procedure for Synthesized Signal Generator 6060 A/AN (Fluke), 30 April 2017 (GIDEP)', limits_text='GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)',
                     note='Points and limits are the document\'s own tables. Its measuring instruments (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (8902A, 96270A + NRP40T, 8563E); '
                          'each replacement is flagged UNVERIFIED on the point. The Calibration Performance Table is "Not Required"; Appendix A (reference oscillator adjustment) is not built.'),
-        options=dict(count_resolution_hz=COUNT_RES_HZ),
+        options=dict(count_resolution_hz=COUNT_RES_HZ, fm_max_khz=FM_MAX_KHZ),
         constants=dict(harm_count=HARM_COUNT),
         discrepancies=[
             'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The deviation-meter checks (4.6) and the reference-oscillator frequency (4.1.5) need a signal generator / counter that this program does not drive: those readings are typed.',

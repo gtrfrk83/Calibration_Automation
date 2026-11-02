@@ -609,9 +609,9 @@ class Fluke6060A(Instrument):
             raise InstrumentError(f"AM source {source!r} is not 'int' or 'ext'")
         return self._apply(writes, expect, f'AM {pct} % {source}', uncal=True, allow_uncal=allow_uncal)
 
-    def fm(self, dev_khz: float, source: str = 'int', rate_hz: int = 1000, allow_uncal=False, input_applied=True) -> dict:
+    def fm(self, dev_khz: float, source: str = 'int', rate_hz: int = 1000, allow_uncal=False, input_applied=True, max_khz: float | None = None) -> dict:
         """FM on. dev_khz 0.1 to 99.9 (0 to 9.99 with the low-rate option -651, found by IO at connect); source 'int' or 'ext'. The other FM source is switched off."""
-        top = MAX_FM_KHZ_651 if self.low_rate_fm else MAX_FM_KHZ
+        top = MAX_FM_KHZ_651 if self.low_rate_fm else (max_khz or MAX_FM_KHZ)      # max_khz: a procedure that asks for more than the manual's 99.9 kHz (GIDEP: 500 kHz; UNVERIFIED, the unit's own range error is read back)
         if not 0 <= dev_khz <= top:
             raise InstrumentError(f'FM deviation {dev_khz:g} kHz is outside 0 to {top:g} kHz')
         writes = [('fm.set', {'khz': float(f'{dev_khz:.3g}')})]

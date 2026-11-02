@@ -244,10 +244,12 @@ class Sim6060ATransport(_SimBase):
                 self._changed()
         elif head == 'FM':
             khz = n * UNIT_SCALE.get(suffix or 'HZ', 1.0) / 1e3
-            if not 0 <= khz <= (MAX_FM_KHZ_651 if low_rate else MAX_FM_KHZ) + 1e-9:
+            if not 0 <= khz <= (MAX_FM_KHZ_651 if low_rate else getattr(self, 'fm_max_khz', MAX_FM_KHZ)) + 1e-9:
                 self._reject(0, 0o001)
             else:
                 s['fm_res_hz'] = 1.0 if low_rate else 10.0                  # simulation choice: the manual only says -651 gives 0.1 Hz resolution
+                if khz * 1e3 / s['fm_res_hz'] > 32767:                      # the learn string holds 4 signed nibbles: a wider range (fm_max_khz, GIDEP) needs a coarser step (simulation choice, UNVERIFIED on a real unit)
+                    s['fm_res_hz'] *= 10.0
                 s['fm_dev_hz'] = round(khz * 1e3 / s['fm_res_hz']) * s['fm_res_hz']
                 self._changed()
         elif head == 'MR':
