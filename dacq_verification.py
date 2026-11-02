@@ -183,7 +183,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         if p['kind'] == 'ACI': return self.pm_param('dacq.settle.aci', 4.0)
         if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('dacq.settle.ohm_high', 4.0)
         if p['kind'] in ('DCI', 'OHM2'): return self.pm_param('dacq.settle.dci_ohm2', 3.0)
-        return self.pm_param('dacq.settle.default', 2.0)
+        return self.pm_param('dacq.settle.default', 5.0)      # DC volts and low-range 4-wire ohms: 5 s after the calibrator goes to operate (was 2 s; owner 2026-11-02: readings were taken too fast)
 
     @procmods_engine.point_commands()
     def measure(self, p):
