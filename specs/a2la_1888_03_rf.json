@@ -1,0 +1,359 @@
+{
+ "schema": 1,
+ "lab": "Applied Technical Services, LLC.",
+ "accreditor": "A2LA",
+ "certificate": "1888.03",
+ "revised": "07/07/2026",
+ "valid_to": "2028-01-31",
+ "cmc_note": "CMC = expanded uncertainty at approximately 95 % confidence (k = 2), footnote 2. It excludes the unit under test.",
+ "source": "Calibration Scope of Accreditation, section VI Electrical - RF/Microwave, printed pp. 33-34 of 47 (Measure lines); section V Distortion - Measure, p. 28",
+ "entries": [
+  {
+   "parameter": "RF Power - Measure",
+   "kind": "RFPOWER",
+   "page": 33,
+   "bands": [
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 10000000.0,
+     "f_hi": 30000000.0,
+     "pct": 0.8,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 30000000.0,
+     "f_hi": 4000000000.0,
+     "pct": 0.8,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 4000000000.0,
+     "f_hi": 6000000000.0,
+     "pct": 0.9,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 6000000000.0,
+     "f_hi": 10000000000.0,
+     "pct": 1.0,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 10000000000.0,
+     "f_hi": 12000000000.0,
+     "pct": 1.0,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 12000000000.0,
+     "f_hi": 14000000000.0,
+     "pct": 1.0,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 14000000000.0,
+     "f_hi": 15000000000.0,
+     "pct": 1.0,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -70,
+     "lv_hi": -30,
+     "f_lo": 15000000000.0,
+     "f_hi": 18000000000.0,
+     "pct": 1.1,
+     "comment": "Signal analyzer"
+    },
+    {
+     "lv_lo": -30,
+     "lv_hi": 20,
+     "f_lo": 0.0,
+     "f_hi": 100000000.0,
+     "db": 0.069,
+     "comment": "RF measurement standard"
+    },
+    {
+     "lv_lo": -30,
+     "lv_hi": 20,
+     "f_lo": 100000000.0,
+     "f_hi": 2400000000.0,
+     "lo_open": true,
+     "db": 0.069,
+     "comment": "RF measurement standard"
+    },
+    {
+     "lv_lo": -30,
+     "lv_hi": 20,
+     "f_lo": 2400000000.0,
+     "f_hi": 8000000000.0,
+     "lo_open": true,
+     "db": 0.092,
+     "comment": "RF measurement standard"
+    },
+    {
+     "lv_lo": -30,
+     "lv_hi": 20,
+     "f_lo": 8000000000.0,
+     "f_hi": 12400000000.0,
+     "lo_open": true,
+     "db": 0.11,
+     "comment": "RF measurement standard"
+    },
+    {
+     "lv_lo": -30,
+     "lv_hi": 20,
+     "f_lo": 12400000000.0,
+     "f_hi": 18000000000.0,
+     "lo_open": true,
+     "db": 0.14,
+     "comment": "RF measurement standard"
+    },
+    {
+     "lv_lo": -30,
+     "lv_hi": 20,
+     "f_lo": 18000000000.0,
+     "f_hi": 26500000000.0,
+     "lo_open": true,
+     "db": 0.15,
+     "comment": "RF measurement standard"
+    }
+   ]
+  },
+  {
+   "parameter": "RF Attenuation - Measure",
+   "kind": "RFATTEN",
+   "page": 33,
+   "f_lo": 10000000.0,
+   "f_hi": 1300000000.0,
+   "comment": "RF measurement standard",
+   "bands": [
+    {
+     "db_lo": 0,
+     "db_hi": 10,
+     "db": 0.064
+    },
+    {
+     "db_lo": 10,
+     "db_hi": 20,
+     "db": 0.067
+    },
+    {
+     "db_lo": 20,
+     "db_hi": 30,
+     "db": 0.069
+    },
+    {
+     "db_lo": 30,
+     "db_hi": 40,
+     "db": 0.082
+    },
+    {
+     "db_lo": 40,
+     "db_hi": 50,
+     "db": 0.1
+    },
+    {
+     "db_lo": 50,
+     "db_hi": 60,
+     "db": 0.1
+    },
+    {
+     "db_lo": 60,
+     "db_hi": 70,
+     "db": 0.11
+    },
+    {
+     "db_lo": 70,
+     "db_hi": 80,
+     "db": 0.11
+    },
+    {
+     "db_lo": 80,
+     "db_hi": 90,
+     "db": 0.14
+    },
+    {
+     "db_lo": 90,
+     "db_hi": 100,
+     "db": 0.14
+    },
+    {
+     "db_lo": 100,
+     "db_hi": 110,
+     "db": 0.15
+    },
+    {
+     "db_lo": 110,
+     "db_hi": 120,
+     "db": 0.22
+    }
+   ]
+  },
+  {
+   "parameter": "Amplitude Modulation - Measure",
+   "kind": "AM",
+   "page": 34,
+   "comment": "RF measurement standard",
+   "bands": [
+    {
+     "rate_lo": 50,
+     "rate_hi": 10000.0,
+     "f_lo": 150000.0,
+     "f_hi": 10000000.0,
+     "depth_lo": 5,
+     "depth_hi": 99,
+     "pct": 2.4
+    },
+    {
+     "rate_lo": 20,
+     "rate_hi": 10000.0,
+     "f_lo": 150000.0,
+     "f_hi": 10000000.0,
+     "depth_lo": 5,
+     "depth_hi": 99,
+     "pct": 3.5
+    },
+    {
+     "rate_lo": 20,
+     "rate_hi": 100000.0,
+     "f_lo": 1300000000.0,
+     "f_hi": 1600000000.0,
+     "depth_lo": 5,
+     "depth_hi": 99,
+     "pct": 3.5
+    },
+    {
+     "rate_lo": 50,
+     "rate_hi": 50000.0,
+     "f_lo": 1300000000.0,
+     "f_hi": 26500000000.0,
+     "depth_lo": 5,
+     "depth_hi": 99,
+     "pct": 3.5
+    },
+    {
+     "rate_lo": 20,
+     "rate_hi": 100000.0,
+     "f_lo": 1300000000.0,
+     "f_hi": 26500000000.0,
+     "depth_lo": 5,
+     "depth_hi": 99,
+     "pct": 3.5
+    }
+   ]
+  },
+  {
+   "parameter": "Frequency Modulation - Measure",
+   "kind": "FM",
+   "page": 34,
+   "comment": "RF measurement standard",
+   "bands": [
+    {
+     "rate_lo": 20,
+     "rate_hi": 10000.0,
+     "f_lo": 150000.0,
+     "f_hi": 10000000.0,
+     "dev_max": 40000.0,
+     "pct": 2.6
+    },
+    {
+     "rate_lo": 50,
+     "rate_hi": 100000.0,
+     "f_lo": 20000000.0,
+     "f_hi": 1300000000.0,
+     "dev_max": 400000.0,
+     "pct": 1.3
+    },
+    {
+     "rate_lo": 20,
+     "rate_hi": 200000.0,
+     "f_lo": 20000000.0,
+     "f_hi": 1300000000.0,
+     "dev_max": 4000.0,
+     "pct": 5.9
+    },
+    {
+     "rate_lo": 50,
+     "rate_hi": 100000.0,
+     "f_lo": 1300000000.0,
+     "f_hi": 26500000000.0,
+     "dev_max": 400000.0,
+     "pct": 3.7
+    },
+    {
+     "rate_lo": 20,
+     "rate_hi": 200000.0,
+     "f_lo": 1300000000.0,
+     "f_hi": 26500000000.0,
+     "dev_max": 400000.0,
+     "pct": 3.7
+    }
+   ]
+  },
+  {
+   "parameter": "Phase Modulation - Measure",
+   "kind": "PM",
+   "page": 34,
+   "comment": "RF measurement standard",
+   "bands": [
+    {
+     "rate_lo": 100,
+     "rate_hi": 20000.0,
+     "f_lo": 150000.0,
+     "f_hi": 1300000000.0,
+     "pct": 3.7
+    },
+    {
+     "rate_lo": 100,
+     "rate_hi": 20000.0,
+     "f_lo": 1300000000.0,
+     "f_hi": 26500000000.0,
+     "pct": 3.7
+    }
+   ]
+  },
+  {
+   "parameter": "Distortion - Measure",
+   "kind": "DIST",
+   "page": 28,
+   "section": "V",
+   "comment": "Distortion analyzer",
+   "bands": [
+    {
+     "db_lo": -80,
+     "db_hi": 0,
+     "f_lo": 20,
+     "f_hi": 20000.0,
+     "db": 1.2
+    },
+    {
+     "db_lo": -70,
+     "db_hi": 0,
+     "f_lo": 20000.0,
+     "f_hi": 50000.0,
+     "db": 2.3
+    },
+    {
+     "db_lo": -65,
+     "db_hi": 0,
+     "f_lo": 50000.0,
+     "f_hi": 100000.0,
+     "db": 2.3
+    }
+   ]
+  }
+ ]
+}
