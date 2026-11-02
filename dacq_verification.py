@@ -44,7 +44,7 @@ PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even pari
 FLOW = {'XON/XOFF (instrument default)': 'xon_xoff', 'None': 'none', 'RTS/CTS': 'rts_cts'}
 BAUDS = ['57600', '115200', '38400', '19200', '9600', '4800', '2400', '1200']
 GROUPS = ('ZERO_SHORT', 'ZERO_SHORT_OHM', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ', 'TEMP')
-GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_SHORT_OHM': 'Shorted channel 3 (ohms zero)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
+GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_SHORT_OHM': 'Shorted channel 3 (zero offset)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
                'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI': 'DC current', 'ACV': 'AC volts', 'ACI': 'AC current', 'FREQ': 'Frequency', 'TEMP': 'Type J thermocouple'}
 
 

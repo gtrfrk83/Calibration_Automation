@@ -9,7 +9,7 @@ Each point carries a 'role' that the procedure turns into a channel for the plug
     input    channel the calibrator is connected to (34901A ch 10, 34902A ch 8)
     current  34901A ch 21 (current input); the 34902A has none, so current points are skipped with that module
     tc       channel 2 (both modules): the type J thermocouple point, the last point (owner, 2026-11-02; 0 degC +/-1 degC, calibrator thermocouple simulation)
-    ohm_short channel 3 (both modules): the copper short of the 4-wire / 2-wire ohms zero points (4-wire partner channel 13; owner 2026-11-02); group ZERO_SHORT_OHM
+    ohm_short channel 3 (both modules): the copper short of ALL zero-short points (DC volts, 4-wire and 2-wire ohms; DC volts moved here 2026-11-02) (4-wire partner channel 13; owner 2026-11-02); group ZERO_SHORT_OHM
     volts    channel 1 (both modules): the DC volts, AC volts, frequency and gain-ohms points (owner, 2026-11-02; ohms force on 1, sense on 11); both models (34970A and 34972A, owner 2026-11-02)
 and a 'group' = the hook-up (diagram) key.
 
@@ -78,7 +78,7 @@ def plus(limits, extra):
 def sections(model='34970A'):
     vrole = 'volts'                                           # 34970A and 34972A: voltage and gain-ohms readings on channel 1 (owner, 2026-11-02)
     vch = 'channel 1'
-    z_short = [pt('DCV', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_V]
+    z_short = [pt('DCV', 0.0, r, l, 'ZERO_SHORT_OHM', 'ohm_short', input='short', plc=10) for r, l in ZERO_V]
     z_short += [pt('OHM4', 0.0, r, l, 'ZERO_SHORT_OHM', 'ohm_short', input='short', plc=10) for r, l in ZERO_R]
     z_open = [pt('DCI', 0.0, r, l, 'ZERO_OPEN', 'current', input='open', plc=10) for r, l in ZERO_I]
     z2w = [pt('OHM2', 0.0, r, plus(l, 4.0), 'ZERO_SHORT_OHM', 'ohm_short', input='short', plc=10,

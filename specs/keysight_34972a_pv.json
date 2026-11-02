@@ -68,8 +68,8 @@
       "1y": 4e-06
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -83,8 +83,8 @@
       "1y": 7e-06
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -98,8 +98,8 @@
       "1y": 4.9999999999999996e-05
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -113,8 +113,8 @@
       "1y": 0.0006
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -128,8 +128,8 @@
       "1y": 0.009000000000000001
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },

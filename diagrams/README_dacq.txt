@@ -26,3 +26,5 @@ GROUP (one picture per separate hook-up)
 DCV / ACV / FREQ pictures should show the calibrator on channel 1 (hook_34972A_<cal>_DCV.png etc. are used before the shared hook_dacq_ files).
 The gain ohms groups OHM4 / OHM2 also use channel 1 on the 34972A (4-wire: force ch 1, sense ch 11). The zero shorts and the current hook-ups are unchanged. 
 Channel numbers are slot*100 + channel; the program uses the module and slot chosen on screen (default 34901A in slot 2 = channels 209, 210, 219, 220, 221).
+
+Update 2026-11-02 (v): the DC volts zero (shorted input) points now also use channel 3, like the ohms zero points (4-wire partner 13). One copper short on channel 3 covers every zero-short point; group ZERO_SHORT_OHM.

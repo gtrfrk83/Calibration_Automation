@@ -107,8 +107,8 @@ class Dacq(Base):
         asks = [d for d in self.hn.dialogs if d[0] == 'box' and d[1] == 'askyesno' and d[2] == 'HIGH VOLTAGE']
         self.assertEqual(len(asks), 1, asks)
 
-    def test_ohms_zero_short_is_on_channel_3_with_partner_13_and_voltage_zero_stays_on_9(self):
-        # owner 2026-11-02: the resistance shorted points use channel 3 (4-wire partner 13); a separate wiring group makes the operator move the short
+    def test_every_zero_short_point_is_on_channel_3_with_partner_13(self):
+        # owner 2026-11-02: the resistance shorted points use channel 3 (4-wire partner 13); the DC volts zero points followed the same day
         import dacq_verification as D
         for model in ('34970A', '34972A'):
             D.configure(model)
@@ -117,9 +117,9 @@ class Dacq(Base):
             volt = [p for p in D.POINTS if p['kind'] == 'DCV' and p['source'] == 'none']
             self.assertEqual((len(ohm), len(volt)), (14, 5))
             self.assertEqual({p['group'] for p in ohm}, {'ZERO_SHORT_OHM'})
-            self.assertEqual({p['group'] for p in volt}, {'ZERO_SHORT'})
+            self.assertEqual({p['group'] for p in volt}, {'ZERO_SHORT_OHM'})
             self.assertEqual({app.io.channel(p) if app.io else D.channel_for('34901A', 2, p['role']) for p in ohm}, {203})
-            self.assertEqual({D.channel_for('34901A', 2, p['role']) for p in volt}, {209})
+            self.assertEqual({D.channel_for('34901A', 2, p['role']) for p in volt}, {203})
             self.assertIn('channel 203', app.setup_text(ohm[0]))
             self.assertIn('213', app.setup_text(ohm[0]))
 
