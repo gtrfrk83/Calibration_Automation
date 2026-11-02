@@ -202,6 +202,31 @@ class GidepEngine(GidepBench):
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 
+    def test_100_khz_carrier_is_tuned_by_automatic_operation_not_keyed_in(self):
+        """Owner bench 2026-11-02: '0.1MZ' gave 8902A error 10 / 20 at the first 100 kHz AM point; the receiver's own AM key (automatic tuning) read it. 150 kHz and up is still keyed in."""
+        low = next(p for p in points() if p['meas'] == 'am_depth' and p['gen']['freq_mhz'] < 0.15)
+        self.run_points(refs=[low['ref']])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])
+        sent = [c for c in self.t8902.sent if c]
+        self.assertTrue(any(c == 'AU' for c in sent), sent)
+        self.assertFalse(any(c.endswith('MZ') and not c.startswith('37') for c in sent), sent)
+
+    def test_the_simulated_8902a_refuses_a_keyed_in_100_khz_tuning_with_error_10(self):
+        from drivers.hp_8902a import HP8902A, decode_reading
+        self.connect()
+        rx = self.app.io.rx
+        with mock.patch.object(HP8902A, 'MIN_MANUAL_TUNE_MHZ', 0.0):                     # the old behaviour: key the 100 kHz in
+            with self.assertRaises(Exception) as cm:
+                rx.measure_am_percent(0.1, detector=9, hp=2, lp=1)
+        self.assertIn('error 10', str(cm.exception))
+
+    def test_manual_tuning_is_kept_at_and_above_150_khz(self):
+        from drivers.hp_8902a import HP8902A
+        self.assertEqual(HP8902A._tune(HP8902A, 0.15), ('tune.mhz', {'mhz': 0.15}))
+        self.assertEqual(HP8902A._tune(HP8902A, 0.1), ('tune.auto', {}))
+        self.assertEqual(HP8902A._tune(HP8902A, 520.0), ('tune.mhz', {'mhz': 520.0}))
+
     def test_typed_points_are_marked_manual_and_judged(self):
         self.run_points(refs=['4.1.5 10 MHz reference output', '4.6 Table 9 30 MHz 100 Hz 10 kHz'])
         found = {E.POINTS[int(k) - 1]['ref']: r for k, r in self.app.found.items()}
@@ -236,3 +261,4 @@ class GidepDemo(GidepBench):
 
 if __name__ == '__main__':
     unittest.main()
+

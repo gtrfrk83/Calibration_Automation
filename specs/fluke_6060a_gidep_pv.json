@@ -2837,7 +2837,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
@@ -2868,7 +2868,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
@@ -2899,7 +2899,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR distortion with HP and LP filters None -> 8902A audio distortion function, S2 at 1 kHz).",
-      "UNVERIFIED: below the 8902A modulation range (150 kHz)."
+      "UNVERIFIED: below the 8902A RF range (150 kHz); automatic tuning (AU) is used, accuracy not specified."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
@@ -2930,7 +2930,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
@@ -2961,7 +2961,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
@@ -2992,7 +2992,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 7",
@@ -3023,7 +3023,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 7",
@@ -3054,7 +3054,7 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is)."
+      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
      ],
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 7",

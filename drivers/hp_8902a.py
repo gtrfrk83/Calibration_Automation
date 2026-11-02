@@ -402,8 +402,15 @@ class HP8902A(Instrument):
             self.log.add('!!', f'status byte {st["value"]} after {context}: an error was displayed while the receiver settled; it is read again with the measurement', self.label)
         self._held_setup = key
 
+    MIN_MANUAL_TUNE_MHZ = 0.15            # the receiver's RF range starts at 150 kHz (p. 3-141 / 188 and the module docstring); UNVERIFIED that the manual prints the same limit for keyed-in tuning
+
     def _tune(self, carrier_mhz):
-        return ('tune.mhz', {'mhz': float(carrier_mhz)}) if carrier_mhz else ('tune.auto', {})
+        """Manual tuning (nMZ) for a carrier in range; AUTOMATIC OPERATION (AU) for none or one below 150 kHz. Owner bench 2026-11-02: nMZ with 0.1 MHz made the 8902A show error 10
+        (input frequency out of range, p. 3-287 / 311) and error 20 (value out of range) while its AM key, with the receiver tuning itself, read the same 100 kHz signal fine. The manual's own
+        AM procedure starts with AUTOMATIC OPERATION (p. 3-161 / 207), so a carrier below the keyed-in range is left to automatic tuning (the signal must be on when the reading is taken)."""
+        if carrier_mhz and float(carrier_mhz) >= self.MIN_MANUAL_TUNE_MHZ:
+            return ('tune.mhz', {'mhz': float(carrier_mhz)})
+        return ('tune.auto', {})
 
     def _trigger_read(self, timeout=None, context='') -> float:
         self.send('trig.hold')

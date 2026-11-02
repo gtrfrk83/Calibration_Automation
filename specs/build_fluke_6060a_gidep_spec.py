@@ -160,13 +160,13 @@ def build_spec():
             for pct, lo, hi in rows:
                 flags = [UNV + ' (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).']
                 if fm < 1:
-                    flags.append('UNVERIFIED: the 8902A measures modulation from 150 kHz; 100 kHz is below its range, so the reading may be refused (type the reading by hand if it is).')
+                    flags.append('UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz.')
                 add(s, f'4.4 {tbl}', tag=f'{nm} {pct} % at {rate} Hz', func='AMDEPTH', meas='am_depth', description=f'AM depth {pct} % at {rate} Hz rate, {nm} ({tbl})',
                     gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=pct, src='int', rate_hz=float(rate))), rx=dict(detector=9, hp=2, lp=1), nominal=float(pct), low=f(D(lo)), high=f(D(hi)), unit='%', flags=flags)
                 if rate == 1000 and pct == 50:
                     add(s, f'4.4 {tbl}', tag=f'{nm} 50 % THD', func='THD', meas='thd', description=f'AM distortion, 50 % at 1 kHz, {nm}, limit < 5 % ({tbl})',
                         gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=50, src='int', rate_hz=1000.0)), rx=dict(source='am', tone_hz=1000), nominal=0.0, low=0.0, high=AM_THD_MAX, strict_high=True, unit='%',
-                        flags=[UNV + ' (MMR distortion with HP and LP filters None -> 8902A audio distortion function, S2 at 1 kHz).'] + (['UNVERIFIED: below the 8902A modulation range (150 kHz).'] if fm < 1 else []))
+                        flags=[UNV + ' (MMR distortion with HP and LP filters None -> 8902A audio distortion function, S2 at 1 kHz).'] + (['UNVERIFIED: below the 8902A RF range (150 kHz); automatic tuning (AU) is used, accuracy not specified.'] if fm < 1 else []))
 
     # 4.5 FM calibration
     s = section('G-4.5', 'FM calibration (Table 8)', f'RF OUTPUT to the 8902A RF INPUT. +{FM_LEVEL_DBM} dBm, INT FM at 1 kHz; 8902A FM deviation, peak+, 300 Hz to 3 kHz.', 'RX')
