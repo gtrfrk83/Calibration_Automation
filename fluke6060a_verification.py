@@ -162,6 +162,33 @@ def apply_options(points, typed_thd, max_mhz=1050.0):
         p['error'] = float(f"{max(p['nominal'] - p['low'], p['high'] - p['nominal']):.9g}")
 
 
+UNCERTAINTY_NOTE = ('Uncertainty: expanded (k = 2) from the published specifications of the measuring standard (HP 8902A, Agilent 8563E), never below the '
+                    'A2LA scope CMC (cert. 1888.03) where the scope covers the point. Marked * : not covered by the scope of accreditation. N/A: no specification on file.')
+
+
+UNCERTAINTY_STATE_KEYS = ('6060A-gidep',)       # procedures whose points the owner reviewed (2026-11-02); the Instruction Manual procedure's report is unchanged
+
+
+def point_uncertainty(p, reading):
+    """(uncertainty text, TUR text) for one report row; ('', '') when the point has no budget or the procedure is not one of UNCERTAINTY_STATE_KEYS.
+    Never raises: a report never fails on an uncertainty."""
+    if STATE_KEY not in UNCERTAINTY_STATE_KEYS:
+        return '', ''
+    try:
+        import fluke6060a_uncertainty as fu
+        import tartur
+        import uncertainty
+        res = fu.evaluate(p, reading=reading)
+        if res.reported is None:
+            return '', ''
+        text = uncertainty.format_value(res.reported, res.unit)
+        if not res.covered:
+            return text + ' *', ''
+        return text, tartur.format_ratio(res.tur())
+    except Exception:
+        return '', ''
+
+
 def prompt_key(p):
     """What decides whether the hook-up prompt is shown again: the wiring group."""
     return p['group']
@@ -1116,10 +1143,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                                    None, False, section=self.report_section(p))
 
     def point_row(self, p, r):
-        """One report row. No uncertainty is printed (the suite has no uncertainty for these RF measurements; the cover sheet from the other software carries the standards)."""
+        """One report row. Uncertainty from fluke6060a_uncertainty (owner, 2026-11-02): the budget from the measuring standard's published specification, with the
+        A2LA CMC as the floor where the scope covers the point; a point the scope does not cover prints its budget marked ' *' (report_pdf prints the footnote);
+        a point with no budget prints N/A. TUR only for points the scope covers (the printed TUR definition says so)."""
         import report_pdf
         note = '' if p['unit'] != '' else ' (1 = passed)'
-        return report_pdf.cert_row(p['description'] + note, p['nominal'], p['low'], p['high'], p['unit'], r['reading'], r['result'] == 'FAIL', section=self.report_section(p))
+        unc, tur = point_uncertainty(p, r.get('reading'))
+        row = report_pdf.cert_row(p['description'] + note, p['nominal'], p['low'], p['high'], p['unit'], r['reading'], r['result'] == 'FAIL', section=self.report_section(p),
+                                  uncertainty=unc)
+        row['TAR'], row['TUR'] = '', tur
+        return row
 
     def export_pdf(self):
         rows, pts = self.certificate_rows_and_points()
@@ -1137,7 +1170,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                       ('Limits applied', SPEC['source'].get('limits_text') or 'Fluke 6060A Instruction Manual, Section 4A'), ('Source', SPEC['source']['cite'])]
             if self.max_mhz() < 1050.0:
                 header.append(('Frequency range', f'0.1 to {self.max_mhz():g} MHz (this unit): points above it are listed as NOT TESTED'))
-            report_pdf.write_calibration_pdf(path, rows, header=header, demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, None),
+            report_pdf.write_calibration_pdf(path, rows, header=header, demo=demo, details=details, footer_note=UNCERTAINTY_NOTE,
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:
             port.message('error', 'PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return

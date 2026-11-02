@@ -392,6 +392,17 @@ def point_row(p, reading, failed, section='', mixed=False, standard=None):
                     uncertainty=point_uncertainty(p, standard))
 
 
+def scope_star_note() -> str:
+    """The footnote for an Uncertainty cell ending in '*': the value is not covered by the laboratory's scope of accreditation."""
+    try:
+        d = scope().data
+        cert = f"{d['accreditor']} scope of accreditation, certificate {d['certificate']}"
+    except Exception:
+        cert = 'scope of accreditation'
+    return (f'* Not covered by the laboratory\'s {cert}. The uncertainty shown is calculated from the published specifications of the '
+            'measuring standard (k = 2).')
+
+
 def cert_row(description, nominal, low, high, unit, reading=None, failed=False, as_left='Same', uncertainty='',
              nominal_text=None, section='', frequency=None):
     """One report row from base-unit numbers. Display scaling (6 mV, 1.00 MOhm) matches the on-screen tables;
@@ -623,6 +634,8 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     table.setStyle(TableStyle(style))
     story.append(table)
     # footer_note (uncertainty source, method notes) is not printed: that information is on the lab's cover certificate.
+    if any(str(r.get('Uncertainty') or '').rstrip().endswith('*') for r in rows):      # only a report with a starred uncertainty (6060A, 2026-11-02): others are unchanged
+        story += [Spacer(1, 6), Paragraph(clean(scope_star_note()), meta)]
     if show_tar_tur:                                   # only when the optional columns are on
         story += [Spacer(1, 6), Paragraph(clean(tar_tur_definition(shown_sel)), meta)]
 

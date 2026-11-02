@@ -18,6 +18,7 @@ import json
 import math
 import os
 import sys
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -213,3 +214,55 @@ class Coverage(Base):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Report(Base):
+    """The engine's report rows and the PDF footnote (owner, 2026-11-02: values not covered by the scope print with an asterisk)."""
+
+    def rows_for(self, state_key, refs, reading=None):
+        import report_pdf
+        old = fv.STATE_KEY
+        try:
+            fv.STATE_KEY = state_key
+            out = []
+            for ref in refs:
+                p = self.points[ref]
+                unc, tur = fv.point_uncertainty(p, reading)
+                out.append(report_pdf.cert_row(p['description'], p['nominal'], p['low'], p['high'], p['unit'], p['nominal'], False, section=p['section'],
+                                               uncertainty=unc) | {'TAR': '', 'TUR': tur})
+            return out
+        finally:
+            fv.STATE_KEY = old
+
+    def test_gidep_rows_star_what_the_scope_does_not_cover(self):
+        rows = self.rows_for('6060A-gidep', ['4.5 Table 8 250 MHz 250 kHz', '4.4 Table 6 250 MHz 30 % at 1000 Hz', '4.7 Table 11 harmonics 5 MHz',
+                                             '4.2 Table 5 250 MHz -10 dBm relative', '4.4 Table 6 100 kHz 30 % at 1000 Hz', '4.1 Table 2 100.00000 MHz'])
+        self.assertEqual([r['Uncertainty'] for r in rows], ['3.3 kHz', '0.30 % *', '1.7 dB *', '0.067 dB', '', '30 Hz'])
+        self.assertEqual([r['TUR'] for r in rows], ['3.7:1', '', '', '37.3:1', '', '0.3:1'])
+
+    def test_instruction_manual_procedure_is_unchanged(self):
+        old = fv.STATE_KEY
+        try:
+            fv.STATE_KEY = fv.MODEL
+            self.assertEqual(fv.point_uncertainty(self.points['4.5 Table 8 250 MHz 250 kHz'], None), ('', ''))
+        finally:
+            fv.STATE_KEY = old
+
+    @unittest.skipUnless(Path('/usr/bin/pdftotext').exists(), 'pdftotext not installed')
+    def test_pdf_prints_the_footnote_only_when_a_value_is_starred(self):
+        try:
+            import reportlab  # noqa: F401
+        except Exception:
+            self.skipTest('reportlab not installed')
+        import report_pdf
+        starred = self.rows_for('6060A-gidep', ['4.4 Table 6 250 MHz 30 % at 1000 Hz', '4.5 Table 8 250 MHz 250 kHz'])
+        plain = self.rows_for('6060A-gidep', ['4.5 Table 8 250 MHz 250 kHz'])
+        texts = []
+        for rows in (starred, plain):
+            pdf = os.path.join(self.tmp.name, f'r{len(texts)}.pdf')
+            report_pdf.write_calibration_pdf(pdf, rows, header=[('Instrument ID', 'T-1')], demo=True, record_history=False)
+            texts.append(subprocess.run(['pdftotext', '-layout', pdf, '-'], capture_output=True, text=True, check=True).stdout)
+        self.assertIn('0.30 % *', texts[0])
+        self.assertIn('* Not covered by the laboratory', texts[0])
+        self.assertIn('certificate 1888.03', ' '.join(texts[0].split()))
+        self.assertNotIn('Not covered by the laboratory', texts[1])

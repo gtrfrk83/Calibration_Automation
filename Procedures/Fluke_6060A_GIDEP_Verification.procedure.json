@@ -27,6 +27,7 @@
   "code": [
    "Procedures/Fluke_6060A_GIDEP_Verification.py",
    "fluke6060a_verification.py",
+   "fluke6060a_uncertainty.py",
    "fluke6060a_view_qt.py",
    "qtui/bench_view.py",
    "ui_port.py",
@@ -42,7 +43,8 @@
    "drivers/keysight_332xx.py"
   ],
   "spec": [
-   "specs/fluke_6060a_gidep_pv.json"
+   "specs/fluke_6060a_gidep_pv.json",
+   "specs/a2la_1888_03_rf.json"
   ]
  },
  "hookup": {

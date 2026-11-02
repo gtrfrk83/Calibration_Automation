@@ -338,6 +338,9 @@ def _amdepth(r, p, reading, path):
 
 
 def _thd(r, p, reading, path):
+    if p.get('meas') != 'thd':
+        r.status, r.reason = NO_SPEC, 'Typed distortion reading from the technician\'s own analyzer: no specification on file'
+        return
     std = _standard('8902A', path)
     r.standard = 'HP 8902A audio distortion'
     g = p['gen']
