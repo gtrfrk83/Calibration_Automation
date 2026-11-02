@@ -23,13 +23,15 @@ AC_KINDS = ('ACV', 'ACI')
 
 # Plug-in module channel plan for the verification (Service Guide pp. 69, 76, 80-87)
 MODULE_CHANNELS = {
-    '34901A': dict(short=9, input=10, current=21, pair_offset=10),     # 4-wire pairs: channel n with n + 10
-    '34902A': dict(short=7, input=8, current=None, pair_offset=8),     # 4-wire pairs: channel n with n + 8; no current input
+    '34901A': dict(short=9, input=10, current=21, pair_offset=10, volts=1),     # 4-wire pairs: channel n with n + 10
+    '34902A': dict(short=7, input=8, current=None, pair_offset=8, volts=1),     # 4-wire pairs: channel n with n + 8; no current input
 }
+# 'volts' = channel 1: the 34972A procedure reads its DC volts, AC volts and frequency points on channel 1 of the module (owner, 2026-11-02).
+# The 34970A procedure still uses the 'input' channel of the Service Guide (34901A ch 10, 34902A ch 8) for those points.
 
 
 def channel_for(module: str, slot: int, role: str) -> int:
-    """Channel number (slot*100 + n) for 'short', 'input' or 'current' on the given module and slot (1-3)."""
+    """Channel number (slot*100 + n) for 'short', 'input', 'current' or 'volts' on the given module and slot (1-3)."""
     plan = MODULE_CHANNELS[module]
     n = plan[role]
     if n is None:

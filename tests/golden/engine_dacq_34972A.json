@@ -338,13 +338,13 @@
    ]
   },
   {
-   "call": "{'description': 'DC volts -10.00 V, 10.00 V range', 'error': 0.0004, 'group': 'DCV', 'id': 16, 'kind': 'DCV', 'limits': {'1y': 0.00039999999999999996, '24h': 0.00018999999999999998, '90d': 0.00025}, 'nominal': -10, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 10, 'role': 'input', 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to the input channel HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "call": "{'description': 'DC volts -10.00 V, 10.00 V range', 'error': 0.0004, 'group': 'DCV', 'id': 16, 'kind': 'DCV', 'limits': {'1y': 0.00039999999999999996, '24h': 0.00018999999999999998, '90d': 0.00025}, 'nominal': -10, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 10, 'role': 'volts', 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to channel 1 HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "dacq_verification.IO.measure[DCV#16]",
    "log": [
     "5560A|>>|STBY",
-    "34972A|>>|CONF:VOLT:DC 10,(@210)",
-    "34972A|>>|VOLT:DC:NPLC 10,(@210)",
-    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|CONF:VOLT:DC 10,(@201)",
+    "34972A|>>|VOLT:DC:NPLC 10,(@201)",
+    "34972A|>>|ROUT:SCAN (@201)",
     "34972A|>>|TRIG:SOUR IMM",
     "34972A|>>|SYST:ERR?",
     "34972A|<<|+0,\"No error\"",
@@ -367,15 +367,15 @@
     ],
     [
      "W",
-     "CONF:VOLT:DC 10,(@210)"
+     "CONF:VOLT:DC 10,(@201)"
     ],
     [
      "W",
-     "VOLT:DC:NPLC 10,(@210)"
+     "VOLT:DC:NPLC 10,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -584,13 +584,13 @@
    ]
   },
   {
-   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter', 'error': 0.0001, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACV', 'id': 32, 'kind': 'ACV', 'limits': {'1y': 9.999999999999999e-05, '24h': 7e-05, '90d': 8.999999999999999e-05}, 'nominal': 0.1, 'optional': False, 'page': '84', 'quick': False, 'range': 0.1, 'role': 'input', 'section': 'acv', 'section_title': 'AC volts gain', 'setup': 'Calibrator AC voltage output to the input channel HI / LO. 3 Hz AC filter (7 s per reading).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter', 'error': 0.0001, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACV', 'id': 32, 'kind': 'ACV', 'limits': {'1y': 9.999999999999999e-05, '24h': 7e-05, '90d': 8.999999999999999e-05}, 'nominal': 0.1, 'optional': False, 'page': '84', 'quick': False, 'range': 0.1, 'role': 'volts', 'section': 'acv', 'section_title': 'AC volts gain', 'setup': 'Calibrator AC voltage output to channel 1 HI / LO. 3 Hz AC filter (7 s per reading).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "dacq_verification.IO.measure[ACV#32]",
    "log": [
     "5560A|>>|STBY",
-    "34972A|>>|CONF:VOLT:AC 0.1,(@210)",
-    "34972A|>>|VOLT:AC:BAND 3,(@210)",
-    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|CONF:VOLT:AC 0.1,(@201)",
+    "34972A|>>|VOLT:AC:BAND 3,(@201)",
+    "34972A|>>|ROUT:SCAN (@201)",
     "34972A|>>|TRIG:SOUR IMM",
     "34972A|>>|SYST:ERR?",
     "34972A|<<|+0,\"No error\"",
@@ -613,15 +613,15 @@
     ],
     [
      "W",
-     "CONF:VOLT:AC 0.1,(@210)"
+     "CONF:VOLT:AC 0.1,(@201)"
     ],
     [
      "W",
-     "VOLT:AC:BAND 3,(@210)"
+     "VOLT:AC:BAND 3,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -748,14 +748,14 @@
    ]
   },
   {
-   "call": "{'amplitude': 0.01, 'description': 'Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range', 'error': 0.1, 'group': 'FREQ', 'id': 48, 'kind': 'FREQ', 'limits': {'1y': 0.1, '24h': 0.06, '90d': 0.1}, 'nominal': 100, 'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).', 'optional': False, 'page': '86', 'quick': False, 'range': 0.1, 'role': 'input', 'section': 'freq', 'section_title': 'Frequency gain', 'setup': 'Calibrator AC voltage at the stated level and frequency to the input channel HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'Hz'}",
+   "call": "{'amplitude': 0.01, 'description': 'Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range', 'error': 0.1, 'group': 'FREQ', 'id': 48, 'kind': 'FREQ', 'limits': {'1y': 0.1, '24h': 0.06, '90d': 0.1}, 'nominal': 100, 'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).', 'optional': False, 'page': '86', 'quick': False, 'range': 0.1, 'role': 'volts', 'section': 'freq', 'section_title': 'Frequency gain', 'setup': 'Calibrator AC voltage at the stated level and frequency to channel 1 HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'Hz'}",
    "case": "dacq_verification.IO.measure[FREQ#48]",
    "log": [
     "5560A|>>|STBY",
-    "34972A|>>|CONF:FREQ 100,(@210)",
-    "34972A|>>|FREQ:VOLT:RANG 0.1,(@210)",
-    "34972A|>>|FREQ:APER 1,(@210)",
-    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|CONF:FREQ 100,(@201)",
+    "34972A|>>|FREQ:VOLT:RANG 0.1,(@201)",
+    "34972A|>>|FREQ:APER 1,(@201)",
+    "34972A|>>|ROUT:SCAN (@201)",
     "34972A|>>|TRIG:SOUR IMM",
     "34972A|>>|SYST:ERR?",
     "34972A|<<|+0,\"No error\"",
@@ -778,19 +778,19 @@
     ],
     [
      "W",
-     "CONF:FREQ 100,(@210)"
+     "CONF:FREQ 100,(@201)"
     ],
     [
      "W",
-     "FREQ:VOLT:RANG 0.1,(@210)"
+     "FREQ:VOLT:RANG 0.1,(@201)"
     ],
     [
      "W",
-     "FREQ:APER 1,(@210)"
+     "FREQ:APER 1,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",

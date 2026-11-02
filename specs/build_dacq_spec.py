@@ -8,6 +8,7 @@ Each point carries a 'role' that the procedure turns into a channel for the plug
     short    channel with the low-thermal short (34901A ch 9, 34902A ch 7); 4-wire pairs use the partner channel (+10 / +8)
     input    channel the calibrator is connected to (34901A ch 10, 34902A ch 8)
     current  34901A ch 21 (current input); the 34902A has none, so current points are skipped with that module
+    volts    channel 1 (both modules): the 34972A's DC volts, AC volts and frequency points (owner, 2026-11-02); the 34970A keeps 'input' for them
 and a 'group' = the hook-up (diagram) key.
 
 Run:  python specs/build_dacq_spec.py
@@ -72,26 +73,28 @@ def plus(limits, extra):
     return tuple(v + extra for v in limits)
 
 
-def sections():
+def sections(model='34970A'):
+    vrole = 'volts' if model == '34972A' else 'input'        # 34972A: voltage readings on channel 1 (owner, 2026-11-02)
+    vch = 'channel 1' if model == '34972A' else 'the input channel'
     z_short = [pt('DCV', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_V]
     z_short += [pt('OHM4', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_R]
     z_open = [pt('DCI', 0.0, r, l, 'ZERO_OPEN', 'current', input='open', plc=10) for r, l in ZERO_I]
     z2w = [pt('OHM2', 0.0, r, plus(l, 4.0), 'ZERO_SHORT', 'short', input='short', plc=10,
               note='2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.') for r, l in ZERO_R]
-    gain_v = [pt('DCV', n, r, l, 'DCV', 'input', plc=10) for n, r, l in GAIN_V]
+    gain_v = [pt('DCV', n, r, l, 'DCV', vrole, plc=10) for n, r, l in GAIN_V]
     gain_r4 = [pt('OHM4', r, r, l, 'OHM4', 'input', plc=10, **({'note': 'Verify only, no adjustment required (manual footnote c).'} if r == 1e8 else {}))
                for r, l in GAIN_R]
     gain_i = [pt('DCI', r, r, l, 'DCI', 'current', plc=10) for r, l in GAIN_I]
     gain_r2 = [pt('OHM2', r, r, plus(l, 1.0), 'OHM2', 'input', plc=10,
                   note='2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.')
                for r, l in GAIN_R]
-    acv = [pt('ACV', v, rng, l, 'ACV', 'input', frequency=f, filter_hz=3, **({'note': AC_V_NOTE[(v, f)]} if (v, f) in AC_V_NOTE else {}))
+    acv = [pt('ACV', v, rng, l, 'ACV', vrole, frequency=f, filter_hz=3, **({'note': AC_V_NOTE[(v, f)]} if (v, f) in AC_V_NOTE else {}))
            for v, f, rng, l in AC_V]
     aci = [pt('ACI', a, rng, l, 'ACI', 'current', frequency=f, filter_hz=3) for a, f, rng, l in AC_I]
-    freq = [pt('FREQ', f, rng, l, 'FREQ', 'input', amplitude=v,
+    freq = [pt('FREQ', f, rng, l, 'FREQ', vrole, amplitude=v,
                **({'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).'} if v == 0.01 else {}))
             for v, f, rng, l in [(a, b, c, d) for a, b, c, d in FREQ]]
-    opt_ac = [pt('ACV', v, rng, l, 'ACV', 'input', frequency=f, filter_hz=3, opt='ac') for v, f, rng, l in OPT_AC]
+    opt_ac = [pt('ACV', v, rng, l, 'ACV', vrole, frequency=f, filter_hz=3, opt='ac') for v, f, rng, l in OPT_AC]
     for p in z2w + gain_r2:
         p['opt'] = 'ohm2'
 
@@ -105,15 +108,15 @@ def sections():
         sec('zero_short', 'Zero offset: shorted input', '80-81', 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.',
             z_short, source='none'),
         sec('zero_open', 'Zero offset: current open', '80', 'Current input channel left OPEN. The calibrator is not used.', z_open, source='none'),
-        sec('dcv', 'DC volts gain', '82', 'Calibrator voltage output to the input channel HI / LO.', gain_v),
+        sec('dcv', 'DC volts gain', '82', f'Calibrator voltage output to {vch} HI / LO.', gain_v),
         sec('ohm4', '4-wire ohms gain', '82', 'Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.', gain_r4),
         sec('dci', 'DC current gain', '83', 'Calibrator current output to the current input channel.', gain_i),
-        sec('acv', 'AC volts gain', '84', 'Calibrator AC voltage output to the input channel HI / LO. 3 Hz AC filter (7 s per reading).', acv),
+        sec('acv', 'AC volts gain', '84', f'Calibrator AC voltage output to {vch} HI / LO. 3 Hz AC filter (7 s per reading).', acv),
         sec('aci', 'AC current gain', '85', 'Calibrator AC current output to the current input channel. 3 Hz AC filter (7 s per reading).', aci),
-        sec('freq', 'Frequency gain', '86', 'Calibrator AC voltage at the stated level and frequency to the input channel HI / LO.', freq),
+        sec('freq', 'Frequency gain', '86', f'Calibrator AC voltage at the stated level and frequency to {vch} HI / LO.', freq),
         sec('zero_ohm2', '2-wire ohms zero (optional)', '81', 'Short on the input channel. The calibrator is not used.', z2w[:], source='none', optional=True),
         sec('ohm2', '2-wire ohms gain (optional)', '83', 'Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).', gain_r2, optional=True),
-        sec('opt_ac', 'Optional AC tests', '87', 'Calibrator AC voltage output to the input channel HI / LO.', opt_ac, optional=True),
+        sec('opt_ac', 'Optional AC tests', '87', f'Calibrator AC voltage output to {vch} HI / LO.', opt_ac, optional=True),
     ]
 
 
@@ -126,14 +129,14 @@ def spec(model, interface):
         'periods': PERIODS, 'default_period': '1y',
         'equipment': {'multiplexer': 'Keysight 34901A 20-channel multiplexer in slot 200 (34902A: no current tests)', 'calibrator': 'Fluke 5560A or 5522A (manual lists the 5700A)',
                       'zero': 'Low-thermal copper shorts on the input channels'},
-        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10},
-                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8}},
+        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, **({'volts': 1} if model == '34972A' else {})},
+                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, **({'volts': 1} if model == '34972A' else {})}},
         'general': ['Ambient 18-28 C (ideally 23 +/- 1 C), humidity below 80 %.',
                     'Warm up 2 hours with a copper short connected and the multiplexer installed before verification.',
                     'Use shielded twisted-pair PTFE cable, as short as possible; connect the shield to the source LO and the calibrator LO to earth ground except where noted.',
                     'Select 6.5 digit resolution (10 PLC) for DC, resistance and frequency tests; AC tests use the 3 Hz slow filter.',
                     'Allow source settling before every reading.'],
-        'sections': sections(),
+        'sections': sections(model),
     }
 
 
