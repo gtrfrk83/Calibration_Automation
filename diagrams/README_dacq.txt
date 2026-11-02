@@ -12,6 +12,7 @@ Search order: hook_<model>_<cal>_<G>  ->  hook_dacq_<cal>_<G>  ->  hook_<model>_
 
 GROUP (one picture per separate hook-up)
   ZERO_SHORT   low-thermal copper shorts on the input channel (34901A ch 9, 34902A ch 7) and its 4-wire partner (ch 19 / 15); no calibrator
+  ZERO_SHORT_OHM  copper shorts on channel 3 and its 4-wire partner channel 13, for the ohms zero points (owner, 2026-11-02); uses the ZERO_SHORT picture if it has none of its own
   ZERO_OPEN    current channel ch 21 left open; no calibrator
   DCV          calibrator voltage to the input channel (34901A ch 10, 34902A ch 8)
   OHM4         4-wire ohms: force to ch 10, sense to ch 20 (34902A: ch 8 / 16)

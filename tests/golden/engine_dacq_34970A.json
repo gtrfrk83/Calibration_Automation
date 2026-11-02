@@ -228,13 +228,13 @@
    ]
   },
   {
-   "call": "{'description': 'Zero offset, 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'group': 'ZERO_SHORT', 'id': 6, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.0035, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': 'Zero offset, 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'group': 'ZERO_SHORT_OHM', 'id': 6, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.0035, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'ohm_short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM4#6]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:FRES 100,(@209)",
-    "34970A|>>|FRES:NPLC 10,(@209)",
-    "34970A|>>|ROUT:SCAN (@209)",
+    "34970A|>>|CONF:FRES 100,(@203)",
+    "34970A|>>|FRES:NPLC 10,(@203)",
+    "34970A|>>|ROUT:SCAN (@203)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -252,15 +252,15 @@
     ],
     [
      "W",
-     "CONF:FRES 100,(@209)"
+     "CONF:FRES 100,(@203)"
     ],
     [
      "W",
-     "FRES:NPLC 10,(@209)"
+     "FRES:NPLC 10,(@203)"
     ],
     [
      "W",
-     "ROUT:SCAN (@209)"
+     "ROUT:SCAN (@203)"
     ],
     [
      "W",
@@ -845,13 +845,13 @@
    ]
   },
   {
-   "call": "{'description': 'Zero offset, 2-wire ohms, 100.0 Ω range (input shorted)', 'error': 4.004, 'group': 'ZERO_SHORT', 'id': 50, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 4.004, '24h': 4.0035, '90d': 4.004}, 'nominal': 0.0, 'note': '2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.', 'opt': 'ohm2', 'optional': True, 'page': '81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'short', 'section': 'zero_ohm2', 'section_title': '2-wire ohms zero (optional)', 'setup': 'Short on the input channel. The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': 'Zero offset, 2-wire ohms, 100.0 Ω range (input shorted)', 'error': 4.004, 'group': 'ZERO_SHORT_OHM', 'id': 50, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 4.004, '24h': 4.0035, '90d': 4.004}, 'nominal': 0.0, 'note': '2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.', 'opt': 'ohm2', 'optional': True, 'page': '81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'ohm_short', 'section': 'zero_ohm2', 'section_title': '2-wire ohms zero (optional)', 'setup': 'Short on the input channel. The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM2#50]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:RES 100,(@209)",
-    "34970A|>>|RES:NPLC 10,(@209)",
-    "34970A|>>|ROUT:SCAN (@209)",
+    "34970A|>>|CONF:RES 100,(@203)",
+    "34970A|>>|RES:NPLC 10,(@203)",
+    "34970A|>>|ROUT:SCAN (@203)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -869,15 +869,15 @@
     ],
     [
      "W",
-     "CONF:RES 100,(@209)"
+     "CONF:RES 100,(@203)"
     ],
     [
      "W",
-     "RES:NPLC 10,(@209)"
+     "RES:NPLC 10,(@203)"
     ],
     [
      "W",
-     "ROUT:SCAN (@209)"
+     "ROUT:SCAN (@203)"
     ],
     [
      "W",

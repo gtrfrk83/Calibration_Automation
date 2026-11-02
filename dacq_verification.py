@@ -43,8 +43,8 @@ CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('55
 PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even parity': (7, 'even'), '7 data bits, odd parity': (7, 'odd')}
 FLOW = {'XON/XOFF (instrument default)': 'xon_xoff', 'None': 'none', 'RTS/CTS': 'rts_cts'}
 BAUDS = ['57600', '115200', '38400', '19200', '9600', '4800', '2400', '1200']
-GROUPS = ('ZERO_SHORT', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ')
-GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
+GROUPS = ('ZERO_SHORT', 'ZERO_SHORT_OHM', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ')
+GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_SHORT_OHM': 'Shorted channel 3 (ohms zero)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
                'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI': 'DC current', 'ACV': 'AC volts', 'ACI': 'AC current', 'FREQ': 'Frequency'}
 
 
@@ -65,7 +65,10 @@ def configure(model):
 def find_diagram(model, cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_<model>_<cal>_<GROUP>.png, then the shared hook_dacq_ names."""
     cal = '5522A' if cal == '5520A' else cal           # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED)
-    for name in (f'hook_{model}_{cal}_{group}', f'hook_dacq_{cal}_{group}', f'hook_{model}_{group}', f'hook_dacq_{group}'):
+    names = (f'hook_{model}_{cal}_{group}', f'hook_dacq_{cal}_{group}', f'hook_{model}_{group}', f'hook_dacq_{group}')
+    if group == 'ZERO_SHORT_OHM':      # no picture of its own: the ZERO_SHORT one (a copper short) shows the same hook-up
+        names += (f'hook_{model}_{cal}_ZERO_SHORT', f'hook_dacq_{cal}_ZERO_SHORT', f'hook_{model}_ZERO_SHORT', 'hook_dacq_ZERO_SHORT')
+    for name in names:
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
             return path
@@ -367,7 +370,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         except Exception:
             return 'This module has no such channel.'
         pair = pair_channel(module, ch) if p['role'] != 'current' else None
-        if g == 'ZERO_SHORT':
+        if g in ('ZERO_SHORT', 'ZERO_SHORT_OHM'):
             return (f'Disconnect the calibrator from the module. Fit low-thermal copper shorts across HI/LO of channel {ch} and, for the 4-wire ohms points, '
                     f'of its partner channel {pair}. The calibrator stays in STANDBY.')
         if g == 'ZERO_OPEN':

@@ -23,15 +23,16 @@ AC_KINDS = ('ACV', 'ACI')
 
 # Plug-in module channel plan for the verification (Service Guide pp. 69, 76, 80-87)
 MODULE_CHANNELS = {
-    '34901A': dict(short=9, input=10, current=21, pair_offset=10, volts=1),     # 4-wire pairs: channel n with n + 10
-    '34902A': dict(short=7, input=8, current=None, pair_offset=8, volts=1),     # 4-wire pairs: channel n with n + 8; no current input
+    '34901A': dict(short=9, input=10, current=21, pair_offset=10, volts=1, ohm_short=3),     # 4-wire pairs: channel n with n + 10
+    '34902A': dict(short=7, input=8, current=None, pair_offset=8, volts=1, ohm_short=3),     # 4-wire pairs: channel n with n + 8; no current input
 }
+# 'ohm_short' = channel 3: the copper short for the 4-wire and 2-wire ohms zero points (4-wire partner channel 13), owner 2026-11-02.
 # 'volts' = channel 1: the 34970A and 34972A procedures read DC volts, AC volts, frequency and gain-ohms points (4-wire sense on channel 11) on channel 1
 # of the module (owner, 2026-11-02), not the Service Guide's 'input' channel (34901A ch 10, 34902A ch 8).
 
 
 def channel_for(module: str, slot: int, role: str) -> int:
-    """Channel number (slot*100 + n) for 'short', 'input', 'current' or 'volts' on the given module and slot (1-3)."""
+    """Channel number (slot*100 + n) for 'short', 'input', 'current', 'volts' or 'ohm_short' on the given module and slot (1-3)."""
     plan = MODULE_CHANNELS[module]
     n = plan[role]
     if n is None:

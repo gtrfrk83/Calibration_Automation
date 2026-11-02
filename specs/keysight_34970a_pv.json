@@ -29,14 +29,16 @@
    "input": 10,
    "current": 21,
    "pair_offset": 10,
-   "volts": 1
+   "volts": 1,
+   "ohm_short": 3
   },
   "34902A": {
    "short": 7,
    "input": 8,
    "current": null,
    "pair_offset": 8,
-   "volts": 1
+   "volts": 1,
+   "ohm_short": 3
   }
  },
  "general": [
@@ -139,8 +141,8 @@
       "1y": 0.004
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -154,8 +156,8 @@
       "1y": 0.01
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -169,8 +171,8 @@
       "1y": 0.1
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -184,8 +186,8 @@
       "1y": 1
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -199,8 +201,8 @@
       "1y": 10
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -214,8 +216,8 @@
       "1y": 100
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     },
@@ -229,8 +231,8 @@
       "1y": 10000.0
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10
     }
@@ -857,8 +859,8 @@
       "1y": 4.004
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
@@ -874,8 +876,8 @@
       "1y": 4.01
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
@@ -891,8 +893,8 @@
       "1y": 4.1
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
@@ -908,8 +910,8 @@
       "1y": 5.0
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
@@ -925,8 +927,8 @@
       "1y": 14.0
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
@@ -942,8 +944,8 @@
       "1y": 104.0
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
@@ -959,8 +961,8 @@
       "1y": 10004.0
      },
      "quick": false,
-     "group": "ZERO_SHORT",
-     "role": "short",
+     "group": "ZERO_SHORT_OHM",
+     "role": "ohm_short",
      "input": "short",
      "plc": 10,
      "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",

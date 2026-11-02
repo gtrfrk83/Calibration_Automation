@@ -8,6 +8,7 @@ Each point carries a 'role' that the procedure turns into a channel for the plug
     short    channel with the low-thermal short (34901A ch 9, 34902A ch 7); 4-wire pairs use the partner channel (+10 / +8)
     input    channel the calibrator is connected to (34901A ch 10, 34902A ch 8)
     current  34901A ch 21 (current input); the 34902A has none, so current points are skipped with that module
+    ohm_short channel 3 (both modules): the copper short of the 4-wire / 2-wire ohms zero points (4-wire partner channel 13; owner 2026-11-02); group ZERO_SHORT_OHM
     volts    channel 1 (both modules): the DC volts, AC volts, frequency and gain-ohms points (owner, 2026-11-02; ohms force on 1, sense on 11); both models (34970A and 34972A, owner 2026-11-02)
 and a 'group' = the hook-up (diagram) key.
 
@@ -77,9 +78,9 @@ def sections(model='34970A'):
     vrole = 'volts'                                           # 34970A and 34972A: voltage and gain-ohms readings on channel 1 (owner, 2026-11-02)
     vch = 'channel 1'
     z_short = [pt('DCV', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_V]
-    z_short += [pt('OHM4', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_R]
+    z_short += [pt('OHM4', 0.0, r, l, 'ZERO_SHORT_OHM', 'ohm_short', input='short', plc=10) for r, l in ZERO_R]
     z_open = [pt('DCI', 0.0, r, l, 'ZERO_OPEN', 'current', input='open', plc=10) for r, l in ZERO_I]
-    z2w = [pt('OHM2', 0.0, r, plus(l, 4.0), 'ZERO_SHORT', 'short', input='short', plc=10,
+    z2w = [pt('OHM2', 0.0, r, plus(l, 4.0), 'ZERO_SHORT_OHM', 'ohm_short', input='short', plc=10,
               note='2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.') for r, l in ZERO_R]
     gain_v = [pt('DCV', n, r, l, 'DCV', vrole, plc=10) for n, r, l in GAIN_V]
     gain_r4 = [pt('OHM4', r, r, l, 'OHM4', vrole, plc=10, **({'note': 'Verify only, no adjustment required (manual footnote c).'} if r == 1e8 else {}))
@@ -129,8 +130,8 @@ def spec(model, interface):
         'periods': PERIODS, 'default_period': '1y',
         'equipment': {'multiplexer': 'Keysight 34901A 20-channel multiplexer in slot 200 (34902A: no current tests)', 'calibrator': 'Fluke 5560A or 5522A (manual lists the 5700A)',
                       'zero': 'Low-thermal copper shorts on the input channels'},
-        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, 'volts': 1},
-                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, 'volts': 1}},
+        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, 'volts': 1, 'ohm_short': 3},
+                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, 'volts': 1, 'ohm_short': 3}},
         'general': ['Ambient 18-28 C (ideally 23 +/- 1 C), humidity below 80 %.',
                     'Warm up 2 hours with a copper short connected and the multiplexer installed before verification.',
                     'Use shielded twisted-pair PTFE cable, as short as possible; connect the shield to the source LO and the calibrator LO to earth ground except where noted.',
