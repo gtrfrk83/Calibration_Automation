@@ -8,7 +8,7 @@ Each point carries a 'role' that the procedure turns into a channel for the plug
     short    channel with the low-thermal short (34901A ch 9, 34902A ch 7); 4-wire pairs use the partner channel (+10 / +8)
     input    channel the calibrator is connected to (34901A ch 10, 34902A ch 8)
     current  34901A ch 21 (current input); the 34902A has none, so current points are skipped with that module
-    volts    channel 1 (both modules): the 34972A's DC volts, AC volts, frequency and gain-ohms points (owner, 2026-11-02; ohms force on 1, sense on 11); the 34970A keeps 'input'
+    volts    channel 1 (both modules): the DC volts, AC volts, frequency and gain-ohms points (owner, 2026-11-02; ohms force on 1, sense on 11); both models (34970A and 34972A, owner 2026-11-02)
 and a 'group' = the hook-up (diagram) key.
 
 Run:  python specs/build_dacq_spec.py
@@ -74,8 +74,8 @@ def plus(limits, extra):
 
 
 def sections(model='34970A'):
-    vrole = 'volts' if model == '34972A' else 'input'        # 34972A: voltage readings on channel 1 (owner, 2026-11-02)
-    vch = 'channel 1' if model == '34972A' else 'the input channel'
+    vrole = 'volts'                                           # 34970A and 34972A: voltage and gain-ohms readings on channel 1 (owner, 2026-11-02)
+    vch = 'channel 1'
     z_short = [pt('DCV', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_V]
     z_short += [pt('OHM4', 0.0, r, l, 'ZERO_SHORT', 'short', input='short', plc=10) for r, l in ZERO_R]
     z_open = [pt('DCI', 0.0, r, l, 'ZERO_OPEN', 'current', input='open', plc=10) for r, l in ZERO_I]
@@ -109,13 +109,13 @@ def sections(model='34970A'):
             z_short, source='none'),
         sec('zero_open', 'Zero offset: current open', '80', 'Current input channel left OPEN. The calibrator is not used.', z_open, source='none'),
         sec('dcv', 'DC volts gain', '82', f'Calibrator voltage output to {vch} HI / LO.', gain_v),
-        sec('ohm4', '4-wire ohms gain', '82', f'Calibrator resistance output, 4-wire: force to {vch}, sense to its 4-wire partner channel{" (channel 11)" if model == "34972A" else ""}.', gain_r4),
+        sec('ohm4', '4-wire ohms gain', '82', f'Calibrator resistance output, 4-wire: force to {vch}, sense to its 4-wire partner channel (channel 11).', gain_r4),
         sec('dci', 'DC current gain', '83', 'Calibrator current output to the current input channel.', gain_i),
         sec('acv', 'AC volts gain', '84', f'Calibrator AC voltage output to {vch} HI / LO. 3 Hz AC filter (7 s per reading).', acv),
         sec('aci', 'AC current gain', '85', 'Calibrator AC current output to the current input channel. 3 Hz AC filter (7 s per reading).', aci),
         sec('freq', 'Frequency gain', '86', f'Calibrator AC voltage at the stated level and frequency to {vch} HI / LO.', freq),
         sec('zero_ohm2', '2-wire ohms zero (optional)', '81', 'Short on the input channel. The calibrator is not used.', z2w[:], source='none', optional=True),
-        sec('ohm2', '2-wire ohms gain (optional)', '83', (f'Calibrator resistance output, 2-wire, to {vch} HI / LO.' if model == '34972A' else 'Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).'), gain_r2, optional=True),
+        sec('ohm2', '2-wire ohms gain (optional)', '83', f'Calibrator resistance output, 2-wire, to {vch} HI / LO.', gain_r2, optional=True),
         sec('opt_ac', 'Optional AC tests', '87', f'Calibrator AC voltage output to {vch} HI / LO.', opt_ac, optional=True),
     ]
 
@@ -129,8 +129,8 @@ def spec(model, interface):
         'periods': PERIODS, 'default_period': '1y',
         'equipment': {'multiplexer': 'Keysight 34901A 20-channel multiplexer in slot 200 (34902A: no current tests)', 'calibrator': 'Fluke 5560A or 5522A (manual lists the 5700A)',
                       'zero': 'Low-thermal copper shorts on the input channels'},
-        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, **({'volts': 1} if model == '34972A' else {})},
-                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, **({'volts': 1} if model == '34972A' else {})}},
+        'channels': {'34901A': {'short': 9, 'input': 10, 'current': 21, 'pair_offset': 10, 'volts': 1},
+                     '34902A': {'short': 7, 'input': 8, 'current': None, 'pair_offset': 8, 'volts': 1}},
         'general': ['Ambient 18-28 C (ideally 23 +/- 1 C), humidity below 80 %.',
                     'Warm up 2 hours with a copper short connected and the multiplexer installed before verification.',
                     'Use shielded twisted-pair PTFE cable, as short as possible; connect the shield to the source LO and the calibrator LO to earth ground except where noted.',

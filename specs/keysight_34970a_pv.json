@@ -28,13 +28,15 @@
    "short": 9,
    "input": 10,
    "current": 21,
-   "pair_offset": 10
+   "pair_offset": 10,
+   "volts": 1
   },
   "34902A": {
    "short": 7,
    "input": 8,
    "current": null,
-   "pair_offset": 8
+   "pair_offset": 8,
+   "volts": 1
   }
  },
  "general": [
@@ -292,7 +294,7 @@
    "id": "dcv",
    "title": "DC volts gain",
    "page": "82",
-   "setup": "Calibrator voltage output to the input channel HI / LO.",
+   "setup": "Calibrator voltage output to channel 1 HI / LO.",
    "source": "calibrator",
    "points": [
     {
@@ -306,7 +308,7 @@
      },
      "quick": false,
      "group": "DCV",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -320,7 +322,7 @@
      },
      "quick": false,
      "group": "DCV",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -334,7 +336,7 @@
      },
      "quick": false,
      "group": "DCV",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -348,7 +350,7 @@
      },
      "quick": false,
      "group": "DCV",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -362,7 +364,7 @@
      },
      "quick": false,
      "group": "DCV",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -376,7 +378,7 @@
      },
      "quick": false,
      "group": "DCV",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     }
    ]
@@ -385,7 +387,7 @@
    "id": "ohm4",
    "title": "4-wire ohms gain",
    "page": "82",
-   "setup": "Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.",
+   "setup": "Calibrator resistance output, 4-wire: force to channel 1, sense to its 4-wire partner channel (channel 11).",
    "source": "calibrator",
    "points": [
     {
@@ -399,7 +401,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -413,7 +415,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -427,7 +429,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -441,7 +443,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -455,7 +457,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -469,7 +471,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10
     },
     {
@@ -483,7 +485,7 @@
      },
      "quick": false,
      "group": "OHM4",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "Verify only, no adjustment required (manual footnote c)."
     }
@@ -544,7 +546,7 @@
    "id": "acv",
    "title": "AC volts gain",
    "page": "84",
-   "setup": "Calibrator AC voltage output to the input channel HI / LO. 3 Hz AC filter (7 s per reading).",
+   "setup": "Calibrator AC voltage output to channel 1 HI / LO. 3 Hz AC filter (7 s per reading).",
    "source": "calibrator",
    "points": [
     {
@@ -558,7 +560,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3
     },
@@ -573,7 +575,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 50000.0,
      "filter_hz": 3
     },
@@ -588,7 +590,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3
     },
@@ -603,7 +605,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 50000.0,
      "filter_hz": 3
     },
@@ -618,7 +620,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3
     },
@@ -633,7 +635,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 50000.0,
      "filter_hz": 3
     },
@@ -648,7 +650,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 10,
      "filter_hz": 3
     },
@@ -663,7 +665,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3,
      "note": "Isolate the calibrator output from earth ground for this point (manual footnote b)."
@@ -679,7 +681,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3
     },
@@ -694,7 +696,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 50000.0,
      "filter_hz": 3
     },
@@ -709,7 +711,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3
     },
@@ -724,7 +726,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 50000.0,
      "filter_hz": 3,
      "note": "Some calibrators struggle to drive the DMM and cable load at this V-Hz product; use short, low-capacitance cable. The manual says verification can be done at >195 V rms and new limits computed from the Chapter 1 specification."
@@ -804,7 +806,7 @@
    "id": "freq",
    "title": "Frequency gain",
    "page": "86",
-   "setup": "Calibrator AC voltage at the stated level and frequency to the input channel HI / LO.",
+   "setup": "Calibrator AC voltage at the stated level and frequency to channel 1 HI / LO.",
    "source": "calibrator",
    "points": [
     {
@@ -818,7 +820,7 @@
      },
      "quick": false,
      "group": "FREQ",
-     "role": "input",
+     "role": "volts",
      "amplitude": 0.01,
      "note": "Isolate the calibrator output from earth ground for this point (manual footnote b)."
     },
@@ -833,7 +835,7 @@
      },
      "quick": false,
      "group": "FREQ",
-     "role": "input",
+     "role": "volts",
      "amplitude": 1
     }
    ]
@@ -971,7 +973,7 @@
    "id": "ohm2",
    "title": "2-wire ohms gain (optional)",
    "page": "83",
-   "setup": "Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).",
+   "setup": "Calibrator resistance output, 2-wire, to channel 1 HI / LO.",
    "source": "calibrator",
    "points": [
     {
@@ -985,7 +987,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1001,7 +1003,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1017,7 +1019,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1033,7 +1035,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1049,7 +1051,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1065,7 +1067,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1081,7 +1083,7 @@
      },
      "quick": false,
      "group": "OHM2",
-     "role": "input",
+     "role": "volts",
      "plc": 10,
      "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
      "opt": "ohm2"
@@ -1093,7 +1095,7 @@
    "id": "opt_ac",
    "title": "Optional AC tests",
    "page": "87",
-   "setup": "Calibrator AC voltage output to the input channel HI / LO.",
+   "setup": "Calibrator AC voltage output to channel 1 HI / LO.",
    "source": "calibrator",
    "points": [
     {
@@ -1107,7 +1109,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 20,
      "filter_hz": 3,
      "opt": "ac"
@@ -1123,7 +1125,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 20000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1139,7 +1141,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 100000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1155,7 +1157,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 200000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1171,7 +1173,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 250000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1187,7 +1189,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 300000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1203,7 +1205,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1219,7 +1221,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3,
      "opt": "ac"
@@ -1235,7 +1237,7 @@
      },
      "quick": false,
      "group": "ACV",
-     "role": "input",
+     "role": "volts",
      "frequency": 1000.0,
      "filter_hz": 3,
      "opt": "ac"

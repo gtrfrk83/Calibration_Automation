@@ -21,8 +21,7 @@ GROUP (one picture per separate hook-up)
   ACI          calibrator AC current to ch 21                                (34901A only)
   FREQ         calibrator AC voltage (frequency test) to the input channel
 
-34972A (owner, 2026-11-02): the DCV, ACV, FREQ, OHM4 and OHM2 groups use CHANNEL 1 of the module (34901A and 34902A), not ch 10 / ch 8, so its
+34970A and 34972A (owner, 2026-11-02): the DCV, ACV, FREQ, OHM4 and OHM2 groups use CHANNEL 1 of the module (34901A and 34902A), not ch 10 / ch 8, so its
 DCV / ACV / FREQ pictures should show the calibrator on channel 1 (hook_34972A_<cal>_DCV.png etc. are used before the shared hook_dacq_ files).
-The gain ohms groups OHM4 / OHM2 also use channel 1 on the 34972A (4-wire: force ch 1, sense ch 11). The zero shorts and the current hook-ups are unchanged. The 34970A is unchanged.
-
+The gain ohms groups OHM4 / OHM2 also use channel 1 on the 34972A (4-wire: force ch 1, sense ch 11). The zero shorts and the current hook-ups are unchanged. 
 Channel numbers are slot*100 + channel; the program uses the module and slot chosen on screen (default 34901A in slot 2 = channels 209, 210, 219, 220, 221).

@@ -171,7 +171,7 @@ class Wiring(unittest.TestCase):
                   'Procedures/Fluke_83V_Verification.py', 'Procedures/Fluke_87V_Verification.py', 'Procedures/Fluke_88V_Verification.py', 'Procedures/Fluke_83V_Verification.procedure.json', 'Procedures/Fluke_87V_Verification.procedure.json', 'Procedures/Fluke_88V_Verification.procedure.json', 'specs/build_80v_spec.py', 'specs/fluke_80_series_v_pv.json',
                   'specs/build_square_wave_rows.py', 'specs/build_5520a_standard.py', 'specs/build_5560a_standard_from_manual.py',      # square-wave rows of the 5522A / 5520A / 5560A sheets (80 Series V uncertainties)
                   'specs/standards/fluke_5520a_standard.json', 'specs/standards/fluke_5522a_standard.json', 'specs/standards/fluke_5560a_standard.json')
-        later += ('specs/build_dacq_spec.py', 'specs/keysight_34972a_pv.json')          # 34972A voltage readings on channel 1 (owner, 2026-11-02); the 34970A sheet is unchanged
+        later += ('specs/build_dacq_spec.py', 'specs/keysight_34972a_pv.json', 'specs/keysight_34970a_pv.json')          # 34972A voltage readings on channel 1 (owner, 2026-11-02); the 34970A sheet is unchanged
         later += ('specs/analyze_34410a_suitability.py', 'specs/analyze_8808a_adjustment_standards.py', 'specs/analyze_k2000_adjustment_standards.py')    # the Tk removal (2026-10-27): they import ui_theme_core
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
