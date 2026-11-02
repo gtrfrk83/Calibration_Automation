@@ -826,7 +826,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._mo_pending = None; self._mo_current = None
         self.stop = False; self.busy = True
         self._prep_done = set()                         # the 8902A is reset at the start of every Run: its calibrations are asked for again
-        self.reset_then(lambda: self._next(points, 0, None))     # the Run resets to defaults first (every instrument; the unit under test notice comes first)
+        self.reset_then(lambda: self._upfront_preps(points))     # the Run resets to defaults first (every instrument; the unit under test notice comes first)
 
     def reset_run(self):
         report = super().reset_run()
@@ -891,10 +891,23 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 port.post(self.root, lambda err=err: self._error(err))
         threading.Thread(target=work, daemon=True).start()
 
+    def _upfront_preps(self, points):
+        """The 8902A calibrations (RF power sensor, AM, FM) the points of this run need are done once, here, before the first point, not at the first section that needs each one."""
+        need, first = [], None
+        if not self.demo:
+            for p in points:
+                if p['meas'] == 'derived' or p.get('skip') or p.get('unavailable'): continue
+                for k in self.preps_for(p):
+                    if k not in need and k not in self._prep_done: need.append(k); first = first or p
+        if not need: self._next(points, 0, None); return
+        self._upfront = True
+        self._run_preps(points, 0, first, prompt_key(first), need)
+
     def _preps_done(self, points, i, p, key, name, rest):
         self._prep_done.add(name)
         if rest: self._run_preps(points, i, p, key, rest); return
-        self._next(points, i, None, after_prep=True)          # the wiring was changed for the calibration: the hook-up prompt is shown again
+        upfront, self._upfront = getattr(self, '_upfront', False), False
+        self._next(points, i, None, after_prep=not upfront)          # the wiring was changed for the calibration: the hook-up prompt is shown again
 
     def _next(self, points, i, previous, after_prep=False):
         if i >= len(points) or self.stop:

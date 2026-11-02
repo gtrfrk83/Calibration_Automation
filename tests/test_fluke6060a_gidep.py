@@ -262,3 +262,37 @@ class GidepDemo(GidepBench):
 if __name__ == '__main__':
     unittest.main()
 
+
+class UpfrontCalibrations(unittest.TestCase):
+    """The three 8902A calibrations are asked once, before the first point, not at the first section that needs each one."""
+
+    def _pts(self):
+        E.load_spec(GIDEP_SPEC)
+        return E.POINTS
+
+    def _app(self, demo=False):
+        app = E.App.__new__(E.App)
+        app.demo, app._prep_done, app.calls = demo, set(), []
+        app._run_preps = lambda points, i, p, key, preps: app.calls.append(('preps', i, p['id'], list(preps)))
+        app._next = lambda points, i, previous, after_prep=False: app.calls.append(('next', i))
+        return app
+
+    def test_all_needed_calibrations_come_first_in_one_pass(self):
+        pts = self._pts()
+        app = self._app()
+        app._upfront_preps(pts)
+        self.assertEqual(len(app.calls), 1)
+        kind, i, pid, preps = app.calls[0]
+        self.assertEqual((kind, i), ('preps', 0))
+        self.assertEqual(sorted(preps), ['rx_am', 'rx_fm', 'rx_power'])
+
+    def test_skipped_points_need_no_calibration_and_none_means_straight_to_the_first_point(self):
+        pts = [dict(p, skip=True) for p in self._pts()]
+        app = self._app()
+        app._upfront_preps(pts)
+        self.assertEqual(app.calls, [('next', 0)])
+
+    def test_demo_asks_for_nothing(self):
+        app = self._app(demo=True)
+        app._upfront_preps(self._pts())
+        self.assertEqual(app.calls, [('next', 0)])
