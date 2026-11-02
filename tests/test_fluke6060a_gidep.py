@@ -236,6 +236,7 @@ class GidepEngine(GidepBench):
         self.assertEqual(self.pm.state['OUTP'], '0')                                       # the 96270A output is off again after the deviation-meter point
         self.assertEqual(self.pm.state['INST'], 'SINE')
         self.assertIn('FM:DEV 10000', self.pm.sent)
+        self.assertEqual(rf_state(self.bench)['frequency_hz'], 30000000)                    # the 6060A carrier frequency was set to the 96270A carrier (30 MHz), read back
         self.assertIn('FM:INT:FREQ 100', self.pm.sent)
         self.app.mo_ask = lambda p, **k: manual_override.parse_reading(p, '10.001')       # 10.001 MHz: outside +/-6 ppm
         self.app.found.clear(); self.app.results.clear()

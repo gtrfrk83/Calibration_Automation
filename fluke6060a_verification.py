@@ -430,6 +430,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             raise InstrumentError(f'{p["ref"]} is not measured by the instruments')
         if kind == 'devmeter':                                     # the 96270A makes the FM; the technician types the 6060A's own deviation display (the 6060A RF stays off)
             pm, src = self._need('pm', '96270A'), p['fmsrc']
+            if self._mod_on:                                       # whatever the previous point left on is switched off first (read back), as in _configure
+                self.gen.mod_off()
+                self._mod_on = False
+            self.gen.set_frequency(src['carrier_mhz'])             # the 6060A is set to the 96270A carrier too (read back); its RF output stays off
             self._fm_on = True
             pm.setup_fm(src['carrier_mhz'] * 1e6, src['level_dbm'], src['dev_khz'] * 1e3, src['rate_hz'])
             pm.output(True)
