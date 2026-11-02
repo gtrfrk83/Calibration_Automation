@@ -907,6 +907,7 @@ EXCLUDED = {         # engine file :: class -> why it has no automatic reading t
     'fluke_753_754.py::App': 'a subclass of handheld_dmm.App (typed readings, see above)',
     'Procedures/Fluke_8808A_Adjustment.py::App': 'a guided ADJUSTMENT (writes calibration constants, no verification reading is judged): nothing to type',
     'Procedures/Keithley_2000_Adjustment.py::App': 'a guided ADJUSTMENT (writes calibration constants, no verification reading is judged): nothing to type',
+    'Procedures/HP_8902A_Cal_Factors.py::App': 'a cal-factor ENTRY (writes the 8902A cal-factor table, no verification reading is judged): nothing to type',
     'Procedures/Fluke_8846A_Adjustment.py::App': 'a guided ADJUSTMENT (writes calibration constants, no verification reading is judged): nothing to type',
     'Procedures/WaveSurfer_WS4104HD.py::RMSNoiseApp': 'NOT DONE (open item): seven section windows with their own row lists and derived results (noise statistics, bandwidth ratio, timebase, '
                                                       'trigger outcome), no point-id record the mixin works on; the DC voltage section already has a typed entry (P1 acquisition off)',

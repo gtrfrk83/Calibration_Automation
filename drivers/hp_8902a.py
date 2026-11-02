@@ -130,6 +130,10 @@ COMMANDS = {
                    placeholders={'mhz': Placeholder('float', '.8g', 1.0), 'cf': Placeholder('float', '.5g', 99.0)}, kind='set', risk='locked', verified=True, ref=_r('SF 37.3', '3-75 / 124 and 3-78 / 127')),
     'cf.recall.ref': Cmd('37.5SP CF', 'Recall reference cal factor', 'Shows the reference calibration factor (only after M4); how it is read over the bus is UNVERIFIED', kind='set', verified=False,
                          ref=_r('SF 37.5', '3-87 / 136')),
+    'cf.recall.freq': Cmd('37.6SP FR', 'Recall the next cal-factor frequency', 'Prepares the next frequency / cal-factor pair of the table (lowest frequency first, after 37.5SP) and shows its frequency; the manual\'s example '
+                          'program reads it with ENTER, in Hz (UNVERIFIED on this unit); the same pair\'s cal factor is then shown with CF', kind='set', verified=False, ref=_r('SF 37.6', '3-87 / 136 and 3-76 / 125')),
+    'cf.auto': Cmd('37.0SP', 'Automatic cal factors', 'Back to the automatic cal-factor table (37.5SP and 37.6SP leave the receiver on a manual cal factor)', kind='set', verified=True,
+                   ref=_r('SF 37.0', '3-87 / 136')),
 }
 
 
@@ -525,6 +529,42 @@ class HP8902A(Instrument):
         if after not in (before, before + 1):
             raise InstrumentError(f'{self.MODEL}: cal-factor table has {after} entries after entering {freq_mhz:g} MHz (was {before}): the entry was not accepted')
         return after
+
+    def remove_cal_factor(self, freq_mhz: float) -> int:
+        """Removes one entry from the cal-factor table: 37.3SP <f> MZ 0 CF (0 % at a frequency already in the table removes it; p. 3-87 / 136). Sent once. Read back: the entry count
+        (37.4SP) must be the old count (the frequency was not in the table) or one less. Returns the count."""
+        before = self.cal_factor_count()
+        self.send('cf.pair', mhz=float(freq_mhz), cf=0.0)
+        self.check_status('cal factor removal')
+        after = self.cal_factor_count()
+        if after not in (before, before - 1):
+            raise InstrumentError(f'{self.MODEL}: cal-factor table has {after} entries after removing {freq_mhz:g} MHz (was {before}): the removal was not accepted')
+        return after
+
+    def recall_cal_factor_table(self) -> dict:
+        """Reads the whole cal-factor table back (reads only; UNVERIFIED mechanism, the sequence is the manual's own example program, p. 3-87 / 136): M4, 37.4SP (entries, the
+        reference included), 37.5SP CF (reference), then for each pair 37.6SP FR (frequency in Hz) and CF (cal factor in %), lowest frequency first. Returns
+        {'count', 'reference', 'pairs': [(MHz, %), ...]}. 37.5SP / 37.6SP leave the receiver on a MANUAL cal factor: call restore_automatic_cal_factors() afterwards."""
+        self.send('func.power')
+        count = int(round(self.read_special('37.4')))
+        if count < 1:
+            return {'count': count, 'reference': None, 'pairs': []}
+        self.send('cf.recall.ref')
+        reference = decode_reading(self._read_reading(self.DEFAULT_TIMEOUT))
+        pairs = []
+        for _ in range(count - 1):
+            self.send('cf.recall.freq')
+            hz = decode_reading(self._read_reading(self.DEFAULT_TIMEOUT))
+            self.send('cf.display')
+            pct = decode_reading(self._read_reading(self.DEFAULT_TIMEOUT))
+            pairs.append((round(hz / 1e6, 6), pct))
+        self.check_status('cal factor table read')
+        return {'count': count, 'reference': reference, 'pairs': pairs}
+
+    def restore_automatic_cal_factors(self):
+        """37.0SP: back to the automatic cal-factor table after a table read (37.5SP / 37.6SP select a manual cal factor). Sent once."""
+        self.send('cf.auto')
+        self.check_status('automatic cal factors')
 
     def _modulation(self, func_key, carrier_mhz, detector, hp, lp, extra=()):
         if detector not in DETECTORS:

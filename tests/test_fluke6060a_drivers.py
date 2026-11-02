@@ -32,7 +32,7 @@ from drivers.simulated_8902a import Sim8902ATransport  # noqa: E402
 from drivers.transport import CommandLog, Transport, TransportError  # noqa: E402
 
 UNVERIFIED_6060A = ['fe.set', 'ii.query', 'im.query', 'io.query', 'ir.query', 'iu.query', 'xa.query']
-UNVERIFIED_8902A = ['cf.display', 'cf.recall.ref', 'id', 'sf.display', 'srq.read']
+UNVERIFIED_8902A = ['cf.display', 'cf.recall.freq', 'cf.recall.ref', 'id', 'sf.display', 'srq.read']
 UNVERIFIED_8563E = ['aunits.query', 'det.query', 'err.query', 'id.query', 'mkpk.nh']
 UNVERIFIED_96270A_NEW = []          # every added PMETer command was read on its rendered page; the NRP40T and the unit of the reading are flagged in the text
 

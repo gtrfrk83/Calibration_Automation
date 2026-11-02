@@ -408,6 +408,7 @@ class Coverage(unittest.TestCase):
         'Tektronix_TBS2000B_Verification.py': 'tbs2000b_verification (own engine, branch tektronix-tbs2000b) has no procedure-modification layer, as the TDS2000C',
         'Fluke_8846A_Adjustment.py': 'an adjustment procedure (stores calibration constants), not a verification: never editable while running',
         'Keithley_2000_Adjustment.py': 'an adjustment procedure (stores calibration constants), not a verification: never editable while running',
+        'HP_8902A_Cal_Factors.py': 'an adjustment procedure (stores the 8902A cal-factor table), not a verification: never editable while running',
         'Fluke_8808A_Adjustment.py': 'an adjustment procedure (changes the calibration of the meter), not a verification: never editable while running',
     }
 

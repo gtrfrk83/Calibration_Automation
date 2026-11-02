@@ -24,7 +24,7 @@ COVERAGE = {
     'HP8902A': dict(
         covered=['show_recal', 'connect', 'cleanup', 'identify', 'remote', 'go_local', 'status', 'check_status', 'set_srq_mask', 'measure_frequency_hz', 'read_special', 'time_base_is_external',
                  'tuned_rf_level_dbm', 'calibrate_tuned_level', 'rf_power_dbm', 'zero_power_sensor', 'calibrate_power_sensor', 'enter_reference_cal_factor', 'cal_factor_count',
-                 'enter_cal_factor', 'measure_am_percent', 'measure_fm_deviation_hz', 'measure_distortion', 'measure_modulation_rate_hz', 'calibrate_modulation',
+                 'enter_cal_factor', 'remove_cal_factor', 'recall_cal_factor_table', 'restore_automatic_cal_factors', 'measure_am_percent', 'measure_fm_deviation_hz', 'measure_distortion', 'measure_modulation_rate_hz', 'calibrate_modulation',
                  'reset_to_defaults'],
         no_command=['write', 'send', 'address', 'set_address']),
     'HP8563E': dict(
@@ -144,6 +144,9 @@ def cases_8902a(c):
     c.run('HP8902A.enter_reference_cal_factor', rx.enter_reference_cal_factor, 98.5)
     c.run('HP8902A.cal_factor_count', rx.cal_factor_count)
     c.run('HP8902A.enter_cal_factor', rx.enter_cal_factor, 250.0, 98.0)
+    c.run('HP8902A.recall_cal_factor_table', rx.recall_cal_factor_table)
+    c.run('HP8902A.restore_automatic_cal_factors', rx.restore_automatic_cal_factors)
+    c.run('HP8902A.remove_cal_factor', rx.remove_cal_factor, 250.0)
     gen.rf(False)
     gen.set_level(0.0)
     gen.am(30, 'int', 1000)

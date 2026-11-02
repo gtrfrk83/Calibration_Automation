@@ -3280,6 +3280,243 @@
    ]
   },
   {
+   "call": "",
+   "case": "HP8902A.recall_cal_factor_table",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0020000000E-07",
+    "8902A|>>|37.5SP CF",
+    "8902A|<<|+0098500000E-06",
+    "8902A|>>|37.6SP FR",
+    "8902A|<<|+0025000000E+01",
+    "8902A|>>|CF",
+    "8902A|<<|+0098000000E-06",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.recall_cal_factor_table",
+   "result": "returned {'count': 2, 'pairs': [(250.0, 98.0)], 'reference': 98.5}",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.5SP CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0098500000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.6SP FR"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0025000000E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0098000000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.restore_automatic_cal_factors",
+   "log": [
+    "8902A|>>|37.0SP",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.restore_automatic_cal_factors",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.0SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.remove_cal_factor",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0020000000E-07",
+    "8902A|>>|37.3SP 250 MZ 0 CF",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0010000000E-07"
+   ],
+   "method": "HP8902A.remove_cal_factor",
+   "result": "returned 1",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.3SP 250 MZ 0 CF"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
    "call": "250.0",
    "case": "HP8902A.measure_am_percent",
    "log": [
