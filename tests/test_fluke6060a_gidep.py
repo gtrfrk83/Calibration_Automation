@@ -437,3 +437,29 @@ class TunedLevelFloor(GidepBench):
         self.run_points(refs=[p['ref'] for p in low if p['meas'] != 'derived'])
         self.assertEqual(self.errors(), [])
         self.assertEqual(self.non_pass(), [])
+
+
+class DeviationMeterNoRfCheck(GidepBench):
+    """Owner 2026-11-03: 'the deviation meter errors out while trying to read if the output of the 6060 is off ... the output will never be on in the deviation meter mode'.
+    From the first deviation-meter point until the next point that uses the 6060A output, the RF-off read-back (RO0 + LM99) is not made, and the command log says so."""
+
+    def test_no_rf_off_read_back_during_deviation_meter_points_and_back_after(self):
+        dm = [p for p in E.POINTS if p['meas'] == 'devmeter' and not p.get('not_tested')][:2]
+        after = next(p for p in E.POINTS[E.POINTS.index(dm[-1]) + 1:] if p['meas'] in ('harmonic', 'spur') and not p.get('not_tested'))
+        self.connect()
+        n = len(self.t6.sent)
+        self.run_points(refs=[p['ref'] for p in dm])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(len([k for k in self.app.found if E.POINTS[int(k) - 1]['meas'] == 'devmeter']), 2)
+        sent = self.t6.sent[n:]
+        first_fr = next(i for i, c in enumerate(sent) if c.startswith('FR'))
+        self.assertIn('RO0', sent[:first_fr], 'RF OFF is confirmed before the deviation-meter points (reset / wiring prompt)')
+        self.assertNotIn('RO0', sent[first_fr:], 'no RF-off read-back once the 6060A is on the deviation-meter carrier')
+        self.assertNotIn('RO1', sent[first_fr:])
+        self.assertTrue([l for l in self.app.io.log.lines() if 'RF OFF read-back skipped: deviation-meter mode' in l])
+        m = len(self.t6.sent)
+        self.run_points(refs=[after['ref']])
+        self.assertEqual(self.errors(), [])
+        back = self.t6.sent[m:]
+        self.assertIn('RO1', back)
+        self.assertIn('RO0', back[back.index('RO1'):], 'the next point switches RF on and confirms it off again')

@@ -2224,6 +2224,13 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- Deviation meter, no RF-off read-back (owner, 2026-11-03: "the deviation meter errors out while trying to read if the output of the 6060 is off....can we remove that check?
+  the output will never be on in the deviation meter mode"): `IO._devmeter` is set once a deviation-meter point has put the 6060A on the carrier and cleared at the start of any
+  point that uses the 6060A output; while it is set, `IO.standby()` (point end, abort, wiring prompt) does NOT send RO0 + LM99 and logs 'RF OFF read-back skipped:
+  deviation-meter mode'. Safe because RF OFF was confirmed before the first deviation-meter point and nothing sends RO1 until the next normal point, whose RF ON / OFF are read
+  back again (a 6060A still in deviation-meter mode then fails loudly). The 96270A FM output is still switched off and read back. Applies to both 6060A procedures (only GIDEP
+  has deviation-meter points). OPEN (bench 2026-11-03, first Table 8 point): 'read-back refused: fm_dev_hz: asked 10000, learn string says 1000.0' at 10 kHz on 250 kHz;
+  waiting for the LM99 reply from the command log to tell a decoder error (FM resolution digit, char 57) from a real 1 kHz setting.
 - Table 5 low carrier 2.5 MHz and no -127 dBm rows (owner, 2026-11-03: bench 8902A showed error 20 doing tuned RF level at 150 kHz; "delete the -127db test points...stop at
   -120dB"): the 8902A tuned RF level is specified 2.5 MHz to 1300 MHz (p. 1-22), so Table 5's moved carrier is 2.5 MHz (`TUNED_LOW_MHZ`; Tables 4, 6, 7 stay at 150 kHz), each
   point flagged 'Carrier changed from the document's 100 kHz to 2.5 MHz'. Table 5 levels end at -120 dBm (6 points removed): 214 points. The points after Table 5 are

@@ -339,6 +339,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self._lf_set = None
         self._lf_on = False
         self._tb_checked = False
+        self._devmeter = False              # deviation-meter points in progress: the 6060A RF output is never switched on (owner, 2026-11-03)
 
     def reset_roles(self):
         return [x for x in (self.rx, self.sa, self.pm, self.lf) if x is not None], [self.gen]
@@ -352,9 +353,14 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         return tuple(x for x in (self.gen, self.rx, self.sa, self.pm, self.lf) if x is not None)
 
     def standby(self):
-        """The end of every point (and of an abort): the 6060A RF OFF, read back (SafetyError when it is not off), and the LF generator output off."""
+        """The end of every point (and of an abort): the 6060A RF OFF, read back (SafetyError when it is not off), and the LF generator output off.
+        Deviation-meter points (owner, 2026-11-03: 'the output will never be on in the deviation meter mode'): from the first one until the next point that uses the 6060A
+        output, the RF-off read-back is NOT made (in deviation-meter mode it errors); nothing switched RF on since the last confirmed OFF, and the next point's RF ON is read back."""
         try:
-            self.gen.end_point()
+            if getattr(self, '_devmeter', False):
+                self.log.add('--', 'RF OFF read-back skipped: deviation-meter mode, the 6060A RF output is not switched on (last confirmed OFF before the deviation-meter points)', MODEL)
+            else:
+                self.gen.end_point()
         finally:
             try:
                 self.fm_source_off()
@@ -479,6 +485,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 self.gen.mod_off()
                 self._mod_on = False
             self.gen.set_frequency(src['carrier_mhz'])             # the 6060A is set to the 96270A carrier too (read back); its RF output stays off
+            self._devmeter = True                                  # from here the RF-off read-back is skipped (see standby)
             self._fm_on = True
             pm.setup_fm(src['carrier_mhz'] * 1e6, src['level_dbm'], src['dev_khz'] * 1e3, src['rate_hz'])
             pm.output(True)
@@ -486,6 +493,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             return TypedPoint(p.get('manual_prompt') or 'Read the 6060A Modulation Display deviation and type it in kHz.')
         if kind == 'manual':                                       # the reading comes from the technician's own instrument (nothing is programmed, no RF is switched on)
             return TypedPoint(p.get('manual_prompt') or 'Read your instrument and type the value.')
+        self._devmeter = False                                     # a point that uses the 6060A output: RF state is read back again
         needs = {'freq_count': ('rx', '8902A'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
                  'mod_rate': ('rx', '8902A'), 'am_depth': ('rx', '8902A'), 'fm_dev': ('rx', '8902A'), 'thd': ('rx', '8902A')}
         if kind in needs:
