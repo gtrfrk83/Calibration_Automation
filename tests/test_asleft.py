@@ -130,7 +130,7 @@ class TruevoltAsLeft(unittest.TestCase):
                 mock.patch.object(self.m.filedialog, 'asksaveasfilename', lambda **k: str(path)):
             app.export_pdf()
         text = load_pdf_text(path)
-        self.assertIn('AS LEFT: OUT OF TOLERANCE', text)
+        self.assertNotIn('AS LEFT:', text)                                  # owner 2026-10-30: no verdict lines on the report
         self.assertIn('1 of 2', text)
         self.assertIn('DEMO DATA', text)
 

@@ -13,9 +13,9 @@ from pathlib import Path
 
 import cmdreg
 
-UNITS = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM2': 'ohm', 'OHM4': 'ohm', 'FREQ': 'Hz', 'CAP': 'F'}
+UNITS = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM2': 'ohm', 'OHM4': 'ohm', 'FREQ': 'Hz', 'CAP': 'F', 'TEMP': '\u00b0C'}
 NAMES = {'DCV': 'DC volts', 'ACV': 'AC volts', 'DCI': 'DC current', 'ACI': 'AC current',
-         'OHM2': '2-wire ohms', 'OHM4': '4-wire ohms', 'FREQ': 'Frequency', 'CAP': 'Capacitance'}
+         'OHM2': '2-wire ohms', 'OHM4': '4-wire ohms', 'FREQ': 'Frequency', 'CAP': 'Capacitance', 'TEMP': 'Thermocouple temperature'}
 
 
 class SpecError(ValueError):
@@ -175,6 +175,8 @@ def describe(p: dict) -> str:
     if p['source'] == 'none':
         what = 'input open' if p.get('input') == 'open' else 'input shorted'
         return f"{p['terminal'].title()} {name}, {_fmt(p['range'], p['unit'])} range ({what})"
+    if p['kind'] == 'TEMP':
+        return f"Type {p.get('tc_type', 'J')} thermocouple temperature {p['nominal']:g} \u00b0C"
     if p['kind'] == 'FREQ':
         return f"Frequency {_fmt(p['nominal'], 'Hz')} at {_fmt(p['amplitude'], 'V')} rms, {_fmt(p['range'], 'V')} range"
     text = f"{name} {_fmt(p['nominal'], p['unit'])}"

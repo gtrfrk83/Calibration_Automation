@@ -1,0 +1,326 @@
+{
+ "step": 4,
+ "owner_ok": "owner runs it and types YES before RF on",
+ "started": "2026-10-29T07:42:55",
+ "events": [
+  {
+   "t": 0.273,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "ID",
+   "reply": "6060A/AN\n",
+   "error": null,
+   "seconds": 0.018,
+   "note": ""
+  },
+  {
+   "t": 0.318,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.044,
+   "note": "clear any old rejected entry (read)"
+  },
+  {
+   "t": 0.32,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF off first"
+  },
+  {
+   "t": 0.326,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "FR111.1111MZ",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 0.33,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-10DB",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 0.858,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.028,
+   "note": "rejected entries after the writes (000000,... = none)"
+  },
+  {
+   "t": 0.939,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABBAEEBBAGBLKKLIAC\n",
+   "error": null,
+   "seconds": 0.079,
+   "note": "read back"
+  },
+  {
+   "t": 2.931,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "before"
+  },
+  {
+   "t": 2.966,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "IP",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 7.952,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after IP + 3 s"
+  },
+  {
+   "t": 7.987,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "M5",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 8.06,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "7.1SP",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 11.04,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after M5 7.1SP + 1 s"
+  },
+  {
+   "t": 13.701,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF ON"
+  },
+  {
+   "t": 14.731,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.03,
+   "note": "UNCAL codes with RF on (000000,000000,000000 = none)"
+  },
+  {
+   "t": 14.755,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 14.803,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T3",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 17.507,
+   "who": "8902A",
+   "kind": "query",
+   "cmd": null,
+   "reply": "+0011111109E+01\r\n",
+   "error": null,
+   "seconds": 2.704,
+   "note": "reading 1 (talk, ends at LF)"
+  },
+  {
+   "t": 18.36,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after reading 1"
+  },
+  {
+   "t": 18.395,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 18.429,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T3",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 19.801,
+   "who": "8902A",
+   "kind": "query",
+   "cmd": null,
+   "reply": "+0011111108E+01\r\n",
+   "error": null,
+   "seconds": 1.372,
+   "note": "reading 2 (talk, ends at LF)"
+  },
+  {
+   "t": 20.654,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after reading 2"
+  },
+  {
+   "t": 20.689,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 20.723,
+   "who": "8902A",
+   "kind": "write",
+   "cmd": "T3",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 22.096,
+   "who": "8902A",
+   "kind": "query",
+   "cmd": null,
+   "reply": "+0011111109E+01\r\n",
+   "error": null,
+   "seconds": 1.372,
+   "note": "reading 3 (talk, ends at LF)"
+  },
+  {
+   "t": 22.949,
+   "who": "8902A",
+   "kind": "poll",
+   "cmd": null,
+   "reply": 0,
+   "error": null,
+   "seconds": null,
+   "note": "after reading 3"
+  },
+  {
+   "t": 38.301,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF off at the end"
+  },
+  {
+   "t": 38.831,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000400\n",
+   "error": null,
+   "seconds": 0.029,
+   "note": "RF off is confirmed when field 3 has 400"
+  }
+ ],
+ "readback_before_rf": {
+  "frequency_hz": 111111100,
+  "amplitude_dbm": -10.0,
+  "ir": "000000,000000,000000\n"
+ },
+ "operator_cable_confirm": "yes",
+ "readings": [
+  {
+   "n": 1,
+   "raw": "+0011111109E+01\r\n",
+   "decoded": "111111090.0 Hz",
+   "status": 0
+  },
+  {
+   "n": 2,
+   "raw": "+0011111108E+01\r\n",
+   "decoded": "111111080.0 Hz",
+   "status": 0
+  },
+  {
+   "n": 3,
+   "raw": "+0011111109E+01\r\n",
+   "decoded": "111111090.0 Hz",
+   "status": 0
+  }
+ ],
+ "display": "111.11109",
+ "rf_off_confirmed": true,
+ "finished": "2026-10-29T07:43:34"
+}

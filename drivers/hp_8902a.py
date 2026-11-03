@@ -130,6 +130,10 @@ COMMANDS = {
                    placeholders={'mhz': Placeholder('float', '.8g', 1.0), 'cf': Placeholder('float', '.5g', 99.0)}, kind='set', risk='locked', verified=True, ref=_r('SF 37.3', '3-75 / 124 and 3-78 / 127')),
     'cf.recall.ref': Cmd('37.5SP CF', 'Recall reference cal factor', 'Shows the reference calibration factor (only after M4); how it is read over the bus is UNVERIFIED', kind='set', verified=False,
                          ref=_r('SF 37.5', '3-87 / 136')),
+    'cf.recall.freq': Cmd('37.6SP FR', 'Recall the next cal-factor frequency', 'Prepares the next frequency / cal-factor pair of the table (lowest frequency first, after 37.5SP) and shows its frequency; the manual\'s example '
+                          'program reads it with ENTER, in Hz (UNVERIFIED on this unit); the same pair\'s cal factor is then shown with CF', kind='set', verified=False, ref=_r('SF 37.6', '3-87 / 136 and 3-76 / 125')),
+    'cf.auto': Cmd('37.0SP', 'Automatic cal factors', 'Back to the automatic cal-factor table (37.5SP and 37.6SP leave the receiver on a manual cal factor)', kind='set', verified=True,
+                   ref=_r('SF 37.0', '3-87 / 136')),
 }
 
 
@@ -141,7 +145,9 @@ def decode_reading(text: str) -> float:
     value = (-1 if m.group(1) == '-' else 1) * int(m.group(2)) * 10.0 ** int(m.group(3))
     if value > MAX_VALUE + 1.0:
         code = round((value - MAX_VALUE) / 1000.0)
-        raise InstrumentError(f'8902A error {code}: {ERROR_TEXT.get(code, "unknown error")} (reading {text.strip()})')
+        hint = (': the receiver sees no signal at its RF input (display "--") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT'
+                if code == 96 else '')                      # owner bench 2026-10-29: error 96 came back at once with the 6060A RF off
+        raise InstrumentError(f'8902A error {code}: {ERROR_TEXT.get(code, "unknown error")}{hint} (reading {text.strip()})')
     return value
 
 
@@ -160,6 +166,25 @@ def encode_reading(value: float, error: int | None = None) -> str:
 class RecalRequired(InstrumentError):
     """The receiver's RECAL / UNCAL flag (status bit 5) is set after a tuned-RF-level reading: calibrate_tuned_level() at a constant level."""
 
+
+
+
+# ---- bench records (bench-first driver workflow, NOTES.md; tools/bench/records/README.md): the real reply each command gave on the owner's unit.  This does NOT
+# flip `verified` by itself (that also needs a driver_verify pass); it puts the recorded evidence next to the manual page in `ref`.
+def _bench(table):
+    import dataclasses
+    for key, text in table.items():
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, ref=f'{c.ref}; BENCH {text}')
+
+_bench({
+    'reset': '2026-10-29: IP accepted, status byte 0 after 3 s',
+    'id': '2026-10-28 and 2026-10-29: NO reply to ID (time-out); the driver connects on a serial poll instead',
+    'func.freq': '2026-10-29 step 4: IP, M5, 7.1SP, T1, T3 -> "+0011111109E+01" CR LF = 111 111 090 Hz with the 6060A at 111.1111 MHz (display 111.11109)',
+    'res.set': '2026-10-29 steps 2-4: 7.1SP gives a 10 Hz display (111.11110); 7.0SP gave 111.1111', 'trig.hold': '2026-10-29 step 4 (see func.freq)',
+    'trig.settle': '2026-10-29 step 4: the reading came 1.4 to 2.7 s after T3. The receiver does NOT assert EOI with a reading: a read must end at the LF of its CR LF '
+                   '(steps 2 and 3, reads ending on EOI only, timed out with data ready in the status byte)',
+})
 
 class HP8902A(Instrument):
     MODEL = 'HP 8902A'
@@ -195,8 +220,14 @@ class HP8902A(Instrument):
         self._address = check_address(address)
 
     # ---- wire access ---------------------------------------------------------------------------------------------------------------------------
+    # codes that do not change the measurement setup the receiver holds (triggers, calibrate on / off, save cal, zero, the SRQ mask)
+    _KEEPS_SETUP = re.compile(r'^(T[0-3]|C[01]|SC|ZR|C1T3SC|22\.\d+SP)$')
+    _held_setup = None                    # the setup (steps) the receiver holds now; None = unknown
+
     def write(self, cmd, log_as=None):
         time.sleep(self.COMMAND_GAP_S)
+        if not getattr(self, '_in_setup', False) and not self._KEEPS_SETUP.match(str(cmd).strip()):
+            self._held_setup = None       # anything else (IP, M5, S4, a tune, a special function ...) may change what the receiver holds
         super().write(cmd, log_as)
 
     def send(self, key, **vals):
@@ -268,6 +299,7 @@ class HP8902A(Instrument):
         self._line_ends()
         try:
             self.t.clear()
+            self._held_setup = None
             time.sleep(self.RESET_SETTLE_S)
             # ID is only a courtesy: the manual shows the code but not any reply (owner bench, 2026-10-28: the 8902A does not answer ID). One short try (read-only, no
             # retries: every miss costs a full timeout); no reply is NOT an error as long as the receiver answers a serial poll (it is there and listening).
@@ -295,6 +327,7 @@ class HP8902A(Instrument):
             if self.idn and not self.id_matches:
                 self.log.add('!!', f'ID reply {self.idn!r} does not mention 8902 / 8901 (the reply text is not in the manual: UNVERIFIED)', self.label)
             self.status()                                                 # clear anything pending
+            self.show_recal()
         except Exception:
             self.close()
             raise
@@ -317,6 +350,18 @@ class HP8902A(Instrument):
         """Put the receiver in remote: it goes remote when addressed to listen (p. 3-21 / 71); T1 (hold) is the harmless listen. No settings change."""
         self.send('trig.hold')
 
+    RECAL_MASK = 34                       # 32 RECAL / UNCAL + 2 HP-IB code error (always on)
+
+    def show_recal(self):
+        """22.34SP: lets RECAL / UNCAL (bit value 32) through to the serial poll. The preset mask (22.2SP) hides it, and a masked bit never reads 1 (p. 3-32), so without this the
+        driver never sees a RECAL and never calibrates a range (bench 2026-10-29, step 6: readings drifted to -1.5 dB, then error 96). Set after every device clear / IP.
+        There is no safe read-back (the 22.64SP display is a special-function display, and 15.1SP locked the receiver on 2026-10-28); bench step 6b showed it working:
+        the poll read 96 (RECAL + RQS) at -13, -37 and -73 dBm."""
+        self.send('srq.set', mask=self.RECAL_MASK)
+
+    def _reset_extra(self):
+        return [('RECAL visible in the serial poll again (22.34SP; IP restores the 22.2SP mask)', self.show_recal)]
+
     def go_local(self):
         """GTL (the transport's go_local); the front panel works again. Never raises."""
         try:
@@ -338,8 +383,18 @@ class HP8902A(Instrument):
 
     # ---- measuring ------------------------------------------------------------------------------------------------------------------------------
     def _setup(self, steps, context):
-        for key, vals in steps:
-            self.send(key, **vals)                                        # each once, never retried
+        key = tuple((k, tuple(sorted(v.items()))) for k, v in steps)
+        if key == self._held_setup:
+            # Bench 2026-10-29 (step 6b): sending the tune + S4 again at every level re-acquires the signal; below about -110 dBm the receiver cannot find it again
+            # (error 96) although it measured -109 dBm a moment before. The setup it already holds is not sent again (the readings stay on the locked signal).
+            self.log.add('--', f'{context}: the receiver still holds this setup; not sent again', self.label)
+            return
+        self._in_setup = True
+        try:
+            for k, vals in steps:
+                self.send(k, **vals)                                      # each once, never retried
+        finally:
+            self._in_setup = False
         # Owner bench 2026-10-28: a serial poll straight after the setup read status byte 60 (instrument error, limit, offset, RECAL): the receiver is still tuning / settling and
         # briefly shows an error. Wait, then read (and so clear) the byte; only an HP-IB CODE error (a command it did not understand) is fatal here. A real measurement problem
         # arrives as an error word in the reading itself (decode_reading raises it) and the status byte is checked again after the reading.
@@ -349,9 +404,17 @@ class HP8902A(Instrument):
             raise InstrumentError(f'{self.MODEL} reports an HP-IB code error after {context} (status byte {st["value"]}): a command was not understood')
         if st['instrument_error']:
             self.log.add('!!', f'status byte {st["value"]} after {context}: an error was displayed while the receiver settled; it is read again with the measurement', self.label)
+        self._held_setup = key
+
+    MIN_MANUAL_TUNE_MHZ = 0.15            # the receiver's RF range starts at 150 kHz (p. 3-141 / 188 and the module docstring); UNVERIFIED that the manual prints the same limit for keyed-in tuning
 
     def _tune(self, carrier_mhz):
-        return ('tune.mhz', {'mhz': float(carrier_mhz)}) if carrier_mhz else ('tune.auto', {})
+        """Manual tuning (nMZ) for a carrier in range; AUTOMATIC OPERATION (AU) for none or one below 150 kHz. Owner bench 2026-11-02: nMZ with 0.1 MHz made the 8902A show error 10
+        (input frequency out of range, p. 3-287 / 311) and error 20 (value out of range) while its AM key, with the receiver tuning itself, read the same 100 kHz signal fine. The manual's own
+        AM procedure starts with AUTOMATIC OPERATION (p. 3-161 / 207), so a carrier below the keyed-in range is left to automatic tuning (the signal must be on when the reading is taken)."""
+        if carrier_mhz and float(carrier_mhz) >= self.MIN_MANUAL_TUNE_MHZ:
+            return ('tune.mhz', {'mhz': float(carrier_mhz)})
+        return ('tune.auto', {})
 
     def _trigger_read(self, timeout=None, context='') -> float:
         self.send('trig.hold')
@@ -371,7 +434,9 @@ class HP8902A(Instrument):
         old firmware) or None (auto). The accuracy is that of the time base (internal 10 MHz, or the external reference the receiver switches to by itself)."""
         if resolution_hz not in RESOLUTION_SF:
             raise InstrumentError(f'frequency resolution {resolution_hz!r} is not one of {list(RESOLUTION_SF)}')
-        steps = [self._tune(carrier_mhz), ('func.freq', {}), ('res.set', {'n': RESOLUTION_SF[resolution_hz]})]
+        # Bench 2026-10-29 (step 4): the sequence that returned the reading was IP ... M5, 7.1SP, T1, T3 with NO tune code (the counter finds the signal by itself);
+        # carrier_mhz is kept in the signature for the callers but is no longer sent.
+        steps = [('func.freq', {}), ('res.set', {'n': RESOLUTION_SF[resolution_hz]})]
         self._setup(steps, 'frequency setup')
         timeout = self.SLOW_FREQ_TIMEOUT_S if resolution_hz == 0.1 else self.DEFAULT_TIMEOUT
         value = self._trigger_read(timeout)
@@ -428,14 +493,18 @@ class HP8902A(Instrument):
         return value
 
     def calibrate_power_sensor(self) -> float:
-        """The 1 mW 50 MHz power calibration (sensor on the RF POWER CALIBRATION OUTPUT): C1T3SC as one write (the manual's own string), C0, then a reading in watts: it must be between
-        0.999 and 1.000 mW (p. 3-49 / 101). Locked commands, each sent once."""
+        """The 1 mW 50 MHz power calibration (sensor on the RF POWER CALIBRATION OUTPUT): C1T3SC as one write (the manual's own string), its reading, a check reading with the
+        calibrator still on (must be 0.999 to 1.000 mW, p. 3-49 / 101), then C0. Locked commands, each sent once."""
         self._setup([('func.power', {}), ('units.lin', {}), ('units.watt', {})], 'power cal setup')
+        # Bench 2026-10-29 (step 6b): reading AFTER C0 measured the calibrator switched off (6E-08 W). The check reading is taken while the 1 mW calibrator is still on:
+        # C1T3SC (its T3 reading is read and logged), then T1 T3 with the calibrator on (the value after SC: 0.999 to 1.000 mW), and C0 last.
         try:
             self.send('cal.power')
+            first = self._read_reading(self.DEFAULT_TIMEOUT)
+            self.log.add('--', f'reading of the C1T3SC trigger: {first.strip()}', self.label)
+            value = self._trigger_read(self.DEFAULT_TIMEOUT)
         finally:
             self.send('cal.off')
-        value = self._trigger_read(self.DEFAULT_TIMEOUT)
         self.check_status('power calibration')
         if not CAL_POWER_W[0] - 1e-9 <= round(value, 7) <= CAL_POWER_W[1] + 1e-9:
             raise InstrumentError(f'{self.MODEL}: after SC the sensor reads {value * 1e3:.4f} mW, not 0.999 to 1.000 mW')
@@ -467,6 +536,42 @@ class HP8902A(Instrument):
         if after not in (before, before + 1):
             raise InstrumentError(f'{self.MODEL}: cal-factor table has {after} entries after entering {freq_mhz:g} MHz (was {before}): the entry was not accepted')
         return after
+
+    def remove_cal_factor(self, freq_mhz: float) -> int:
+        """Removes one entry from the cal-factor table: 37.3SP <f> MZ 0 CF (0 % at a frequency already in the table removes it; p. 3-87 / 136). Sent once. Read back: the entry count
+        (37.4SP) must be the old count (the frequency was not in the table) or one less. Returns the count."""
+        before = self.cal_factor_count()
+        self.send('cf.pair', mhz=float(freq_mhz), cf=0.0)
+        self.check_status('cal factor removal')
+        after = self.cal_factor_count()
+        if after not in (before, before - 1):
+            raise InstrumentError(f'{self.MODEL}: cal-factor table has {after} entries after removing {freq_mhz:g} MHz (was {before}): the removal was not accepted')
+        return after
+
+    def recall_cal_factor_table(self) -> dict:
+        """Reads the whole cal-factor table back (reads only; UNVERIFIED mechanism, the sequence is the manual's own example program, p. 3-87 / 136): M4, 37.4SP (entries, the
+        reference included), 37.5SP CF (reference), then for each pair 37.6SP FR (frequency in Hz) and CF (cal factor in %), lowest frequency first. Returns
+        {'count', 'reference', 'pairs': [(MHz, %), ...]}. 37.5SP / 37.6SP leave the receiver on a MANUAL cal factor: call restore_automatic_cal_factors() afterwards."""
+        self.send('func.power')
+        count = int(round(self.read_special('37.4')))
+        if count < 1:
+            return {'count': count, 'reference': None, 'pairs': []}
+        self.send('cf.recall.ref')
+        reference = decode_reading(self._read_reading(self.DEFAULT_TIMEOUT))
+        pairs = []
+        for _ in range(count - 1):
+            self.send('cf.recall.freq')
+            hz = decode_reading(self._read_reading(self.DEFAULT_TIMEOUT))
+            self.send('cf.display')
+            pct = decode_reading(self._read_reading(self.DEFAULT_TIMEOUT))
+            pairs.append((round(hz / 1e6, 6), pct))
+        self.check_status('cal factor table read')
+        return {'count': count, 'reference': reference, 'pairs': pairs}
+
+    def restore_automatic_cal_factors(self):
+        """37.0SP: back to the automatic cal-factor table after a table read (37.5SP / 37.6SP select a manual cal factor). Sent once."""
+        self.send('cf.auto')
+        self.check_status('automatic cal factors')
 
     def _modulation(self, func_key, carrier_mhz, detector, hp, lp, extra=()):
         if detector not in DETECTORS:

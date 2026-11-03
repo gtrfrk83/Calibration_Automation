@@ -32,7 +32,7 @@ from drivers.simulated_8902a import Sim8902ATransport  # noqa: E402
 from drivers.transport import CommandLog, Transport, TransportError  # noqa: E402
 
 UNVERIFIED_6060A = ['fe.set', 'ii.query', 'im.query', 'io.query', 'ir.query', 'iu.query', 'xa.query']
-UNVERIFIED_8902A = ['cf.display', 'cf.recall.ref', 'id', 'sf.display', 'srq.read']
+UNVERIFIED_8902A = ['cf.display', 'cf.recall.freq', 'cf.recall.ref', 'id', 'sf.display', 'srq.read']
 UNVERIFIED_8563E = ['aunits.query', 'det.query', 'err.query', 'id.query', 'mkpk.nh']
 UNVERIFIED_96270A_NEW = []          # every added PMETer command was read on its rendered page; the NRP40T and the unit of the reading are flagged in the text
 
@@ -593,14 +593,14 @@ class EightNineOhTwo(_NoSleep):
     def test_frequency_command_order_and_value(self):
         bench, src, rx, t = connected_8902a(mhz=111.1111)
         f = rx.measure_frequency_hz(111.1111, 10)
-        self.assertEqual(t.sent, ['111.1111MZ', 'M5', '7.1SP', 'T1', 'T3'])
+        self.assertEqual(t.sent, ['M5', '7.1SP', 'T1', 'T3'])          # bench 2026-10-29 step 4: no tune code
         self.assertAlmostEqual(f, 111_111_100, delta=20)
         self.assertEqual(rf_state(bench)['frequency_hz'], 111_111_100)
 
     def test_frequency_resolutions_and_the_slow_mode_timeout(self):
         bench, src, rx, t = connected_8902a()
         self.assertEqual(rx.measure_frequency_hz(None, 1000) % 1000, 0)
-        self.assertIn('AU', t.sent)
+        self.assertNotIn('AU', t.sent)                                  # no tune code at all (bench 2026-10-29)
         t.timeouts.clear()
         rx.measure_frequency_hz(100.0, 0.1)
         self.assertIn('7.4SP', t.sent)
@@ -711,6 +711,43 @@ class EightNineOhTwo(_NoSleep):
         self.assertNotIn('M5', t.sent)
         self.assertNotIn('T3', t.sent)
 
+    def test_recal_is_made_visible_at_connect_and_after_a_reset(self):
+        """Bench 2026-10-29: the preset SRQ mask hides RECAL; 22.34SP lets it through (the poll read 96 at each range change)."""
+        bench, src, rx, t = connected_8902a()
+        self.assertTrue(any(line.rstrip().endswith('>>  22.34SP') for line in rx.log.lines()), rx.log.lines())
+        t.sent.clear()
+        rx.reset_to_defaults()
+        self.assertIn('22.34SP', t.sent)
+        self.assertGreater(t.sent.index('22.34SP'), t.sent.index('IP'))
+
+    def test_a_held_setup_is_not_sent_again(self):
+        """Bench 2026-10-29 (step 6b): re-sending the tune + S4 at every level re-acquires the signal and loses it below about -110 dBm."""
+        bench, src, rx, t = connected_8902a(mhz=120.0, dbm=-13.0)
+        from drivers.hp_8902a import RecalRequired
+        try:
+            rx.tuned_rf_level_dbm(120.0)
+        except RecalRequired:
+            rx.calibrate_tuned_level(120.0)
+            rx.tuned_rf_level_dbm(120.0)
+        t.sent.clear()
+        rx.tuned_rf_level_dbm(120.0)
+        self.assertEqual(t.sent, ['T1', 'T3'])                                   # same setup: only the trigger
+        try:
+            rx.tuned_rf_level_dbm(244.0)                                         # another frequency: the whole setup again
+        except InstrumentError:                                                 # nothing at 244 MHz: only the commands matter here
+            pass
+        self.assertIn('244MZ', t.sent)
+        try:
+            rx.measure_frequency_hz(None, 10)                                    # another function in between
+        except InstrumentError:
+            pass
+        t.sent.clear()
+        try:
+            rx.tuned_rf_level_dbm(244.0)                                         # another function in between: sent again
+        except InstrumentError:                                                 # nothing at 244 MHz: only the commands matter here
+            pass
+        self.assertIn('S4', t.sent)
+
     def test_power_zero_and_calibration(self):
         bench, src, rx, t = connected_8902a(rf=False)
         self.assertLess(abs(rx.zero_power_sensor()), 3e-6)
@@ -718,7 +755,8 @@ class EightNineOhTwo(_NoSleep):
         t.sensor_on_calibrator = True
         t.sent.clear()
         value = rx.calibrate_power_sensor()
-        self.assertEqual(t.sent[3:5], ['C1T3SC', 'C0'])                         # the manual's own string, one write
+        self.assertEqual(t.sent, ['C1T3SC', 'T1', 'T3', 'C0'])                  # the manual's own string, one write; the check reading with the calibrator still on; C0 last
+                                                                                 # (M4 LN WT are held from the zero: not sent again)
         self.assertTrue(0.999e-3 <= value <= 1.000e-3)
         t.errors['power_cal_w'] = 0.9e-3
         with self.assertRaises(InstrumentError):
@@ -1011,7 +1049,7 @@ class FakeScpi(Transport):
     def write(self, text):
         self.sent.append(text)
         t = text.strip()
-        u = t.upper()
+        u = re.sub(r'^PMET\d:', 'PMET:', t.upper())          # the driver sends PMET1: since the bench of 2026-10-29
         self._reply = None
         if u == '*IDN?':
             self._reply = 'Fluke,96270A,1,1'
@@ -1020,7 +1058,7 @@ class FakeScpi(Transport):
         elif u == 'SYST:ERR?':
             self._reply = self.errors.pop(0) if self.errors else '0,"No error"'
         elif u.startswith('INST '):
-            self.state['INST'] = {'PMET': 'PMETER', 'SINE': 'SINE'}[u.split()[1]]
+            self.state['INST'] = {'PMET': 'PMETER', 'SINE': 'SINE', 'FM': 'FM'}[u.split()[1]]
             self.state['OUTP'] = '0'
         elif u == 'INST?':
             self._reply = self.state['INST']
@@ -1034,6 +1072,12 @@ class FakeScpi(Transport):
             self._reply = '0'
         elif u == 'OUTP OFF':
             self.state['OUTP'] = '0'
+        elif u == 'OUTP ON':
+            self.state['OUTP'] = '1'
+        elif re.match(r'(FREQ|POW|FM:STAT|FM:DEV|FM:INT:FREQ) \S+$', u):
+            self.state['FM_' + u.split()[0]] = u.split()[1]
+        elif u in ('FREQ?', 'POW?', 'FM:STAT?', 'FM:DEV?', 'FM:INT:FREQ?') and 'FM_' + u[:-1] in self.state:
+            self._reply = self.state['FM_' + u[:-1]]
         elif u == 'OUTP?':
             self._reply = self.state['OUTP']
         elif u.startswith('PMET:') and ' ' in u:
@@ -1077,7 +1121,7 @@ class PowerMeterMode(_NoSleep):
     def test_the_existing_rf_commands_are_unchanged(self):
         for key, template in ORIGINAL_RF_COMMANDS.items():
             self.assertEqual(RF_COMMANDS[key].template, template, key)
-        self.assertEqual(sorted(k for k in RF_COMMANDS if k not in ORIGINAL_RF_COMMANDS), sorted(reference_instruments.PMETER_COMMANDS))
+        self.assertEqual(sorted(k for k in RF_COMMANDS if k not in ORIGINAL_RF_COMMANDS), sorted({**reference_instruments.PMETER_COMMANDS, **reference_instruments.FM_COMMANDS, **reference_instruments.AM_COMMANDS}))
         self.assertEqual(cmdreg.lint_registry(RF_COMMANDS), [])
 
     def test_the_new_commands_have_pages_and_the_unverified_ones_are_listed(self):
@@ -1088,18 +1132,42 @@ class PowerMeterMode(_NoSleep):
         self.assertIn('UNVERIFIED', reference_instruments.PMETER_COMMANDS['pm.idn'].description)
         self.assertEqual(reference_instruments.PMETER_COMMANDS['pm.zero'].risk, 'locked')
 
+    def test_fm_mode_commands_have_manual_pages_and_the_sequence_is_read_back(self):
+        for key, cmd in reference_instruments.FM_COMMANDS.items():
+            self.assertTrue(cmd.ref and 'p. ' in cmd.ref and 'NOT run on hardware' in cmd.ref, key)
+        t = FakeScpi()
+        drv = Fluke96270A(t, CommandLog())
+        drv.connect()
+        t.sent.clear()
+        drv.setup_fm(250e6, 7.0, 100e3, 4000.0)
+        self.assertEqual([c for c in t.sent if not c.endswith('?')], ['OUTP OFF', 'INST FM', 'UNIT:POW DBM', 'POW 7.000', 'FREQ 250000000', 'FM:STAT 1', 'FM:DEV 100000', 'FM:INT:FREQ 4000'])
+        self.assertEqual(t.state['INST'], 'FM')
+
+    def test_fm_limits_of_the_operator_manual_are_checked_before_anything_is_sent(self):
+        self.assertEqual(reference_instruments.fm_max_deviation_hz(30e6), 300e3)
+        self.assertEqual(reference_instruments.fm_max_deviation_hz(100e6), 750e3)
+        self.assertAlmostEqual(reference_instruments.fm_max_deviation_hz(500e6), 600e3)
+        t = FakeScpi()
+        drv = Fluke96270A(t, CommandLog())
+        drv.connect()
+        t.sent.clear()
+        for args in ((30e6, 7.0, 370e3, 100.0), (250e6, 7.0, 370e3, 100.0), (8e6, 7.0, 1e3, 100.0), (30e6, 7.0, 1e3, 400e3)):
+            with self.assertRaises(InstrumentError):
+                drv.setup_fm(*args)
+        self.assertEqual(t.sent, [])
+
     def test_select_power_meter_sequence_and_read_back(self):
         t, drv = self.make()
         ident = drv.select_power_meter(1e9, 'AUTO', single=True)
         self.assertEqual(ident, 'R&S,NRP40T,100001,1.0')
-        self.assertEqual(t.sent[:5], ['INST PMET', 'INST?', 'UNIT:POW DBM', 'UNIT:POW?', 'PMET:TRIG SING'])
-        self.assertIn('PMET:FREQ 1000000000', t.sent)
+        self.assertEqual(t.sent[:3], ['INST PMET', 'INST?', 'PMET1:TRIG SING'])          # no UNIT:POW in power-meter mode (bench 2026-10-29)
+        self.assertIn('PMET1:FREQ 1000000000', t.sent)
         self.assertEqual(t.state['INST'], 'PMETER')
         self.assertEqual(t.state['PMET:AVER'], 'AUTO')
         t2, drv2 = self.make()
         drv2.select_power_meter(5e8, '16', single=False)
-        self.assertIn('PMET:AVER 16', t2.sent)
-        self.assertIn('PMET:TRIG CONT', t2.sent)
+        self.assertIn('PMET1:AVER 16', t2.sent)
+        self.assertIn('PMET1:TRIG CONT', t2.sent)
 
     def test_no_sensor_is_refused(self):
         t, drv = self.make(sensor='NONE, NONE, NONE, NONE')
@@ -1111,7 +1179,7 @@ class PowerMeterMode(_NoSleep):
         orig = t.write
 
         def stubborn(text):
-            if text.startswith('PMET:AVER '):
+            if text.startswith('PMET1:AVER '):
                 t.sent.append(text)
                 t._reply = None
                 return
@@ -1119,17 +1187,17 @@ class PowerMeterMode(_NoSleep):
         t.write = stubborn
         with self.assertRaises(InstrumentError):
             drv.select_power_meter(1e9, '16')
-        self.assertEqual(sum(1 for s in t.sent if s.startswith('PMET:AVER ')), 1)
+        self.assertEqual(sum(1 for s in t.sent if s.startswith('PMET1:AVER ')), 1)
 
     def test_zero_is_asked_once_and_a_failure_names_the_error(self):
         t, drv = self.make()
         drv.zero()
-        self.assertEqual(t.sent, ['PMET:ZERO?'])
+        self.assertEqual(t.sent, ['PMET1:ZERO?'])
         t2, drv2 = self.make(zero='1')
         with self.assertRaises(InstrumentError) as ctx:
             drv2.zero()
         self.assertIn('error queue', str(ctx.exception))
-        self.assertEqual(t2.sent.count('PMET:ZERO?'), 1)
+        self.assertEqual(t2.sent.count('PMET1:ZERO?'), 1)
 
     def test_read_dbm(self):
         t, drv = self.make(reading='-9.87E+00')

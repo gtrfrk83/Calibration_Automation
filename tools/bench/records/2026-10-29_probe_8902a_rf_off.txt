@@ -1,0 +1,71 @@
+Resource GPIB1::14::INSTR
+
+=== TEST 1  M5, 7.1SP, T1, T3 (what the procedure sends, no tune)
+   sent 'IP'
+   status byte after IP: 0  (read twice: 0)
+   sent 'M5'
+   sent '7.1SP'
+   sent 'T1'
+   sent 'T3'
+   status byte before reading: 0
+   reply after 0.0 s: b'+9000009600E+01\r\n'
+   status byte now: 0
+   DISPLAY: --
+
+=== TEST 2  AU (automatic tune), M5, 7.1SP, T1, T3
+   sent 'IP'
+   status byte after IP: 0  (read twice: 0)
+   sent 'AU'
+   sent 'M5'
+   sent '7.1SP'
+   sent 'T1'
+   sent 'T3'
+   status byte before reading: 0
+   reply after 0.0 s: b'+9000009600E+01\r\n'
+   status byte now: 0
+   DISPLAY: --
+
+=== TEST 3  111.1111MZ, M5, T1, T3 (manual tune, no resolution code)
+   sent 'IP'
+   status byte after IP: 0  (read twice: 0)
+   sent '111.1111MZ'
+   sent 'M5'
+   sent 'T1'
+   sent 'T3'
+   status byte before reading: 0
+   reply after 0.0 s: b'+9000009600E+01\r\n'
+   status byte now: 0
+   DISPLAY: --
+
+=== TEST 4  M5, T3 only
+   sent 'IP'
+   status byte after IP: 0  (read twice: 0)
+   sent 'M5'
+   sent 'T3'
+   status byte before reading: 0
+   reply after 0.0 s: b'+9000009600E+01\r\n'
+   status byte now: 0
+   DISPLAY: --
+
+=== TEST 5  M5, T0 (free run) then read
+   sent 'IP'
+   status byte after IP: 0  (read twice: 0)
+   sent 'M5'
+   sent 'T0'
+   status byte before reading: 0
+   reply after 2.0 s: b'+9000009600E+01\r\n'
+   status byte now: 0
+   DISPLAY: --
+
+=== TEST 6  AU, M5, T2 (trigger without settling)
+   sent 'IP'
+   status byte after IP: 0  (read twice: 0)
+   sent 'AU'
+   sent 'M5'
+   sent 'T2'
+   status byte before reading: 0
+   reply after 0.0 s: b'+9000009600E+01\r\n'
+   status byte now: 0
+   DISPLAY: --
+
+Done.

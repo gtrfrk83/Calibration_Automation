@@ -43,9 +43,9 @@ CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('55
 PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even parity': (7, 'even'), '7 data bits, odd parity': (7, 'odd')}
 FLOW = {'XON/XOFF (instrument default)': 'xon_xoff', 'None': 'none', 'RTS/CTS': 'rts_cts'}
 BAUDS = ['57600', '115200', '38400', '19200', '9600', '4800', '2400', '1200']
-GROUPS = ('ZERO_SHORT', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ')
-GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
-               'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI': 'DC current', 'ACV': 'AC volts', 'ACI': 'AC current', 'FREQ': 'Frequency'}
+GROUPS = ('ZERO_SHORT', 'ZERO_SHORT_OHM', 'ZERO_OPEN', 'DCV', 'OHM4', 'OHM2', 'DCI', 'ACV', 'ACI', 'FREQ', 'TEMP')
+GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_SHORT_OHM': 'Shorted channel 3 (zero offset)', 'ZERO_OPEN': 'Open current input (zero offset)', 'DCV': 'DC volts',
+               'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI': 'DC current', 'ACV': 'AC volts', 'ACI': 'AC current', 'FREQ': 'Frequency', 'TEMP': 'Type J thermocouple'}
 
 
 def configure(model):
@@ -65,7 +65,10 @@ def configure(model):
 def find_diagram(model, cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_<model>_<cal>_<GROUP>.png, then the shared hook_dacq_ names."""
     cal = '5522A' if cal == '5520A' else cal           # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED)
-    for name in (f'hook_{model}_{cal}_{group}', f'hook_dacq_{cal}_{group}', f'hook_{model}_{group}', f'hook_dacq_{group}'):
+    names = (f'hook_{model}_{cal}_{group}', f'hook_dacq_{cal}_{group}', f'hook_{model}_{group}', f'hook_dacq_{group}')
+    if group == 'ZERO_SHORT_OHM':      # no picture of its own: the ZERO_SHORT one (a copper short) shows the same hook-up
+        names += (f'hook_{model}_{cal}_ZERO_SHORT', f'hook_dacq_{cal}_ZERO_SHORT', f'hook_{model}_ZERO_SHORT', 'hook_dacq_ZERO_SHORT')
+    for name in names:
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
             return path
@@ -183,7 +186,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         if p['kind'] == 'ACI': return self.pm_param('dacq.settle.aci', 4.0)
         if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('dacq.settle.ohm_high', 4.0)
         if p['kind'] in ('DCI', 'OHM2'): return self.pm_param('dacq.settle.dci_ohm2', 3.0)
-        return self.pm_param('dacq.settle.default', 2.0)
+        return self.pm_param('dacq.settle.default', 5.0)      # DC volts and low-range 4-wire ohms: 5 s after the calibrator goes to operate (was 2 s; owner 2026-11-02: readings were taken too fast)
 
     @procmods_engine.point_commands()
     def measure(self, p):
@@ -201,6 +204,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
         elif k in ('OHM2', 'OHM4'): self.cal.set_output_ohms(v)
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], v)
+        elif k == 'TEMP': self.cal.set_output_temperature(v, p.get('tc_type') or 'J')      # thermocouple simulation (5520A / 5522A / 5560A drivers)
         surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)   # the calibrator refuses outputs it cannot make; never operate then (so no Continue)
         self.cal.operate_unverified()
         time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
@@ -367,7 +371,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         except Exception:
             return 'This module has no such channel.'
         pair = pair_channel(module, ch) if p['role'] != 'current' else None
-        if g == 'ZERO_SHORT':
+        if g in ('ZERO_SHORT', 'ZERO_SHORT_OHM'):
             return (f'Disconnect the calibrator from the module. Fit low-thermal copper shorts across HI/LO of channel {ch} and, for the 4-wire ohms points, '
                     f'of its partner channel {pair}. The calibrator stays in STANDBY.')
         if g == 'ZERO_OPEN':
@@ -383,6 +387,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g == 'OHM2':
             return (f'2-wire: calibrator {out} to channel {ch} HI / LO (the median-length path). Calibrator external sense OFF; '
                     'use its 2-wire compensation if it offers it.')
+        if g == 'TEMP':
+            return (f'Type {p.get("tc_type", "J")} thermocouple wire (miniature connector to the calibrator TC output, bare leads to the module) from the calibrator TC OUTPUT '
+                    f'to channel {ch} HI / LO, observing the polarity (J: white +, red -). Allow the junctions to stabilise. The calibrator simulates {p["nominal"]:g} \u00b0C.')
         if g in ('DCI', 'ACI'):
             amps = 'VI AUX output and OUTPUT LO' if five60 else 'AUX HI and AUX LO'
             return f'Calibrator {amps} to the current channel {ch} (HI / LO). Check the calibrator range and the fuse first.'
@@ -493,6 +500,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.fast_demo and self.io is None: self.test_connections()
         if not self.fast_demo and self.io is None: return
         self.mo_reset_run()
+        self._hv_acked = False                                   # a new run asks the high-voltage question again
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
@@ -526,9 +534,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         key = p['group']
         if not self.fast_demo and key != previous and not self._prompt_setup(p):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
-        if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 100:
+        if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 100 and not getattr(self, '_hv_acked', False):
+            # owner 2026-11-02: the high-voltage question is asked once per run, at the first high-voltage point; answering Yes covers the rest of the run
             if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
+            self._hv_acked = True
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)

@@ -413,9 +413,29 @@ def cert_row(description, nominal, low, high, unit, reading=None, failed=False, 
 
 
 # Shown on the lab's cover certificate instead, so left off this report. They are still passed in (and kept in the asset history).
-HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Temperature', 'Humidity'}
+HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Temperature', 'Humidity',
+                 'Operator-supplied standard'}          # owner, 2026-10-30: not printed (still passed in and kept in the asset history)
 # The standards-used table and the Performed by / Reviewed by / Date block are on the cover certificate too, so they are not drawn.
 # So is the footnote under the table (footer_note is accepted and ignored).
+
+
+def header_shown(key):
+    """Owner, 2026-10-30: the header of the report shows ONLY the asset ID, the serial number and the report date (everything else the engines pass in, e.g.
+    Instrument, Limits applied, Source, Mode, Standards, Frequency range, is kept in the asset history / snapshot but not printed). Returns the print order
+    (1, 2, 3) or 0 for a key that is not printed."""
+    k = str(key or '').strip().lower()
+    if k in HEADER_HIDDEN_LOWER:
+        return 0
+    if k in ('instrument id', 'asset', 'asset id', 'asset #', 'asset no', 'asset number'):
+        return 1
+    if k.startswith('serial') or k in ('s/n', 'sn'):
+        return 2
+    if k == 'report date':
+        return 3
+    return 0
+
+
+HEADER_HIDDEN_LOWER = set()
 
 
 def _mod_lines(modifications) -> list:
@@ -516,7 +536,11 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     info = header + [('Procedure', details.get('procedure')), ('Technician', details.get('technician')),
                      ('Temperature', details.get('temperature')), ('Humidity', details.get('humidity')),
                      ('Report date', report_date)]
-    info = [(k, v) for k, v in info if v not in (None, '') and k not in HEADER_HIDDEN]
+    # Only the asset ID, serial number and report date are printed (header_shown); a DEMO marking an engine puts in the header is ALWAYS printed too, first
+    # (demo mode never produces real-looking evidence).
+    demo_mark = lambda k, v: bool(demo) and 'DEMO' in str(v).upper()                 # noqa: E731
+    info = [(k, v) for k, v in info if v not in (None, '') and (header_shown(k) or demo_mark(k, v))]
+    info.sort(key=lambda kv: 0 if demo_mark(*kv) else header_shown(kv[0]))          # demo marking, asset ID, serial number, report date
     story = [Paragraph(f'<u>{clean(title)}</u>', title_style), Spacer(1, 6)]
     # two items per line keeps long source citations from running off the page
     pairs = [info[i:i + 3] for i in range(0, len(info), 3)]
@@ -529,34 +553,11 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
                                'PASS/FAIL is judged against the tolerance used.', red))
         story.append(Spacer(1, 6))
 
-    # ---- verdict --------------------------------------------------------------------------------------
+    # ---- verdict ---------------------------------------------------------------------------------------------------------------------------
+    # The RESULT / AS LEFT summary lines (the out-of-tolerance count, the list of failed points, the 'Points without an As Left reading ...' note) are no longer
+    # printed (owner, 2026-10-30): the OOT column of the table shows each point, and the lab's cover certificate carries the verdict.
     total = len(rows)
-    failed = [r for r in rows if r.get('OOT')]
-    if total:
-        if failed:
-            names = '; '.join(clean(r['Description']) for r in failed[:8]) + (f'; and {len(failed) - 8} more' if len(failed) > 8 else '')
-            story.append(Paragraph(f'RESULT: OUT OF TOLERANCE — {len(failed)} of {total} points outside limits', verdict_fail))
-            story.append(Paragraph(names, meta))
-        else:
-            story.append(Paragraph(f'RESULT: PASS — all {total} points within tolerance', verdict_pass))
-        story.append(Spacer(1, 6))
-    left_rows = [r for r in rows if str(r.get('As Left') or '') not in ('', 'Same')]      # points measured again after an adjustment
-    if left_rows and left_copied:
-        left_bad = [r for r in left_rows if r.get('As Left OOT')]
-        if left_bad:
-            story.append(Paragraph(f'AS LEFT: OUT OF TOLERANCE — {len(left_bad)} of {len(left_rows)} points; the As Left values are the As Found readings (no adjustment made)', verdict_fail))
-        else:
-            story.append(Paragraph(f'AS LEFT: PASS — all {len(left_rows)} points; the As Left values are the As Found readings (no adjustment made)', verdict_pass))
-        story.append(Spacer(1, 6))
-    elif left_rows:
-        left_bad = [r for r in left_rows if r.get('As Left OOT')]
-        if left_bad:
-            story.append(Paragraph(f'AS LEFT: OUT OF TOLERANCE — {len(left_bad)} of {len(left_rows)} points measured after adjustment '
-                                   'are still outside limits', verdict_fail))
-        else:
-            story.append(Paragraph(f'AS LEFT: PASS — all {len(left_rows)} points measured after adjustment are within tolerance', verdict_pass))
-        story.append(Paragraph("Points without an As Left reading were not adjusted (shown as 'Same').", meta))
-        story.append(Spacer(1, 6))
+    left_rows = [r for r in rows if str(r.get('As Left') or '') not in ('', 'Same')]      # points measured again after an adjustment (the table needs it)
 
     # Standards used and the signature block are on the lab's cover certificate, so they are not printed here.
 
@@ -667,12 +668,8 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             self.line(margin, H - 0.42 * inch, W - margin, H - 0.42 * inch)
             self.line(margin, 0.5 * inch, W - margin, 0.5 * inch)
             self.setFont(REG, 7)
-            try:
-                import suite_info
-                software = f'{suite_info.NAME} {suite_info.full_version()}   |   '
-            except ImportError:
-                software = ''
-            self.drawRightString(W - margin, 0.34 * inch, f'{software}Page {self._pageNumber} of {count}')
+            # the program name and version are no longer printed in the page footer (owner, 2026-10-30): only the page number
+            self.drawRightString(W - margin, 0.34 * inch, f'Page {self._pageNumber} of {count}')
             left = f'Instrument ID: {instrument_id or "-"}   |   {title}'
             if demo:                                   # non-demo footers are unchanged
                 left = demo_footer_left(left, REG, 7, margin, W, BOLD, 8)

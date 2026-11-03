@@ -57,8 +57,11 @@ class ReportMods(Base):
         build(report_pdf, a, sample_rows())
         build(report_pdf, b, sample_rows(), modifications=[])
         build(report_pdf, c, sample_rows(), modifications=pm.resolve('34465A', None, store=self.store))       # empty OverrideSet
-        for f in (a, b, c):
-            self.assertEqual(old.read_bytes(), f.read_bytes())
+        # owner, 2026-10-30: the footer (program / version) and the RESULT / AS LEFT lines were removed on purpose, so the pre-modifications baseline can no longer be
+        # byte-identical; what this test guards is that an empty modification list changes nothing: a, b and c must be identical.
+        self.assertTrue(old.read_bytes())
+        for f in (b, c):
+            self.assertEqual(a.read_bytes(), f.read_bytes())
         self.assertNotIn('Procedure modifications', pdf_text(a))
 
     def test_block_and_header_line(self):

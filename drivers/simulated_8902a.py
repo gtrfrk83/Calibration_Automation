@@ -49,6 +49,7 @@ class Sim8902ATransport(_SimBase):
         self.trig, self.cal_on, self.mask = 0, False, 2
         self.code_error = False
         self.instr_error = False
+        self.tune_error = False
         self.data_ready = False
         self.zeroed = False
         self.sc_held = False                 # the 1 mW calibration result stays on the display after C0 until the next ZR
@@ -56,6 +57,7 @@ class Sim8902ATransport(_SimBase):
         self.dist_tone = 1000
         self.last_function = None
         self._cf_mode, self._cf_freq = None, None
+        self._cf_ptr, self._cf_cur = 0, None   # 37.6SP: next pair to recall / the pair shown by FR and CF
 
     # ---- bus --------------------------------------------------------------------------------------------------------------------------------
     def clear(self):
@@ -131,7 +133,11 @@ class Sim8902ATransport(_SimBase):
         if suffix == 'MZ' and self._cf_mode in ('ref', 'pair'):
             self._cf_mode, self._cf_freq = 'pair', float(num)           # 37.3SP <f> MZ <cf> CF: a cal-factor frequency, not a tuning
         elif suffix == 'MZ':
-            self.tuned_mhz = float(num)
+            if float(num) < 0.15:                                    # keyed-in tuning below the 150 kHz range: error 10 (and 20) like the real receiver (owner bench 2026-11-02)
+                self.tune_error = True
+                self.instr_error = True
+            else:
+                self.tuned_mhz = float(num)
         elif suffix == 'HZ':
             self.tuned_mhz = float(num) / 1e6
         elif suffix == 'CF':
@@ -161,6 +167,19 @@ class Sim8902ATransport(_SimBase):
             self.pending = encode_reading(len(self.cf_table) + 1)
         elif sf == 37 and arg == '5':
             self._cf_mode = 'show'
+            self._cf_ptr, self._cf_cur = 0, None
+        elif sf == 37 and arg == '6':
+            pairs = sorted(self.cf_table.items())
+            if self._cf_ptr >= len(pairs):
+                self._cf_cur = None
+                self._cf_mode = 'next'
+                self.pending = self._error(26)                       # end of table (or an empty table)
+            else:
+                self._cf_cur = pairs[self._cf_ptr]
+                self._cf_ptr += 1
+                self._cf_mode = 'next'
+        elif sf == 37 and arg == '0':
+            self._cf_mode = None                                     # automatic cal factors
         elif sf == 22:
             if arg == '64':
                 self.pending = encode_reading(self.mask)
@@ -182,6 +201,7 @@ class Sim8902ATransport(_SimBase):
             self._reset_state()
         elif code == 'AU':
             self.tuned_mhz = None
+            self.tune_error = False
         elif code in ('M1', 'M2', 'M4', 'M5', 'S1', 'S2', 'S4', 'S5'):
             self.func = code
             self.last_function = code
@@ -225,6 +245,10 @@ class Sim8902ATransport(_SimBase):
                 self.pending = encode_reading(0, error=18)
             else:
                 self.sc_held = True
+        elif code == 'FR' and self._cf_mode == 'next' and self._cf_cur is not None:
+            self.pending = encode_reading(self._cf_cur[0] * 1e6)
+        elif code == 'CF' and self._cf_mode == 'next' and self._cf_cur is not None:
+            self.pending = encode_reading(self._cf_cur[1])
         elif code == 'CF':
             if self._cf_mode == 'show' or self.func not in ('M1', 'M2'):
                 self.pending = encode_reading(self.cf_ref)
@@ -248,6 +272,8 @@ class Sim8902ATransport(_SimBase):
         f, level = src['frequency_hz'], src['amplitude_dbm']
         have_signal = src['rf_on']
         fn = self.func
+        if self.tune_error:
+            return self._error(10)
         if fn == 'M5':
             if not have_signal:
                 return self._error(96)

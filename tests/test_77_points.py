@@ -401,7 +401,7 @@ class EndToEnd(unittest.TestCase):
         self.assertRegex(seen['initialfile'], r'^A-77-\d\d-\d\d-\d{4}\.pdf$')
         self.assertIn('Calibration Data', text)
         self.assertNotIn('Performance Verification', text)
-        self.assertIn('Fluke 77 Series IV', text)
+        self.assertNotIn('Instrument: Fluke 77 Series IV', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
         flat = ' '.join(text.split())
         self.assertIn('6.000 V range (limits corrected)', flat)       # the correction is stated on the report itself
         self.assertIn('99.99 kHz range (5 V applied)', ' '.join(text.split()))

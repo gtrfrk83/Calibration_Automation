@@ -37,6 +37,8 @@ from drivers.gpib_address import address_of, check_address
 
 MODEL = '6060A'
 SPEC_PATH = HERE / 'specs' / 'fluke_6060a_pv.json'
+STATE_KEY = MODEL                   # what the saved settings, the procedure modifications and the progress files are keyed by; a second procedure on this engine uses its own (owner, 2026-11-02)
+VARIANT_LABEL = ''                  # shown after the model in the window title and the report title of a second procedure on this engine ('' for the manual's procedure)
 SPEC: dict[str, Any] = {}           # set by configure()
 POINTS: list[dict[str, Any]] = []
 UUT_ADDRESS = drivers.Fluke6060A.DEFAULT_ADDRESS          # the owner's lab addresses; each is an editable box and none is fixed in code
@@ -46,10 +48,11 @@ DEFAULT_RF_ADDR = 'GPIB0::4::INSTR'                        # the 96270A: the sam
 NO_LF = 'None (I set the generator by hand)'
 LF_CHOICES = {NO_LF: None, 'Keysight 33210A': drivers.Keysight33210A, 'Keysight 33220A': drivers.Keysight33220A, 'Keysight 33250A': drivers.Keysight33250A}
 LF_VRMS = 0.7071                                          # test 3 and 6: "0.7071 V rms as read by the DVM" (UNVERIFIED: the generator is set to this into High Z; check the DVM)
-MEAS = ('selftest', 'freq_count', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'derived')
+MEAS = ('selftest', 'freq_count', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'devmeter', 'derived')
 GROUP_TITLE = {'POWERON': 'Power-on self test', 'RX': '6060A RF OUTPUT to the 8902A RF INPUT', 'RXPWR': '6060A RF OUTPUT to the 11722A sensor module (8902A RF power)',
                'PM': '6060A RF OUTPUT to the NRP40T sensor on the 96270A', 'SA': '6060A RF OUTPUT to the 8563E', 'EXT1K': '8902A and LF generator at 1 kHz (external modulation)',
-               'EXT10K': '8902A and LF generator at 10 kHz (external modulation)', 'EXT400': '8902A and LF generator at 400 Hz (external modulation)'}
+               'EXT10K': '8902A and LF generator at 10 kHz (external modulation)', 'EXT400': '8902A and LF generator at 400 Hz (external modulation)',
+               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'DEVM': '96270A FM output to the 6060A DEVIATION METER INPUT (typed readings)'}
 WARM_UP = ('The 8902A needs 30 minutes of warm-up before its power, AM and FM calibrations (8902A manual), and the 8563E and the 6060A should be on long enough to be stable. '
            'The program does not wait for it.')
 TYPED_THD_TEXT = ('Test 6: THD at 10 kHz is typed from your own distortion analyzer (the 8902A measures distortion only at 1 kHz and 400 Hz). Untick to leave those 17 points out.')
@@ -59,9 +62,9 @@ class SpecError(procspec.SpecError):
     pass
 
 
-def load_spec(path=SPEC_PATH):
+def load_spec(path=None):
     """Read and check the spec (kind 'rf-generator-pv'): every point has a measurement kind, a group, limits that contain the nominal, and (for a derived point) inputs that exist."""
-    spec = json.loads(Path(path).read_text(encoding='utf-8'))
+    spec = json.loads(Path(path or SPEC_PATH).read_text(encoding='utf-8'))
     if spec.get('kind') != 'rf-generator-pv' or spec.get('model') != MODEL:
         raise SpecError("not a 'rf-generator-pv' spec for the 6060A")
     refs = set()
@@ -79,8 +82,10 @@ def load_spec(path=SPEC_PATH):
                 raise SpecError(f'{where}: low must not be above high')
             if not p['low'] <= p['nominal'] <= p['high']:
                 raise SpecError(f'{where}: limits do not contain the nominal')
-            if p['meas'] not in ('selftest', 'derived') and 'gen' not in p:
+            if p['meas'] not in ('selftest', 'derived', 'manual', 'devmeter') and 'gen' not in p:
                 raise SpecError(f'{where}: a measured point needs a generator setting')
+            if p['meas'] == 'devmeter' and 'fmsrc' not in p:
+                raise SpecError(f'{where}: a deviation-meter point needs an fmsrc (the 96270A FM setting)')
     for s in spec['sections']:
         for p in s['points']:
             if p['meas'] == 'derived' and not all(r in refs for r in p['derive']['inputs']):
@@ -110,8 +115,26 @@ def configure(model=MODEL):
     apply_options(POINTS, True)
 
 
-def apply_options(points, typed_thd):
-    """What depends on the ticked box: the typed THD points are left out when their box is unticked. Sets p['unavailable'] (a reason) or ''."""
+# The generator's upper frequency (owner, 2026-10-29: the lab's 6060A here only goes up to 520 MHz; other units may cover the manual's 1050 MHz). A point whose 6060A
+# frequency is above the chosen range is NOT run and is listed on the report as not tested (owner decision: keep it, mark it).
+RANGE_CHOICES = {'0.1 to 1050 MHz (as the manual)': 1050.0, '0.1 to 520 MHz': 520.0}
+DEFAULT_RANGE = '0.1 to 1050 MHz (as the manual)'
+
+
+def uut_mhz(p, by_ref=None):
+    """The 6060A frequency (MHz) a point programs; a derived point (section error / sum) takes the highest of its inputs. None when the point programs none."""
+    f = (p.get('gen') or {}).get('freq_mhz')
+    if f is None and p.get('meas') == 'derived' and by_ref:
+        fs = [uut_mhz(by_ref[r]) for r in p['derive']['inputs'] if r in by_ref]
+        fs = [x for x in fs if x is not None]
+        f = max(fs) if fs else None
+    return f
+
+
+def apply_options(points, typed_thd, max_mhz=1050.0):
+    """What depends on the settings: the typed THD points are left out when their box is unticked, and points above the generator's frequency range are not run
+    (p['not_tested'] True, listed on the report). Sets p['unavailable'] (a reason) or ''."""
+    by_ref = {p['ref']: p for p in points}
     for p in points:
         base = p['_base']
         p['nominal'], p['low'], p['high'], p['description'] = base['nominal'], base['low'], base['high'], base['description']
@@ -120,6 +143,22 @@ def apply_options(points, typed_thd):
         p['unavailable'] = ''
         if p.get('typed_only') and not typed_thd:
             p['unavailable'] = 'THD at 10 kHz typed from your analyzer is switched off (tick the box in the settings)'
+        f = uut_mhz(p, by_ref)
+        p['not_tested'] = f is not None and f > float(max_mhz) + 1e-9
+        if p['not_tested']:
+            p['unavailable'] = f'not tested: {f:g} MHz is above this generator\'s {float(max_mhz):g} MHz range'
+        if (p.get('gen') or {}).get('freq_mhz') is not None and float(p['gen']['freq_mhz']) < drivers.fluke_6060a.MIN_MHZ - 1e-9:      # the driver's frequency command is verified from 0.1 MHz (p. 2-15)
+            p['not_tested'] = True
+            p['unavailable'] = f'not tested: {float(p["gen"]["freq_mhz"]) * 1000:g} kHz is below the 0.1 MHz the 6060A driver programs (p. 2-15)'
+        src = p.get('fmsrc')
+        if src and drivers.reference_instruments.fm_max_deviation_hz(src['carrier_mhz'] * 1e6) < src['dev_khz'] * 1e3 - 1e-6:      # the 96270A's own FM limit (Operator Manual Table 3-26)
+            p['not_tested'] = True
+            p['unavailable'] = (f'not tested: the 96270A cannot generate {src["dev_khz"]:g} kHz deviation at {src["carrier_mhz"]:g} MHz '
+                                f'(its limit is {drivers.reference_instruments.fm_max_deviation_hz(src["carrier_mhz"] * 1e6) / 1e3:g} kHz, Operator Manual Table 3-26)')
+        khz = ((p.get('gen') or {}).get('fm') or {}).get('khz')
+        if khz is not None and float(khz) > ((SPEC.get('options') or {}).get('fm_max_khz') or drivers.fluke_6060a.MAX_FM_KHZ) + 1e-9:          # the driver's FM command is verified to 99.9 kHz only (p. 2-21): a larger deviation is not programmed
+            p['not_tested'] = True
+            p['unavailable'] = f'not tested: {float(khz):g} kHz deviation is above the 99.9 kHz the 6060A driver programs (Table 2-5, p. 2-21) and this spec allows no more'
         p['error'] = float(f"{max(p['nominal'] - p['low'], p['high'] - p['nominal']):.9g}")
 
 
@@ -251,6 +290,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """What the program remembers about the instruments; forgotten at every reset (the reset puts them back to defaults)."""
         self._mod_on = False
         self._pm_key = None
+        self._fm_on = False
         self._lf_set = None
         self._lf_on = False
         self._tb_checked = False
@@ -271,8 +311,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         try:
             self.gen.end_point()
         finally:
-            self.lf_off()
+            try:
+                self.fm_source_off()
+            finally:
+                self.lf_off()
 
+    def fm_source_off(self):
+        """After a deviation-meter point: the 96270A output OFF (read back; SafetyError when it is not off) and the source back to the leveled sine; the power meter is selected again at the next level point."""
+        if not getattr(self, '_fm_on', False) or self.pm is None:
+            return
+        self._fm_on = False
+        self._pm_key = None
+        self.pm.output(False)
+        self.pm.select_sine()
     def lf_off(self):
         if self.lf is not None and self._lf_on:
             try:
@@ -342,7 +393,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         if p['meas'] == 'level_pm': return self.pm_param('f6060a.settle.pm', PM_SETTLE_S)
         if p['meas'] in ('harmonic', 'spur'): return self.pm_param('f6060a.settle.sa', SA_SETTLE_S)
-        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
+        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count', 'devmeter'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
         return self.pm_param('f6060a.settle.default', DEFAULT_SETTLE_S)
 
     def _need(self, name, what):
@@ -377,6 +428,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         kind = p['meas']
         if kind in ('derived', 'selftest'):
             raise InstrumentError(f'{p["ref"]} is not measured by the instruments')
+        if kind == 'devmeter':                                     # the 96270A makes the FM; the technician types the 6060A's own deviation display (the 6060A RF stays off)
+            pm, src = self._need('pm', '96270A'), p['fmsrc']
+            if self._mod_on:                                       # whatever the previous point left on is switched off first (read back), as in _configure
+                self.gen.mod_off()
+                self._mod_on = False
+            self.gen.set_frequency(src['carrier_mhz'])             # the 6060A is set to the 96270A carrier too (read back); its RF output stays off
+            self._fm_on = True
+            pm.setup_fm(src['carrier_mhz'] * 1e6, src['level_dbm'], src['dev_khz'] * 1e3, src['rate_hz'])
+            pm.output(True)
+            time.sleep(self.settle(p))
+            return TypedPoint(p.get('manual_prompt') or 'Read the 6060A Modulation Display deviation and type it in kHz.')
+        if kind == 'manual':                                       # the reading comes from the technician's own instrument (nothing is programmed, no RF is switched on)
+            return TypedPoint(p.get('manual_prompt') or 'Read your instrument and type the value.')
         needs = {'freq_count': ('rx', '8902A'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
                  'mod_rate': ('rx', '8902A'), 'am_depth': ('rx', '8902A'), 'fm_dev': ('rx', '8902A'), 'thd': ('rx', '8902A')}
         if kind in needs:
@@ -418,7 +482,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             gen.am(am['pct'], source=am['src'], rate_hz=am.get('rate_hz', 1000), input_applied=am.get('input_applied', True))
             self._mod_on = True
         if fm:
-            gen.fm(fm['khz'], source=fm['src'], rate_hz=fm.get('rate_hz', 1000))
+            gen.fm(fm['khz'], source=fm['src'], rate_hz=fm.get('rate_hz', 1000), max_khz=(SPEC.get('options') or {}).get('fm_max_khz'))
             self._mod_on = True
 
     def _pm_ready(self, p):
@@ -514,9 +578,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         configure(model)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}
-        self.pm_init('f6060a', MODEL, demo=demo, lists=[POINTS], shape='band')         # procedure modifications: saved overrides for this model
+        self.pm_init('f6060a', STATE_KEY, demo=demo, lists=[POINTS], shape='band')         # procedure modifications: saved overrides for this model
         self.ui_view.setup_window(self)
-        self.settings = ui.Settings(MODEL)
+        self.settings = ui.Settings(STATE_KEY)
         s = self.settings
         self.asset = port.var(); self.serial = port.var()
         self.uut_addr = port.var(s.get('uut_addr', str(UUT_ADDRESS)))                  # 6060A (unit under test)
@@ -526,6 +590,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.lf_model = port.var(s.get('lf_model', NO_LF) if s.get('lf_model', NO_LF) in LF_CHOICES else NO_LF)
         self.lf_addr = port.var(s.get('lf_addr', ''))                                  # 33210A / 33220A / 33250A as the LF source (empty: set by hand)
         self.thd_typed = port.var(bool(s.get('thd_typed', True)), 'bool')
+        self.freq_range = port.var(s.get('freq_range', DEFAULT_RANGE) if s.get('freq_range', DEFAULT_RANGE) in RANGE_CHOICES else DEFAULT_RANGE)
         self.status = port.var()
         self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
@@ -562,9 +627,11 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
     def is_manual(self, p):
-        return p['meas'] == 'thd_typed'               # the reading is typed from the technician's own analyzer
+        return p['meas'] in ('thd_typed', 'manual', 'devmeter')   # the reading is typed from the technician's own analyzer / instrument
 
     def manual_reason(self, p):
+        if p['meas'] in ('manual', 'devmeter'):
+            return p.get('manual_prompt') or 'Read your instrument and type the value.'
         return 'The 8902A measures audio distortion only at 1 kHz and 400 Hz: read your own distortion analyzer.'
 
     # ------------------------------------------------------------------ layout
@@ -621,13 +688,16 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def on_options(self, save=True):
         """The typed-THD box: the point list follows. Stored readings are judged again against the limits that now apply."""
         self.pm_revert(POINTS)
-        apply_options(POINTS, bool(self.thd_typed.get()))
+        apply_options(POINTS, bool(self.thd_typed.get()), self.max_mhz())
         self.pm_apply(POINTS)
         for records in (self.found, self.left):
             for key, rec in records.items():
                 rec['result'] = 'PASS' if judge(POINTS[int(key) - 1], rec['reading']) else 'FAIL'
         if save: self._save_settings()
         self.refresh()
+
+    def max_mhz(self) -> float:
+        return RANGE_CHOICES.get(self.freq_range.get(), 1050.0)
 
     def on_select(self, _event=None):
         sel = self.ui_view.table_selection(self)
@@ -646,6 +716,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return 'No connections. Switch the 6060A POWER off and on and watch the self test (every indicator on for about 5 seconds; the failure codes show in the four display fields if it fails).'
         if g == 'RX':
             return rx_in
+        if g == 'REFOSC':
+            return ('6060A rear panel 10 MHz IN/OUT to the frequency counter input (50 ohm), REF INT/EXT switch to INT. Read the counter and type the frequency in Hz. The 6060A RF output is not used.')
+        if g == 'DEVM':
+            return ('96270A leveling-head RF OUTPUT to the 6060A DEVIATION METER INPUT (the 6060A RF OUTPUT is not used). On the 6060A press SPCL 6, 1 and set the 400/1000 switch to the deviation range the '
+                    'point says (50 kHz or 500 kHz). The program sets the 96270A carrier, level (+7 dBm), FM rate and deviation (each read back), switches its output ON for the point, and asks you to type the 6060A '
+                    'Modulation Display deviation in kHz; it switches the output OFF afterwards. With no 96270A connected, set an FM source by hand to the values on the point.')
         if g == 'RXPWR':
             return ('6060A RF OUTPUT to the 11722A power sensor module connected to the 8902A SENSOR input (RF power, M4). The sensor module\'s calibration-factor table must already be loaded '
                     'in the 8902A (UNVERIFIED: this program does not enter it).')
@@ -722,6 +798,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                          ('lf_addr', self.lf_addr)):
             self.settings.set(key, var.get())
         self.settings.set('thd_typed', bool(self.thd_typed.get()))
+        self.settings.set('freq_range', self.freq_range.get())
         self.settings.save()
 
     # ------------------------------------------------------------------ running
@@ -753,7 +830,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._mo_pending = None; self._mo_current = None
         self.stop = False; self.busy = True
         self._prep_done = set()                         # the 8902A is reset at the start of every Run: its calibrations are asked for again
-        self.reset_then(lambda: self._next(points, 0, None))     # the Run resets to defaults first (every instrument; the unit under test notice comes first)
+        self.reset_then(lambda: self._upfront_preps(points))     # the Run resets to defaults first (every instrument; the unit under test notice comes first)
 
     def reset_run(self):
         report = super().reset_run()
@@ -818,10 +895,23 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 port.post(self.root, lambda err=err: self._error(err))
         threading.Thread(target=work, daemon=True).start()
 
+    def _upfront_preps(self, points):
+        """The 8902A calibrations (RF power sensor, AM, FM) the points of this run need are done once, here, before the first point, not at the first section that needs each one."""
+        need, first = [], None
+        if not self.demo:
+            for p in points:
+                if p['meas'] == 'derived' or p.get('skip') or p.get('unavailable'): continue
+                for k in self.preps_for(p):
+                    if k not in need and k not in self._prep_done: need.append(k); first = first or p
+        if not need: self._next(points, 0, None); return
+        self._upfront = True
+        self._run_preps(points, 0, first, prompt_key(first), need)
+
     def _preps_done(self, points, i, p, key, name, rest):
         self._prep_done.add(name)
         if rest: self._run_preps(points, i, p, key, rest); return
-        self._next(points, i, None, after_prep=True)          # the wiring was changed for the calibration: the hook-up prompt is shown again
+        upfront, self._upfront = getattr(self, '_upfront', False), False
+        self._next(points, i, None, after_prep=not upfront)          # the wiring was changed for the calibration: the hook-up prompt is shown again
 
     def _next(self, points, i, previous, after_prep=False):
         if i >= len(points) or self.stop:
@@ -977,12 +1067,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     # ------------------------------------------------------------------ files
     def _checkpoint_path(self):
         name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        return appdata.progress_path(f'{MODEL}_{name}_checkpoint.json')
+        return appdata.progress_path(f'{STATE_KEY}_{name}_checkpoint.json')
 
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, thd_typed=bool(self.thd_typed.get()),
-                                        lf_model=self.lf_model.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
+                                        freq_range=self.freq_range.get(), lf_model=self.lf_model.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -993,6 +1083,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             if not port.ask_yes_no('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.thd_typed.set(bool(data.get('thd_typed', self.thd_typed.get())))
+        if data.get('freq_range') in RANGE_CHOICES:
+            self.freq_range.set(data['freq_range'])
         self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_options(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
@@ -1009,10 +1101,19 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """(rows, points): the report rows and, parallel to them, the spec point each came from."""
         rows, pts = [], []
         for p in POINTS:
+            if p.get('not_tested') and not p.get('skip'):
+                rows.append(self.not_tested_row(p)); pts.append(p)        # kept on the report, no result (owner decision 2026-10-29)
+                continue
             if not self.active(p): continue
             row = self.found_left_row(p, lambda r, p=p: self.point_row(p, r))
             if row: rows.append(row); pts.append(p)
         return rows, pts
+
+    def not_tested_row(self, p):
+        """A point above the generator's frequency range: on the report with its limits, no reading, marked NOT TESTED."""
+        import report_pdf
+        return report_pdf.cert_row(f"{p['description']} - NOT TESTED: above this unit's {self.max_mhz():g} MHz range", p['nominal'], p['low'], p['high'], p['unit'],
+                                   None, False, section=self.report_section(p))
 
     def point_row(self, p, r):
         """One report row. No uncertainty is printed (the suite has no uncertainty for these RF measurements; the cover sheet from the other software carries the standards)."""
@@ -1022,10 +1123,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def export_pdf(self):
         rows, pts = self.certificate_rows_and_points()
-        if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
+        if not any(not p.get('not_tested') for p in pts): port.message('info', 'No results', 'No recorded results to export yet.'); return
         try: import report_pdf
         except ImportError as exc: port.message('error', 'Report export', str(exc)); return
-        details = port.report_details(f'Fluke {MODEL} performance verification', parent=self.root)
+        details = port.report_details(f'Fluke {MODEL} performance verification' + (f' ({VARIANT_LABEL})' if VARIANT_LABEL else ''), parent=self.root)
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
         path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
@@ -1033,7 +1134,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         demo = self.any_synthetic()
         try:
             header = [('Instrument', f'Fluke {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                      ('Limits applied', 'Fluke 6060A Instruction Manual, Section 4A'), ('Source', SPEC['source']['cite'])]
+                      ('Limits applied', SPEC['source'].get('limits_text') or 'Fluke 6060A Instruction Manual, Section 4A'), ('Source', SPEC['source']['cite'])]
+            if self.max_mhz() < 1050.0:
+                header.append(('Frequency range', f'0.1 to {self.max_mhz():g} MHz (this unit): points above it are listed as NOT TESTED'))
             report_pdf.write_calibration_pdf(path, rows, header=header, demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, None),
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:
@@ -1047,7 +1150,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.stop = True; self._save_settings(); self.disconnect(); port.close(self.root)
 
 
-def main(argv=None):
+def main(argv=None, spec_path=None, state_key=None, variant_label=None):
+    """spec_path / state_key / variant_label: a second procedure on this engine (a different spec, its own saved state and its own title); None keeps the manual's procedure."""
+    global SPEC_PATH, STATE_KEY, VARIANT_LABEL
+    if spec_path is not None: SPEC_PATH = Path(spec_path)
+    if state_key is not None: STATE_KEY = state_key
+    if variant_label is not None: VARIANT_LABEL = variant_label
     argv = sys.argv if argv is None else argv
     def build(root):
         App(root, MODEL, demo='--demo' in argv)

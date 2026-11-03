@@ -168,13 +168,13 @@
    ]
   },
   {
-   "call": "{'description': 'Zero offset, DC volts, 100.0 mV range (input shorted)', 'error': 4e-06, 'group': 'ZERO_SHORT', 'id': 1, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 4e-06, '24h': 3.5e-06, '90d': 4e-06}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 0.1, 'role': 'short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'V'}",
+   "call": "{'description': 'Zero offset, DC volts, 100.0 mV range (input shorted)', 'error': 4e-06, 'group': 'ZERO_SHORT_OHM', 'id': 1, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 4e-06, '24h': 3.5e-06, '90d': 4e-06}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 0.1, 'role': 'ohm_short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "dacq_verification.IO.measure[DCV#1]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:VOLT:DC 0.1,(@209)",
-    "34970A|>>|VOLT:DC:NPLC 10,(@209)",
-    "34970A|>>|ROUT:SCAN (@209)",
+    "34970A|>>|CONF:VOLT:DC 0.1,(@203)",
+    "34970A|>>|VOLT:DC:NPLC 10,(@203)",
+    "34970A|>>|ROUT:SCAN (@203)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -192,15 +192,15 @@
     ],
     [
      "W",
-     "CONF:VOLT:DC 0.1,(@209)"
+     "CONF:VOLT:DC 0.1,(@203)"
     ],
     [
      "W",
-     "VOLT:DC:NPLC 10,(@209)"
+     "VOLT:DC:NPLC 10,(@203)"
     ],
     [
      "W",
-     "ROUT:SCAN (@209)"
+     "ROUT:SCAN (@203)"
     ],
     [
      "W",
@@ -228,13 +228,13 @@
    ]
   },
   {
-   "call": "{'description': 'Zero offset, 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'group': 'ZERO_SHORT', 'id': 6, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.0035, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': 'Zero offset, 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'group': 'ZERO_SHORT_OHM', 'id': 6, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.0035, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'ohm_short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM4#6]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:FRES 100,(@209)",
-    "34970A|>>|FRES:NPLC 10,(@209)",
-    "34970A|>>|ROUT:SCAN (@209)",
+    "34970A|>>|CONF:FRES 100,(@203)",
+    "34970A|>>|FRES:NPLC 10,(@203)",
+    "34970A|>>|ROUT:SCAN (@203)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -252,15 +252,15 @@
     ],
     [
      "W",
-     "CONF:FRES 100,(@209)"
+     "CONF:FRES 100,(@203)"
     ],
     [
      "W",
-     "FRES:NPLC 10,(@209)"
+     "FRES:NPLC 10,(@203)"
     ],
     [
      "W",
-     "ROUT:SCAN (@209)"
+     "ROUT:SCAN (@203)"
     ],
     [
      "W",
@@ -348,13 +348,13 @@
    ]
   },
   {
-   "call": "{'description': 'DC volts -10.00 V, 10.00 V range', 'error': 0.0004, 'group': 'DCV', 'id': 16, 'kind': 'DCV', 'limits': {'1y': 0.00039999999999999996, '24h': 0.00018999999999999998, '90d': 0.00025}, 'nominal': -10, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 10, 'role': 'input', 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to the input channel HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "call": "{'description': 'DC volts -10.00 V, 10.00 V range', 'error': 0.0004, 'group': 'DCV', 'id': 16, 'kind': 'DCV', 'limits': {'1y': 0.00039999999999999996, '24h': 0.00018999999999999998, '90d': 0.00025}, 'nominal': -10, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 10, 'role': 'volts', 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to channel 1 HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "dacq_verification.IO.measure[DCV#16]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:VOLT:DC 10,(@210)",
-    "34970A|>>|VOLT:DC:NPLC 10,(@210)",
-    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|CONF:VOLT:DC 10,(@201)",
+    "34970A|>>|VOLT:DC:NPLC 10,(@201)",
+    "34970A|>>|ROUT:SCAN (@201)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -377,15 +377,15 @@
     ],
     [
      "W",
-     "CONF:VOLT:DC 10,(@210)"
+     "CONF:VOLT:DC 10,(@201)"
     ],
     [
      "W",
-     "VOLT:DC:NPLC 10,(@210)"
+     "VOLT:DC:NPLC 10,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -411,7 +411,7 @@
     ],
     [
      "sleep",
-     2.0
+     5.0
     ],
     [
      "Q",
@@ -430,13 +430,13 @@
    ]
   },
   {
-   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 22, 'kind': 'OHM4', 'limits': {'1y': 0.014, '24h': 0.006500000000000001, '90d': 0.012}, 'nominal': 100, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 100, 'role': 'input', 'section': 'ohm4', 'section_title': '4-wire ohms gain', 'setup': 'Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 22, 'kind': 'OHM4', 'limits': {'1y': 0.014, '24h': 0.006500000000000001, '90d': 0.012}, 'nominal': 100, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 100, 'role': 'volts', 'section': 'ohm4', 'section_title': '4-wire ohms gain', 'setup': 'Calibrator resistance output, 4-wire: force to channel 1, sense to its 4-wire partner channel (channel 11).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM4#22]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:FRES 100,(@210)",
-    "34970A|>>|FRES:NPLC 10,(@210)",
-    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|CONF:FRES 100,(@201)",
+    "34970A|>>|FRES:NPLC 10,(@201)",
+    "34970A|>>|ROUT:SCAN (@201)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -459,15 +459,15 @@
     ],
     [
      "W",
-     "CONF:FRES 100,(@210)"
+     "CONF:FRES 100,(@201)"
     ],
     [
      "W",
-     "FRES:NPLC 10,(@210)"
+     "FRES:NPLC 10,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -493,7 +493,7 @@
     ],
     [
      "sleep",
-     2.0
+     5.0
     ],
     [
      "Q",
@@ -594,13 +594,13 @@
    ]
   },
   {
-   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter', 'error': 0.0001, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACV', 'id': 32, 'kind': 'ACV', 'limits': {'1y': 9.999999999999999e-05, '24h': 7e-05, '90d': 8.999999999999999e-05}, 'nominal': 0.1, 'optional': False, 'page': '84', 'quick': False, 'range': 0.1, 'role': 'input', 'section': 'acv', 'section_title': 'AC volts gain', 'setup': 'Calibrator AC voltage output to the input channel HI / LO. 3 Hz AC filter (7 s per reading).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter', 'error': 0.0001, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACV', 'id': 32, 'kind': 'ACV', 'limits': {'1y': 9.999999999999999e-05, '24h': 7e-05, '90d': 8.999999999999999e-05}, 'nominal': 0.1, 'optional': False, 'page': '84', 'quick': False, 'range': 0.1, 'role': 'volts', 'section': 'acv', 'section_title': 'AC volts gain', 'setup': 'Calibrator AC voltage output to channel 1 HI / LO. 3 Hz AC filter (7 s per reading).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "dacq_verification.IO.measure[ACV#32]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:VOLT:AC 0.1,(@210)",
-    "34970A|>>|VOLT:AC:BAND 3,(@210)",
-    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|CONF:VOLT:AC 0.1,(@201)",
+    "34970A|>>|VOLT:AC:BAND 3,(@201)",
+    "34970A|>>|ROUT:SCAN (@201)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -623,15 +623,15 @@
     ],
     [
      "W",
-     "CONF:VOLT:AC 0.1,(@210)"
+     "CONF:VOLT:AC 0.1,(@201)"
     ],
     [
      "W",
-     "VOLT:AC:BAND 3,(@210)"
+     "VOLT:AC:BAND 3,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -758,14 +758,14 @@
    ]
   },
   {
-   "call": "{'amplitude': 0.01, 'description': 'Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range', 'error': 0.1, 'group': 'FREQ', 'id': 48, 'kind': 'FREQ', 'limits': {'1y': 0.1, '24h': 0.06, '90d': 0.1}, 'nominal': 100, 'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).', 'optional': False, 'page': '86', 'quick': False, 'range': 0.1, 'role': 'input', 'section': 'freq', 'section_title': 'Frequency gain', 'setup': 'Calibrator AC voltage at the stated level and frequency to the input channel HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'Hz'}",
+   "call": "{'amplitude': 0.01, 'description': 'Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range', 'error': 0.1, 'group': 'FREQ', 'id': 48, 'kind': 'FREQ', 'limits': {'1y': 0.1, '24h': 0.06, '90d': 0.1}, 'nominal': 100, 'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).', 'optional': False, 'page': '86', 'quick': False, 'range': 0.1, 'role': 'volts', 'section': 'freq', 'section_title': 'Frequency gain', 'setup': 'Calibrator AC voltage at the stated level and frequency to channel 1 HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'Hz'}",
    "case": "dacq_verification.IO.measure[FREQ#48]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:FREQ 100,(@210)",
-    "34970A|>>|FREQ:VOLT:RANG 0.1,(@210)",
-    "34970A|>>|FREQ:APER 1,(@210)",
-    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|CONF:FREQ 100,(@201)",
+    "34970A|>>|FREQ:VOLT:RANG 0.1,(@201)",
+    "34970A|>>|FREQ:APER 1,(@201)",
+    "34970A|>>|ROUT:SCAN (@201)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -788,19 +788,19 @@
     ],
     [
      "W",
-     "CONF:FREQ 100,(@210)"
+     "CONF:FREQ 100,(@201)"
     ],
     [
      "W",
-     "FREQ:VOLT:RANG 0.1,(@210)"
+     "FREQ:VOLT:RANG 0.1,(@201)"
     ],
     [
      "W",
-     "FREQ:APER 1,(@210)"
+     "FREQ:APER 1,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -845,13 +845,13 @@
    ]
   },
   {
-   "call": "{'description': 'Zero offset, 2-wire ohms, 100.0 Ω range (input shorted)', 'error': 4.004, 'group': 'ZERO_SHORT', 'id': 50, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 4.004, '24h': 4.0035, '90d': 4.004}, 'nominal': 0.0, 'note': '2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.', 'opt': 'ohm2', 'optional': True, 'page': '81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'short', 'section': 'zero_ohm2', 'section_title': '2-wire ohms zero (optional)', 'setup': 'Short on the input channel. The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': 'Zero offset, 2-wire ohms, 100.0 Ω range (input shorted)', 'error': 4.004, 'group': 'ZERO_SHORT_OHM', 'id': 50, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 4.004, '24h': 4.0035, '90d': 4.004}, 'nominal': 0.0, 'note': '2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.', 'opt': 'ohm2', 'optional': True, 'page': '81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'ohm_short', 'section': 'zero_ohm2', 'section_title': '2-wire ohms zero (optional)', 'setup': 'Short on the input channel. The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM2#50]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:RES 100,(@209)",
-    "34970A|>>|RES:NPLC 10,(@209)",
-    "34970A|>>|ROUT:SCAN (@209)",
+    "34970A|>>|CONF:RES 100,(@203)",
+    "34970A|>>|RES:NPLC 10,(@203)",
+    "34970A|>>|ROUT:SCAN (@203)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -869,15 +869,15 @@
     ],
     [
      "W",
-     "CONF:RES 100,(@209)"
+     "CONF:RES 100,(@203)"
     ],
     [
      "W",
-     "RES:NPLC 10,(@209)"
+     "RES:NPLC 10,(@203)"
     ],
     [
      "W",
-     "ROUT:SCAN (@209)"
+     "ROUT:SCAN (@203)"
     ],
     [
      "W",
@@ -905,13 +905,13 @@
    ]
   },
   {
-   "call": "{'description': '2-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 1.014, 'group': 'OHM2', 'id': 57, 'kind': 'OHM2', 'limits': {'1y': 1.014, '24h': 1.0065, '90d': 1.012}, 'nominal': 100, 'note': '2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.', 'opt': 'ohm2', 'optional': True, 'page': '83', 'plc': 10, 'quick': False, 'range': 100, 'role': 'input', 'section': 'ohm2', 'section_title': '2-wire ohms gain (optional)', 'setup': 'Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "call": "{'description': '2-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 1.014, 'group': 'OHM2', 'id': 57, 'kind': 'OHM2', 'limits': {'1y': 1.014, '24h': 1.0065, '90d': 1.012}, 'nominal': 100, 'note': '2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.', 'opt': 'ohm2', 'optional': True, 'page': '83', 'plc': 10, 'quick': False, 'range': 100, 'role': 'volts', 'section': 'ohm2', 'section_title': '2-wire ohms gain (optional)', 'setup': 'Calibrator resistance output, 2-wire, to channel 1 HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
    "case": "dacq_verification.IO.measure[OHM2#57]",
    "log": [
     "5560A|>>|STBY",
-    "34970A|>>|CONF:RES 100,(@210)",
-    "34970A|>>|RES:NPLC 10,(@210)",
-    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|CONF:RES 100,(@201)",
+    "34970A|>>|RES:NPLC 10,(@201)",
+    "34970A|>>|ROUT:SCAN (@201)",
     "34970A|>>|TRIG:SOUR IMM",
     "34970A|>>|SYST:ERR?",
     "34970A|<<|+0,\"No error\"",
@@ -934,15 +934,15 @@
     ],
     [
      "W",
-     "CONF:RES 100,(@210)"
+     "CONF:RES 100,(@201)"
     ],
     [
      "W",
-     "RES:NPLC 10,(@210)"
+     "RES:NPLC 10,(@201)"
     ],
     [
      "W",
-     "ROUT:SCAN (@210)"
+     "ROUT:SCAN (@201)"
     ],
     [
      "W",
@@ -974,6 +974,168 @@
      "Q",
      "READ?",
      "+1.000010000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Type J thermocouple temperature 0 °C', 'error': 1.0, 'group': 'TEMP', 'id': 73, 'kind': 'TEMP', 'limits': {'1y': 1.0, '24h': 1.0, '90d': 1.0}, 'nominal': 0.0, 'note': 'UNVERIFIED: not in the Service Guide tables; 0 degC, +/-1 degC set by the owner (2026-11-02). The calibrator (5520A / 5522A / 5560A) simulates the thermocouple.', 'optional': False, 'page': 'n/a', 'plc': 10, 'quick': False, 'range': 0.0, 'role': 'tc', 'section': 'temp_j', 'section_title': 'Type J thermocouple temperature', 'settle_s': 10.0, 'setup': 'Calibrator thermocouple simulation, type J, to channel 2 HI / LO (owner, 2026-11-02; not a Service Guide test).', 'source': 'calibrator', 'tc_type': 'J', 'terminal': 'FRONT', 'unit': '°C'}",
+   "case": "dacq_verification.IO.measure[TEMP#73]",
+   "log": [
+    "5560A|>>|STBY",
+    "34970A|>>|CONF:TEMP TC,J,(@202)",
+    "34970A|>>|TEMP:NPLC 10,(@202)",
+    "34970A|>>|ROUT:SCAN (@202)",
+    "34970A|>>|TRIG:SOUR IMM",
+    "34970A|>>|SYST:ERR?",
+    "34970A|<<|+0,\"No error\"",
+    "5560A|>>|TSENS_TYPE TC",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|OUT 0CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|TC_TYPE J",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|TC_TYPE?",
+    "5560A|<<|J",
+    "5560A|>>|OUT 0CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34970A|>>|READ?",
+    "34970A|<<|+0.000000000E+00",
+    "5560A|>>|STBY",
+    "34970A|>>|SYST:ERR?",
+    "34970A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:TEMP TC,J,(@202)"
+    ],
+    [
+     "W",
+     "TEMP:NPLC 10,(@202)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@202)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "TSENS_TYPE TC"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "W",
+     "OUT 0CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "TC_TYPE J"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "TC_TYPE?",
+     "J"
+    ],
+    [
+     "W",
+     "OUT 0CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     10.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+0.000000000E+00"
     ],
     [
      "W",

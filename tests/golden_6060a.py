@@ -22,9 +22,9 @@ COVERAGE = {
                     'address', 'set_address',                            # the GPIB address of the object (the transport is re-targeted in connect)
                     'compare']),                                         # pure comparison of two dicts
     'HP8902A': dict(
-        covered=['connect', 'cleanup', 'identify', 'remote', 'go_local', 'status', 'check_status', 'set_srq_mask', 'measure_frequency_hz', 'read_special', 'time_base_is_external',
+        covered=['show_recal', 'connect', 'cleanup', 'identify', 'remote', 'go_local', 'status', 'check_status', 'set_srq_mask', 'measure_frequency_hz', 'read_special', 'time_base_is_external',
                  'tuned_rf_level_dbm', 'calibrate_tuned_level', 'rf_power_dbm', 'zero_power_sensor', 'calibrate_power_sensor', 'enter_reference_cal_factor', 'cal_factor_count',
-                 'enter_cal_factor', 'measure_am_percent', 'measure_fm_deviation_hz', 'measure_distortion', 'measure_modulation_rate_hz', 'calibrate_modulation',
+                 'enter_cal_factor', 'remove_cal_factor', 'recall_cal_factor_table', 'restore_automatic_cal_factors', 'measure_am_percent', 'measure_fm_deviation_hz', 'measure_distortion', 'measure_modulation_rate_hz', 'calibrate_modulation',
                  'reset_to_defaults'],
         no_command=['write', 'send', 'address', 'set_address']),
     'HP8563E': dict(
@@ -36,7 +36,7 @@ COVERAGE = {
 }
 COVERAGE.pop('gpib_address')                                             # a helper module with no Instrument class: it only appears in LINT_FILES
 
-PM_COVERED = ['select_power_meter', 'zero', 'read_dbm', 'select_sine']     # added to COVERAGE['reference_instruments']['Fluke96270A']['covered'] by golden_capture
+PM_COVERED = ['select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm']     # added to COVERAGE['reference_instruments']['Fluke96270A']['covered'] by golden_capture
 
 
 def _source(bench, mhz=250.0, dbm=-10.0, on=True, **extra):
@@ -117,6 +117,7 @@ def cases_8902a(c):
     c.run('HP8902A.status', rx.status)
     c.run('HP8902A.check_status', rx.check_status, 'ctx')
     c.run('HP8902A.set_srq_mask', rx.set_srq_mask, 2)
+    c.run('HP8902A.show_recal', rx.show_recal)
     c.run('HP8902A.measure_frequency_hz[no signal]', rx.measure_frequency_hz, 250.0)
     gen.set_frequency(250.0)
     gen.set_level(-5.0)
@@ -143,6 +144,9 @@ def cases_8902a(c):
     c.run('HP8902A.enter_reference_cal_factor', rx.enter_reference_cal_factor, 98.5)
     c.run('HP8902A.cal_factor_count', rx.cal_factor_count)
     c.run('HP8902A.enter_cal_factor', rx.enter_cal_factor, 250.0, 98.0)
+    c.run('HP8902A.recall_cal_factor_table', rx.recall_cal_factor_table)
+    c.run('HP8902A.restore_automatic_cal_factors', rx.restore_automatic_cal_factors)
+    c.run('HP8902A.remove_cal_factor', rx.remove_cal_factor, 250.0)
     gen.rf(False)
     gen.set_level(0.0)
     gen.am(30, 'int', 1000)
@@ -221,7 +225,8 @@ def cases_pmeter(c):
     t = Sim96270AMeter(bench)
     pm = c.inst(Fluke96270A, t, opened=False, label='96270A')
     c.quiet(pm.connect)
-    c.run('Fluke96270A.select_power_meter', pm.select_power_meter, 250e6)
+    c.run('Fluke96270A.select_power_meter[single]', pm.select_power_meter, 250e6, 'AUTO', True)
+    c.run('Fluke96270A.select_power_meter[continuous, the default]', pm.select_power_meter, 1e9)
     c.run('Fluke96270A.select_power_meter[continuous, 8 averages]', pm.select_power_meter, 1e9, '8', False)
     c.run('Fluke96270A.zero', pm.zero)
     gen.set_frequency(250.0)
@@ -233,13 +238,16 @@ def cases_pmeter(c):
     t.zero_reply = '1'
     c.run('Fluke96270A.zero[failed]', pm.zero)
     c.run('Fluke96270A.select_sine', pm.select_sine)
+    c.run('Fluke96270A.setup_fm', pm.setup_fm, 250e6, 7.0, 100e3, 4000.0)
+    c.run('Fluke96270A.setup_fm[above the 96270A deviation limit]', pm.setup_fm, 250e6, 7.0, 370e3, 4000.0)
+    c.run('Fluke96270A.select_sine[after FM]', pm.select_sine)
     nosensor = c.inst(Fluke96270A, Sim96270AMeter(bench, sensor='NONE,NONE,NONE,NONE'), label='96270A')
     c.run('Fluke96270A.select_power_meter[no sensor]', nosensor.select_power_meter, 250e6)
-    implausible = c.inst(Fluke96270A, Scripted([(r'^PMET:READ\?', '9.91E+37')]), label='96270A')
+    implausible = c.inst(Fluke96270A, Scripted([(r'^PMET1:READ\?', '9.91E+37')]), label='96270A')
     c.run('Fluke96270A.read_dbm[no reading]', implausible.read_dbm)
-    watts = c.inst(Fluke96270A, Scripted([(r'^PMET:READ\?', '1.0E-4')]), label='96270A')
+    watts = c.inst(Fluke96270A, Scripted([(r'^PMET1:READ\?', '1.0E-4')]), label='96270A')
     c.run('Fluke96270A.read_dbm[not plausible as dBm]', watts.read_dbm)
-    watts_big = c.inst(Fluke96270A, Scripted([(r'^PMET:READ\?', '-300')]), label='96270A')
+    watts_big = c.inst(Fluke96270A, Scripted([(r'^PMET1:READ\?', '-300')]), label='96270A')
     c.run('Fluke96270A.read_dbm[below the floor]', watts_big.read_dbm)
 
 

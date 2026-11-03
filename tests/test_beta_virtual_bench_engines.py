@@ -97,6 +97,48 @@ class Dacq(Base):
         self.assertTrue(self.hn.run_all())
         self.fast_is_old(app)
 
+    def test_high_voltage_question_is_asked_once_per_run(self):
+        # owner 2026-11-02: only the first high-voltage point asks; the rest of the run is covered by that answer
+        app = self.make()
+        self.assertTrue(self.hn.run_all())
+        import dacq_verification as D
+        hv_points = [p for p in D.POINTS if p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 100]
+        self.assertGreater(len(hv_points), 1)
+        asks = [d for d in self.hn.dialogs if d[0] == 'box' and d[1] == 'askyesno' and d[2] == 'HIGH VOLTAGE']
+        self.assertEqual(len(asks), 1, asks)
+
+    def test_every_zero_short_point_is_on_channel_3_with_partner_13(self):
+        # owner 2026-11-02: the resistance shorted points use channel 3 (4-wire partner 13); the DC volts zero points followed the same day
+        import dacq_verification as D
+        for model in ('34970A', '34972A'):
+            D.configure(model)
+            app = self.make()
+            ohm = [p for p in D.POINTS if p['kind'] in ('OHM4', 'OHM2') and p['source'] == 'none']
+            volt = [p for p in D.POINTS if p['kind'] == 'DCV' and p['source'] == 'none']
+            self.assertEqual((len(ohm), len(volt)), (14, 5))
+            self.assertEqual({p['group'] for p in ohm}, {'ZERO_SHORT_OHM'})
+            self.assertEqual({p['group'] for p in volt}, {'ZERO_SHORT_OHM'})
+            self.assertEqual({app.io.channel(p) if app.io else D.channel_for('34901A', 2, p['role']) for p in ohm}, {203})
+            self.assertEqual({D.channel_for('34901A', 2, p['role']) for p in volt}, {203})
+            self.assertIn('channel 203', app.setup_text(ohm[0]))
+            self.assertIn('213', app.setup_text(ohm[0]))
+
+    def test_type_j_thermocouple_point_is_last_on_channel_2_zero_c_plus_minus_1(self):
+        # owner 2026-11-02: a type J thermocouple point on channel 2 at the end, 0 degC +/- 1 degC, sourced by the calibrator's thermocouple simulation
+        import dacq_verification as D
+        for model in ('34970A', '34972A'):
+            D.configure(model)
+            p = D.POINTS[-1]
+            self.assertEqual((p['kind'], p['tc_type'], p['nominal'], p['error'], p['group'], p['role']), ('TEMP', 'J', 0.0, 1.0, 'TEMP', 'tc'))
+            self.assertEqual(D.channel_for('34901A', 2, p['role']), 202)
+        app = self.make()
+        self.assertTrue(self.hn.run_all())
+        wire = [t for _i, t in VH.wire(app.io)]
+        self.assertTrue(any('CONF:TEMP TC,J,(@202)' in t for t in wire), wire[-12:])
+        self.assertTrue(any('OUT 0CEL' in t for t in wire))
+        last = D.POINTS[-1]['id']
+        self.assertIn(last, [int(k) for k in app.found])           # the optional sections are skipped; the thermocouple point is not optional
+
 
 class Agilent34401A(Base):
     def make(self):

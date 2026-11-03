@@ -115,24 +115,99 @@ PMETER_COMMANDS = {
                        'unavailable until one is selected again', kind='set', readback='inst.query', verified=True, ref=_rf('INSTrument[:SELect] PMETer', 32)),
     'pm.unit.set': Cmd('UNIT:POW {unit}', 'Power units (power meter)', 'DBM or W for the power commands of the SELECTED instrument (select PMETer first)',
                        placeholders={'unit': Placeholder('enum', '', 'DBM', enum=('DBM', 'W'))}, kind='set', readback='unit.query', verified=True, ref=_rf('UNIT:POWer', 47)),
-    'pm.freq.set': Cmd('PMET:FREQ {hz:.12g}', 'Power meter frequency', 'Frequency at which the sensor measures power (power-on 1E6 Hz). Sensor limits are UNVERIFIED (NRP40T not in the manual)',
+    'pm.freq.set': Cmd('PMET1:FREQ {hz:.12g}', 'Power meter frequency', 'Frequency at which the sensor measures power (power-on 1E6 Hz). Sensor limits are UNVERIFIED (NRP40T not in the manual)',
                        placeholders={'hz': Placeholder('float', '.12g', 1e9)}, kind='set', readback='pm.freq.query', verified=True, ref=_rf(':PMETer:FREQuency', 41)),
-    'pm.freq.query': Cmd('PMET:FREQ?', 'Power meter frequency', kind='query', verified=True, ref=_rf(':PMETer:FREQuency?', 41)),
-    'pm.aver.set': Cmd('PMET:AVER {n}', 'Power meter averaging', 'Readings averaged: AUTO or 1, 2, 4, 8 ... 32768',
+    'pm.freq.query': Cmd('PMET1:FREQ?', 'Power meter frequency', kind='query', verified=True, ref=_rf(':PMETer:FREQuency?', 41)),
+    'pm.aver.set': Cmd('PMET1:AVER {n}', 'Power meter averaging', 'Readings averaged: AUTO or 1, 2, 4, 8 ... 32768',
                        placeholders={'n': Placeholder('enum', '', 'AUTO', enum=('AUTO', '1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768'))},
                        kind='set', readback='pm.aver.query', verified=True, ref=_rf(':PMETer:AVERage', 41)),
-    'pm.aver.query': Cmd('PMET:AVER?', 'Power meter averaging', kind='query', verified=True, ref=_rf(':PMETer:AVERage?', 41)),
-    'pm.trig.set': Cmd('PMET:TRIG {mode}', 'Power meter trigger mode', 'SINGle: :READ? triggers one reading and returns it. CONTinuous: free running (power-on)',
+    'pm.aver.query': Cmd('PMET1:AVER?', 'Power meter averaging', kind='query', verified=True, ref=_rf(':PMETer:AVERage?', 41)),
+    'pm.trig.set': Cmd('PMET1:TRIG {mode}', 'Power meter trigger mode', 'SINGle: :READ? triggers one reading and returns it. CONTinuous: free running (power-on)',
                        placeholders={'mode': Placeholder('enum', '', 'SING', enum=('SING', 'CONT'))}, kind='set', readback='pm.trig.query', verified=True, ref=_rf(':PMETer:TRIGger', '41 and 42')),
-    'pm.trig.query': Cmd('PMET:TRIG?', 'Power meter trigger mode', kind='query', verified=True, ref=_rf(':PMETer:TRIGger?', 41)),
-    'pm.zero': Cmd('PMET:ZERO?', 'Zero the power sensor', 'Performs the input zero on the sensor (RF must be removed). Answers 0 for success and 1 for failure with an error message in the error queue. It ACTS, '
+    'pm.trig.query': Cmd('PMET1:TRIG?', 'Power meter trigger mode', kind='query', verified=True, ref=_rf(':PMETer:TRIGger?', 41)),
+    'pm.zero': Cmd('PMET1:ZERO?', 'Zero the power sensor', 'Performs the input zero on the sensor (RF must be removed). Answers 0 for success and 1 for failure with an error message in the error queue. It ACTS, '
                    'so it is never retried and never overridable', kind='query', risk='locked', verified=True, ref=_rf(':PMETer:ZERO?', 41)),
-    'pm.read': Cmd('PMET:READ?', 'Power meter reading', 'The next reading; in single-trigger mode it triggers one and returns it. Whether the value follows UNIT:POW is UNVERIFIED; 9.91E+37 means none',
+    'pm.read': Cmd('PMET1:READ?', 'Power meter reading', 'The next reading; in single-trigger mode it triggers one and returns it. Whether the value follows UNIT:POW is UNVERIFIED; 9.91E+37 means none',
                    kind='query', verified=True, ref=_rf(':PMETer:READ?', 41)),
-    'pm.idn': Cmd('PMET:IDN?', 'Power sensor identity', 'Make, model, serial number, firmware version of the sensor; NONE, NONE, NONE, NONE when no sensor is fitted. An R&S NRP40T is UNVERIFIED '
+    'pm.idn': Cmd('PMET1:IDN?', 'Power sensor identity', 'Make, model, serial number, firmware version of the sensor; NONE, NONE, NONE, NONE when no sensor is fitted. An R&S NRP40T is UNVERIFIED '
                   '(the manual does not mention it)', kind='query', verified=True, ref=_rf(':PMETer:IDN?', 41)),
 }
+# Bench 2026-10-29 (tools/bench/records, step 5): the 96270A (firmware 1.17) sees the NRP40T on sensor 1 ("ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101"); INST PMET,
+# PMET1:FREQ 120E6 (-> 1.2E+8), PMET1:AVER AUTO, PMET1:TRIG CONT each read back; PMET1:ZERO? -> 0 after 10.6 s; PMET1:READ? -> -1.051E+1 for the 6060A at -10 dBm and
+# -4.84E-1 at 0 dBm (dBm; the front panel showed -0.49); RF off: -3.7831E+1. In power-meter mode UNIT:POW? answers NONE, so the driver does not set or check it.
+import dataclasses as _dc
+for _k, _t in {'pm.inst.set': 'INST? -> PMET', 'pm.freq.set': 'PMET1:FREQ 120E6 -> 1.2E+8', 'pm.aver.set': 'AUTO -> AUTO', 'pm.trig.set': 'CONT -> CONT',
+               'pm.zero': '0 after 10.6 s', 'pm.read': '-1.051E+1 at -10 dBm, -4.84E-1 at 0 dBm (dBm)', 'pm.idn': 'ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101',
+               'pm.unit.set': 'NOT USED: in power-meter mode UNIT:POW? answers NONE'}.items():
+    PMETER_COMMANDS[_k] = _dc.replace(PMETER_COMMANDS[_k], ref=f'{PMETER_COMMANDS[_k].ref}; BENCH 2026-10-29 step 5: {_t}')
 RF_COMMANDS.update(PMETER_COMMANDS)
+
+# ---- Fluke 96270A FM mode (FM logical instrument): ADDED subset for the 6060A deviation-meter checks (owner, 2026-11-02). The command text was read on the RENDERED pages of the 96000 Series Remote
+# Programmers Manual (Rev. 1, 10/14): INSTrument p. 32, POWer p. 35, FREQuency p. 36, FM subsystem p. 38, "FM Output" example p. 59 (INST FM; UNIT:POW DBM; POW; FREQ; FM:STATE 1;DEV 500.0E+3;
+# INTernal:FREQ 27E3; OUTPUT ON). Nothing has run on hardware. NOT verified (flagged in the report): the unit of the FM:DEV? / FM:INT:FREQ? replies (the example sends Hz; the *RST column shows
+# "10.0 kHz" / "1.0 kHz"), so each reply is compared in Hz and a mismatch is a loud error; the FM accuracy of the source (not read from the remote manual).
+FM_COMMANDS = {
+    'fm.inst.set': Cmd('INST FM', 'Select the FM instrument', 'FM is a logical instrument of the 96270A; selecting it puts the output into standby and makes the other logical instruments unavailable '
+                       'until one is selected again', kind='set', readback='inst.query', verified=True, ref=_rf('INSTrument[:SELect] FM', 32)),
+    'fm.freq.set': Cmd('FREQ {hz:.12g}', 'FM carrier frequency', 'Carrier of the FM instrument, Hz (9 MHz to 4.024 GHz, Operator Manual Table 3-26)', placeholders={'hz': Placeholder('float', '.12g', 3e7)},
+                       kind='set', readback='freq.query', verified=True, ref=_rf('[:SOURce]:FREQuency[:CW|FIXed]', 36)),
+    'fm.pow.set': Cmd('POW {dbm:.3f}', 'FM carrier level', 'dBm (UNIT:POW DBM is set and read back first)', placeholders={'dbm': Placeholder('float', '.3f', 7.0)}, kind='set',
+                      readback='level.query', verified=True, ref=_rf('[:SOURce]:POWer[:LEVel]', 35)),
+    'fm.state.set': Cmd('FM:STAT {on}', 'FM on', '1 = the output has an FM component, 0 = none', placeholders={'on': Placeholder('enum', '', '1', enum=('0', '1'))}, kind='set',
+                        readback='fm.state.query', verified=True, ref=_rf('[:SOURce]:FM:STATe', 38)),
+    'fm.state.query': Cmd('FM:STAT?', 'FM state', kind='query', verified=True, ref=_rf('[:SOURce]:FM:STATe?', 38)),
+    'fm.dev.set': Cmd('FM:DEV {hz:.9g}', 'FM deviation', 'Peak deviation in Hz (the manual example sends 500.0E+3). Limits (Operator Manual Table 3-26): 10 Hz to 300 kHz at 9 to 31.4375 MHz, '
+                      '750 kHz to 125.75 MHz, 0.12 % of the carrier above that', placeholders={'hz': Placeholder('float', '.9g', 1e4)}, kind='set', readback='fm.dev.query', verified=True,
+                      ref=_rf('[:SOURce]:FM[:DEViation]', 38)),
+    'fm.dev.query': Cmd('FM:DEV?', 'FM deviation', 'Unit of the reply is UNVERIFIED (compared in Hz)', kind='query', verified=True, ref=_rf('[:SOURce]:FM[:DEViation]?', 38)),
+    'fm.rate.set': Cmd('FM:INT:FREQ {hz:.9g}', 'FM modulation rate', 'Internal modulation rate in Hz (1 Hz to 300 kHz); the example sends 27E3', placeholders={'hz': Placeholder('float', '.9g', 1e3)},
+                       kind='set', readback='fm.rate.query', verified=True, ref=_rf('[:SOURce]:FM:INTernal:FREQuency', 38)),
+    'fm.rate.query': Cmd('FM:INT:FREQ?', 'FM modulation rate', 'Unit of the reply is UNVERIFIED (compared in Hz)', kind='query', verified=True, ref=_rf('[:SOURce]:FM:INTernal:FREQuency?', 38)),
+}
+for _k, _c in list(FM_COMMANDS.items()):
+    FM_COMMANDS[_k] = _dc.replace(_c, ref=f'{_c.ref}; example p. 59: INST FM, UNIT:POW DBM, POW, FREQ, FM:STATE 1;DEV;INT:FREQ, OUTPUT ON. NOT run on hardware')
+RF_COMMANDS.update(FM_COMMANDS)
+FM_MIN_HZ, FM_MAX_HZ_CARRIER = 9e6, 4.024e9           # Operator Manual Table 3-26
+FM_RATE_MIN_HZ, FM_RATE_MAX_HZ = 1.0, 300e3
+
+
+def fm_max_deviation_hz(carrier_hz: float) -> float:
+    """The largest FM deviation the 96270A allows at a carrier (Operator Manual Table 3-26): 300 kHz to 31.4375 MHz, 750 kHz to 125.75 MHz, 0.12 % of the carrier above."""
+    if carrier_hz <= 31.4375e6:
+        return 300e3
+    if carrier_hz <= 125.75e6:
+        return 750e3
+    return 0.0012 * carrier_hz
+# ---- Fluke 96270A AM mode (AM logical instrument): ADDED subset for the HP 8591A sweep-time and span checks (owner, 2026-11-02: "sweep-time AM uses the 96270A internal AM"). The command text was read on the
+# RENDERED pages of the 96000 Series Remote Programmers Manual (Rev. 1, 10/14): INSTrument p. 32, POWer p. 35, FREQuency p. 36, AM subsystem p. 37 ([:SOURce]:AM:STATe, AM[:DEPTh] (*RST 30.0 %),
+# AM:INTernal:FREQuency (*RST 1000 Hz), AM:SHAPe {SINE|TRIangle|EXTernal}). Nothing has run on hardware. NOT verified (flagged in the report): the unit of the AM:DEPT? / AM:INT:FREQ? replies (the
+# manual shows %, Hz in its *RST column; each reply is compared in %, Hz and a mismatch is a loud error), the AM accuracy of the source, and that the 96270A accepts a carrier of 500 MHz with the AM
+# instrument selected (the Operator Manual limits the AM carrier to 50 kHz to 4.024 GHz and the modulation rate to 1 Hz to 220 kHz up to a 125.75 MHz carrier: not read here).
+AM_COMMANDS = {
+    'am.inst.set': Cmd('INST AM', 'Select the AM instrument', 'AM is a logical instrument of the 96270A; selecting it puts the output into standby and makes the other logical instruments unavailable '
+                       'until one is selected again', kind='set', readback='inst.query', verified=True, ref=_rf('INSTrument[:SELect] AM', 32)),
+    'am.freq.set': Cmd('FREQ {hz:.12g}', 'AM carrier frequency', 'Carrier of the AM instrument, Hz', placeholders={'hz': Placeholder('float', '.12g', 5e8)}, kind='set', readback='freq.query',
+                       verified=True, ref=_rf('[:SOURce]:FREQuency[:CW|FIXed]', 36)),
+    'am.pow.set': Cmd('POW {dbm:.3f}', 'AM carrier level', 'dBm (UNIT:POW DBM is set and read back first)', placeholders={'dbm': Placeholder('float', '.3f', -10.0)}, kind='set',
+                      readback='level.query', verified=True, ref=_rf('[:SOURce]:POWer[:LEVel]', 35)),
+    'am.state.set': Cmd('AM:STAT {on}', 'AM on', '1 = the output has an AM component, 0 = none', placeholders={'on': Placeholder('enum', '', '1', enum=('0', '1'))}, kind='set',
+                        readback='am.state.query', verified=True, ref=_rf('[:SOURce]:AM:STATe', 37)),
+    'am.state.query': Cmd('AM:STAT?', 'AM state', kind='query', verified=True, ref=_rf('[:SOURce]:AM:STATe?', 37)),
+    'am.depth.set': Cmd('AM:DEPT {pct:.4g}', 'AM depth', 'Percent (*RST 30.0 %). 0.1 to 99 % per the Operator Manual (UNVERIFIED here)', placeholders={'pct': Placeholder('float', '.4g', 50.0)}, kind='set',
+                        readback='am.depth.query', verified=True, ref=_rf('[:SOURce]:AM[:DEPTh]', 37)),
+    'am.depth.query': Cmd('AM:DEPT?', 'AM depth', 'Unit of the reply is UNVERIFIED (compared in percent)', kind='query', verified=True, ref=_rf('[:SOURce]:AM[:DEPTh]?', 37)),
+    'am.rate.set': Cmd('AM:INT:FREQ {hz:.9g}', 'AM modulation rate', 'Internal modulation rate in Hz (*RST 1000 Hz); 1 Hz to 220 kHz per the Operator Manual (UNVERIFIED here)',
+                       placeholders={'hz': Placeholder('float', '.9g', 1e3)}, kind='set', readback='am.rate.query', verified=True, ref=_rf('[:SOURce]:AM:INTernal:FREQuency', 37)),
+    'am.rate.query': Cmd('AM:INT:FREQ?', 'AM modulation rate', 'Unit of the reply is UNVERIFIED (compared in Hz)', kind='query', verified=True, ref=_rf('[:SOURce]:AM:INTernal:FREQuency?', 37)),
+    'am.shape.set': Cmd('AM:SHAP {shape}', 'AM modulation shape', 'SINE (*RST), TRIangle or EXTernal',
+                        placeholders={'shape': Placeholder('enum', '', 'TRI', enum=('SINE', 'TRI', 'EXT'))}, kind='set', readback='am.shape.query', verified=True, ref=_rf('[:SOURce]:AM:SHAPe', 37)),
+    'am.shape.query': Cmd('AM:SHAP?', 'AM modulation shape', 'Reply text UNVERIFIED: matched on its first three letters', kind='query', verified=True, ref=_rf('[:SOURce]:AM:SHAPe?', 37)),
+}
+for _k, _c in list(AM_COMMANDS.items()):
+    AM_COMMANDS[_k] = _dc.replace(_c, ref=f'{_c.ref}. NOT run on hardware')
+RF_COMMANDS.update(AM_COMMANDS)
+AM_RATE_MIN_HZ, AM_RATE_MAX_HZ, AM_DEPTH_MIN_PCT, AM_DEPTH_MAX_PCT = 1.0, 220e3, 0.1, 99.0          # Operator Manual (AM instrument), not read from the remote manual
+AM_CARRIER_MIN_HZ, AM_CARRIER_MAX_HZ = 50e3, 4.024e9
 PM_NO_READING = 9.0e37                       # :FETCh? answers 9.91E+37 when there is no reading (p. 41)
 
 
@@ -223,17 +298,14 @@ class Fluke96270A(Instrument):
     # ---- power-meter mode (ADDED; the Rohde & Schwarz NRP40T sensor is UNVERIFIED, see PMETER_COMMANDS) ---------------------------------------------------------
     PM_MIN_DBM, PM_MAX_DBM = -120.0, 50.0        # a reading outside this is not taken as dBm (a choice of this driver: the manual does not say whether READ? follows UNIT:POW)
 
-    def select_power_meter(self, frequency_hz: float | None = None, average: str = 'AUTO', single: bool = True) -> str:
-        """INST PMET (the output goes to standby, p. 32), UNIT:POW DBM, PMET:TRIG SING / CONT, PMET:AVER, PMET:FREQ (each read back and compared), then PMET:IDN?: it must name a sensor
+    def select_power_meter(self, frequency_hz: float | None = None, average: str = 'AUTO', single: bool = False) -> str:
+        """INST PMET (the output goes to standby, p. 32), PMET1:TRIG CONT (the bench-proven mode; SING is UNVERIFIED) or SING, PMET:AVER, PMET:FREQ (each read back and compared), then PMET:IDN?: it must name a sensor
         (NONE, NONE, NONE, NONE means none is fitted). Returns the sensor identity text (an NRP40T is UNVERIFIED). Use select_sine() to go back to the source."""
         self.send('pm.inst.set')
         reply = self.ask('inst.query').strip().strip('"').upper()
         if not reply.startswith('PMET'):
             raise InstrumentError(f'96270A did not select the power meter: INST? answered {reply!r}')
-        self.send('pm.unit.set', unit='DBM')
-        reply = self.ask('unit.query').strip().strip('"').upper()
-        if reply != 'DBM':
-            raise InstrumentError(f'96270A power-meter units DBM were not accepted: UNIT:POW? answered {reply!r}')
+        # no UNIT:POW here: in power-meter mode UNIT:POW? answers NONE and PMET1:READ? is in dBm (bench 2026-10-29, step 5)
         mode = 'SING' if single else 'CONT'
         self.send('pm.trig.set', mode=mode)
         reply = self.ask('pm.trig.query').strip().strip('"').upper()
@@ -253,6 +325,83 @@ class Fluke96270A(Instrument):
             raise InstrumentError(f'96270A has no power sensor fitted (PMET:IDN? answered {ident!r})')
         self.check_error('power meter setup')
         return ident
+
+    def setup_fm(self, carrier_hz: float, level_dbm: float, deviation_hz: float, rate_hz: float) -> None:
+        """INST FM (the output goes to standby, p. 32), UNIT:POW DBM, POW, FREQ, FM:STAT 1, FM:DEV, FM:INT:FREQ, each read back and compared, then SYST:ERR?. The output stays OFF: call output(True).
+        Refuses a carrier, rate or deviation outside the limits of Operator Manual Table 3-26 before anything is sent. Never retried. Use select_sine() to go back to the source."""
+        if not FM_MIN_HZ <= carrier_hz <= FM_MAX_HZ_CARRIER:
+            raise InstrumentError(f'96270A FM carrier {carrier_hz / 1e6:g} MHz is outside 9 MHz to 4.024 GHz')
+        if not FM_RATE_MIN_HZ <= rate_hz <= FM_RATE_MAX_HZ:
+            raise InstrumentError(f'96270A FM rate {rate_hz:g} Hz is outside 1 Hz to 300 kHz')
+        top = fm_max_deviation_hz(carrier_hz)
+        if not 10.0 <= deviation_hz <= top + 1e-6:
+            raise InstrumentError(f'96270A FM deviation {deviation_hz / 1e3:g} kHz is outside 0.01 to {top / 1e3:g} kHz at {carrier_hz / 1e6:g} MHz (Operator Manual Table 3-26)')
+        self.output(False)
+        self.send('fm.inst.set')
+        reply = self.ask('inst.query').strip().strip('"').upper()
+        if reply != 'FM':
+            raise InstrumentError(f'96270A did not select the FM instrument: INST? answered {reply!r}')
+        self._set_and_check('unit.set', 'unit.query', lambda r: r.strip().strip('"').upper() == 'DBM', 'power units DBM (FM)')
+        self.send('fm.pow.set', dbm=level_dbm)
+        lvl = float(self.ask('level.query').strip().split()[0])
+        if abs(lvl - level_dbm) > 0.01:
+            raise InstrumentError(f'96270A FM level set {level_dbm:g} dBm, reports {lvl:g} dBm')
+        self.send('fm.freq.set', hz=carrier_hz)
+        got = float(self.ask('freq.query').strip().split()[0])
+        if not math.isclose(got, carrier_hz, rel_tol=1e-6):
+            raise InstrumentError(f'96270A FM carrier set {carrier_hz:g}, reports {got:g}')
+        self.send('fm.state.set', on='1')
+        if not _bool_reply(self.ask('fm.state.query')):
+            raise InstrumentError('96270A did not confirm FM on (FM:STAT? answered off)')
+        self.send('fm.dev.set', hz=deviation_hz)
+        got = float(self.ask('fm.dev.query').strip().split()[0])
+        if not math.isclose(got, deviation_hz, rel_tol=1e-4):
+            raise InstrumentError(f'96270A FM deviation set {deviation_hz:g} Hz, reports {got:g} (UNVERIFIED: the unit of the FM:DEV? reply is not in the manual)')
+        self.send('fm.rate.set', hz=rate_hz)
+        got = float(self.ask('fm.rate.query').strip().split()[0])
+        if not math.isclose(got, rate_hz, rel_tol=1e-4):
+            raise InstrumentError(f'96270A FM rate set {rate_hz:g} Hz, reports {got:g} (UNVERIFIED: the unit of the FM:INT:FREQ? reply is not in the manual)')
+        self.check_error('FM setup')
+
+    def setup_am(self, carrier_hz: float, level_dbm: float, depth_pct: float, rate_hz: float, shape: str = 'TRI') -> None:
+        """INST AM (the output goes to standby, p. 32), UNIT:POW DBM, POW, FREQ, AM:SHAP, AM:STAT 1, AM:DEPT, AM:INT:FREQ, each read back and compared, then SYST:ERR?. The output stays OFF: call output(True).
+        Refuses a carrier, rate or depth outside the limits of the Operator Manual before anything is sent (a rate below 1 Hz cannot be made). Never retried. select_sine() goes back to the source."""
+        if not AM_CARRIER_MIN_HZ <= carrier_hz <= AM_CARRIER_MAX_HZ:
+            raise InstrumentError(f'96270A AM carrier {carrier_hz / 1e6:g} MHz is outside 50 kHz to 4.024 GHz')
+        if not AM_RATE_MIN_HZ <= rate_hz <= AM_RATE_MAX_HZ:
+            raise InstrumentError(f'96270A AM rate {rate_hz:g} Hz is outside 1 Hz to 220 kHz')
+        if not AM_DEPTH_MIN_PCT <= depth_pct <= AM_DEPTH_MAX_PCT:
+            raise InstrumentError(f'96270A AM depth {depth_pct:g} % is outside 0.1 to 99 %')
+        self.output(False)
+        self.send('am.inst.set')
+        reply = self.ask('inst.query').strip().strip('"').upper()
+        if reply != 'AM':
+            raise InstrumentError(f'96270A did not select the AM instrument: INST? answered {reply!r}')
+        self._set_and_check('unit.set', 'unit.query', lambda r: r.strip().strip('"').upper() == 'DBM', 'power units DBM (AM)')
+        self.send('am.pow.set', dbm=level_dbm)
+        lvl = float(self.ask('level.query').strip().split()[0])
+        if abs(lvl - level_dbm) > 0.01:
+            raise InstrumentError(f'96270A AM level set {level_dbm:g} dBm, reports {lvl:g} dBm')
+        self.send('am.freq.set', hz=carrier_hz)
+        got = float(self.ask('freq.query').strip().split()[0])
+        if not math.isclose(got, carrier_hz, rel_tol=1e-6):
+            raise InstrumentError(f'96270A AM carrier set {carrier_hz:g}, reports {got:g}')
+        self.send('am.shape.set', shape=shape)
+        reply = self.ask('am.shape.query').strip().strip('"').upper()
+        if reply[:3] != shape.upper()[:3]:
+            raise InstrumentError(f'96270A AM shape {shape} was not accepted: AM:SHAP? answered {reply!r}')
+        self.send('am.state.set', on='1')
+        if not _bool_reply(self.ask('am.state.query')):
+            raise InstrumentError('96270A did not confirm AM on (AM:STAT? answered off)')
+        self.send('am.depth.set', pct=depth_pct)
+        got = float(self.ask('am.depth.query').strip().split()[0])
+        if not math.isclose(got, depth_pct, rel_tol=1e-4):
+            raise InstrumentError(f'96270A AM depth set {depth_pct:g} %, reports {got:g} (UNVERIFIED: the unit of the AM:DEPT? reply is not in the manual)')
+        self.send('am.rate.set', hz=rate_hz)
+        got = float(self.ask('am.rate.query').strip().split()[0])
+        if not math.isclose(got, rate_hz, rel_tol=1e-4):
+            raise InstrumentError(f'96270A AM rate set {rate_hz:g} Hz, reports {got:g} (UNVERIFIED: the unit of the AM:INT:FREQ? reply is not in the manual)')
+        self.check_error('AM setup')
 
     def select_sine(self):
         """Back to the leveled-sine source: the known state again (SINE, dBm, offsets off, output OFF), each read back."""

@@ -5,17 +5,17 @@
    "case": "Fluke6060A.connect",
    "log": [
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|--|device clear sent; RF output is switched off at once",
     "6060A|>>|RO0",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC",
     "6060A|>>|RC98",
     "6060A|>>|RO0",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC",
     "6060A|>>|CE",
@@ -25,7 +25,7 @@
     "6060A|>>|IO",
     "6060A|<<|3,1,0",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000"
+    "6060A|<<|000000,000000,000000"
    ],
    "method": "Fluke6060A.connect",
    "result": "returned <Fluke6060A>",
@@ -42,7 +42,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "ctl",
@@ -59,7 +59,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -85,7 +85,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -121,7 +121,7 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ]
    ]
   },
@@ -130,15 +130,15 @@
    "case": "Fluke6060A.identify",
    "log": [
     "6060A|>>|ID",
-    "6060A|<<|6060A"
+    "6060A|<<|6060A/AN"
    ],
    "method": "Fluke6060A.identify",
-   "result": "returned '6060A'",
+   "result": "returned '6060A/AN'",
    "wire": [
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ]
    ]
   },
@@ -181,7 +181,7 @@
    "case": "Fluke6060A.wait_valid",
    "log": [
     "6060A|>>|ID",
-    "6060A|<<|6060A"
+    "6060A|<<|6060A/AN"
    ],
    "method": "Fluke6060A.wait_valid",
    "result": "returned None",
@@ -189,7 +189,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ]
    ]
   },
@@ -198,15 +198,15 @@
    "case": "Fluke6060A.rejected_entries",
    "log": [
     "6060A|>>|IR",
-    "6060A|<<|000,000,000"
+    "6060A|<<|000000,000000,000000"
    ],
    "method": "Fluke6060A.rejected_entries",
-   "result": "returned (False, 'none (000,000,000)')",
+   "result": "returned (False, 'none (000000,000000,000000)')",
    "wire": [
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ]
    ]
   },
@@ -215,7 +215,7 @@
    "case": "Fluke6060A.check_rejected",
    "log": [
     "6060A|>>|IR",
-    "6060A|<<|000,000,000"
+    "6060A|<<|000000,000000,000000"
    ],
    "method": "Fluke6060A.check_rejected",
    "result": "returned None",
@@ -223,7 +223,7 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ]
    ]
   },
@@ -232,15 +232,15 @@
    "case": "Fluke6060A.uncal",
    "log": [
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.uncal",
-   "result": "returned ((0, 0, 0), 'none (000,000,400)')",
+   "result": "returned ((0, 0, 0), 'none (000000,000000,000400)')",
    "wire": [
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -249,7 +249,7 @@
    "case": "Fluke6060A.check_uncal",
    "log": [
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.check_uncal",
    "result": "returned None",
@@ -257,7 +257,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -302,9 +302,9 @@
     "6060A|>>|CE",
     "6060A|>>|FR111.11110MZ",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC"
    ],
@@ -330,12 +330,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -359,13 +359,13 @@
     "6060A|>>|CE",
     "6060A|>>|AP-10.0DB",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.set_level",
    "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -389,12 +389,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -404,7 +404,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -423,9 +423,9 @@
     "6060A|>>|CE",
     "6060A|>>|AP15.0DB",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC"
    ],
@@ -451,12 +451,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -471,7 +471,7 @@
    "log": [
     "6060A|>>|RO1",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC"
    ],
@@ -489,7 +489,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -504,7 +504,7 @@
    "log": [
     "6060A|>>|RO0",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
    ],
@@ -522,7 +522,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -545,7 +545,7 @@
    "log": [
     "6060A|>>|RO0",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
    ],
@@ -563,7 +563,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -582,13 +582,13 @@
     "6060A|>>|AE0",
     "6060A|>>|AI1",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.am",
    "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12452, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': True, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -636,12 +636,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -651,7 +651,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -664,13 +664,13 @@
     "6060A|>>|AI0",
     "6060A|>>|AE1",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.am",
    "result": "returned {'am_depth_pct': 70, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -710,12 +710,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -725,7 +725,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -738,13 +738,13 @@
     "6060A|>>|AI0",
     "6060A|>>|AE1",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.am",
    "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -784,12 +784,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -799,7 +799,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -813,16 +813,16 @@
     "6060A|>>|AE0",
     "6060A|>>|AI1",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAMEBBAGBLKKHCAC",
     "6060A|>>|IU",
-    "6060A|<<|020,000,400"
+    "6060A|<<|000020,000000,000400"
    ],
    "method": "Fluke6060A.am",
-   "result": "raised InstrumentError: Fluke 6060A output is UNCAL (AM 95 % int): 020,000,400: AM depth above 90 %",
+   "result": "raised InstrumentError: Fluke 6060A output is UNCAL (AM 95 % int): 000020,000000,000400: AM depth above 90 %",
    "wire": [
     [
      "sleep",
@@ -867,12 +867,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -882,7 +882,7 @@
     [
      "Q",
      "IU",
-     "020,000,400"
+     "000020,000000,000400"
     ]
    ]
   },
@@ -904,13 +904,13 @@
     "6060A|>>|FE0",
     "6060A|>>|FI1",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.fm",
    "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12868, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': True, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -958,12 +958,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -973,7 +973,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -986,13 +986,13 @@
     "6060A|>>|FI0",
     "6060A|>>|FE1",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.fm",
    "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 1092, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': True, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -1032,12 +1032,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1047,7 +1047,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -1069,9 +1069,9 @@
     "6060A|>>|FI0",
     "6060A|>>|FE0",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC"
    ],
@@ -1121,12 +1121,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1142,13 +1142,13 @@
     "6060A|>>|CE",
     "6060A|>>|AP-12.0DB",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400"
+    "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.select_section",
    "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
@@ -1172,12 +1172,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1187,7 +1187,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ]
    ]
   },
@@ -1200,24 +1200,24 @@
     "6060A|>>|CE",
     "6060A|>>|AP-12.0DB",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400",
+    "6060A|<<|000000,000000,000400",
     "6060A|>>|CE",
     "6060A|>>|SP84",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC",
     "6060A|>>|RO0",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
    ],
@@ -1248,12 +1248,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1263,7 +1263,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ],
     [
      "sleep",
@@ -1284,12 +1284,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1307,7 +1307,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1325,19 +1325,19 @@
     "6060A|>>|CE",
     "6060A|>>|AP-12.0DB",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
     "6060A|>>|IU",
-    "6060A|<<|000,000,400",
+    "6060A|<<|000000,000000,000400",
     "6060A|>>|CE",
     "6060A|>>|SP85",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
    ],
@@ -1368,12 +1368,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1383,7 +1383,7 @@
     [
      "Q",
      "IU",
-     "000,000,400"
+     "000000,000000,000400"
     ],
     [
      "sleep",
@@ -1404,12 +1404,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1431,7 +1431,7 @@
    "case": "Fluke6060A.hardware_attenuation",
    "log": [
     "6060A|>>|XA",
-    "6060A|<<|4"
+    "6060A|<<|00004"
    ],
    "method": "Fluke6060A.hardware_attenuation",
    "result": "returned 4",
@@ -1439,7 +1439,7 @@
     [
      "Q",
      "XA",
-     "4"
+     "00004"
     ]
    ]
   },
@@ -1450,9 +1450,9 @@
     "6060A|>>|CE",
     "6060A|>>|FS1.50000MZ",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC"
    ],
@@ -1478,12 +1478,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1499,9 +1499,9 @@
     "6060A|>>|CE",
     "6060A|>>|LS2.0DB",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
    ],
@@ -1527,12 +1527,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1551,9 +1551,9 @@
     "6060A|>>|FU",
     "6060A|>>|FU",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
    ],
@@ -1592,12 +1592,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1615,9 +1615,9 @@
     "6060A|>>|CE",
     "6060A|>>|LD",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
    ],
@@ -1648,12 +1648,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1679,9 +1679,9 @@
     "6060A|>>|CE",
     "6060A|>>|FD",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
    ],
@@ -1712,12 +1712,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1735,9 +1735,9 @@
     "6060A|>>|CE",
     "6060A|>>|LU",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC"
    ],
@@ -1768,12 +1768,12 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -1915,10 +1915,10 @@
     "6060A|>>|RC98",
     "6060A|>>|CE",
     "6060A|>>|IR",
-    "6060A|<<|000,000,000",
+    "6060A|<<|000000,000000,000000",
     "6060A|>>|RO0",
     "6060A|>>|ID",
-    "6060A|<<|6060A",
+    "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC",
     "6060A|>>|@4",
@@ -1949,7 +1949,7 @@
     [
      "Q",
      "IR",
-     "000,000,000"
+     "000000,000000,000000"
     ],
     [
      "sleep",
@@ -1962,7 +1962,7 @@
     [
      "Q",
      "ID",
-     "6060A"
+     "6060A/AN"
     ],
     [
      "Q",
@@ -2025,7 +2025,8 @@
    "log": [
     "8902A|>>|ID",
     "8902A|<<|HP8902A",
-    "8902A|--|serial poll -> 0"
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|22.34SP"
    ],
    "method": "HP8902A.connect",
    "result": "returned <HP8902A>",
@@ -2061,6 +2062,14 @@
      "ctl",
      "read_stb",
      0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.34SP"
     ]
    ]
   },
@@ -2176,10 +2185,28 @@
    ]
   },
   {
+   "call": "",
+   "case": "HP8902A.show_recal",
+   "log": [
+    "8902A|>>|22.34SP"
+   ],
+   "method": "HP8902A.show_recal",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.34SP"
+    ]
+   ]
+  },
+  {
    "call": "250.0",
    "case": "HP8902A.measure_frequency_hz[no signal]",
    "log": [
-    "8902A|>>|250MZ",
     "8902A|>>|M5",
     "8902A|>>|7.1SP",
     "8902A|--|serial poll -> 0",
@@ -2189,16 +2216,8 @@
     "8902A|--|serial poll -> 4"
    ],
    "method": "HP8902A.measure_frequency_hz",
-   "result": "raised InstrumentError: 8902A error 96: no input signal sensed (HP-IB only) (reading +9000009600E+01)",
+   "result": "raised InstrumentError: 8902A error 96: no input signal sensed (HP-IB only): the receiver sees no signal at its RF input (display \"--\") - check the source RF is ON, its level, and the cable to the 8902A RF INPUT (reading +9000009600E+01)",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
     [
      "sleep",
      0.05
@@ -2265,10 +2284,7 @@
    "call": "250.0",
    "case": "HP8902A.measure_frequency_hz",
    "log": [
-    "8902A|>>|250MZ",
-    "8902A|>>|M5",
-    "8902A|>>|7.1SP",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|frequency setup: the receiver still holds this setup; not sent again",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|+0025000001E+01",
@@ -2277,39 +2293,6 @@
    "method": "HP8902A.measure_frequency_hz",
    "result": "returned 250000010.0",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "M5"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "7.1SP"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
     [
      "sleep",
      0.05
@@ -2351,7 +2334,6 @@
    "call": "250.0, 100",
    "case": "HP8902A.measure_frequency_hz[100 Hz resolution]",
    "log": [
-    "8902A|>>|250MZ",
     "8902A|>>|M5",
     "8902A|>>|7.2SP",
     "8902A|--|serial poll -> 0",
@@ -2363,14 +2345,6 @@
    "method": "HP8902A.measure_frequency_hz",
    "result": "returned 250000000.0",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
     [
      "sleep",
      0.05
@@ -2551,11 +2525,11 @@
     "8902A|>>|S4",
     "8902A|>>|LG",
     "8902A|>>|4.0SP",
-    "8902A|--|serial poll -> 32",
+    "8902A|--|serial poll -> 96",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|-0049800000E-07",
-    "8902A|--|serial poll -> 32"
+    "8902A|--|serial poll -> 96"
    ],
    "method": "HP8902A.tuned_rf_level_dbm",
    "result": "raised RecalRequired: HP 8902A: RECAL / UNCAL after the tuned level reading -4.98: calibrate_tuned_level(250) at this level, then measure again",
@@ -2599,7 +2573,7 @@
     [
      "ctl",
      "read_stb",
-     32
+     96
     ],
     [
      "sleep",
@@ -2634,7 +2608,7 @@
     [
      "ctl",
      "read_stb",
-     32
+     96
     ]
    ]
   },
@@ -2642,11 +2616,7 @@
    "call": "250.0",
    "case": "HP8902A.calibrate_tuned_level",
    "log": [
-    "8902A|>>|250MZ",
-    "8902A|>>|S4",
-    "8902A|>>|LG",
-    "8902A|>>|4.0SP",
-    "8902A|--|serial poll -> 32",
+    "8902A|--|tuned level cal setup: the receiver still holds this setup; not sent again",
     "8902A|>>|C1",
     "8902A|>>|T1",
     "8902A|>>|T3",
@@ -2657,47 +2627,6 @@
    "method": "HP8902A.calibrate_tuned_level",
    "result": "returned -4.9799999999999995",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "S4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LG"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "4.0SP"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     32
-    ],
     [
      "sleep",
      0.05
@@ -2755,11 +2684,7 @@
    "call": "250.0",
    "case": "HP8902A.tuned_rf_level_dbm",
    "log": [
-    "8902A|>>|250MZ",
-    "8902A|>>|S4",
-    "8902A|>>|LG",
-    "8902A|>>|4.0SP",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|tuned level setup: the receiver still holds this setup; not sent again",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|-0049800000E-07",
@@ -2768,47 +2693,6 @@
    "method": "HP8902A.tuned_rf_level_dbm",
    "result": "returned -4.9799999999999995",
    "wire": [
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "250MZ"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "S4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LG"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "4.0SP"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
     [
      "sleep",
      0.05
@@ -2953,15 +2837,14 @@
    "call": "",
    "case": "HP8902A.calibrate_power_sensor",
    "log": [
-    "8902A|>>|M4",
-    "8902A|>>|LN",
-    "8902A|>>|WT",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|power cal setup: the receiver still holds this setup; not sent again",
     "8902A|>>|C1T3SC",
-    "8902A|>>|C0",
+    "8902A|<<|+0099950000E-11",
+    "8902A|--|reading of the C1T3SC trigger: +0099950000E-11",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|+0099950000E-11",
+    "8902A|>>|C0",
     "8902A|--|serial poll -> 0"
    ],
    "method": "HP8902A.calibrate_power_sensor",
@@ -2973,48 +2856,21 @@
     ],
     [
      "W",
-     "M4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LN"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "WT"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
      "C1T3SC"
     ],
     [
-     "sleep",
-     0.05
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
-     "W",
-     "C0"
+     "R",
+     "+0099950000E-11"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
      "sleep",
@@ -3047,6 +2903,14 @@
      40.0
     ],
     [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
+    ],
+    [
      "ctl",
      "read_stb",
      0
@@ -3057,15 +2921,14 @@
    "call": "",
    "case": "HP8902A.calibrate_power_sensor[sensor not on the calibrator]",
    "log": [
-    "8902A|>>|M4",
-    "8902A|>>|LN",
-    "8902A|>>|WT",
-    "8902A|--|serial poll -> 0",
+    "8902A|--|power cal setup: the receiver still holds this setup; not sent again",
     "8902A|>>|C1T3SC",
-    "8902A|>>|C0",
+    "8902A|<<|+9000001800E+01",
+    "8902A|--|reading of the C1T3SC trigger: +9000001800E+01",
     "8902A|>>|T1",
     "8902A|>>|T3",
     "8902A|<<|+0010000000E-14",
+    "8902A|>>|C0",
     "8902A|--|serial poll -> 4"
    ],
    "method": "HP8902A.calibrate_power_sensor",
@@ -3077,48 +2940,21 @@
     ],
     [
      "W",
-     "M4"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "LN"
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
-     "WT"
-    ],
-    [
-     "sleep",
-     1.0
-    ],
-    [
-     "ctl",
-     "read_stb",
-     0
-    ],
-    [
-     "sleep",
-     0.05
-    ],
-    [
-     "W",
      "C1T3SC"
     ],
     [
-     "sleep",
-     0.05
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
-     "W",
-     "C0"
+     "R",
+     "+9000001800E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
     ],
     [
      "sleep",
@@ -3149,6 +2985,14 @@
      "ctl",
      "set_timeout",
      40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "C0"
     ],
     [
      "ctl",
@@ -3427,6 +3271,243 @@
     [
      "R",
      "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.recall_cal_factor_table",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0020000000E-07",
+    "8902A|>>|37.5SP CF",
+    "8902A|<<|+0098500000E-06",
+    "8902A|>>|37.6SP FR",
+    "8902A|<<|+0025000000E+01",
+    "8902A|>>|CF",
+    "8902A|<<|+0098000000E-06",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.recall_cal_factor_table",
+   "result": "returned {'count': 2, 'pairs': [(250.0, 98.0)], 'reference': 98.5}",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.5SP CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0098500000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.6SP FR"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0025000000E+01"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "CF"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0098000000E-06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP8902A.restore_automatic_cal_factors",
+   "log": [
+    "8902A|>>|37.0SP",
+    "8902A|--|serial poll -> 0"
+   ],
+   "method": "HP8902A.restore_automatic_cal_factors",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.0SP"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "250.0",
+   "case": "HP8902A.remove_cal_factor",
+   "log": [
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0020000000E-07",
+    "8902A|>>|37.3SP 250 MZ 0 CF",
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|M4",
+    "8902A|>>|37.4SP",
+    "8902A|<<|+0010000000E-07"
+   ],
+   "method": "HP8902A.remove_cal_factor",
+   "result": "returned 1",
+   "wire": [
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0020000000E-07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.3SP 250 MZ 0 CF"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "M4"
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "37.4SP"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     40.0
+    ],
+    [
+     "R",
+     "+0010000000E-07"
     ],
     [
      "ctl",
@@ -4321,10 +4402,11 @@
    "case": "HP8902A.reset_to_defaults",
    "log": [
     "8902A|>>|IP",
-    "8902A|--|serial poll -> 0"
+    "8902A|--|serial poll -> 0",
+    "8902A|>>|22.34SP"
    ],
    "method": "HP8902A.reset_to_defaults",
-   "result": "returned ResetReport(instrument='8902A', ok=True, exempt=False, steps=[ResetStep(name='reset (IP)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='status byte clean')], warnings=[])",
+   "result": "returned ResetReport(instrument='8902A', ok=True, exempt=False, steps=[ResetStep(name='reset (IP)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='status byte clean'), ResetStep(name='RECAL visible in the serial poll again (22.34SP; IP restores the 22.2SP mask)', ok=True, detail='')], warnings=[])",
    "wire": [
     [
      "sleep",
@@ -4342,6 +4424,14 @@
      "ctl",
      "read_stb",
      0
+    ],
+    [
+     "sleep",
+     0.05
+    ],
+    [
+     "W",
+     "22.34SP"
     ]
    ]
   },
@@ -6536,25 +6626,22 @@
    ]
   },
   {
-   "call": "250000000.0",
-   "case": "Fluke96270A.select_power_meter",
+   "call": "250000000.0, 'AUTO', True",
+   "case": "Fluke96270A.select_power_meter[single]",
    "log": [
     "96270A|>>|INST PMET",
     "96270A|>>|INST?",
     "96270A|<<|PMETER",
-    "96270A|>>|UNIT:POW DBM",
-    "96270A|>>|UNIT:POW?",
-    "96270A|<<|DBM",
-    "96270A|>>|PMET:TRIG SING",
-    "96270A|>>|PMET:TRIG?",
+    "96270A|>>|PMET1:TRIG SING",
+    "96270A|>>|PMET1:TRIG?",
     "96270A|<<|SING",
-    "96270A|>>|PMET:AVER AUTO",
-    "96270A|>>|PMET:AVER?",
+    "96270A|>>|PMET1:AVER AUTO",
+    "96270A|>>|PMET1:AVER?",
     "96270A|<<|AUTO",
-    "96270A|>>|PMET:FREQ 250000000",
-    "96270A|>>|PMET:FREQ?",
+    "96270A|>>|PMET1:FREQ 250000000",
+    "96270A|>>|PMET1:FREQ?",
     "96270A|<<|250000000",
-    "96270A|>>|PMET:IDN?",
+    "96270A|>>|PMET1:IDN?",
     "96270A|<<|R&S,NRP40T,SIM100001,1.0",
     "96270A|>>|SYST:ERR?",
     "96270A|<<|0,\"No error\""
@@ -6573,43 +6660,106 @@
     ],
     [
      "W",
-     "UNIT:POW DBM"
+     "PMET1:TRIG SING"
     ],
     [
      "Q",
-     "UNIT:POW?",
-     "DBM"
-    ],
-    [
-     "W",
-     "PMET:TRIG SING"
-    ],
-    [
-     "Q",
-     "PMET:TRIG?",
+     "PMET1:TRIG?",
      "SING"
     ],
     [
      "W",
-     "PMET:AVER AUTO"
+     "PMET1:AVER AUTO"
     ],
     [
      "Q",
-     "PMET:AVER?",
+     "PMET1:AVER?",
      "AUTO"
     ],
     [
      "W",
-     "PMET:FREQ 250000000"
+     "PMET1:FREQ 250000000"
     ],
     [
      "Q",
-     "PMET:FREQ?",
+     "PMET1:FREQ?",
      "250000000"
     ],
     [
      "Q",
-     "PMET:IDN?",
+     "PMET1:IDN?",
+     "R&S,NRP40T,SIM100001,1.0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "1000000000.0",
+   "case": "Fluke96270A.select_power_meter[continuous, the default]",
+   "log": [
+    "96270A|>>|INST PMET",
+    "96270A|>>|INST?",
+    "96270A|<<|PMETER",
+    "96270A|>>|PMET1:TRIG CONT",
+    "96270A|>>|PMET1:TRIG?",
+    "96270A|<<|CONT",
+    "96270A|>>|PMET1:AVER AUTO",
+    "96270A|>>|PMET1:AVER?",
+    "96270A|<<|AUTO",
+    "96270A|>>|PMET1:FREQ 1000000000",
+    "96270A|>>|PMET1:FREQ?",
+    "96270A|<<|1000000000",
+    "96270A|>>|PMET1:IDN?",
+    "96270A|<<|R&S,NRP40T,SIM100001,1.0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.select_power_meter",
+   "result": "returned 'R&S,NRP40T,SIM100001,1.0'",
+   "wire": [
+    [
+     "W",
+     "INST PMET"
+    ],
+    [
+     "Q",
+     "INST?",
+     "PMETER"
+    ],
+    [
+     "W",
+     "PMET1:TRIG CONT"
+    ],
+    [
+     "Q",
+     "PMET1:TRIG?",
+     "CONT"
+    ],
+    [
+     "W",
+     "PMET1:AVER AUTO"
+    ],
+    [
+     "Q",
+     "PMET1:AVER?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "PMET1:FREQ 1000000000"
+    ],
+    [
+     "Q",
+     "PMET1:FREQ?",
+     "1000000000"
+    ],
+    [
+     "Q",
+     "PMET1:IDN?",
      "R&S,NRP40T,SIM100001,1.0"
     ],
     [
@@ -6626,19 +6776,16 @@
     "96270A|>>|INST PMET",
     "96270A|>>|INST?",
     "96270A|<<|PMETER",
-    "96270A|>>|UNIT:POW DBM",
-    "96270A|>>|UNIT:POW?",
-    "96270A|<<|DBM",
-    "96270A|>>|PMET:TRIG CONT",
-    "96270A|>>|PMET:TRIG?",
+    "96270A|>>|PMET1:TRIG CONT",
+    "96270A|>>|PMET1:TRIG?",
     "96270A|<<|CONT",
-    "96270A|>>|PMET:AVER 8",
-    "96270A|>>|PMET:AVER?",
+    "96270A|>>|PMET1:AVER 8",
+    "96270A|>>|PMET1:AVER?",
     "96270A|<<|8",
-    "96270A|>>|PMET:FREQ 1000000000",
-    "96270A|>>|PMET:FREQ?",
+    "96270A|>>|PMET1:FREQ 1000000000",
+    "96270A|>>|PMET1:FREQ?",
     "96270A|<<|1000000000",
-    "96270A|>>|PMET:IDN?",
+    "96270A|>>|PMET1:IDN?",
     "96270A|<<|R&S,NRP40T,SIM100001,1.0",
     "96270A|>>|SYST:ERR?",
     "96270A|<<|0,\"No error\""
@@ -6657,43 +6804,34 @@
     ],
     [
      "W",
-     "UNIT:POW DBM"
+     "PMET1:TRIG CONT"
     ],
     [
      "Q",
-     "UNIT:POW?",
-     "DBM"
-    ],
-    [
-     "W",
-     "PMET:TRIG CONT"
-    ],
-    [
-     "Q",
-     "PMET:TRIG?",
+     "PMET1:TRIG?",
      "CONT"
     ],
     [
      "W",
-     "PMET:AVER 8"
+     "PMET1:AVER 8"
     ],
     [
      "Q",
-     "PMET:AVER?",
+     "PMET1:AVER?",
      "8"
     ],
     [
      "W",
-     "PMET:FREQ 1000000000"
+     "PMET1:FREQ 1000000000"
     ],
     [
      "Q",
-     "PMET:FREQ?",
+     "PMET1:FREQ?",
      "1000000000"
     ],
     [
      "Q",
-     "PMET:IDN?",
+     "PMET1:IDN?",
      "R&S,NRP40T,SIM100001,1.0"
     ],
     [
@@ -6707,7 +6845,7 @@
    "call": "",
    "case": "Fluke96270A.zero",
    "log": [
-    "96270A|>>|PMET:ZERO?",
+    "96270A|>>|PMET1:ZERO?",
     "96270A|<<|0"
    ],
    "method": "Fluke96270A.zero",
@@ -6715,7 +6853,7 @@
    "wire": [
     [
      "Q",
-     "PMET:ZERO?",
+     "PMET1:ZERO?",
      "0"
     ]
    ]
@@ -6724,7 +6862,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|-9.9800E+00"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6732,7 +6870,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "-9.9800E+00"
     ]
    ]
@@ -6741,7 +6879,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[RF off]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|-9.0000E+01"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6749,7 +6887,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "-9.0000E+01"
     ]
    ]
@@ -6758,7 +6896,7 @@
    "call": "",
    "case": "Fluke96270A.zero[failed]",
    "log": [
-    "96270A|>>|PMET:ZERO?",
+    "96270A|>>|PMET1:ZERO?",
     "96270A|<<|1",
     "96270A|>>|SYST:ERR?",
     "96270A|<<|-221,\"Settings conflict: sensor not zeroed\""
@@ -6768,7 +6906,7 @@
    "wire": [
     [
      "Q",
-     "PMET:ZERO?",
+     "PMET1:ZERO?",
      "1"
     ],
     [
@@ -6877,25 +7015,248 @@
    ]
   },
   {
+   "call": "250000000.0, 7.0, 100000.0, 4000.0",
+   "case": "Fluke96270A.setup_fm",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FM",
+    "96270A|>>|INST?",
+    "96270A|<<|FM",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|POW 7.000",
+    "96270A|>>|POW?",
+    "96270A|<<|7.000",
+    "96270A|>>|FREQ 250000000",
+    "96270A|>>|FREQ?",
+    "96270A|<<|250000000",
+    "96270A|>>|FM:STAT 1",
+    "96270A|>>|FM:STAT?",
+    "96270A|<<|1",
+    "96270A|>>|FM:DEV 100000",
+    "96270A|>>|FM:DEV?",
+    "96270A|<<|100000",
+    "96270A|>>|FM:INT:FREQ 4000",
+    "96270A|>>|FM:INT:FREQ?",
+    "96270A|<<|4000",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.setup_fm",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FM"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FM"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "POW 7.000"
+    ],
+    [
+     "Q",
+     "POW?",
+     "7.000"
+    ],
+    [
+     "W",
+     "FREQ 250000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "250000000"
+    ],
+    [
+     "W",
+     "FM:STAT 1"
+    ],
+    [
+     "Q",
+     "FM:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "FM:DEV 100000"
+    ],
+    [
+     "Q",
+     "FM:DEV?",
+     "100000"
+    ],
+    [
+     "W",
+     "FM:INT:FREQ 4000"
+    ],
+    [
+     "Q",
+     "FM:INT:FREQ?",
+     "4000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "250000000.0, 7.0, 370000.0, 4000.0",
+   "case": "Fluke96270A.setup_fm[above the 96270A deviation limit]",
+   "log": [],
+   "method": "Fluke96270A.setup_fm",
+   "result": "raised InstrumentError: 96270A FM deviation 370 kHz is outside 0.01 to 300 kHz at 250 MHz (Operator Manual Table 3-26)",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.select_sine[after FM]",
+   "log": [
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.select_sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
    "call": "250000000.0",
    "case": "Fluke96270A.select_power_meter[no sensor]",
    "log": [
     "96270A|>>|INST PMET",
     "96270A|>>|INST?",
     "96270A|<<|PMETER",
-    "96270A|>>|UNIT:POW DBM",
-    "96270A|>>|UNIT:POW?",
-    "96270A|<<|DBM",
-    "96270A|>>|PMET:TRIG SING",
-    "96270A|>>|PMET:TRIG?",
-    "96270A|<<|SING",
-    "96270A|>>|PMET:AVER AUTO",
-    "96270A|>>|PMET:AVER?",
+    "96270A|>>|PMET1:TRIG CONT",
+    "96270A|>>|PMET1:TRIG?",
+    "96270A|<<|CONT",
+    "96270A|>>|PMET1:AVER AUTO",
+    "96270A|>>|PMET1:AVER?",
     "96270A|<<|AUTO",
-    "96270A|>>|PMET:FREQ 250000000",
-    "96270A|>>|PMET:FREQ?",
+    "96270A|>>|PMET1:FREQ 250000000",
+    "96270A|>>|PMET1:FREQ?",
     "96270A|<<|250000000",
-    "96270A|>>|PMET:IDN?",
+    "96270A|>>|PMET1:IDN?",
     "96270A|<<|NONE,NONE,NONE,NONE"
    ],
    "method": "Fluke96270A.select_power_meter",
@@ -6912,43 +7273,34 @@
     ],
     [
      "W",
-     "UNIT:POW DBM"
+     "PMET1:TRIG CONT"
     ],
     [
      "Q",
-     "UNIT:POW?",
-     "DBM"
+     "PMET1:TRIG?",
+     "CONT"
     ],
     [
      "W",
-     "PMET:TRIG SING"
+     "PMET1:AVER AUTO"
     ],
     [
      "Q",
-     "PMET:TRIG?",
-     "SING"
-    ],
-    [
-     "W",
-     "PMET:AVER AUTO"
-    ],
-    [
-     "Q",
-     "PMET:AVER?",
+     "PMET1:AVER?",
      "AUTO"
     ],
     [
      "W",
-     "PMET:FREQ 250000000"
+     "PMET1:FREQ 250000000"
     ],
     [
      "Q",
-     "PMET:FREQ?",
+     "PMET1:FREQ?",
      "250000000"
     ],
     [
      "Q",
-     "PMET:IDN?",
+     "PMET1:IDN?",
      "NONE,NONE,NONE,NONE"
     ]
    ]
@@ -6957,7 +7309,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[no reading]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|9.91E+37"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6965,7 +7317,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "9.91E+37"
     ]
    ]
@@ -6974,7 +7326,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[not plausible as dBm]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|1.0E-4"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6982,7 +7334,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "1.0E-4"
     ]
    ]
@@ -6991,7 +7343,7 @@
    "call": "",
    "case": "Fluke96270A.read_dbm[below the floor]",
    "log": [
-    "96270A|>>|PMET:READ?",
+    "96270A|>>|PMET1:READ?",
     "96270A|<<|-300"
    ],
    "method": "Fluke96270A.read_dbm",
@@ -6999,7 +7351,7 @@
    "wire": [
     [
      "Q",
-     "PMET:READ?",
+     "PMET1:READ?",
      "-300"
     ]
    ]

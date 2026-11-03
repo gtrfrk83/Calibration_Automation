@@ -99,7 +99,9 @@ class ReportFooter(unittest.TestCase):
         except Exception as exc:
             self.skipTest(f'PDF writer unavailable here: {exc}')
         text = subprocess.run(['pdftotext', '-layout', str(out), '-'], capture_output=True, text=True).stdout
-        self.assertIn(suite_info.full_version(), text)
+        self.assertNotIn(suite_info.full_version(), text)                     # owner, 2026-10-30: no program name / version in the page footer
+        self.assertNotIn(suite_info.NAME, text)
+        self.assertIn('Page 1 of 1', text)
         self.assertNotIn('logo', text.lower())
 
 

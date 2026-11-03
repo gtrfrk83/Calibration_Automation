@@ -305,7 +305,7 @@ class SimDmmTransport(_SimBase):
         if u == '*OPC?': return '1'
         if u == 'SYST:ERR?': return '+0,"No error"'
         if u == 'ROUT:TERM?': return getattr(self, 'terminals', 'FRON')
-        if re.match(r'^(VOLT|CURR|RES|FRES)(:DC|:AC)?:(NPLC|BAND) ', u) or re.match(r'^FREQ:(RANG:LOW|APER|VOLT:RANG) ', u):
+        if re.match(r'^(VOLT|CURR|RES|FRES|TEMP)(:DC|:AC)?:(NPLC|BAND) ', u) or re.match(r'^FREQ:(RANG:LOW|APER|VOLT:RANG) ', u):
             return None
         if u == 'SYST:REM': self.remote = True; return None
         if u == 'SYST:LOC': self.remote = False; return None
@@ -369,7 +369,7 @@ class SimDacqTransport(_SimBase):
         m = re.match(r'CONF:([A-Z:]+) (\S+?),\(@(\d+)\)$', u)
         if m:
             self.function = m.group(1); self.scan = None; return None
-        if re.match(r'^(VOLT|CURR|RES|FRES)(:DC|:AC)?:(NPLC|BAND) \S+,\(@\d+\)$', u) or re.match(r'^FREQ:(APER|VOLT:RANG) \S+,\(@\d+\)$', u):
+        if re.match(r'^(VOLT|CURR|RES|FRES|TEMP)(:DC|:AC)?:(NPLC|BAND) \S+,\(@\d+\)$', u) or re.match(r'^FREQ:(APER|VOLT:RANG) \S+,\(@\d+\)$', u):
             return None
         m = re.match(r'ROUT:SCAN \(@(\d+)\)$', u)
         if m: self.scan = int(m.group(1)); return None

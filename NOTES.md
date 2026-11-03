@@ -2218,6 +2218,13 @@ Owner decision: the Tk build is gone; the suite is Qt only.
 - UNVERIFIED (flagged on the points): the NRP40T on the 96270A and its range at -66 dBm; the 8902A S4 / M4 switch at -20 dBm; the sensor cal-factor table is not loaded by the program; AM / FM calibration connectors and the FM cal band; the 15.1SP time-base check; the 8563E analyzer settings, the spur offset/absolute reading and the unused NH walk (`scan_spurs`); IT / SP02 at power-on; THD at 10 kHz is typed (the 8902A cannot measure it); the LF generator High-Z / DVM check; settle times (tunables `f6060a.settle.*`); 4A-7 uses the 8902A tuned level (owner decision 2026-10-28: kept; it differs from the printed method); 4A-8 is ordered tuned-level points first, then RF-power points.
 - Shared-file touches (no behavior change to any other engine): `drivers/__init__.py` (exports), `procmods_engine.py` (`MODEL_IDS['f6060a']` + four settle tunables), `drivers/simulated_8902a.py` (`sc_held`), `tests/golden_capture.py` (registration + `read_stb` pass-through on `RecordingTransport`), `tests/test_driver_commands_gen.py` (96270A command counts), `tests/test_reset_startup.py`, `tests/test_procmods_engines.py`, `tests/test_8808a_manual_override.py` and `tests/test_dsb_runtime_rules.py` (the MANUAL_OVERRIDE scan lists), `tests/fixtures/legacy_registry.json`, `tests/golden/fstring_lint_baseline.json`.
 
+### Fluke 6060A/AN from the GIDEP document (added 2026-11-02; `Procedures/Fluke_6060A_GIDEP_Verification.py`)
+T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedure, own spec `specs/fluke_6060a_gidep_pv.json` (builder `specs/build_fluke_6060a_gidep_spec.py`, 220 points), own settings / progress / procmods key `6060A-gidep` (engine `main(spec_path, state_key, variant_label)`).
+- New engine point kinds: `manual` (typed reading, no RF): the 10 MHz reference (counter) and the three sub-kHz spurs; `devmeter` (Tables 9, 10): the 96270A FM instrument (`Fluke96270A.setup_fm`, commands `FM_COMMANDS`, Remote Programmers Manual pp. 32, 35, 36, 38, 59; NOT run on hardware, the unit of the FM:DEV? / FM:INT:FREQ? replies is UNVERIFIED) sends carrier / rate / deviation at +7 dBm to the 6060A DEVIATION METER INPUT, the technician types the 6060A display in kHz, limit = deviation +/- 3 kHz (Table 9) or +/- 30 kHz (Table 10). The 96270A goes back to the leveled sine afterwards. Six points (370 kHz at 30 and 250 MHz) exceed the 96270A's FM limit (Operator Manual Table 3-26) and are listed NOT TESTED.
+- Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
+- Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
+- Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+
 ## Manual entry on every two-way engine (branch manual-entry-all)
 
 Owner: "i need to be able to enter data manually on all procedures". "Enter reading manually" (manual_override.py, `ManualOverrideMixin`, File > Settings `manual_override`) was on the Fluke 8808A and the datasheet runtime only (and had been taken off the 5491B). It is now on every automatic-reading engine; the typed value goes through each engine's own `_record` and limit logic, so pass/fail, limits, commands and prompts are unchanged, and the report is identical with or without an override (no annotation).
@@ -2243,3 +2250,63 @@ Order of work for every new two-way instrument (also in the new-calibration-proc
 7. First hardware run: no step-through (long tests). Optional smoke pass (one lowest-energy point per test, full speed), then the full run at normal speed, stopping on the first surprise (`surprise.py`); the command log is kept. 'Mark verified on hardware' asks whether a clean full run is on record.
 
 Pilot: Fluke 6060A (2026-10-29 bench session, all five instruments connected: 6060A, 8902A, 8563E, 96270A + NRP40T, 33xxx generator; read-only passes first). Order: `drivers/fluke_6060a.py`, `hp_8902a.py`, `hp_8563e.py`, then the 96270A power-meter methods and the generator. The other ~37 never-hardware-run procedures are left as they are until the pilot is judged.
+
+## Check an EMU calculator: fully fledged (owner request 2026-10-29)
+Standards Specs tab > Check an EMU (qtui/screens/standards_specs.CheckDialog, model emu_check_model.py). Every choice comes from the standard's own sheet (`emu_check_model.options`):
+- Function: only the kinds this standard's sheet can answer (DCV ... TEMP, plus conductance, DC / AC power, phase, time marks, RPM, light fc / lux / La / UV 365 nm,
+  RF level in dBm on the 96270A). Flatness, aberration, rise time and the receiver / analyzer 'OTHER' rows (dB re carrier, ratios) are not a test point here: the window says so.
+- The standard sources (output) or measures (input) the point: the measuring standards (3458A, 5790B, 34461A / 34465A, 8902A) now compute (before, every lookup was 'output'
+  and they returned nothing); a measured point is floored by the laboratory's Measure CMC.
+- Sheet function: the exact function (e.g. Voltage, AC [Sinewave], 4-wire / 2-wire resistance), or the default the procedures use.
+- Temperature: the sensor (thermocouple B C E J K L N R S T U, RTD Pt 385 100/200/500/1000 Ω, Pt 3916, Pt 3926, Pt 395, PtNi 385, Cu 427 - as the sheet lists them), with that
+  sensor's scope CMC as the floor; the nominal in °C, °F or K (resolution / Type A / reported as differences); the result in °C, plus °F when the point was given in °F.
+- Specification period (24 hr, 90 day, 1 yr, 2 yr ... as printed; default the standard's own).
+- The frequency box shows only when the chosen function's rows are specified by frequency.
+- The spec line selected in the table when the button is pressed fills the function, direction, sheet function / sensor, nominal (top of its range, °F for a °F row) and frequency.
+Nothing shared changed: the calculator restricts a copy of the standard (emu_check_model._Restricted) and calls uncertainty_budget.build / rf_level as the engines do.
+Tests: tests/test_emu_check_model.py (FullyFledged). The Qt window itself is compile-checked only here (PySide6 is not installable in the sandbox); its logic was run against
+stand-in widgets. Check it on the bench PC.
+
+### 6060A: 4A-6 on the 8902A (owner, 2026-10-29)
+4A-6 mid level (-24 to -66 dBm, 40 points) is measured with the 8902A tuned RF level, like 4A-7 and 4A-8: the R&S NRP40T is a thermal sensor (-35 to +20 dBm) and cannot
+reach -66 dBm. Deviation from the printed method, flagged on the first point and in the section note. 4A-5 high level (+12 to -12 dBm) stays on the 96270A + NRP40T.
+
+### 6060A: generator frequency range (owner, 2026-10-29)
+The lab's 6060A on the bench only reaches 520 MHz (other units may cover the manual's 1050 MHz). Connections window: 'Generator frequency range' = 0.1 to 1050 MHz
+(as the manual, the default) or 0.1 to 520 MHz, saved with the settings and the progress file. Points whose 6060A frequency is above the range (a derived section
+error / sum takes the highest frequency of its inputs) are not run and are listed on the report as "NOT TESTED: above this unit's 520 MHz range" with their
+limits and no reading (owner decision: keep, mark not tested). With 520 MHz: 172 of the 470 points (4A-4 5, 4A-5 32, 4A-6 16, 4A-7 2, 4A-8 48, 4A-11 2,
+modulation tests 3, 4, 6 and 8: 67). The report header says 'Frequency range: 0.1 to 520 MHz (this unit)'.
+
+## HP 8902A power sensor cal factors (owner request 2026-11-02; adjustment kind, `Procedures/HP_8902A_Cal_Factors.py`; simulated 8902A only, never run on a real receiver)
+Enters the 11722A (or other) sensor's cal-factor table into the 8902A: reference cal factor (the 50 MHz label value) and up to 16 frequency / cal-factor pairs, with the driver's
+existing locked, verified `cf.ref` / `cf.pair` (37.3SP ... CF; manual pp. 3-75 / 124, 3-78 / 127, 3-87 / 136). Logic `hp8902a_calfactors.py` (no toolkit), window
+`hp8902a_calfactors_view_qt.py`, saved sensor tables `sensor_cal_factor_store.py` (NEW tables `sensor_cal_factor_tables` / `sensor_cal_factor_pairs` in lab_registry.sqlite3 only),
+audit through `adjustment_audit.py`. Sidecar order 80, Adjustment tab, category "RF Measuring Receiver Adjustment".
+- Validation (nothing is sent until all pass; every problem is listed): reference and pair cal factors 40 to 120 % in 0.1 % steps, frequency above 0 and up to 42 GHz in 50 kHz steps
+  (rendered p. 3-82 / 131 "Specifications for Cal-Factor Entry"), no duplicate frequency (MHz / GHz / kHz suffixes are folded), at most 16 pairs (17 entries with the reference), at least one
+  pair (the reference alone leaves Error 15). No ordering rule: the receiver orders the table itself (p. 3-78 / 127); the program sends ascending and shows the list sorted.
+- Flow: Connect (nothing changes) -> Start record and read table (M4, 37.4SP entries, 37.5SP CF reference, 37.6SP FR / CF per pair, then 37.0SP; reads only) -> type or load the list ->
+  Check my list -> Enter table: notice that this CHANGES the stored table, the exact list and the entries that will be removed, and the operator must TYPE `ENTER`; any other text sends nothing.
+- Writes, each sent ONCE and never retried: reference (read back with 37.5SP CF, +/-0.05 %), then every stale entry of the receiver that is not in the list as 0 % (count must drop by one),
+  then each pair (count must grow by one, or stay when the frequency was already there). The first mismatch / error / code error stops the run (status STOPPED, "may be partly changed").
+  Then the whole table is read back: PASS / FAIL per entry, extra entries, entry count (status ENTERED_VERIFIED or ENTERED_NOT_VERIFIED). The table-clear functions 37.7 / 37.9 are never sent.
+  "Remove entries that are not in my list" is ticked by default; unticked, the other entries stay (and the list is refused up front when the union would exceed 16 pairs).
+- The reference of a table that cannot be read is not written: if the pre-read fails the entry is not started (no read-back = no write).
+- Report: like Keithley_2000_Adjustment there is no PDF; the record is adjustment_runs / adjustment_events (instrument "HP 8902A cal factors", scope = sensor model and serial).
+  Demo: simulated 8902A, in-memory audit and sensor tables (nothing persisted, every row demo=1), no export.
+- New driver methods (no existing command changed): `recall_cal_factor_table`, `restore_automatic_cal_factors` (37.0SP, verified), `remove_cal_factor`, new command `cf.recall.freq` (37.6SP FR,
+  UNVERIFIED). The simulator learned 37.6SP / FR / CF / 37.0SP; its behaviour for the 6060A tests is unchanged.
+- UNVERIFIED: how the 8902A returns the value behind 37.4SP / 37.5SP / 37.6SP + FR / CF over HP-IB (the manual's example program on p. 3-87 / 136 reads them with ENTER, the frequency in Hz);
+  that 37.4SP counts the reference (pairs = count - 1; the example program loops to the count); that CF after 37.6SP FR shows the same pair; that the cal-factor / frequency steps
+  (0.1 % / 50 kHz) are strict entry rules and not only display resolutions. Microwave sensor modules (27.1SP) are not handled. The Qt window was not run here (PySide6 is not installable in the sandbox).
+Tests: tests/test_hp8902a_calfactors.py.
+
+## HP 8591A spectrum analyzer (owner request 2026-11-02; `Procedures/HP_8591A_Verification.py`; simulated bench only, never run on a real 8591A or on the 96270A AM / NRP40T)
+
+- Source: USAF T.O. 33K3-4-2864-1 (30 May 2012), read on RENDERED pages; every table read twice. 127 points in `specs/hp_8591a_pv.json` (built by `specs/build_hp_8591a_spec.py`): 3.3 self-calibration (prompt, 1 = done), 4.1 CAL OUT level (NRP40T on the 96270A, 1 point) and frequency (typed counter, standard and OPT 004 limits, the Option 004 box chooses), 4.2 frequency readout (3), 4.3 noise sidebands (4), 4.4 span (Table 2, 13), 4.5 sweep time (Table 3, 8), 4.6 scale fidelity (Tables 4/5 log 12, Table 6 linear 4), 4.7 input attenuator (5), 4.8 reference level (9), 4.9 RBW switching (7), 4.10 RBW width (8), 4.11 frequency response (Table 11: 36, Table 12: 7, plus most positive / most negative / total), 4.12 displayed average noise level (4, typed).
+- Instruments: the 8591A (unit under test) and the Fluke 96270A, which replaces the document's sweeper, 436A/8481A, synthesizer, step attenuators, 3325B and 8640B (owner answers): leveled sine, internal AM (`Fluke96270A.setup_am`, new, AM subsystem of the 96000 Remote Programmers Manual p. 37, not run on hardware) and the NRP40T power meter. The 50 s and 100 s sweep-time rows need a 0.1 / 0.2 Hz AM rate (96270A minimum 1 Hz): listed on the report as NOT TESTED.
+- Driver `drivers/hp_8591a.py`: the 8590 language is not SCPI; every command cites its PDF page of the 8590 Programming Manual (PDF = printed chapter-4 page + 60) and `verified` is False for what the manual does not print (ID? text, AUNITS? / DET? reply text, default GPIB address 18). Errors come from STB? (bit 32 illegal command, bit 8 hardware). No calibration, security, firmware or memory command exists in the driver (test). `preset()` sends IP; at the start of every point so each point is self-contained.
+- Methods that are this procedure's own reading of the document (UNVERIFIED, flagged on the points): span = source difference for 320 trace points from the parabolic peak positions; sweep time = 8 x the mean rising-crossing spacing of a zero-span AM trace; RBW width = interpolated -3 dB crossings of the trace (2 dB/division, +5 dBm reference level so both crossings are on screen); Tables 7 / 8 reading = marker change minus source-level change; frequency response = analyzer amplitude at f minus that at 300 MHz at the same source level (96270A flatness trusted).
+- Standby: the 96270A output is switched off (read back) after every point and the source returns to the leveled sine after AM; the analyzer has no output. The NRP40T is zeroed once per Run with nothing connected (prompt), before the CAL OUT point.
+- Hook-up diagrams: `diagrams/hook_8591A_<GROUP>.png` (SELFCAL, CALPM, CALCTR, SRC, CALIN, DANL) are supplied by the owner; none is drawn here. Simulated bench: `drivers/simulated_8591a.py` (analyzer + 96270A on one bench; the error functions are simulation choices, not facts).

@@ -768,8 +768,8 @@ class Rule12Sections(Base):
         self.assertTrue(self.h.run_all())
         text = self.pdf_text(app)
         n = len(self.ids(app, self.SEC))
-        self.assertRegex(text, rf'Not tested:?\s+{self.SEC} \({n} point\(s\)\)')
-        self.assertIn('RESULT: PASS', text)
+        self.assertNotRegex(text, rf'Not tested:?\s+{self.SEC}')  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
+        self.assertNotIn('RESULT:', text)                                   # owner 2026-10-30: no verdict lines on the report
         self.assertNotIn('FAIL', text)
         rows = app.certificate_rows()
         self.assertFalse([r for r in rows if r['Section'] == self.SEC])
@@ -788,7 +788,7 @@ class Rule12Sections(Base):
         labels = [d[3] for d in self.h.dialogs if d[0] == 'reading' and d[1] in ids]
         self.assertTrue(labels and set(labels) == {'UNIT UNDER TEST'})
         text = self.pdf_text(app)
-        self.assertIn('By hand', text)
+        self.assertNotIn('By hand', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
 
     def test_hand_typed_readings_are_padded_and_judged_like_a_manual_calibration(self):
         app, io = self.dmm()

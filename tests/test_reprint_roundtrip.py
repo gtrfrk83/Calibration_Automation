@@ -68,7 +68,7 @@ class RoundTrip(unittest.TestCase):
         R.truevolt_export(pdf, details={'show_tar_tur': report_pdf.TarTur(True, False)})
         text = R.pdf_text(pdf)
         self.assertIn('TAR', text)
-        self.assertIn('AS LEFT: PASS', text)
+        self.assertNotIn('AS LEFT:', text)                                  # owner 2026-10-30: no verdict lines on the report
         out = self.check(pdf, R.last_run_id(), 'truevolt')
         self.assertIn('TAR', R.pdf_text(out))
         self.assertNotIn('TUR (test uncertainty', R.pdf_text(out), 'only the TAR column was ticked: the TAR / TUR toggle state is restored exactly')
@@ -83,7 +83,7 @@ class RoundTrip(unittest.TestCase):
             pdf = self.dir / f'tv{n}.pdf'
             R.truevolt_export(pdf, details={'show_tar_tur': tt})
             out = self.check(pdf, R.last_run_id(), f'truevolt{n}')
-            self.assertEqual('TUR' in R.pdf_text(out).split('RESULT')[1].split('Zero offset')[0], tt)
+            self.assertEqual('TUR' in R.pdf_text(out).split('Zero offset')[0], tt)          # owner 2026-10-30: no RESULT line any more; the column headings come first
 
     def test_scope_engine_tds2000c(self):
         pdf = self.dir / 'tds.pdf'

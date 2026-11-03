@@ -1,0 +1,429 @@
+{
+ "step": 1,
+ "kind": "read-only",
+ "started": "2026-10-29T07:17:14",
+ "python": "3.15.0",
+ "arch": "64bit",
+ "pyvisa": "1.16.2",
+ "instruments": {
+  "6060A": {
+   "what": "Fluke 6060A signal generator (UUT)",
+   "address": "GPIB1::2::INSTR",
+   "records": [
+    {
+     "cmd": "ID",
+     "reply": "6060A/AN\n",
+     "error": null,
+     "seconds": 0.093,
+     "ends_with": "b'N\\n'",
+     "note": "identity"
+    },
+    {
+     "cmd": "IV",
+     "reply": "V1.1\n",
+     "error": null,
+     "seconds": 0.014,
+     "ends_with": "b'1\\n'",
+     "note": "firmware version"
+    },
+    {
+     "cmd": "IO",
+     "reply": "5,0,1\n",
+     "error": null,
+     "seconds": 0.015,
+     "ends_with": "b'1\\n'",
+     "note": "installed options"
+    },
+    {
+     "cmd": "II",
+     "reply": "00004\n",
+     "error": null,
+     "seconds": 0.016,
+     "ends_with": "b'4\\n'",
+     "note": "interface modes"
+    },
+    {
+     "cmd": "IM",
+     "reply": "00192\n",
+     "error": null,
+     "seconds": 0.017,
+     "ends_with": "b'2\\n'",
+     "note": "SRQ mask"
+    },
+    {
+     "cmd": "IU",
+     "reply": "000000,000000,000400\n",
+     "error": null,
+     "seconds": 0.028,
+     "ends_with": "b'0\\n'",
+     "note": "UNCAL codes"
+    },
+    {
+     "cmd": "IR",
+     "reply": "000020,000000,000000\n",
+     "error": null,
+     "seconds": 0.028,
+     "ends_with": "b'0\\n'",
+     "note": "rejected-entry codes (reading clears them)"
+    },
+    {
+     "cmd": "LM99",
+     "reply": "BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABBAEEBBAGBLKKLIAC\n",
+     "error": null,
+     "seconds": 0.059,
+     "ends_with": "b'C\\n'",
+     "note": "learn string: present state (frequency, level, RF on/off ...)"
+    },
+    {
+     "cmd": "XA",
+     "reply": "00023\n",
+     "error": null,
+     "seconds": 0.017,
+     "ends_with": "b'3\\n'",
+     "note": "hardware attenuation setting (0-23)"
+    }
+   ],
+   "status_byte_before": 23,
+   "status_byte_after": 21,
+   "local": "sent GTL (front panel back to local)"
+  },
+  "8902A": {
+   "what": "HP 8902A measuring receiver",
+   "address": "GPIB1::14::INSTR",
+   "records": [
+    {
+     "cmd": null,
+     "reply": null,
+     "error": "VisaIOError: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.",
+     "seconds": 4.042,
+     "note": "talk only (no command): whatever the receiver has to send - the present display value"
+    },
+    {
+     "cmd": "ID",
+     "reply": null,
+     "error": "VisaIOError: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.",
+     "seconds": 4.056,
+     "note": "identify (the manual does not show a reply; it did not answer on 2026-10-28)"
+    }
+   ],
+   "status_byte_before": "serial poll failed: VI_ERROR_TMO (-1073807339): Timeout expired before operation completed.",
+   "status_byte_after": 0,
+   "local": "sent GTL (front panel back to local)"
+  },
+  "8563E": {
+   "what": "HP 8563E spectrum analyzer",
+   "address": "GPIB1::18::INSTR",
+   "records": [
+    {
+     "cmd": "ID?;",
+     "reply": "HP8563E\n",
+     "error": null,
+     "seconds": 0.067,
+     "ends_with": "b'E\\n'",
+     "note": "model"
+    },
+    {
+     "cmd": "REV?;",
+     "reply": "971024\n",
+     "error": null,
+     "seconds": 0.01,
+     "ends_with": "b'4\\n'",
+     "note": "firmware date"
+    },
+    {
+     "cmd": "SER?;",
+     "reply": "3611A04800\n",
+     "error": null,
+     "seconds": 0.011,
+     "ends_with": "b'0\\n'",
+     "note": "serial number"
+    },
+    {
+     "cmd": "ERR?;",
+     "reply": "112,111\n",
+     "error": null,
+     "seconds": 0.009,
+     "ends_with": "b'1\\n'",
+     "note": "error list"
+    },
+    {
+     "cmd": "DONE?;",
+     "reply": "1\n",
+     "error": null,
+     "seconds": 0.009,
+     "ends_with": "b'1\\n'",
+     "note": "sweep done"
+    },
+    {
+     "cmd": "CF?;",
+     "reply": "1.3250000000E10\n",
+     "error": null,
+     "seconds": 0.026,
+     "ends_with": "b'0\\n'",
+     "note": "center frequency"
+    },
+    {
+     "cmd": "SP?;",
+     "reply": "2.6500000000E10\n",
+     "error": null,
+     "seconds": 0.024,
+     "ends_with": "b'0\\n'",
+     "note": "span"
+    },
+    {
+     "cmd": "RL?;",
+     "reply": "0 \n",
+     "error": null,
+     "seconds": 0.013,
+     "ends_with": "b' \\n'",
+     "note": "reference level"
+    },
+    {
+     "cmd": "AT?;",
+     "reply": "10 \n",
+     "error": null,
+     "seconds": 0.013,
+     "ends_with": "b' \\n'",
+     "note": "input attenuation"
+    },
+    {
+     "cmd": "RB?;",
+     "reply": "1.0000E6\n",
+     "error": null,
+     "seconds": 0.015,
+     "ends_with": "b'6\\n'",
+     "note": "resolution bandwidth"
+    },
+    {
+     "cmd": "VB?;",
+     "reply": "1.0000E6\n",
+     "error": null,
+     "seconds": 0.015,
+     "ends_with": "b'6\\n'",
+     "note": "video bandwidth"
+    },
+    {
+     "cmd": "ST?;",
+     "reply": "5.3000E-1\n",
+     "error": null,
+     "seconds": 0.015,
+     "ends_with": "b'1\\n'",
+     "note": "sweep time"
+    },
+    {
+     "cmd": "AUNITS?;",
+     "reply": "DBM\n",
+     "error": null,
+     "seconds": 0.011,
+     "ends_with": "b'M\\n'",
+     "note": "amplitude units"
+    },
+    {
+     "cmd": "TDF?;",
+     "reply": "P\n",
+     "error": null,
+     "seconds": 0.021,
+     "ends_with": "b'P\\n'",
+     "note": "trace data format"
+    }
+   ],
+   "status_byte_before": 60,
+   "status_byte_after": 60,
+   "local": "sent GTL (front panel back to local)"
+  },
+  "96270A": {
+   "what": "Fluke 96270A + R&S NRP40T (power meter mode)",
+   "address": "GPIB1::4::INSTR",
+   "records": [
+    {
+     "cmd": "*IDN?",
+     "reply": "Fluke,96270A,398472732,1.17\n",
+     "error": null,
+     "seconds": 0.062,
+     "ends_with": "b'7\\n'",
+     "note": "identity"
+    },
+    {
+     "cmd": "SYST:ERR?",
+     "reply": "0,\"No error\"\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'\"\\n'",
+     "note": "error queue (one entry)"
+    },
+    {
+     "cmd": "INST?",
+     "reply": "SINE\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'E\\n'",
+     "note": "selected function"
+    },
+    {
+     "cmd": "INST:CAT?",
+     "reply": "SINE,SWEEP,AM,FM,PM,FCO,PMET\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'T\\n'",
+     "note": "functions it has"
+    },
+    {
+     "cmd": "OUTP?",
+     "reply": "0\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'0\\n'",
+     "note": "output on/off"
+    },
+    {
+     "cmd": "UNIT:POW?",
+     "reply": "DBM\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'M\\n'",
+     "note": "power units"
+    },
+    {
+     "cmd": "PMET1:IDN?",
+     "reply": "NONE,NONE,NONE,NONE\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'E\\n'",
+     "note": "power sensor 1 identity (is the NRP40T seen?)"
+    },
+    {
+     "cmd": "PMET2:IDN?",
+     "reply": "NONE,NONE,NONE,NONE\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'E\\n'",
+     "note": "power sensor 2 identity"
+    },
+    {
+     "cmd": "PMET1:FREQ?",
+     "reply": "5.0E+7\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'7\\n'",
+     "note": "sensor 1 measurement frequency"
+    },
+    {
+     "cmd": "PMET1:AVER?",
+     "reply": "AUTO\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'O\\n'",
+     "note": "sensor 1 averaging"
+    },
+    {
+     "cmd": "PMET1:TRIG?",
+     "reply": "CONT\n",
+     "error": null,
+     "seconds": 0.004,
+     "ends_with": "b'T\\n'",
+     "note": "sensor 1 trigger mode"
+    },
+    {
+     "cmd": "*OPC?",
+     "reply": "1\n",
+     "error": null,
+     "seconds": 0.002,
+     "ends_with": "b'1\\n'",
+     "note": "operation complete"
+    }
+   ],
+   "status_byte_before": 0,
+   "status_byte_after": 0,
+   "local": "sent GTL (front panel back to local)"
+  },
+  "LF": {
+   "what": "Keysight 33210A / 33220A / 33250A function generator",
+   "address": "",
+   "records": []
+  }
+ },
+ "visa_sees": [
+  "ASRL12::INSTR",
+  "ASRL9::INSTR",
+  "GPIB0::INTFC",
+  "GPIB0::11::INSTR",
+  "GPIB0::14::INSTR",
+  "GPIB0::18::INSTR",
+  "GPIB0::1::INSTR",
+  "GPIB0::20::INSTR",
+  "GPIB0::22::INSTR",
+  "GPIB0::23::INSTR",
+  "GPIB0::25::INSTR",
+  "GPIB0::28::INSTR",
+  "GPIB0::8::INSTR",
+  "GPIB1::INTFC",
+  "GPIB1::0::INSTR",
+  "GPIB1::10::INSTR",
+  "GPIB1::11::INSTR",
+  "GPIB1::12::INSTR",
+  "GPIB1::13::INSTR",
+  "GPIB1::14::INSTR",
+  "GPIB1::15::INSTR",
+  "GPIB1::16::INSTR",
+  "GPIB1::17::INSTR",
+  "GPIB1::18::INSTR",
+  "GPIB1::19::INSTR",
+  "GPIB1::1::INSTR",
+  "GPIB1::20::INSTR",
+  "GPIB1::22::INSTR",
+  "GPIB1::23::INSTR",
+  "GPIB1::24::INSTR",
+  "GPIB1::25::INSTR",
+  "GPIB1::26::INSTR",
+  "GPIB1::27::INSTR",
+  "GPIB1::28::INSTR",
+  "GPIB1::29::INSTR",
+  "GPIB1::2::INSTR",
+  "GPIB1::30::INSTR",
+  "GPIB1::3::INSTR",
+  "GPIB1::4::INSTR",
+  "GPIB1::5::INSTR",
+  "GPIB1::6::INSTR",
+  "GPIB1::7::INSTR",
+  "GPIB1::8::INSTR",
+  "GPIB1::9::INSTR",
+  "USB0::0x049F::0x505E::CN5541135000613::0::INSTR",
+  "USB0::0x05E6::0x2100::8020085::0::INSTR",
+  "USB0::0x05E6::0x2110::1423950::0::INSTR",
+  "USB0::0x05E6::0x2110::1424779::0::INSTR",
+  "USB0::0x05FF::0x1023::4207N21880::0::INSTR",
+  "USB0::0x05FF::0x1023::LCRY4903C19426::0::INSTR",
+  "USB0::0x05FF::0x1023::LCRY4903C19427::0::INSTR",
+  "USB0::0x0699::0x0351::C010110::0::INSTR",
+  "USB0::0x0699::0x0393::C020114::0::INSTR",
+  "USB0::0x0699::0x03A3::C040071::0::INSTR",
+  "USB0::0x0699::0x03A6::C015207::0::INSTR",
+  "USB0::0x0699::0x0408::C031088::0::INSTR",
+  "USB0::0x0699::0x0408::C043335::0::INSTR",
+  "USB0::0x0699::0x0408::C046964::0::INSTR",
+  "USB0::0x0699::0x0408::C049046::0::INSTR",
+  "USB0::0x0957::0x1728::MY54410171::0::INSTR",
+  "USB0::0x0957::0x2007::MY49012692::0::INSTR",
+  "USB0::0x1AB1::0x04B0::DS2A0000000004::0::INSTR",
+  "USB0::0x1AB1::0x04CE::DS1ZA183816903::0::INSTR",
+  "USB0::0x1AB1::0x04CE::DS1ZD193900997::0::INSTR",
+  "USB0::0x1AB1::0x0515::MS5A241603773::0::INSTR",
+  "USB0::0x2A8D::0x0301::MY54505415::0::INSTR",
+  "USB0::0x2A8D::0x0301::MY54505430::0::INSTR",
+  "USB0::0x2A8D::0x0301::MY54508113::0::INSTR",
+  "USB0::0x2A8D::0x1301::MY57227156::0::INSTR",
+  "USB0::0x2A8D::0x1301::MY59011173::0::INSTR",
+  "USB0::0x2A8D::0x1401::MY57222688::0::INSTR",
+  "USB0::0x2A8D::0x1401::MY59010008::0::INSTR",
+  "USB0::0x2A8D::0x1401::MY59024073::0::INSTR",
+  "ASRL3::INSTR"
+ ],
+ "addresses": {
+  "6060A": "GPIB1::2::INSTR",
+  "8902A": "GPIB1::14::INSTR",
+  "8563E": "GPIB1::18::INSTR",
+  "96270A": "GPIB1::4::INSTR",
+  "LF": ""
+ },
+ "finished": "2026-10-29T07:18:54"
+}

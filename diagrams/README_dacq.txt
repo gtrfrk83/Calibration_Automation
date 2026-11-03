@@ -12,6 +12,7 @@ Search order: hook_<model>_<cal>_<G>  ->  hook_dacq_<cal>_<G>  ->  hook_<model>_
 
 GROUP (one picture per separate hook-up)
   ZERO_SHORT   low-thermal copper shorts on the input channel (34901A ch 9, 34902A ch 7) and its 4-wire partner (ch 19 / 15); no calibrator
+  ZERO_SHORT_OHM  copper shorts on channel 3 and its 4-wire partner channel 13, for the ohms zero points (owner, 2026-11-02); uses the ZERO_SHORT picture if it has none of its own
   ZERO_OPEN    current channel ch 21 left open; no calibrator
   DCV          calibrator voltage to the input channel (34901A ch 10, 34902A ch 8)
   OHM4         4-wire ohms: force to ch 10, sense to ch 20 (34902A: ch 8 / 16)
@@ -21,4 +22,9 @@ GROUP (one picture per separate hook-up)
   ACI          calibrator AC current to ch 21                                (34901A only)
   FREQ         calibrator AC voltage (frequency test) to the input channel
 
+34970A and 34972A (owner, 2026-11-02): the DCV, ACV, FREQ, OHM4 and OHM2 groups use CHANNEL 1 of the module (34901A and 34902A), not ch 10 / ch 8, so its
+DCV / ACV / FREQ pictures should show the calibrator on channel 1 (hook_34972A_<cal>_DCV.png etc. are used before the shared hook_dacq_ files).
+The gain ohms groups OHM4 / OHM2 also use channel 1 on the 34972A (4-wire: force ch 1, sense ch 11). The zero shorts and the current hook-ups are unchanged. 
 Channel numbers are slot*100 + channel; the program uses the module and slot chosen on screen (default 34901A in slot 2 = channels 209, 210, 219, 220, 221).
+
+Update 2026-11-02 (v): the DC volts zero (shorted input) points now also use channel 3, like the ohms zero points (4-wire partner 13). One copper short on channel 3 covers every zero-short point; group ZERO_SHORT_OHM.

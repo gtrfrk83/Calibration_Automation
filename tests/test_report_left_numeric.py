@@ -67,7 +67,7 @@ class Pdf(unittest.TestCase):
         self.assertIn('Same', off)
         on = self.text({'left_numeric': True})
         self.assertNotIn('Same', on)
-        self.assertIn('no adjustment made', on)
+        self.assertNotIn('no adjustment made', on)                          # owner 2026-10-30: no AS LEFT summary line
         self.assertIn('1.0004', on.replace(' ', ''))
 
 

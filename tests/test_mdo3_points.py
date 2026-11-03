@@ -631,8 +631,8 @@ class VirtualRun(unittest.TestCase):
             text = subprocess.run(['pdftotext', '-layout', str(out), '-'], capture_output=True, text=True, timeout=60).stdout
             self.assertIn('Calibration Data', text)
             self.assertIn('DEMO', text)
-            self.assertIn('Tektronix MDO32 200 MHz', text)
-            self.assertIn('RESULT: PASS', text)
+            self.assertNotIn('Instrument: Tektronix MDO32 200 MHz', text)  # owner 2026-10-30: the report header shows only the asset ID, serial number and report date
+            self.assertNotIn('RESULT:', text)                               # owner 2026-10-30: no verdict lines on the report
 
 
 # ======================================================================================================================================================

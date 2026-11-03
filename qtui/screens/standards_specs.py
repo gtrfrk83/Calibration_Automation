@@ -1213,6 +1213,292 @@ SpecManagerPanel = StandardsSpecsPanel          # the Tk class name, so the Mana
 class CheckDialog(ModalDialog):
     """Give a nominal test point (with its units); shows the uncertainty that would be REPORTED ON THE CERTIFICATE for it with this standard (emu_check_model: the standard's
     specification row that covers the point, its resolution, any Type A, k = 2, against the scope CMC, the larger one rounded up).  Optionally an uncertainty somebody already
+    reported can be entered to be audited against the budget.
+    Every choice the standard's own sheet has is offered (emu_check_model.options): the function, whether the standard sources or measures the point, the exact sheet function
+    (temperature: the thermocouple type or RTD), the specification period, and °C / °F / K for temperatures.  The spec line selected in the table when the window opens fills
+    all of them (owner, 2026-10-29)."""
+
+    # (label, key, hint, unit family): every value box has its own unit box
+    FIELDS = (('Nominal test point', 'nominal', 'e.g. 250', 'nominal'), ('Frequency', 'freq', 'AC points only', 'freq'),
+              ('Calibrator resolution', 'res', 'optional: blank = from the sheet', 'diff'), ('Type A std. uncertainty (k = 1)', 'typea', 'optional: repeatability, blank = none', 'diff'),
+              ('Uncertainty already reported', 'reported', 'optional: check it against the budget', 'diff'))
+    DEFAULT_FUNCTION = 'Default (what the procedures use)'
+
+    def __init__(self, parent, standard, row=None):
+        super().__init__(parent, f'Reported uncertainty - {standard.model}', width=920, modal=False)
+        self.setWindowTitle(sed._title(f'Reported uncertainty - {standard.model}'))
+        self.title_label.hide()
+        self.std = standard
+        self.opts = emu.options(standard)
+        self.v, self.u, self.rowlabels, self.hints = {}, {}, {}, {}
+        self._busy = False
+        form = QGridLayout()
+        form.setHorizontalSpacing(M.md)
+        form.setVerticalSpacing(M.sm)
+        r = 0
+        form.addWidget(label('Function'), r, 0)
+        self.kind_box = QComboBox()
+        for k, _ko in self.opts.items():
+            self.kind_box.addItem(f'{k}  {emu.KIND_NAMES[k]}', k)
+        self.kind_box.setAccessibleName('Function')
+        self.kind_box.currentIndexChanged.connect(lambda _i: self._kind_changed())
+        form.addWidget(self.kind_box, r, 1, 1, 2)
+        r += 1
+        self.dir_label = label('The standard')
+        form.addWidget(self.dir_label, r, 0)
+        self.dir_box = QComboBox()
+        self.dir_box.setAccessibleName('Direction')
+        self.dir_box.currentIndexChanged.connect(lambda _i: self._direction_changed())
+        form.addWidget(self.dir_box, r, 1, 1, 2)
+        r += 1
+        self.fn_label = label('Sheet function')
+        form.addWidget(self.fn_label, r, 0)
+        self.fn_box = QComboBox()
+        self.fn_box.setAccessibleName('Sheet function')
+        self.fn_box.setMinimumWidth(320)
+        self.fn_box.currentIndexChanged.connect(lambda _i: self._function_changed())
+        form.addWidget(self.fn_box, r, 1, 1, 3)
+        r += 1
+        form.addWidget(label('Specification period'), r, 0)
+        self.period_box = QComboBox()
+        self.period_box.setAccessibleName('Specification period')
+        form.addWidget(self.period_box, r, 1, 1, 2)
+        r += 1
+        for lab, key, hint, family in self.FIELDS:
+            lb = label(lab)
+            form.addWidget(lb, r, 0)
+            ent = QLineEdit()
+            ent.setMinimumWidth(160)
+            ent.setAccessibleName(lab)
+            ent.returnPressed.connect(self.run_check)
+            box = QComboBox()
+            box.setAccessibleName(lab + ' unit')
+            box.setMinimumWidth(90)
+            self.v[key], self.u[key] = ent, box
+            if key == 'nominal':
+                box.currentTextChanged.connect(self._follow_nominal_unit)
+            self.rowlabels[key] = lb
+            form.addWidget(ent, r, 1)
+            form.addWidget(box, r, 2)
+            self.hints[key] = label(hint, 'hint')
+            form.addWidget(self.hints[key], r, 3)
+            r += 1
+        form.setColumnStretch(4, 1)
+        self.body.addLayout(form)
+        self.note = label('', 'hint')
+        self.note.setWordWrap(True)
+        self.body.addWidget(self.note)
+        self.big = label('', 'section')
+        self.big.setAccessibleName('Uncertainty to report')
+        self.body.addWidget(self.big)
+        self.out = QPlainTextEdit()
+        self.out.setReadOnly(True)
+        self.out.setMinimumHeight(220)
+        self.body.addWidget(self.out)
+        self.add_button('Close', cancel=True)
+        self.run_btn = self.add_button('Calculate', role='primary', default=True, close=False, callback=self.run_check)
+        self.result = None
+        if not self.opts:
+            self.note.setText(f'The {standard.model} sheet has no specification this calculator can evaluate as a test point.')
+            self.run_btn.setEnabled(False)
+            return
+        self.prefill(row)
+
+    # ---- filling from the selected spec line
+    def prefill(self, row):
+        """The spec line selected in the table: its function, direction, sheet function (temperature: sensor), nominal and frequency (emu_check_model.prefill_from_row)."""
+        pre = emu.prefill_from_row(row) if row else {'kind': ''}
+        kind = pre.get('kind') if pre.get('kind') in self.opts else ('DCV' if 'DCV' in self.opts else next(iter(self.opts)))
+        self.set_kind(kind)
+        if pre.get('why'):
+            self.note.setText(pre['why'])
+        if pre.get('kind') != kind:
+            return
+        if pre.get('direction'):
+            self.set_direction(pre['direction'])
+        if pre.get('function'):
+            self.set_function(pre['function'])
+        if pre.get('nominal'):
+            self.set_value('nominal', pre['nominal'])
+            self.set_unit('nominal', pre['nominal_unit'])
+        if pre.get('frequency'):
+            self.set_value('freq', pre['frequency'])
+            self.set_unit('freq', pre['frequency_unit'])
+        if row:
+            self.note.setText(f'Filled from the selected spec line: {emu._clean_function(row.get("function", ""))} / {row.get("label", "")}')
+
+    # ---- the inputs
+    def kind(self) -> str:
+        return self.kind_box.currentData()
+
+    def set_kind(self, kind) -> None:
+        self.kind_box.setCurrentIndex(max(0, self.kind_box.findData(kind)))
+        self._kind_changed()
+
+    def direction(self) -> str:
+        return self.dir_box.currentData() or ''
+
+    def set_direction(self, direction) -> None:
+        i = self.dir_box.findData(direction)
+        if i >= 0:
+            self.dir_box.setCurrentIndex(i)
+        self._direction_changed()
+
+    def function(self) -> str:
+        return self.fn_box.currentData() or ''
+
+    def set_function(self, function) -> None:
+        i = self.fn_box.findData(function)
+        if i < 0:
+            i = self.fn_box.findText(function)
+        if i >= 0:
+            self.fn_box.setCurrentIndex(i)
+        self._function_changed()
+
+    def period(self) -> str:
+        return self.period_box.currentText()
+
+    def set_period(self, period) -> None:
+        i = self.period_box.findText(period)
+        if i >= 0:
+            self.period_box.setCurrentIndex(i)
+
+    def _ko(self):
+        return self.opts.get(self.kind())
+
+    def _kind_changed(self):
+        ko = self._ko()
+        if ko is None:
+            return
+        self.dir_box.blockSignals(True)
+        self.dir_box.clear()
+        for d in ko.directions:
+            self.dir_box.addItem(emu.DIRECTION_NAMES[d], d)
+        self.dir_box.blockSignals(False)
+        multi = len(ko.directions) > 1
+        self.dir_label.setVisible(multi)
+        self.dir_box.setVisible(multi)
+        self.fn_label.setText('Sensor' if self.kind() == 'TEMP' else 'Sheet function')
+        self.out.clear()
+        self.big.setText('')
+        self._direction_changed()
+
+    def _direction_changed(self):
+        ko = self._ko()
+        if ko is None:
+            return
+        d = self.direction() or ko.directions[0]
+        self.fn_box.blockSignals(True)
+        self.fn_box.clear()
+        choices = ko.functions.get(d, [])
+        if self.kind() == 'TEMP':
+            for c in choices:
+                self.fn_box.addItem(c.label, c.value)
+            i = self.fn_box.findData('K')
+            self.fn_box.setCurrentIndex(i if i >= 0 else 0)
+        else:
+            self.fn_box.addItem(self.DEFAULT_FUNCTION, '')
+            for c in choices:
+                self.fn_box.addItem(c.label, c.value)
+        self.fn_box.blockSignals(False)
+        self._function_changed()
+
+    def _function_changed(self):
+        ko = self._ko()
+        if ko is None:
+            return
+        d = self.direction() or ko.directions[0]
+        fn = self.function()
+        periods = ko.periods.get((d, fn)) or []
+        self.period_box.clear()
+        for p in periods:
+            self.period_box.addItem(p)
+        if self.std.period in periods:
+            self.period_box.setCurrentIndex(periods.index(self.std.period))
+        peak = ko.peak.get((d, fn))
+        for key in ('nominal', 'res', 'typea', 'reported'):
+            box = self.u[key]
+            keep = box.currentText()
+            box.blockSignals(True)
+            box.clear()
+            choices = emu.unit_choices(self.kind(), peak) if key == 'nominal' else emu.diff_unit_choices(self.kind(), peak)
+            for name, _f in choices:
+                box.addItem(name)
+            i = box.findText(keep)
+            if i < 0:
+                base = [n for n, f in choices if f == 1.0]      # default to the base unit (V, A, ohm...), not the biggest one in the list
+                i = box.findText(base[0]) if base else 0
+            box.setCurrentIndex(max(0, i))
+            box.blockSignals(False)
+        freq = self.u['freq']
+        if freq.count() == 0:
+            for name, _f in emu.FREQUENCY_UNITS:
+                freq.addItem(name)
+            freq.setCurrentIndex(max(0, freq.findText('Hz')))
+        rule = ko.frequency.get((d, fn), '')
+        for w in (self.rowlabels['freq'], self.v['freq'], self.u['freq'], self.hints['freq']):
+            w.setVisible(bool(rule))
+        self.hints['freq'].setText('required: the sheet specifies this by frequency' if rule == 'required' else 'only for the rows that have a frequency band')
+        self.hints['nominal'].setText('°C, °F or K' if self.kind() == 'TEMP' else ('in dBm' if self.kind() == 'RFLEVEL' else 'e.g. 250'))
+        self.out.clear()
+        self.big.setText('')
+
+    def _follow_nominal_unit(self, text):
+        """Resolution, Type A and the reported figure are in the same family as the nominal: they follow its unit until changed by hand (°F / K: as differences)."""
+        for key in ('res', 'typea', 'reported'):
+            i = self.u[key].findText(text)
+            if i >= 0:
+                self.u[key].setCurrentIndex(i)
+
+    def value(self, key) -> str:
+        return self.kind() if key == 'kind' else self.v[key].text()
+
+    def set_value(self, key, text) -> None:
+        if key == 'kind':
+            self.set_kind(text)
+        else:
+            self.v[key].setText(text)
+
+    def unit(self, key) -> str:
+        return self.u[key].currentText()
+
+    def set_unit(self, key, text) -> None:
+        i = self.u[key].findText(text)
+        if i >= 0:
+            self.u[key].setCurrentIndex(i)
+
+    def inputs(self) -> emu.Inputs:
+        return emu.Inputs(kind=self.kind(), nominal=self.value('nominal'), nominal_unit=self.unit('nominal'), frequency=self.value('freq') if self.v['freq'].isVisibleTo(self) else '',
+                          frequency_unit=self.unit('freq'), resolution=self.value('res'), resolution_unit=self.unit('res'), type_a=self.value('typea'),
+                          type_a_unit=self.unit('typea'), reported=self.value('reported'), reported_unit=self.unit('reported'),
+                          direction=self.direction(), function=self.function(), period=self.period())
+
+    def run_check(self):
+        res = self.result = emu.compute(self.std, self.inputs())
+        if res.error:
+            self.big.setText('')
+            self.out.setPlainText(res.error)
+            sed.show_error(self, 'Reported uncertainty', res.error)
+            return False
+        self.big.setText(f'Uncertainty to report on the certificate:  \u00b1 {res.cert_text}' + (f'   ({res.relative})' if res.relative else ''))
+        self.out.setPlainText('\n'.join(res.lines))
+        return False
+
+    run = run_check            # the Tk method name (ModalDialog.run, the modal loop, is not used by this non-modal window)
+
+    def output_text(self) -> str:
+        return self.out.toPlainText()
+
+    def cert_text(self) -> str:
+        return self.result.cert_text if self.result is not None else ''
+
+
+SpecManagerPanel = StandardsSpecsPanel          # the Tk class name, so the Manager shell can host either
+
+
+class CheckDialog(ModalDialog):
+    """Give a nominal test point (with its units); shows the uncertainty that would be REPORTED ON THE CERTIFICATE for it with this standard (emu_check_model: the standard's
+    specification row that covers the point, its resolution, any Type A, k = 2, against the scope CMC, the larger one rounded up).  Optionally an uncertainty somebody already
     reported can be entered to be audited against the budget.  The point is prefilled from the row selected in the spec table."""
 
     # (label, key, hint, unit family): every value box has its own unit box

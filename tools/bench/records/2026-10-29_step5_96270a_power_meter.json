@@ -1,0 +1,512 @@
+{
+ "step": 5,
+ "owner_ok": "lets do it (2026-10-29 07:46); the script asks for YES before RF on",
+ "started": "2026-10-29T07:52:45",
+ "events": [
+  {
+   "t": 0.281,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "*IDN?",
+   "reply": "Fluke,96270A,398472732,1.17\n",
+   "error": null,
+   "seconds": 0.003,
+   "note": ""
+  },
+  {
+   "t": 0.318,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:IDN?",
+   "reply": "ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101\n",
+   "error": null,
+   "seconds": 0.036,
+   "note": "sensor 1 (NONE,NONE,NONE,NONE = no sensor)"
+  },
+  {
+   "t": 0.336,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET2:IDN?",
+   "reply": "NONE,NONE,NONE,NONE\n",
+   "error": null,
+   "seconds": 0.018,
+   "note": "sensor 2"
+  },
+  {
+   "t": 0.339,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "INST?",
+   "reply": "PMET\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": ""
+  },
+  {
+   "t": 0.342,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "OUTP?",
+   "reply": "0\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": "must be 0"
+  },
+  {
+   "t": 0.346,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "SYST:ERR?",
+   "reply": "0,\"No error\"\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": ""
+  },
+  {
+   "t": 0.365,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "ID",
+   "reply": "6060A/AN\n",
+   "error": null,
+   "seconds": 0.018,
+   "note": ""
+  },
+  {
+   "t": 0.415,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.049,
+   "note": "clear any old rejected entry (read)"
+  },
+  {
+   "t": 0.418,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF off first"
+  },
+  {
+   "t": 0.422,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "FR120MZ",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 0.442,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP-10DB",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 0.971,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.028,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 1.051,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAPPJMAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABBAEEBBAGBLKKEIAC\n",
+   "error": null,
+   "seconds": 0.079,
+   "note": "read back"
+  },
+  {
+   "t": 1.054,
+   "who": "96270A",
+   "kind": "write",
+   "cmd": "INST PMET",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 2.058,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "INST?",
+   "reply": "PMET\n",
+   "error": null,
+   "seconds": 0.003,
+   "note": "expect PMET"
+  },
+  {
+   "t": 2.075,
+   "who": "96270A",
+   "kind": "write",
+   "cmd": "PMET1:FREQ 120E6",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 2.078,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:FREQ?",
+   "reply": "1.2E+8\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": "expect 120E6"
+  },
+  {
+   "t": 2.08,
+   "who": "96270A",
+   "kind": "write",
+   "cmd": "PMET1:AVER AUTO",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 2.114,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:AVER?",
+   "reply": "AUTO\n",
+   "error": null,
+   "seconds": 0.034,
+   "note": ""
+  },
+  {
+   "t": 2.116,
+   "who": "96270A",
+   "kind": "write",
+   "cmd": "PMET1:TRIG CONT",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 2.119,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:TRIG?",
+   "reply": "CONT\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": ""
+  },
+  {
+   "t": 2.121,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "UNIT:POW?",
+   "reply": "NONE\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": "the unit of the readings?"
+  },
+  {
+   "t": 2.125,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "SYST:ERR?",
+   "reply": "0,\"No error\"\n",
+   "error": null,
+   "seconds": 0.003,
+   "note": ""
+  },
+  {
+   "t": 2.127,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "OUTP?",
+   "reply": "0\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": "must still be 0"
+  },
+  {
+   "t": 12.766,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:ZERO?",
+   "reply": "0\n",
+   "error": null,
+   "seconds": 10.638,
+   "note": "0 = zero done, 1 = failed (RF is OFF now)"
+  },
+  {
+   "t": 12.769,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "SYST:ERR?",
+   "reply": "0,\"No error\"\n",
+   "error": null,
+   "seconds": 0.003,
+   "note": ""
+  },
+  {
+   "t": 12.826,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-3.7831E+1\n",
+   "error": null,
+   "seconds": 0.056,
+   "note": "reading with the RF OFF (should be near the noise floor)"
+  },
+  {
+   "t": 71.891,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO1",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF ON"
+  },
+  {
+   "t": 72.919,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.027,
+   "note": "UNCAL codes with RF on (all zero = none)"
+  },
+  {
+   "t": 74.937,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-1.051E+1\n",
+   "error": null,
+   "seconds": 0.016,
+   "note": "-10 dBm, reading 1"
+  },
+  {
+   "t": 75.146,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-1.051E+1\n",
+   "error": null,
+   "seconds": 0.208,
+   "note": "-10 dBm, reading 2"
+  },
+  {
+   "t": 75.364,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-1.051E+1\n",
+   "error": null,
+   "seconds": 0.217,
+   "note": "-10 dBm, reading 3"
+  },
+  {
+   "t": 75.368,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "SYST:ERR?",
+   "reply": "0,\"No error\"\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": ""
+  },
+  {
+   "t": 75.373,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "AP0DB",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 75.903,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IR",
+   "reply": "000000,000000,000000\n",
+   "error": null,
+   "seconds": 0.029,
+   "note": "rejected entries (000000,... = none)"
+  },
+  {
+   "t": 75.981,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "LM99",
+   "reply": "BOABAAAAAAAAAAAKAAAAAAAAAHCHAOAAAAAPECEAABPEAAABFAEEBBAGBLKKKDAC\n",
+   "error": null,
+   "seconds": 0.077,
+   "note": "read back"
+  },
+  {
+   "t": 78.055,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-4.84E-1\n",
+   "error": null,
+   "seconds": 0.072,
+   "note": "0 dBm, reading 1"
+  },
+  {
+   "t": 78.264,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-4.84E-1\n",
+   "error": null,
+   "seconds": 0.208,
+   "note": "0 dBm, reading 2"
+  },
+  {
+   "t": 78.464,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "PMET1:READ?",
+   "reply": "-4.84E-1\n",
+   "error": null,
+   "seconds": 0.195,
+   "note": "0 dBm, reading 3"
+  },
+  {
+   "t": 78.483,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "SYST:ERR?",
+   "reply": "0,\"No error\"\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": ""
+  },
+  {
+   "t": 99.444,
+   "who": "6060A",
+   "kind": "write",
+   "cmd": "RO0",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": "RF off at the end"
+  },
+  {
+   "t": 99.996,
+   "who": "6060A",
+   "kind": "query",
+   "cmd": "IU",
+   "reply": "000000,000000,000400\n",
+   "error": null,
+   "seconds": 0.05,
+   "note": "RF off is confirmed when field 3 has 400"
+  },
+  {
+   "t": 100.046,
+   "who": "96270A",
+   "kind": "write",
+   "cmd": "INST SINE",
+   "reply": null,
+   "error": null,
+   "seconds": null,
+   "note": ""
+  },
+  {
+   "t": 101.061,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "INST?",
+   "reply": "SINE\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": "expect SINE"
+  },
+  {
+   "t": 101.065,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "OUTP?",
+   "reply": "0\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": "must be 0"
+  },
+  {
+   "t": 101.067,
+   "who": "96270A",
+   "kind": "query",
+   "cmd": "SYST:ERR?",
+   "reply": "0,\"No error\"\n",
+   "error": null,
+   "seconds": 0.002,
+   "note": ""
+  }
+ ],
+ "readings": [
+  {
+   "set_dbm": -10,
+   "n": 1,
+   "raw": "-1.051E+1\n",
+   "value": -10.51
+  },
+  {
+   "set_dbm": -10,
+   "n": 2,
+   "raw": "-1.051E+1\n",
+   "value": -10.51
+  },
+  {
+   "set_dbm": -10,
+   "n": 3,
+   "raw": "-1.051E+1\n",
+   "value": -10.51
+  },
+  {
+   "set_dbm": 0,
+   "n": 1,
+   "raw": "-4.84E-1\n",
+   "value": -0.484
+  },
+  {
+   "set_dbm": 0,
+   "n": 2,
+   "raw": "-4.84E-1\n",
+   "value": -0.484
+  },
+  {
+   "set_dbm": 0,
+   "n": 3,
+   "raw": "-4.84E-1\n",
+   "value": -0.484
+  }
+ ],
+ "sensor1": "ROHDE&SCHWARZ,NRP40T,101033,03.50.25102101\n",
+ "zero": "0\n",
+ "operator_cable_confirm": "yes",
+ "display": "-0.49",
+ "rf_off_confirmed": true,
+ "pm_output_after": "0\n",
+ "finished": "2026-10-29T07:54:26"
+}

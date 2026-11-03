@@ -1,0 +1,57 @@
+{
+ "schema": 1,
+ "id": "HP_8902A_Cal_Factors",
+ "name": "HP 8902A Power Sensor Cal Factors",
+ "manufacturer": "HP",
+ "model": "8902A",
+ "category": "RF Measuring Receiver Adjustment",
+ "kind": "adjustment",
+ "version": "1",
+ "order": 80,
+ "description": "Enters the calibration-factor table of an 11722A (or other) power sensor into the 8902A: reference cal factor and up to 16 frequency / cal-factor pairs, validated against the manual's entry limits, typed ENTER confirmation, every write sent once and read back, final read-back of the whole table (read-back mechanism UNVERIFIED on the real receiver)",
+ "launcher": "Procedures/HP_8902A_Cal_Factors.py",
+ "engine": [
+  "hp8902a_calfactors.py",
+  "adjustment_audit.py",
+  "sensor_cal_factor_store.py"
+ ],
+ "drivers": [
+  "hp_8902a",
+  "gpib_address"
+ ],
+ "specs": [],
+ "fingerprint": {
+  "code": [
+   "Procedures/HP_8902A_Cal_Factors.py",
+   "hp8902a_calfactors.py",
+   "hp8902a_calfactors_view_qt.py",
+   "adjustment_audit.py",
+   "sensor_cal_factor_store.py",
+   "ui_port.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/gpib_address.py",
+   "drivers/hp_8902a.py"
+  ],
+  "spec": []
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/HP_8902A_Cal_Factors.py",
+  "Procedures/HP_8902A_Cal_Factors.procedure.json",
+  "hp8902a_calfactors.py",
+  "hp8902a_calfactors_view_qt.py",
+  "sensor_cal_factor_store.py",
+  "adjustment_audit.py",
+  "drivers/hp_8902a.py",
+  "drivers/simulated_8902a.py",
+  "tests/test_hp8902a_calfactors.py"
+ ],
+ "tests": [
+  "tests/test_hp8902a_calfactors.py"
+ ]
+}

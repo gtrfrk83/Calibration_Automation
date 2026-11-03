@@ -153,7 +153,7 @@ class Wiring(unittest.TestCase):
                   'Procedures/Tektronix_TBS1000C_Verification.py', 'Procedures/Tektronix_TBS1000C_Verification.procedure.json',
                   'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
                   'specs/build_tbs1000c_spec.py', 'specs/tektronix_tbs1000c_pv.json', 'specs/build_tbs1000_spec.py', 'specs/tektronix_tbs1000_pv.json')
-        later += ('fluke6060a_verification.py', 'Procedures/Fluke_6060A_Verification.py', 'Procedures/Fluke_6060A_Verification.procedure.json', 'specs/build_fluke_6060a_spec.py', 'specs/fluke_6060a_pv.json')       # the Fluke 6060A procedure (new engine, launcher and sidecar)
+        later += ('fluke6060a_verification.py', 'Procedures/Fluke_6060A_Verification.py', 'Procedures/Fluke_6060A_Verification.procedure.json', 'specs/build_fluke_6060a_spec.py', 'specs/fluke_6060a_pv.json', 'Procedures/HP_8902A_Cal_Factors.py', 'Procedures/HP_8902A_Cal_Factors.procedure.json', 'hp8902a_calfactors.py')       # the Fluke 6060A procedure (new engine, launcher and sidecar)
         later += ('mdo3_verification.py', 'Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json', 'specs/README.txt',     # the 3 Series MDO procedure (branch tektronix-mdo3); not this work
                   'specs/build_mdo3_spec.py', 'specs/tektronix_mdo3_pv.json', 'specs/mdo3_reference_cmc.json')
         later += ('tbs2000b_verification.py', 'Procedures/Tektronix_TBS2000B_Verification.py', 'Procedures/Tektronix_TBS2000B_Verification.procedure.json',   # the TBS2000B procedure (branch tektronix-tbs2000b)
@@ -171,6 +171,8 @@ class Wiring(unittest.TestCase):
                   'Procedures/Fluke_83V_Verification.py', 'Procedures/Fluke_87V_Verification.py', 'Procedures/Fluke_88V_Verification.py', 'Procedures/Fluke_83V_Verification.procedure.json', 'Procedures/Fluke_87V_Verification.procedure.json', 'Procedures/Fluke_88V_Verification.procedure.json', 'specs/build_80v_spec.py', 'specs/fluke_80_series_v_pv.json',
                   'specs/build_square_wave_rows.py', 'specs/build_5520a_standard.py', 'specs/build_5560a_standard_from_manual.py',      # square-wave rows of the 5522A / 5520A / 5560A sheets (80 Series V uncertainties)
                   'specs/standards/fluke_5520a_standard.json', 'specs/standards/fluke_5522a_standard.json', 'specs/standards/fluke_5560a_standard.json')
+        later += ('specs/build_dacq_spec.py', 'specs/keysight_34972a_pv.json', 'specs/keysight_34970a_pv.json')          # 34972A voltage readings on channel 1 (owner, 2026-11-02); the 34970A sheet is unchanged
+        later += ('specs/build_fluke_6060a_gidep_spec.py', 'specs/fluke_6060a_gidep_pv.json')          # the 6060A/AN GIDEP procedure (2026-11-02)
         later += ('specs/analyze_34410a_suitability.py', 'specs/analyze_8808a_adjustment_standards.py', 'specs/analyze_k2000_adjustment_standards.py')    # the Tk removal (2026-10-27): they import ui_theme_core
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))

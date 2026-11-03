@@ -295,6 +295,27 @@ def encode_learn(state: dict) -> str:
     return ''.join(chr(65 + n) for n in nibs)
 
 
+
+# ---- bench records (bench-first driver workflow, NOTES.md; tools/bench/records/README.md): the real reply each command gave on the owner's unit.  This does NOT
+# flip `verified` by itself (that also needs a driver_verify pass); it puts the recorded evidence next to the manual page in `ref`.
+def _bench(table):
+    import dataclasses
+    for key, text in table.items():
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, ref=f'{c.ref}; BENCH {text}')
+
+_bench({
+    'id': '2026-10-29 step 1: "6060A/AN" + LF (no CR)',
+    'ir.query': '2026-10-29 steps 1-4: three 6-digit octal fields "000000,000000,000000"; "000020,..." = a syntax error left from an earlier session',
+    'iu.query': '2026-10-29 steps 1-4: "000000,000000,000400" with RF off, "000000,000000,000000" with RF on at -10 dBm',
+    'io.query': '2026-10-29 step 1: "5,0,1" (field 3 = 1: Option -870 reverse-power protection; field 1 is 5, the manual says 3)',
+    'ii.query': '2026-10-29 step 1: "00004"', 'im.query': '2026-10-29 step 1: "00192" (decimal)', 'xa.query': '2026-10-29 step 1: "00023" with RF off',
+    'lm.query': '2026-10-29 steps 1-4: 64 letters; characters 25-32 = 111 111 100 Hz and 9-12 = -10.0 dBm after FR111.1111MZ / AP-10DB',
+    'fr.set': '2026-10-28 FR111.11110MZ and 2026-10-29 FR111.1111MZ accepted (IR all zero, LM99 111 111 100 Hz)',
+    'ap.set': '2026-10-29 AP-10DB accepted (IR all zero, LM99 -10.0 dBm)',
+    'ro.on': '2026-10-29 steps 2-4: IU third field 000400 -> 000000', 'ro.off': '2026-10-29 steps 2-4: IU third field 000000 -> 000400 (RF off confirmed)',
+})
+
 class Fluke6060A(Instrument):
     MODEL = 'Fluke 6060A'
     IDN_MATCH = ('6060A',)
@@ -588,9 +609,9 @@ class Fluke6060A(Instrument):
             raise InstrumentError(f"AM source {source!r} is not 'int' or 'ext'")
         return self._apply(writes, expect, f'AM {pct} % {source}', uncal=True, allow_uncal=allow_uncal)
 
-    def fm(self, dev_khz: float, source: str = 'int', rate_hz: int = 1000, allow_uncal=False, input_applied=True) -> dict:
+    def fm(self, dev_khz: float, source: str = 'int', rate_hz: int = 1000, allow_uncal=False, input_applied=True, max_khz: float | None = None) -> dict:
         """FM on. dev_khz 0.1 to 99.9 (0 to 9.99 with the low-rate option -651, found by IO at connect); source 'int' or 'ext'. The other FM source is switched off."""
-        top = MAX_FM_KHZ_651 if self.low_rate_fm else MAX_FM_KHZ
+        top = MAX_FM_KHZ_651 if self.low_rate_fm else (max_khz or MAX_FM_KHZ)      # max_khz: a procedure that asks for more than the manual's 99.9 kHz (GIDEP: 500 kHz; UNVERIFIED, the unit's own range error is read back)
         if not 0 <= dev_khz <= top:
             raise InstrumentError(f'FM deviation {dev_khz:g} kHz is outside 0 to {top:g} kHz')
         writes = [('fm.set', {'khz': float(f'{dev_khz:.3g}')})]

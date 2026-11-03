@@ -253,8 +253,8 @@ class MockSaveAndDemo(unittest.TestCase):
         text, asked, _rec = self.export(app)
         self.assertEqual(asked['initialfile'], ui.report_filename('MOCK-0001'), 'asset number - date')
         self.assertIn('DEMO - synthetic data, not calibration evidence', text)
-        self.assertIn('MOCK Acme Mock 8000', text)
-        self.assertIn('RESULT: PASS', text)
+        self.assertNotIn('Instrument: MOCK Acme Mock 8000', text)          # owner 2026-10-30: header is asset ID, serial and date only
+        self.assertNotIn('RESULT:', text)                                   # owner 2026-10-30: no verdict lines on the report
         self.assertEqual(text.count('[demo]'), 14)
 
     def test_demo_report_is_never_recorded_in_asset_history_but_a_real_one_is(self):

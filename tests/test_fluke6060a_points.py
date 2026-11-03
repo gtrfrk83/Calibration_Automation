@@ -97,6 +97,17 @@ class SpecTests(unittest.TestCase):
                 self.assertEqual((p['nominal'] - p['low'], p['high'] - p['nominal']) if p['meas'] != 'derived' else (1.5, 1.5), (1.5, 1.5), p['ref'])
 
 
+class MidLevelOnThe8902A(unittest.TestCase):
+    def test_4a6_is_measured_with_the_8902a_tuned_level(self):
+        """Owner, 2026-10-29: the NRP40T (thermal, -35 to +20 dBm) cannot reach -66 dBm; 4A-6 uses the 8902A tuned RF level like 4A-7 / 4A-8. 4A-5 stays on the power meter."""
+        mid = [p for p in points() if p["ref"].startswith("4A-6")]
+        high = [p for p in points() if p["ref"].startswith("4A-5") and p.get("meas") == "level_pm"]
+        self.assertEqual(len(mid), 40)
+        self.assertTrue(all(p['meas'] == 'level_rx' and p['rx']['mode'] == 'tuned' for p in mid))
+        self.assertEqual(len(high), 48)
+        self.assertTrue(any('DEVIATION' in f for p in mid for f in p.get('flags', ())))
+
+
 class JudgeAndDerive(unittest.TestCase):
     def test_judge_is_decimal_and_includes_its_limits(self):
         p = {'low': 0.1, 'high': 0.3}
@@ -409,3 +420,39 @@ class SourceGuards(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class FrequencyRange(Bench):
+    """Owner, 2026-10-29: this lab's 6060A only reaches 520 MHz. Points above the chosen range are not run and are kept on the report as NOT TESTED."""
+
+    def test_the_520_mhz_range_leaves_the_upper_points_out_and_reports_them(self):
+        self.assertEqual(self.app.max_mhz(), 1050.0)                              # the manual's range by default
+        self.assertFalse(any(p.get('not_tested') for p in E.POINTS))
+        self.app.freq_range.set('0.1 to 520 MHz')
+        self.app.on_options(save=False)
+        out = [p for p in E.POINTS if p.get('not_tested')]
+        self.assertTrue(out)
+        for p in E.POINTS:
+            f = E.uut_mhz(p, {q['ref']: q for q in E.POINTS})
+            self.assertEqual(bool(p.get('not_tested')), f is not None and f > 520, p['ref'])
+        self.assertTrue(all(not self.app.active(p) and '520 MHz' in p['unavailable'] for p in out))
+        self.assertEqual(len([p for p in out if p['ref'].startswith('4A-4')]), 5)          # 555.5555 to 999.9999 MHz
+        self.assertTrue(any(p['ref'].startswith('4A-5') and p['meas'] == 'derived' for p in out), 'the 850 / 1050 MHz section errors and sums go too')
+        self.assertFalse(any(p['ref'].startswith('4A-11') and (p.get('gen') or {}).get('freq_mhz', 0) <= 520 for p in out))
+        rows, pts = self.app.certificate_rows_and_points()
+        nt = [r for r, p in zip(rows, pts) if p.get('not_tested')]
+        self.assertEqual(len(nt), len(out))
+        self.assertTrue(all('NOT TESTED' in r['Description'] and r['As Found'] == '' and r['As Left'] == '' for r in nt))
+
+    def test_a_520_mhz_run_never_programs_the_generator_above_520_mhz(self):
+        self.app.freq_range.set('0.1 to 520 MHz')
+        self.connect()
+        sent = []
+        orig = self.t6.write
+        self.t6.write = lambda text: (sent.append(text), orig(text))[1]
+        self.run_points('4A-4')
+        import re
+        freqs = [float(m.group(1)) for t in sent for m in re.finditer(r'FR([\d.]+)MZ', t)]
+        self.assertTrue(freqs)
+        self.assertLessEqual(max(freqs), 520.0)
+        self.assertEqual(len(self.app.found), 4)                                   # 111.1111 to 444.4444 MHz

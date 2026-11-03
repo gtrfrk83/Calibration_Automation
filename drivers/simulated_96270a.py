@@ -42,7 +42,7 @@ class Sim96270AMeter(_SimBase):
         self._reply = self.handle(text.strip())
 
     def handle(self, text):
-        u = text.upper()
+        u = re.sub(r'^PMET\d:', 'PMET:', text.upper())          # PMET1: (what the driver sends since the bench of 2026-10-29) = PMET: (sensor 1 by default, manual p. 41)
         s = self.state
         if u == '*IDN?':
             return 'Fluke,96270A,SIM0001,1.0'
@@ -57,8 +57,21 @@ class Sim96270AMeter(_SimBase):
         if u == 'SYST:ERR?':
             return self.errors.pop(0) if self.errors else '0,"No error"'
         if u.startswith('INST '):
-            s['INST'] = 'PMETER' if u.split()[1].startswith('PMET') else 'SINE'
+            name = u.split()[1]
+            s['INST'] = 'PMETER' if name.startswith('PMET') else 'FM' if name == 'FM' else 'SINE'
             s['OUTP'] = '0'
+            return None
+        m = re.match(r'(FREQ|POW|FM:STAT|FM:DEV|FM:INT:FREQ)\s+(\S+)$', u)          # the FM instrument (Remote Programmers Manual p. 38 and the example p. 59); values are echoed as sent (Hz, dBm)
+        if m:
+            if s['INST'] != 'FM':
+                self.errors.append('-221,"Settings conflict: FM instrument not selected"')
+                return None
+            s['FM_' + m.group(1)] = m.group(2)
+            return None
+        if u in ('FREQ?', 'POW?', 'FM:STAT?', 'FM:DEV?', 'FM:INT:FREQ?') and ('FM_' + u[:-1]) in s:
+            return s['FM_' + u[:-1]]
+        if u == 'OUTP ON':
+            s['OUTP'] = '1'
             return None
         if u == 'INST?':
             return s['INST']
@@ -66,7 +79,7 @@ class Sim96270AMeter(_SimBase):
             s['UNIT'] = u.split()[1]
             return None
         if u == 'UNIT:POW?':
-            return s['UNIT']
+            return 'NONE' if s['INST'] == 'PMETER' else s['UNIT']        # bench 2026-10-29 step 5: NONE in power-meter mode
         if u in ('POW:OFFS:STAT 0', 'FREQ:OFFS:STAT 0'):
             return None
         if u in ('POW:OFFS:STAT?', 'FREQ:OFFS:STAT?'):
