@@ -2224,6 +2224,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- Low carrier 150 kHz (owner, 2026-11-03: "change the test points with a 100kHz carrier to 150kHz to meet the range of our 8902"): the 38 Tables 4-7 points at the document's
+  100 kHz run at 150 kHz (`LOW_MHZ` in the builder) with the document's limits (they do not depend on the carrier); each says so in its flags, carries `moved_from: '100 kHz'`, and
+  the spec's discrepancies list it. The 6060A between 100 and 150 kHz is not verified. 150 kHz is keyed in (0.15MZ, UNVERIFIED on the bench; 0.1MZ gave error 10 / 20).
+  Results are keyed by point number, so the engine now saves each result's `ref` and `drop_stale_results` leaves out, when a checkpoint is loaded, a result naming another
+  point or (older files, no ref) one on a `moved_from` point; the status line says how many.
 - Uncertainty (owner, 2026-11-02: "assign uncertainties from the standards specs and then mark the ones not covered on the scope ... with an asterisk"): `fluke6060a_uncertainty.py`
   builds each point's budget from the measuring standard's sheet (8902A, 8563E; divisor 2, k = 2, rounded UP) and checks it against the A2LA scope: XII Frequency - Measure
   (`specs/a2la_1888_03_cmc.json`) and the section VI RF Measure lines + V Distortion - Measure, transcribed from the owner's full scope PDF (rendered pp. 28, 33, 34) into a
@@ -2231,8 +2236,9 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   max(budget, CMC). Not in scope: the budget alone, printed `<value> *`; `report_pdf` prints '* Not covered by the laboratory's A2LA scope of accreditation, certificate 1888.03 ...'
   under the table ONLY when a row's Uncertainty ends in '*' (every other report is unchanged). TUR only for in-scope points (the printed TUR definition says so). No budget: N/A.
   GIDEP procedure only (`UNCERTAINTY_STATE_KEYS`); the Instruction Manual procedure's report is unchanged (its points were not reviewed: typed 10 kHz THD, section errors ...).
-  Counts (GIDEP, 220): 47 in scope, 39 starred (incl. THD whose scope is undecided), 32 need an input or decision, 94 no spec, 8 N/A. Findings: FREQ 30 Hz (8902A +/-3 counts or
-  30 Hz, p. 1-21) = TUR 0.3:1 against +/-10 Hz; no AM - Measure line between 10 MHz and 1.3 GHz; the 8902A is not specified below 150 kHz (all 100 kHz points blank).
+  Counts (GIDEP, 220, after the 150 kHz move below): 54 in scope, 53 starred (incl. THD whose scope is undecided), 46 need an input or decision, 59 no spec, 8 N/A. Findings: FREQ
+  30 Hz (8902A +/-3 counts or 30 Hz, p. 1-21) = TUR 0.3:1 against +/-10 Hz; no AM - Measure line between 10 MHz and 1.3 GHz (AM at 150 kHz is on the 2.4 % line).
+  Overlapping scope / 8902A lines whose printed conditions all hold: the narrowest modulation-rate band is used (AM 1 kHz at 150 kHz: 2.4 %, not 3.5 %).
   OPEN (fluke6060a_uncertainty.DECISIONS, review page https://claude.ai/artifact/V4Fc1BSztoRqr2Z5E9DSPm): scope of the deviation meter / THD / residual FM (until decided: starred),
   basis of the RF Power - Measure '0.8 %', acceptance of the hand-built tuned-level (no Option 050; IF / RF range structure UNVERIFIED) and 8563E methods. Missing source data:
   96270A FM accuracy, NRP40T / 96270A power-meter readout, 11722A cal-factor uncertainty, 6060A output SWR, 53132A counter. Tests: `tests/test_fluke6060a_uncertainty.py`.

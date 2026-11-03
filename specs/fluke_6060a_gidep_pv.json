@@ -19,6 +19,7 @@
   "Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.",
   "Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.",
   "The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.",
+  "Tables 4 to 7: the document's 100 kHz carrier is moved to 150 kHz (owner, 2026-11-03), where the 8902A RF input range starts; the 6060A between 100 and 150 kHz is not verified.",
   "Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 8902A frequency counter covers the display range (+/-1 count)."
  ],
  "sections": [
@@ -398,14 +399,14 @@
    "id": "G-4.2a",
    "title": "Amplitude: power meter (Table 4)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "100 kHz: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.",
+   "setup": "150 kHz: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.",
    "group": "RXPWR",
    "points": [
     {
      "func": "LEVEL",
-     "description": "Level +13 dBm at 100 kHz (Table 4)",
+     "description": "Level +13 dBm at 150 kHz (Table 4)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 13
      },
      "nominal": 13.0,
@@ -415,21 +416,23 @@
      "meas": "level_rx",
      "group": "RXPWR",
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
-     "ref": "4.2 Table 4 100 kHz +13 dBm"
+     "ref": "4.2 Table 4 150 kHz +13 dBm"
     },
     {
      "func": "LEVEL",
-     "description": "Level +10 dBm at 100 kHz (Table 4)",
+     "description": "Level +10 dBm at 150 kHz (Table 4)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 10
      },
      "nominal": 10.0,
@@ -439,21 +442,23 @@
      "meas": "level_rx",
      "group": "RXPWR",
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
-     "ref": "4.2 Table 4 100 kHz +10 dBm"
+     "ref": "4.2 Table 4 150 kHz +10 dBm"
     },
     {
      "func": "LEVEL",
-     "description": "Level 0 dBm at 100 kHz (Table 4)",
+     "description": "Level 0 dBm at 150 kHz (Table 4)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 0
      },
      "nominal": 0.0,
@@ -463,16 +468,18 @@
      "meas": "level_rx",
      "group": "RXPWR",
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "power"
      },
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "The document also asks to record the power-meter indication and the TI frequency at 0 dBm (the MMR Ext RF Atten value): the 8902A tuned level of Table 5 needs no such offset, so only the reading is kept."
      ],
+     "moved_from": "100 kHz",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
-     "ref": "4.2 Table 4 100 kHz 0 dBm"
+     "ref": "4.2 Table 4 150 kHz 0 dBm"
     },
     {
      "func": "LEVEL",
@@ -635,22 +642,22 @@
    ]
   },
   {
-   "id": "G-4.2b-0.1",
-   "title": "Amplitude: tuned RF level at 100 kHz (Table 5)",
+   "id": "G-4.2b-0.15",
+   "title": "Amplitude: tuned RF level at 150 kHz (Table 5)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "8902A tuned RF level at 100 kHz: the 0 dBm reading is the reference, each lower level is compared with it (limits are relative, +/-2.5 dB). Keep the 6060A level unchanged while the 8902A recalibrates.",
+   "setup": "8902A tuned RF level at 150 kHz: the 0 dBm reading is the reference, each lower level is compared with it (limits are relative, +/-2.5 dB). Keep the 6060A level unchanged while the 8902A recalibrates.",
    "group": "RX",
    "points": [
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Reference level 0 dBm at 100 kHz (recorded; Table 5 is relative to it)",
+     "description": "Reference level 0 dBm at 150 kHz (recorded; Table 5 is relative to it)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 0
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": 0.0,
@@ -659,24 +666,25 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the document gives this row as \"Reference\" with no limit; the wide limits only reject an impossible reading. The Table 5 limits are judged on the relative rows."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz 0 dBm reference"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz 0 dBm reference"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -10 dBm at 100 kHz (recorded)",
+     "description": "Level -10 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -10
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -10.0,
@@ -685,50 +693,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -10 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -10 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -10 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -10 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -10 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -10 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -10.0,
      "low": -12.5,
      "high": -7.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -10 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -10 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -20 dBm at 100 kHz (recorded)",
+     "description": "Level -20 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -20
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -20.0,
@@ -737,50 +748,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -20 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -20 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -20 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -20 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -20 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -20 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -20.0,
      "low": -22.5,
      "high": -17.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -20 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -20 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -30 dBm at 100 kHz (recorded)",
+     "description": "Level -30 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -30
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -30.0,
@@ -789,50 +803,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -30 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -30 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -30 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -30 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -30 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -30 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -30.0,
      "low": -32.5,
      "high": -27.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -30 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -30 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -40 dBm at 100 kHz (recorded)",
+     "description": "Level -40 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -40
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -40.0,
@@ -841,50 +858,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -40 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -40 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -40 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -40 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -40 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -40 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -40.0,
      "low": -42.5,
      "high": -37.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -40 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -40 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -50 dBm at 100 kHz (recorded)",
+     "description": "Level -50 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -50
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -50.0,
@@ -893,50 +913,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -50 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -50 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -50 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -50 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -50 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -50 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -50.0,
      "low": -52.5,
      "high": -47.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -50 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -50 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -60 dBm at 100 kHz (recorded)",
+     "description": "Level -60 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -60
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -60.0,
@@ -945,50 +968,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -60 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -60 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -60 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -60 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -60 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -60 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -60.0,
      "low": -62.5,
      "high": -57.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -60 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -60 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -70 dBm at 100 kHz (recorded)",
+     "description": "Level -70 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -70
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -70.0,
@@ -997,50 +1023,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -70 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -70 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -70 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -70 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -70 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -70 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -70.0,
      "low": -72.5,
      "high": -67.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -70 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -70 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -80 dBm at 100 kHz (recorded)",
+     "description": "Level -80 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -80
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -80.0,
@@ -1049,50 +1078,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -80 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -80 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -80 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -80 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -80 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -80 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -80.0,
      "low": -82.5,
      "high": -77.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -80 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -80 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -90 dBm at 100 kHz (recorded)",
+     "description": "Level -90 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -90
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -90.0,
@@ -1101,50 +1133,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -90 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -90 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -90 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -90 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -90 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -90 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -90.0,
      "low": -92.5,
      "high": -87.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -90 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -90 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -100 dBm at 100 kHz (recorded)",
+     "description": "Level -100 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -100
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -100.0,
@@ -1153,50 +1188,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -100 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -100 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -100 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -100 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -100 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -100 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -100.0,
      "low": -102.5,
      "high": -97.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -100 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -100 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -110 dBm at 100 kHz (recorded)",
+     "description": "Level -110 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -110
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -110.0,
@@ -1205,50 +1243,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -110 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -110 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -110 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -110 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -110 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -110 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -110.0,
      "low": -112.5,
      "high": -107.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -110 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -110 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -120 dBm at 100 kHz (recorded)",
+     "description": "Level -120 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -120
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -120.0,
@@ -1257,50 +1298,53 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -120 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -120 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -120 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -120 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -120 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -120 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -120.0,
      "low": -122.5,
      "high": -117.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -120 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -120 dBm relative"
     },
     {
      "func": "LEVEL",
      "meas": "level_rx",
-     "description": "Level -127 dBm at 100 kHz (recorded)",
+     "description": "Level -127 dBm at 150 kHz (recorded)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": -127
      },
      "rx": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "mode": "tuned"
      },
      "nominal": -127.0,
@@ -1309,39 +1353,42 @@
      "unit": "dBm",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).",
-      "UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier).",
       "Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -127 dBm"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -127 dBm"
     },
     {
      "func": "LEVEL_REL",
      "meas": "derived",
-     "description": "Level -127 dBm at 100 kHz relative to the 0 dBm reference (Table 5)",
+     "description": "Level -127 dBm at 150 kHz relative to the 0 dBm reference (Table 5)",
      "derive": {
       "kind": "section",
       "inputs": [
-       "4.2 Table 5 100 kHz 0 dBm reference",
-       "4.2 Table 5 100 kHz -127 dBm"
+       "4.2 Table 5 150 kHz 0 dBm reference",
+       "4.2 Table 5 150 kHz -127 dBm"
       ],
       "constant": 0
      },
-     "band_label": "100 kHz",
+     "band_label": "150 kHz",
      "zero_key": null,
      "nominal": -127.0,
      "low": -129.5,
      "high": -124.5,
      "unit": "dB",
      "flags": [
-      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5)."
+      "Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).",
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 5",
-     "section": "G-4.2b-0.1",
-     "ref": "4.2 Table 5 100 kHz -127 dBm relative"
+     "section": "G-4.2b-0.15",
+     "ref": "4.2 Table 5 150 kHz -127 dBm relative"
     }
    ]
   },
@@ -2807,18 +2854,18 @@
    ]
   },
   {
-   "id": "G-4.4-0.1",
-   "title": "AM depth and distortion at 100 kHz (Tables 6 and 7)",
+   "id": "G-4.4-0.15",
+   "title": "AM depth and distortion at 150 kHz (Tables 6 and 7)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "RF OUTPUT to the 8902A RF INPUT. 100 kHz, +7 dBm, INT AM. 8902A: (peak+ and peak-)/2 detector, 300 Hz to 3 kHz.",
+   "setup": "RF OUTPUT to the 8902A RF INPUT. 150 kHz, +7 dBm, INT AM. 8902A: (peak+ and peak-)/2 detector, 300 Hz to 3 kHz.",
    "group": "RX",
    "points": [
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 30 % at 1000 Hz rate, 100 kHz (Table 6)",
+     "description": "AM depth 30 % at 1000 Hz rate, 150 kHz (Table 6)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 30,
@@ -2837,19 +2884,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 6 100 kHz 30 % at 1000 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 6 150 kHz 30 % at 1000 Hz"
     },
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 50 % at 1000 Hz rate, 100 kHz (Table 6)",
+     "description": "AM depth 50 % at 1000 Hz rate, 150 kHz (Table 6)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 50,
@@ -2868,19 +2916,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 6 100 kHz 50 % at 1000 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 6 150 kHz 50 % at 1000 Hz"
     },
     {
      "func": "THD",
      "meas": "thd",
-     "description": "AM distortion, 50 % at 1 kHz, 100 kHz, limit < 5 % (Table 6)",
+     "description": "AM distortion, 50 % at 1 kHz, 150 kHz, limit < 5 % (Table 6)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 50,
@@ -2899,19 +2948,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR distortion with HP and LP filters None -> 8902A audio distortion function, S2 at 1 kHz).",
-      "UNVERIFIED: below the 8902A RF range (150 kHz); automatic tuning (AU) is used, accuracy not specified."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 6 100 kHz 50 % THD"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 6 150 kHz 50 % THD"
     },
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 70 % at 1000 Hz rate, 100 kHz (Table 6)",
+     "description": "AM depth 70 % at 1000 Hz rate, 150 kHz (Table 6)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 70,
@@ -2930,19 +2980,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 6 100 kHz 70 % at 1000 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 6 150 kHz 70 % at 1000 Hz"
     },
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 90 % at 1000 Hz rate, 100 kHz (Table 6)",
+     "description": "AM depth 90 % at 1000 Hz rate, 150 kHz (Table 6)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 90,
@@ -2961,19 +3012,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 6",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 6 100 kHz 90 % at 1000 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 6 150 kHz 90 % at 1000 Hz"
     },
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 30 % at 400 Hz rate, 100 kHz (Table 7)",
+     "description": "AM depth 30 % at 400 Hz rate, 150 kHz (Table 7)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 30,
@@ -2992,19 +3044,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 7",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 7 100 kHz 30 % at 400 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 7 150 kHz 30 % at 400 Hz"
     },
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 70 % at 400 Hz rate, 100 kHz (Table 7)",
+     "description": "AM depth 70 % at 400 Hz rate, 150 kHz (Table 7)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 70,
@@ -3023,19 +3076,20 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 7",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 7 100 kHz 70 % at 400 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 7 150 kHz 70 % at 400 Hz"
     },
     {
      "func": "AMDEPTH",
      "meas": "am_depth",
-     "description": "AM depth 90 % at 400 Hz rate, 100 kHz (Table 7)",
+     "description": "AM depth 90 % at 400 Hz rate, 150 kHz (Table 7)",
      "gen": {
-      "freq_mhz": 0.1,
+      "freq_mhz": 0.15,
       "level_dbm": 7,
       "am": {
        "pct": 90,
@@ -3054,12 +3108,13 @@
      "unit": "%",
      "flags": [
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).",
-      "UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz."
+      "Carrier changed from the document's 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document's (they do not depend on the carrier). UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02)."
      ],
+     "moved_from": "100 kHz",
      "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.4 Table 7",
-     "section": "G-4.4-0.1",
-     "ref": "4.4 Table 7 100 kHz 90 % at 400 Hz"
+     "section": "G-4.4-0.15",
+     "ref": "4.4 Table 7 150 kHz 90 % at 400 Hz"
     }
    ]
   },

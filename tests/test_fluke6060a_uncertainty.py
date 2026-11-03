@@ -95,12 +95,30 @@ class Budgets(Base):
         self.assertEqual((r.status, r.scope, r.reported), (fu.OK, fu.OUT, 0.3))
         self.assertIsNone(r.cmc)
 
-    def test_100_khz_carrier_is_below_the_8902a_range(self):
-        for ref in ('4.4 Table 6 100 kHz 30 % at 1000 Hz', '4.2 Table 5 100 kHz -10 dBm relative'):
-            r = self.ev(ref)
+    def test_a_carrier_below_150_khz_has_no_8902a_spec(self):
+        for ref in ('4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 150 kHz -10 dBm relative'):
+            p = copy.deepcopy(self.points[ref])
+            if p.get('gen'):
+                p['gen']['freq_mhz'] = 0.1
+            p['description'] = p['description'].replace('150 kHz', '100 kHz')
+            r = fu.evaluate(p, path=self.db)
             self.assertEqual(r.status, fu.NO_SPEC, ref)
             self.assertIn('150 kHz', r.reason)
             self.assertEqual(r.scope, fu.OUT, ref)
+
+    def test_150_khz_am_is_in_scope_on_the_most_specific_line(self):
+        """150 kHz (owner, 2026-11-03): 8902A 150 kHz-10 MHz rows 2 % (50 Hz-10 kHz) and 3 % (20 Hz-10 kHz) -> 2 % x 30 = 0.6 %; scope lines 2.4 % (50 Hz-10 kHz) and
+        3.5 % (20 Hz-10 kHz) -> the narrower rate band, 2.4 % x 30 = 0.72 % (larger than the budget) -> 0.72 %, TUR 1.8 / 0.72 = 2.5."""
+        r = self.ev('4.4 Table 6 150 kHz 30 % at 1000 Hz')
+        self.assertEqual((r.status, r.scope), (fu.OK, fu.IN))
+        self.assertAlmostEqual(r.emu, 0.6, places=9)
+        self.assertAlmostEqual(r.cmc, 0.72, places=9)
+        self.assertEqual(r.reported, 0.72)
+        self.assertAlmostEqual(r.tur(), 1.8 / 0.72, places=6)
+
+    def test_150_khz_relative_level_is_budgeted_but_out_of_scope(self):
+        r = self.ev('4.2 Table 5 150 kHz -10 dBm relative')
+        self.assertEqual((r.status, r.scope, r.reported), (fu.OK, fu.OUT, 0.05))
 
     def test_relative_level_uses_the_attenuation_cmc_floor(self):
         r = self.ev('4.2 Table 5 250 MHz -10 dBm relative')
@@ -236,9 +254,10 @@ class Report(Base):
 
     def test_gidep_rows_star_what_the_scope_does_not_cover(self):
         rows = self.rows_for('6060A-gidep', ['4.5 Table 8 250 MHz 250 kHz', '4.4 Table 6 250 MHz 30 % at 1000 Hz', '4.7 Table 11 harmonics 5 MHz',
-                                             '4.2 Table 5 250 MHz -10 dBm relative', '4.4 Table 6 100 kHz 30 % at 1000 Hz', '4.1 Table 2 100.00000 MHz'])
-        self.assertEqual([r['Uncertainty'] for r in rows], ['3.3 kHz', '0.30 % *', '1.7 dB *', '0.067 dB', '', '30 Hz'])
-        self.assertEqual([r['TUR'] for r in rows], ['3.7:1', '', '', '37.3:1', '', '0.3:1'])
+                                             '4.2 Table 5 250 MHz -10 dBm relative', '4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 150 kHz -10 dBm relative',
+                                             '4.1 Table 2 100.00000 MHz'])
+        self.assertEqual([r['Uncertainty'] for r in rows], ['3.3 kHz', '0.30 % *', '1.7 dB *', '0.067 dB', '0.72 %', '0.050 dB *', '30 Hz'])
+        self.assertEqual([r['TUR'] for r in rows], ['3.7:1', '', '', '37.3:1', '2.5:1', '', '0.3:1'])
 
     def test_instruction_manual_procedure_is_unchanged(self):
         old = fv.STATE_KEY

@@ -166,15 +166,21 @@ def scope_freq(hz):
     return None
 
 
+def _most_specific(hits):
+    """Of the scope lines whose printed conditions all hold, the one with the narrowest modulation-rate band (the lines mirror the 8902A rows: the wider rate band carries
+    the larger CMC, the same rule as the 8902A row choice); on a tie the larger CMC. hits: [(line, cmc)]."""
+    return max(hits, key=lambda h: (-(h[0]['rate_hi'] - h[0]['rate_lo']), h[1]))[1] if hits else None
+
+
 def scope_am(fc, rate, depth_pct):
-    hits = [b['pct'] for b in rf_scope()['AM']['bands']
+    hits = [(b, b['pct']) for b in rf_scope()['AM']['bands']
             if b['f_lo'] <= fc <= b['f_hi'] and b['rate_lo'] <= rate <= b['rate_hi'] and b['depth_lo'] <= depth_pct <= b['depth_hi']]
-    return max(hits) if hits else None          # % of reading
+    return _most_specific(hits)                 # % of reading
 
 
 def scope_fm(fc, rate, dev_hz):
-    hits = [b['pct'] for b in rf_scope()['FM']['bands'] if b['f_lo'] <= fc <= b['f_hi'] and b['rate_lo'] <= rate <= b['rate_hi'] and dev_hz <= b['dev_max']]
-    return max(hits) if hits else None          # % of reading
+    hits = [(b, b['pct']) for b in rf_scope()['FM']['bands'] if b['f_lo'] <= fc <= b['f_hi'] and b['rate_lo'] <= rate <= b['rate_hi'] and dev_hz <= b['dev_max']]
+    return _most_specific(hits)                 # % of reading
 
 
 def scope_atten(fc, delta_db):

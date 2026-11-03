@@ -40,10 +40,20 @@ def builder():
 class SpecTests(unittest.TestCase):
     def test_counts_and_groups(self):
         got = {s['id']: len(s['points']) for s in SPEC['sections']}
-        self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-0.1': 27, 'G-4.2b-250': 27, 'G-4.2b-520': 27, 'G-4.3': 2, 'G-4.4-0.1': 8, 'G-4.4-250': 8,
+        self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-0.15': 27, 'G-4.2b-250': 27, 'G-4.2b-520': 27, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
                                'G-4.4-520': 8, 'G-4.5': 9, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
         self.assertEqual(len(points()), 220)
         self.assertEqual({p['group'] for p in points()}, {'POWERON', 'REFOSC', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
+
+    def test_the_100_khz_carrier_is_moved_to_150_khz(self):
+        """Owner 2026-11-03: every Tables 4 to 7 point at the document's 100 kHz now runs at 150 kHz with the document's limits, says so on the point, and carries moved_from."""
+        moved = [p for p in points() if p.get('moved_from')]
+        self.assertEqual(len(moved), 38)
+        self.assertEqual({p['moved_from'] for p in moved}, {'100 kHz'})
+        self.assertTrue(all(any('100 kHz to 150 kHz' in f for f in p['flags']) for p in moved))
+        self.assertTrue(all('150 kHz' in p['ref'] for p in moved))
+        self.assertFalse([p['ref'] for p in points() if (p.get('gen') or {}).get('freq_mhz') is not None and 0.01 < p['gen']['freq_mhz'] < 0.15])
+        self.assertTrue(any('moved to 150 kHz' in d for d in SPEC['discrepancies']))
 
     def test_json_is_what_the_builder_makes(self):
         self.assertEqual(json.loads(json.dumps(builder().build_spec())), SPEC)
@@ -65,7 +75,7 @@ class SpecTests(unittest.TestCase):
 
     def test_table_4_limits(self):
         got = {(p['gen']['freq_mhz'], p['gen']['level_dbm']): (p['low'], p['high'], p['meas']) for s in SPEC['sections'] if s['id'] == 'G-4.2a' for p in s['points']}
-        self.assertEqual(got[(0.1, 13)], (10.5, 15.5, 'level_rx'))
+        self.assertEqual(got[(0.15, 13)], (10.5, 15.5, 'level_rx'))
         self.assertEqual(got[(250, 10)], (7.5, 12.5, 'level_pm'))
         self.assertEqual(got[(520, 0)], (-2.5, 2.5, 'level_pm'))
 
@@ -88,7 +98,7 @@ class SpecTests(unittest.TestCase):
         self.assertEqual(len(am), 21)
         self.assertEqual(am[(250, 1000.0, 50)], (47.0, 53.0))
         self.assertEqual(am[(520, 400.0, 90)], (84.6, 95.4))
-        self.assertEqual(am[(0.1, 1000.0, 30)], (28.2, 31.8))
+        self.assertEqual(am[(0.15, 1000.0, 30)], (28.2, 31.8))
         thd = [p for p in points() if p['func'] == 'THD']
         self.assertEqual(len(thd), 3)
         for p in thd:
@@ -202,15 +212,15 @@ class GidepEngine(GidepBench):
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 
-    def test_100_khz_carrier_is_tuned_by_automatic_operation_not_keyed_in(self):
-        """Owner bench 2026-11-02: '0.1MZ' gave 8902A error 10 / 20 at the first 100 kHz AM point; the receiver's own AM key (automatic tuning) read it. 150 kHz and up is still keyed in."""
-        low = next(p for p in points() if p['meas'] == 'am_depth' and p['gen']['freq_mhz'] < 0.15)
+    def test_150_khz_carrier_is_keyed_in(self):
+        """Owner 2026-11-03: the document's 100 kHz carrier is moved to 150 kHz, where the 8902A RF input starts, so it is tuned by keying the carrier in (0.1MZ gave error 10 / 20)."""
+        low = next(p for p in points() if p['meas'] == 'am_depth' and p['gen']['freq_mhz'] < 1)
+        self.assertEqual(low['gen']['freq_mhz'], 0.15)
         self.run_points(refs=[low['ref']])
         self.assertEqual(self.errors(), [])
         self.assertEqual(self.non_pass(), [])
         sent = [c for c in self.t8902.sent if c]
-        self.assertTrue(any(c == 'AU' for c in sent), sent)
-        self.assertFalse(any(c.endswith('MZ') and not c.startswith('37') for c in sent), sent)
+        self.assertTrue(any(c.endswith('MZ') and not c.startswith('37') for c in sent), sent)
 
     def test_the_simulated_8902a_refuses_a_keyed_in_100_khz_tuning_with_error_10(self):
         from drivers.hp_8902a import HP8902A, decode_reading
@@ -297,3 +307,21 @@ class UpfrontCalibrations(unittest.TestCase):
         app = self._app(demo=True)
         app._upfront_preps(self._pts())
         self.assertEqual(app.calls, [('next', 0)])
+
+
+class StaleCheckpoint(unittest.TestCase):
+    """Results are keyed by point number: a checkpoint saved before the 100 kHz -> 150 kHz move must not put its 100 kHz readings on the 150 kHz points."""
+
+    def pts(self):
+        return [dict(id=1, ref='4.2 Table 4 250 MHz +13 dBm'), dict(id=2, ref='4.2 Table 4 150 kHz +13 dBm', moved_from='100 kHz')]
+
+    def test_old_results_without_a_ref_are_dropped_only_on_moved_points(self):
+        data = dict(results={'1': dict(reading=13.1), '2': dict(reading=13.0)}, left_results={'2': dict(reading=13.0)})
+        self.assertEqual(E.drop_stale_results(data, self.pts()), 2)
+        self.assertEqual(list(data['results']), ['1'])
+        self.assertEqual(data['left_results'], {})
+
+    def test_a_result_naming_another_point_is_dropped_and_a_matching_one_kept(self):
+        data = dict(results={'1': dict(reading=13.1, ref='4.2 Table 4 100 kHz +13 dBm'), '2': dict(reading=13.0, ref='4.2 Table 4 150 kHz +13 dBm'), '9': dict(reading=1)})
+        self.assertEqual(E.drop_stale_results(data, self.pts()), 2)
+        self.assertEqual(list(data['results']), ['2'])

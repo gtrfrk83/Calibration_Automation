@@ -189,6 +189,22 @@ def point_uncertainty(p, reading):
         return '', ''
 
 
+def drop_stale_results(data, points):
+    """Remove from a loaded checkpoint (in place) every result that no longer belongs to its point: results are keyed by point number, so a spec change that keeps the
+    numbering would otherwise attach an old reading to a new point (GIDEP 2026-11-03: the 100 kHz carrier moved to 150 kHz). A result that names its point (ref, saved since
+    then) must name the same one; an older result without a ref is dropped on a point that carries `moved_from`. Returns the number removed."""
+    by_id = {str(p['id']): p for p in points}
+    n = 0
+    for key in ('results', 'left_results'):
+        res = data.get(key) or {}
+        for pid in list(res):
+            p, r = by_id.get(pid), res[pid]
+            if p is None or (r.get('ref') is not None and r['ref'] != p['ref']) or (r.get('ref') is None and p.get('moved_from')):
+                del res[pid]
+                n += 1
+    return n
+
+
 def prompt_key(p):
     """What decides whether the hook-up prompt is shown again: the wiring group."""
     return p['group']
@@ -1063,7 +1079,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def _record(self, p, reading, synthetic, manual=False, extra=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
-        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, manual=bool(manual) or self.is_manual(p),
+        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, manual=bool(manual) or self.is_manual(p), ref=p['ref'],
                                           timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
         self._derive_after(p)
@@ -1112,9 +1128,11 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.thd_typed.set(bool(data.get('thd_typed', self.thd_typed.get())))
         if data.get('freq_range') in RANGE_CHOICES:
             self.freq_range.set(data['freq_range'])
+        dropped = drop_stale_results(data, POINTS)
         self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
-        self.on_options(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+        self.on_options(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.'
+                                                     + (f' {dropped} result(s) left out: their test point has changed since they were saved.' if dropped else ''))
 
     @staticmethod
     def report_section(p):

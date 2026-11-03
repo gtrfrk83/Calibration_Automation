@@ -23,7 +23,11 @@ TABLE2_MHZ[0] = D('100.00000')
 TABLE3_MHZ = [D('299.99999'), D('399.99999'), D('499.99999')]
 COUNT_STEP_MHZ = D('0.00001')                                                 # the printed limits are the applied value +/-0.00001 MHz (10 Hz), 1 count of the counter's LSD
 REF_LOW_HZ, REF_HIGH_HZ = 9999940, 10000060                                   # 4.1.5
-TABLE4_FREQS = (0.1, 250, 520)                                                # 100 kHz, 250 MHz, 520 MHz (Tables 4 to 7)
+DOC_LOW_MHZ = 0.1                                                              # the document's low carrier for Tables 4 to 7: 100 kHz
+LOW_MHZ = 0.15                                                                 # used instead (owner, 2026-11-03): the 8902A RF input starts at 150 kHz
+TABLE4_FREQS = (LOW_MHZ, 250, 520)                                             # 150 kHz (document: 100 kHz), 250 MHz, 520 MHz (Tables 4 to 7)
+MOVED = (f'Carrier changed from the document\'s 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. '
+         'The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document\'s (they do not depend on the carrier).')
 TABLE4_LEVELS = ((13, '10.5', '15.5'), (10, '7.5', '12.5'), (0, '-2.5', '2.5'))
 TABLE5_LEVELS = (0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100, -110, -120, -127)   # 0 dBm is the reference
 TABLE5_TOL = D('2.5')
@@ -112,12 +116,13 @@ def build_spec():
                 flags=[UNV + ' (53132A counter -> 8902A frequency counter).', 'The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged.'])
 
     # 4.2 amplitude
-    s = section('G-4.2a', 'Amplitude: power meter (Table 4)', '100 kHz: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.', 'RXPWR')
+    s = section('G-4.2a', 'Amplitude: power meter (Table 4)', f'{fname(LOW_MHZ)}: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.', 'RXPWR')
     for fm in TABLE4_FREQS:
         for dbm, lo, hi in TABLE4_LEVELS:
             nm = fname(fm)
             if fm < 1:
-                kw = dict(meas='level_rx', group='RXPWR', rx=dict(freq_mhz=fm, mode='power'), flags=[UNV + ' (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).'])
+                kw = dict(meas='level_rx', group='RXPWR', rx=dict(freq_mhz=fm, mode='power'), flags=[UNV + ' (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).', MOVED],
+                          moved_from=fname(DOC_LOW_MHZ))
             else:
                 kw = dict(meas='level_pm', group='PM', zero_key=f'G@{fm:g}', band_label=nm, pm=dict(freq_mhz=fm), flags=[UNV + ' (E4418B + 8482A -> NRP40T on the 96270A).',
                                                                                                                      'UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode.'])
@@ -132,18 +137,19 @@ def build_spec():
         for lv in TABLE5_LEVELS:
             tag = f'{nm} {lvl(lv)} dBm'
             flags = [UNV + ' (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).']
-            if fm < 1:
-                flags.append('UNVERIFIED: the 8902A tuned RF level starts at 150 kHz; 100 kHz is below it, so the reading may be refused (type the reading by hand if it is).')
+            moved = dict(moved_from=fname(DOC_LOW_MHZ)) if fm == LOW_MHZ else {}
+            if moved:
+                flags.append(MOVED)
             if lv == 0:
                 add(s, '4.2 Table 5', tag=tag + ' reference', func='LEVEL', meas='level_rx', description=f'Reference level 0 dBm at {nm} (recorded; Table 5 is relative to it)', gen=dict(freq_mhz=num(fm), level_dbm=0), rx=dict(freq_mhz=fm, mode='tuned'),
-                    nominal=0.0, low=-140.0, high=5.0, unit='dBm', flags=flags + ['Record only: the document gives this row as "Reference" with no limit; the wide limits only reject an impossible reading. The Table 5 limits are judged on the relative rows.'])
+                    nominal=0.0, low=-140.0, high=5.0, unit='dBm', flags=flags + ['Record only: the document gives this row as "Reference" with no limit; the wide limits only reject an impossible reading. The Table 5 limits are judged on the relative rows.'], **moved)
                 ref0 = f'4.2 Table 5 {tag} reference'
                 continue
             m = add(s, '4.2 Table 5', tag=tag, func='LEVEL', meas='level_rx', description=f'Level {lv:+g} dBm at {nm} (recorded)', gen=dict(freq_mhz=num(fm), level_dbm=lv), rx=dict(freq_mhz=fm, mode='tuned'),
-                    nominal=float(lv), low=-140.0, high=5.0, unit='dBm', flags=flags + ['Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference).'])
+                    nominal=float(lv), low=-140.0, high=5.0, unit='dBm', flags=flags + ['Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference).'], **moved)
             add(s, '4.2 Table 5', tag=tag + ' relative', func='LEVEL_REL', meas='derived', description=f'Level {lv:+g} dBm at {nm} relative to the 0 dBm reference (Table 5)',
                 derive=dict(kind='section', inputs=[ref0, m['ref']], constant=0), band_label=nm, zero_key=None, nominal=float(lv), low=f(D(lv) - TABLE5_TOL), high=f(D(lv) + TABLE5_TOL), unit='dB',
-                flags=['Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).'])
+                flags=['Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).'] + ([MOVED] if moved else []), **moved)
 
     # 4.3 internal modulation source
     s = section('G-4.3', 'Internal modulation source', f'RF OUTPUT to the 8902A RF INPUT. {MOD_CARRIER_MHZ} MHz, +{MOD_LEVEL_DBM} dBm, INT AM 90 %, 1 kHz then 400 Hz; the 8902A audio frequency counter reads the modulation rate.', 'RX')
@@ -159,14 +165,15 @@ def build_spec():
         for rate, rows, tbl in ((1000, TABLE6, 'Table 6'), (400, TABLE7, 'Table 7')):
             for pct, lo, hi in rows:
                 flags = [UNV + ' (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).']
-                if fm < 1:
-                    flags.append('UNVERIFIED: the 8902A RF range starts at 150 kHz. A keyed-in tuning below it gives error 10 / 20 (owner bench 2026-11-02), so the program leaves the 8902A in automatic operation (AU) for this carrier; the 8902A does not specify its accuracy at 100 kHz.')
+                moved = dict(moved_from=fname(DOC_LOW_MHZ)) if fm == LOW_MHZ else {}
+                if moved:
+                    flags.append(MOVED + ' UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02).')
                 add(s, f'4.4 {tbl}', tag=f'{nm} {pct} % at {rate} Hz', func='AMDEPTH', meas='am_depth', description=f'AM depth {pct} % at {rate} Hz rate, {nm} ({tbl})',
-                    gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=pct, src='int', rate_hz=float(rate))), rx=dict(detector=9, hp=2, lp=1), nominal=float(pct), low=f(D(lo)), high=f(D(hi)), unit='%', flags=flags)
+                    gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=pct, src='int', rate_hz=float(rate))), rx=dict(detector=9, hp=2, lp=1), nominal=float(pct), low=f(D(lo)), high=f(D(hi)), unit='%', flags=flags, **moved)
                 if rate == 1000 and pct == 50:
                     add(s, f'4.4 {tbl}', tag=f'{nm} 50 % THD', func='THD', meas='thd', description=f'AM distortion, 50 % at 1 kHz, {nm}, limit < 5 % ({tbl})',
                         gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=50, src='int', rate_hz=1000.0)), rx=dict(source='am', tone_hz=1000), nominal=0.0, low=0.0, high=AM_THD_MAX, strict_high=True, unit='%',
-                        flags=[UNV + ' (MMR distortion with HP and LP filters None -> 8902A audio distortion function, S2 at 1 kHz).'] + (['UNVERIFIED: below the 8902A RF range (150 kHz); automatic tuning (AU) is used, accuracy not specified.'] if fm < 1 else []))
+                        flags=[UNV + ' (MMR distortion with HP and LP filters None -> 8902A audio distortion function, S2 at 1 kHz).'] + ([MOVED] if moved else []), **moved)
 
     # 4.5 FM calibration
     s = section('G-4.5', 'FM calibration (Table 8)', f'RF OUTPUT to the 8902A RF INPUT. +{FM_LEVEL_DBM} dBm, INT FM at 1 kHz; 8902A FM deviation, peak+, 300 Hz to 3 kHz.', 'RX')
@@ -247,6 +254,7 @@ def build_spec():
             'Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.',
             'Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.',
             'The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.',
+            'Tables 4 to 7: the document\'s 100 kHz carrier is moved to 150 kHz (owner, 2026-11-03), where the 8902A RF input range starts; the 6060A between 100 and 150 kHz is not verified.',
             'Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 8902A frequency counter covers the display range (+/-1 count).'],
         sections=sections)
 
