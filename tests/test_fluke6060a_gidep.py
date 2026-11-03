@@ -499,3 +499,22 @@ class SpurCarrierApproach(GidepBench):
         p['gen'].pop('approach_mhz')
         self.run_points(refs=[p['ref']])
         self.assertTrue(any('UNCAL' in (d[3] or '') or 'PLL' in (d[3] or '') for d in self.errors()), self.h.dialogs[-3:])
+
+
+class AmFilterAt400Hz(GidepBench):
+    """Owner bench 2026-11-03: 'the 8902 should have a high pass filter of 50Hz, not 300Hz' on the 400 Hz-rate AM points (Table 7): the 300 Hz high-pass cut the tone
+    (30 % read 26.63 %, 70 % read 61.8 %). Every 400 Hz-rate AM depth point uses H1 (50 Hz); the 1 kHz ones keep H2 (300 Hz)."""
+
+    def test_spec_filters_follow_the_rate(self):
+        am = [p for p in E.POINTS if p['func'] == 'AMDEPTH']
+        self.assertEqual({(p['gen']['am']['rate_hz'], p['rx']['hp']) for p in am}, {(400.0, 1), (1000.0, 2)})
+        self.assertEqual(len([p for p in am if p['rx']['hp'] == 1]), 9)
+
+    def test_a_400_hz_point_sends_h1(self):
+        p = next(p for p in E.POINTS if p['func'] == 'AMDEPTH' and p['gen']['am']['rate_hz'] == 400.0 and p['gen']['freq_mhz'] == 250)
+        n = len(self.t8902.sent)
+        self.run_points(refs=[p['ref']])
+        self.assertEqual(self.errors(), [])
+        sent = self.t8902.sent[n:]
+        self.assertIn('H1', sent)
+        self.assertNotIn('H2', sent[sent.index('H1'):])

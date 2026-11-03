@@ -182,12 +182,15 @@ def build_spec():
         s = section(f'G-4.4-{fm:g}', f'AM depth and distortion at {nm} (Tables 6 and 7)', f'RF OUTPUT to the 8902A RF INPUT. {nm}, +{AM_LEVEL_DBM} dBm, INT AM. 8902A: (peak+ and peak-)/2 detector, 300 Hz to 3 kHz.', 'RX')
         for rate, rows, tbl in ((1000, TABLE6, 'Table 6'), (400, TABLE7, 'Table 7')):
             for pct, lo, hi in rows:
-                flags = [UNV + ' (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).']
+                hp = 1 if rate == 400 else 2                                  # owner bench 2026-11-03: the 300 Hz high-pass cut the 400 Hz tone (26.6 % for 30 %); 400 Hz rate -> 50 Hz (H1)
+                flags = [UNV + (' (MMR AM depth, peak +/-/2, HP 300 Hz, LP 3 kHz -> 8902A detector D9, H2, L1).' if hp == 2 else
+                                ' (MMR AM depth, peak +/-/2, LP 3 kHz -> 8902A detector D9, H1, L1).'),
+                         *(['High-pass 50 Hz (H1), not 300 Hz: the 300 Hz filter attenuates the 400 Hz modulation (owner bench 2026-11-03: 30 % read 26.63 %, 70 % read 61.8 %).'] if hp == 1 else [])]
                 moved = dict(moved_from=fname(DOC_LOW_MHZ)) if fm == LOW_MHZ else {}
                 if moved:
                     flags.append(MOVED + ' UNVERIFIED on the bench: the 8902A keyed-in tuning at exactly 150 kHz (0.15MZ; 0.1MZ gave error 10 / 20 on 2026-11-02).')
                 add(s, f'4.4 {tbl}', tag=f'{nm} {pct} % at {rate} Hz', func='AMDEPTH', meas='am_depth', description=f'AM depth {pct} % at {rate} Hz rate, {nm} ({tbl})',
-                    gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=pct, src='int', rate_hz=float(rate))), rx=dict(detector=9, hp=2, lp=1), nominal=float(pct), low=f(D(lo)), high=f(D(hi)), unit='%', flags=flags, **moved)
+                    gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=pct, src='int', rate_hz=float(rate))), rx=dict(detector=9, hp=hp, lp=1), nominal=float(pct), low=f(D(lo)), high=f(D(hi)), unit='%', flags=flags, **moved)
                 if rate == 1000 and pct == 50:
                     add(s, f'4.4 {tbl}', tag=f'{nm} 50 % THD', func='THD', meas='thd', description=f'AM distortion, 50 % at 1 kHz, {nm}, limit < 5 % ({tbl})',
                         gen=dict(freq_mhz=num(fm), level_dbm=AM_LEVEL_DBM, am=dict(pct=50, src='int', rate_hz=1000.0)), rx=dict(source='am', tone_hz=1000), nominal=0.0, low=0.0, high=AM_THD_MAX, strict_high=True, unit='%',
