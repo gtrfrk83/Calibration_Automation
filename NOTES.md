@@ -2224,6 +2224,10 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- 8902A 1 mW calibration check at display resolution (owner bench 2026-11-03: 'after SC the sensor reads 1.0004 mW, not 0.999 to 1.000 mW'; owner: "we'll try your method
+  first" rather than removing the check): `HP8902A.calibrate_power_sensor` judges the reading rounded to the display's 0.001 mW (1.0004 -> 1.000, passes) against p. 3-49's
+  0.999 to 1.000 mW; before it was judged to 0.1 uW. 1.0006 (1.001) or 0.9984 (0.998) still stop the run. The reading and the shown value are written to the command log.
+  Both 6060A procedures (and anything else on this driver) get it. Test: `tests/test_fluke6060a_drivers.py` test_the_1_mw_check_is_judged_as_the_display_shows_it.
 - Spur carriers 244 / 244.99 MHz from 242 MHz (owner bench 2026-11-03: "we keep getting an uncal message on the 6060 unless we start at 242MHz and increment up to the
   244MHz"): the builder gives every Table 12 point whose carrier is above 242 and below 245 MHz `gen.approach_mhz` (242, 243 [, 244]); `IO._configure` sets those
   frequencies first (each read back), then the carrier, and the UNCAL check runs as before once the point is configured. The three typed spurs at 244.99 MHz (nothing is

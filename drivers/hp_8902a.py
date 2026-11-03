@@ -506,8 +506,10 @@ class HP8902A(Instrument):
         finally:
             self.send('cal.off')
         self.check_status('power calibration')
-        if not CAL_POWER_W[0] - 1e-9 <= round(value, 7) <= CAL_POWER_W[1] + 1e-9:
-            raise InstrumentError(f'{self.MODEL}: after SC the sensor reads {value * 1e3:.4f} mW, not 0.999 to 1.000 mW')
+        shown_mw = round(value * 1e3, 3)            # judged as the display shows it, 0.001 mW (bench 2026-11-03: 1.0004 mW reads 1.000 and was refused when judged to 0.1 uW)
+        if not CAL_POWER_W[0] * 1e3 - 1e-9 <= shown_mw <= CAL_POWER_W[1] * 1e3 + 1e-9:
+            raise InstrumentError(f'{self.MODEL}: after SC the sensor reads {value * 1e3:.4f} mW (shown {shown_mw:.3f} mW), not 0.999 to 1.000 mW')
+        self.log.add('--', f'1 mW calibration check: {value * 1e3:.4f} mW, shown {shown_mw:.3f} mW (0.999 to 1.000 mW)', self.label)
         return value
 
     def enter_reference_cal_factor(self, percent: float) -> float:

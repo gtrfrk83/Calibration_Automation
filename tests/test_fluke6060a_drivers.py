@@ -765,6 +765,20 @@ class EightNineOhTwo(_NoSleep):
         with self.assertRaises(InstrumentError):
             rx.calibrate_power_sensor()
 
+    def test_the_1_mw_check_is_judged_as_the_display_shows_it(self):
+        """Owner bench 2026-11-03: 'after SC the sensor reads 1.0004 mW, not 0.999 to 1.000 mW'. The display shows 1.000 mW (0.001 mW digit), inside p. 3-49's 0.999 to 1.000:
+        it passes; 1.0006 shows 1.001 and 0.9984 shows 0.998, which still stop the run."""
+        bench, src, rx, t = connected_8902a(rf=False)
+        rx.zero_power_sensor()
+        t.sensor_on_calibrator = True
+        for watts, ok in ((1.0004e-3, True), (0.9991e-3, True), (1.0006e-3, False), (0.9984e-3, False)):
+            t.errors['power_cal_w'] = watts
+            if ok:
+                self.assertAlmostEqual(rx.calibrate_power_sensor(), watts, places=12)
+            else:
+                with self.assertRaises(InstrumentError):
+                    rx.calibrate_power_sensor()
+
     def test_zero_refuses_a_residual_above_3_microwatts(self):
         bench, src, rx, t = connected_8902a(rf=True, dbm=0.0)
         with self.assertRaises(InstrumentError):
