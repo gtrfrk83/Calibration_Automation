@@ -167,7 +167,7 @@
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
    ],
    "method": "Fluke6060A.learn",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 300000000, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 300000000, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "Q",
@@ -269,7 +269,7 @@
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
    ],
    "method": "Fluke6060A.verify",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 300000000, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 300000000, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "Q",
@@ -309,7 +309,7 @@
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC"
    ],
    "method": "Fluke6060A.set_frequency",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -368,7 +368,7 @@
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.set_level",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -10.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAPPJMAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJIAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -430,7 +430,7 @@
     "6060A|<<|BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC"
    ],
    "method": "Fluke6060A.set_level",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 15.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 15.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAJGAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKJNAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -476,7 +476,7 @@
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC"
    ],
    "method": "Fluke6060A.rf",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABHAEEBBAGBLKKPDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -509,7 +509,7 @@
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
    ],
    "method": "Fluke6060A.rf",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -550,7 +550,7 @@
     "6060A|<<|BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC"
    ],
    "method": "Fluke6060A.end_point",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -591,7 +591,7 @@
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.am",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12452, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': True, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12452, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': True, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDAKEBBAGBLKKNDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -673,7 +673,7 @@
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.am",
-   "result": "returned {'am_depth_pct': 70, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 70, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'EGABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKFKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -747,7 +747,7 @@
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.am",
-   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 30, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 292, 'data_set_2': 4358, 'ext_am': True, 'ext_fm': False, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 400, 'raw': 'BOABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABABCEBBAGBLKKICAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -913,7 +913,7 @@
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.fm",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12868, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': True, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12868, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 500, 'fm_dev_hz': 5000.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': True, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAABPEAAABDCEEBBAGBLKKPAAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -990,12 +990,12 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC",
+    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABAEEEBBAGBLKKCJAC",
     "6060A|>>|IU",
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.fm",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 1092, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': True, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 1092, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': True, 'ext_mod_level': 'valid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABAEEEBBAGBLKKCJAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -1042,7 +1042,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABAEEEBBAGBLKKOGAC"
+     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABAEEEBBAGBLKKCJAC"
     ],
     [
      "Q",
@@ -1073,10 +1073,10 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC"
+    "6060A|<<|FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKPNAC"
    ],
    "method": "Fluke6060A.mod_off",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': 0.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKPNAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -1131,7 +1131,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKLKAC"
+     "FPABAAAAAAAAAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKPNAC"
     ]
    ]
   },
@@ -1146,12 +1146,12 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC",
     "6060A|>>|IU",
     "6060A|<<|000000,000000,000400"
    ],
    "method": "Fluke6060A.select_section",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -1182,7 +1182,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
     ],
     [
      "Q",
@@ -1196,7 +1196,7 @@
    "case": "Fluke6060A.select_section[5]",
    "log": [
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC",
     "6060A|>>|CE",
     "6060A|>>|AP-12.0DB",
     "6060A|>>|IR",
@@ -1204,7 +1204,7 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC",
     "6060A|>>|IU",
     "6060A|<<|000000,000000,000400",
     "6060A|>>|CE",
@@ -1214,20 +1214,20 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABHAEEBBAGBLKKDGAC",
     "6060A|>>|RO0",
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
    ],
    "method": "Fluke6060A.select_section",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 12356, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': False, 'step_function': 'freq'}",
    "wire": [
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
     ],
     [
      "sleep",
@@ -1258,7 +1258,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
     ],
     [
      "Q",
@@ -1294,7 +1294,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABHAEEBBAGBLKKDGAC"
     ],
     [
      "sleep",
@@ -1312,7 +1312,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
     ]
    ]
   },
@@ -1321,7 +1321,7 @@
    "case": "Fluke6060A.select_section[5, RF on]",
    "log": [
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC",
     "6060A|>>|CE",
     "6060A|>>|AP-12.0DB",
     "6060A|>>|IR",
@@ -1329,7 +1329,7 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC",
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC",
     "6060A|>>|IU",
     "6060A|<<|000000,000000,000400",
     "6060A|>>|CE",
@@ -1339,15 +1339,15 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABHAEEBBAGBLKKDGAC"
    ],
    "method": "Fluke6060A.select_section",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1000000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABHAEEBBAGBLKKDGAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
    "wire": [
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
     ],
     [
      "sleep",
@@ -1378,7 +1378,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABDAEEBBAGBLKKDDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABDAEEBBAGBLKKHGAC"
     ],
     [
      "Q",
@@ -1414,7 +1414,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEACHAGAAABHAEEBBAGBLKKPDAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAAAPECEAADOHAAABHAEEBBAGBLKKDGAC"
     ]
    ]
   },
@@ -1454,10 +1454,10 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC"
+    "6060A|<<|FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGOAC"
    ],
    "method": "Fluke6060A.set_step",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 1.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGOAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -1488,7 +1488,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCLAC"
+     "FPABAAAAPPIIAAAKAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGOAC"
     ]
    ]
   },
@@ -1503,10 +1503,10 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGEAC"
    ],
    "method": "Fluke6060A.set_step",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 111111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGEAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
    "wire": [
     [
      "sleep",
@@ -1537,7 +1537,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
+     "FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGEAC"
     ]
    ]
   },
@@ -1546,7 +1546,7 @@
    "case": "Fluke6060A.step[freq up]",
    "log": [
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGEAC",
     "6060A|>>|CE",
     "6060A|>>|FU",
     "6060A|>>|FU",
@@ -1555,15 +1555,15 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEEBBAGBLKKKPAC"
    ],
    "method": "Fluke6060A.step",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 114111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 114111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEEBBAGBLKKKPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
    "wire": [
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGACHAGAAABHAEEBBAGBLKKCBAC"
+     "FPABAAAAPPIIAABEAAAAAAAAAGJPGLLMAABGODGAADOHAAABHAEEBBAGBLKKGEAC"
     ],
     [
      "sleep",
@@ -1602,7 +1602,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
+     "FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEEBBAGBLKKKPAC"
     ]
    ]
   },
@@ -1611,7 +1611,7 @@
    "case": "Fluke6060A.step[level down]",
    "log": [
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC",
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEEBBAGBLKKKPAC",
     "6060A|>>|CE",
     "6060A|>>|LD",
     "6060A|>>|IR",
@@ -1619,15 +1619,15 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEIBBAGBLKKLPAC"
    ],
    "method": "Fluke6060A.step",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -14.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28744, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 114111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'ampl'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -14.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28744, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 114111100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEIBBAGBLKKLPAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'ampl'}",
    "wire": [
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEEBBAGBLKKGMAC"
+     "FPABAAAAPPIIAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEEBBAGBLKKKPAC"
     ],
     [
      "sleep",
@@ -1658,7 +1658,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
+     "FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEIBBAGBLKKLPAC"
     ]
    ]
   },
@@ -1675,7 +1675,7 @@
    "case": "Fluke6060A.step_frequency",
    "log": [
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC",
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEIBBAGBLKKLPAC",
     "6060A|>>|CE",
     "6060A|>>|FD",
     "6060A|>>|IR",
@@ -1683,15 +1683,15 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEEBBAGBLKKBNAC"
    ],
    "method": "Fluke6060A.step_frequency",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -14.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 112611100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -14.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28740, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 112611100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEEBBAGBLKKBNAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'freq'}",
    "wire": [
     [
      "Q",
      "LM99",
-     "FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGACHAGAAABHAEIBBAGBLKKHMAC"
+     "FPABAAAAPPHEAABEAAAAAAAAAGMNDCHMAABGODGAADOHAAABHAEIBBAGBLKKLPAC"
     ],
     [
      "sleep",
@@ -1722,7 +1722,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
+     "FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEEBBAGBLKKBNAC"
     ]
    ]
   },
@@ -1731,7 +1731,7 @@
    "case": "Fluke6060A.step_level",
    "log": [
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC",
+    "6060A|<<|FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEEBBAGBLKKBNAC",
     "6060A|>>|CE",
     "6060A|>>|LU",
     "6060A|>>|IR",
@@ -1739,15 +1739,15 @@
     "6060A|>>|ID",
     "6060A|<<|6060A/AN",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC"
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEIBBAGBLKKAFAC"
    ],
    "method": "Fluke6060A.step_level",
-   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28744, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_hz': 99900.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 112611100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'ampl'}",
+   "result": "returned {'am_depth_pct': 95, 'am_step_pct': 1, 'amp_step': 2.0, 'amplitude_dbm': -12.0, 'amplitude_units': 'dBm', 'amplitude_v': None, 'correction': 'all_on', 'data_set_1': 28744, 'data_set_2': 4358, 'ext_am': False, 'ext_fm': False, 'ext_mod_level': 'invalid', 'ext_ref': False, 'fixed_range': False, 'fm_dev_digits': 999, 'fm_dev_hz': 9990.0, 'fm_res_hz': 10.0, 'fm_step_hz': 100.0, 'freq_step_hz': 1500000, 'frequency_hz': 112611100, 'int_am': False, 'int_fm': False, 'mod_display': 'AM', 'mod_rate_hz': 1000, 'raw': 'FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEIBBAGBLKKAFAC', 'reference_frequency_hz': 0, 'rel_amp': False, 'rel_freq': False, 'rf_on': True, 'step_function': 'ampl'}",
    "wire": [
     [
      "Q",
      "LM99",
-     "FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEEBBAGBLKKNKAC"
+     "FPABAAAAPPHEAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEEBBAGBLKKBNAC"
     ],
     [
      "sleep",
@@ -1778,7 +1778,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABHAEIBBAGBLKKMCAC"
+     "FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABHAEIBBAGBLKKAFAC"
     ]
    ]
   },
@@ -1788,7 +1788,7 @@
    "log": [
     "6060A|>>|RO0",
     "6060A|>>|LM99",
-    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABDAEIBBAGBLKKACAC"
+    "6060A|<<|FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABDAEIBBAGBLKKEFAC"
    ],
    "method": "Fluke6060A.cleanup",
    "result": "returned None",
@@ -1804,7 +1804,7 @@
     [
      "Q",
      "LM99",
-     "FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGACHAGAAABDAEIBBAGBLKKACAC"
+     "FPABAAAAPPIIAABEAAAAAAAAAGLGEPBMAABGODGAADOHAAABDAEIBBAGBLKKEFAC"
     ],
     [
      "ctl",

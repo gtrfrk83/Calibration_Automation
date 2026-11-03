@@ -184,7 +184,26 @@ class LearnString(unittest.TestCase):
         self.assertTrue(learn_checksum_ok(text))
         back = decode_learn(text)
         for key, want in state.items():
+            if key == 'fm_dev_hz':
+                continue
             self.assertEqual(back[key], want, key)
+        # owner bench 2026-11-03: the FM field holds the DISPLAYED digits (12.3 kHz -> 123, resolution char still 'B'); the decade comes from the value asked for
+        self.assertEqual(back['fm_dev_digits'], 123)
+        self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 12_300.0}, back), [])
+        self.assertTrue(Fluke6060A.compare(None, {'fm_dev_hz': 12_400.0}, decode_learn(text)))
+
+    def test_the_bench_learn_string_at_10_khz_reads_back_as_10_khz(self):
+        """Owner bench 2026-11-03: FM10KZ on a 250 kHz carrier, front panel 10.0 kHz; LM99 (the 'read-back refused ... 1000.0' error) as shown on screen, one letter fixed by the
+        checksum. Chars 41-44 'AAGE' = 100 digits, char 57 'B'. It now reads back as 10.0 kHz; 9.99 kHz or 1.00 kHz asked against it would not match the display range."""
+        bench = 'BOABAAAAAAEGAAAKAAAAAAAAAAADNAJAAAAPECEAAAGEAAABJCEEBBBGBLKKHFAC'
+        self.assertTrue(learn_checksum_ok(bench))
+        st = decode_learn(bench)
+        self.assertEqual((st['frequency_hz'], st['amplitude_dbm'], st['int_fm'], st['mod_rate_hz'], st['fm_dev_digits'], st['fm_res_hz']), (250_000, 7.0, True, 1000, 100, 10.0))
+        self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 10_000.0}, st), [])
+        self.assertEqual(st['fm_dev_hz'], 10_000.0)
+        self.assertTrue(Fluke6060A.compare(None, {'fm_dev_hz': 9_990.0}, decode_learn(bench)))
+        self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 1_000.0}, decode_learn(bench)), [], 'the string cannot tell 1.00 kHz from 10.0 kHz (the 8902A reading can)')
+        self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 5_000.0}, decode_learn(PRESET_LEARN)), [])
 
     def test_bad_strings_are_refused(self):
         for bad in (PRESET_LEARN[:-1], PRESET_LEARN + 'A', PRESET_LEARN[:-1] + 'Q', PRESET_LEARN[:-1] + 'B', ''):

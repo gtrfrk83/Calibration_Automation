@@ -218,6 +218,13 @@ def _amplitude(number, res):
     raise InstrumentError(f'6060A learn string: amplitude resolution {res:X} is not defined')
 
 
+def fm_display_res_hz(hz: float) -> float:
+    """The resolution the 6060A displays an FM deviation with (three digits): 10 Hz below 10 kHz (9.99 kHz), 100 Hz from 10.0 to 99.9 kHz, 1 kHz above (the 6060A/AN to 500 kHz:
+    UNVERIFIED). The learn string's FM field holds those digits (owner bench 2026-11-03)."""
+    hz = abs(float(hz))
+    return 10.0 if hz < 9995.0 else 100.0 if hz < 99950.0 else 1000.0
+
+
 def learn_checksum_ok(text: str) -> bool:
     """The 32 bytes (two letters each, checksum included) add up to a number ending in 01 (p. 2-52 item 6)."""
     nibs = _nibbles(text)
@@ -245,7 +252,7 @@ def decode_learn(text: str) -> dict:
         amplitude_units=units, amplitude_dbm=dbm, amplitude_v=volts,
         amp_step=step_dbm if step_units == 'dBm' else _hex(nibs, 13, 16, True) * (10.0 ** nibs[57]) * 1e-9,
         reference_frequency_hz=_hex(nibs, 17, 24), frequency_hz=_hex(nibs, 25, 32), freq_step_hz=_hex(nibs, 33, 40),
-        fm_dev_hz=_hex(nibs, 41, 44, True) * fm_res, fm_step_hz=_hex(nibs, 45, 48, True) * 10.0 ** nibs[63], fm_res_hz=fm_res,
+        fm_dev_hz=_hex(nibs, 41, 44, True) * fm_res, fm_dev_digits=_hex(nibs, 41, 44, True), fm_step_hz=_hex(nibs, 45, 48, True) * 10.0 ** nibs[63], fm_res_hz=fm_res,
         ext_ref=bool(ds1 >> 15 & 1), rf_on=bool(ds1 >> 14 & 1), ext_mod_level=EXT_MOD_LEVEL[ds1 >> 12 & 0b11],
         ext_fm=bool(ds1 >> 10 & 1), int_fm=bool(ds1 >> 9 & 1), ext_am=bool(ds1 >> 8 & 1), int_am=bool(ds1 >> 7 & 1),
         mod_rate_hz={0b01: 400, 0b10: 1000}.get(rate), step_function=STEP_FUNCTION.get(ds1 >> 2 & 0b111),
@@ -276,7 +283,9 @@ def encode_learn(state: dict) -> str:
     put(25, 32, round(s.get('frequency_hz', 300e6)))
     put(33, 40, round(s.get('freq_step_hz', 1e6)))
     fm_res_digit = int(round(math.log10(s.get('fm_res_hz', 10.0))))
-    put(41, 44, round(s.get('fm_dev_hz', 5000.0) / 10.0 ** fm_res_digit))
+    dev = s.get('fm_dev_hz', 5000.0)
+    scale = fm_display_res_hz(dev) if fm_res_digit == 1 else 10.0 ** fm_res_digit      # the displayed digits, as the bench 6060A stores them (2026-11-03)
+    put(41, 44, round(dev / scale))
     nibs[56] = fm_res_digit                                         # char 57
     put(45, 48, round(s.get('fm_step_hz', 100.0) / 100.0))
     nibs[63] = 2                                                    # char 64: FM step resolution 100 Hz
@@ -514,6 +523,17 @@ class Fluke6060A(Instrument):
         bad = []
         for key, want in expect.items():
             got = state.get(key)
+            if key == 'fm_dev_hz' and state['fm_res_hz'] == 10.0 and got is not None:
+                # Owner bench 2026-11-03: 10.0 kHz set and shown on the front panel came back as 'AAGE' (100) with resolution char 57 'B' (10 Hz), the same character as the
+                # preset's 5.00 kHz (500). The field holds the three DISPLAYED digits; their scale is the display's resolution for the value (10 Hz below 10 kHz, 100 Hz to
+                # 99.9 kHz, 1 kHz above: the last one UNVERIFIED). The learn string cannot tell 1.00 kHz from 10.0 kHz; the 8902A reading of the point would.
+                r = fm_display_res_hz(want)
+                shown = state['fm_dev_digits'] * r
+                if abs(shown - float(want)) > r / 2 + 1e-6:
+                    bad.append(f'{key}: asked {want:g}, learn string says {shown:g} (digits {state["fm_dev_digits"]} x {r:g} Hz)')
+                else:
+                    state['fm_dev_hz'] = shown                     # the deviation the 6060A shows (the decode alone cannot tell the decade)
+                continue
             if key in tol:
                 if got is None or abs(float(got) - float(want)) > tol[key]:
                     bad.append(f'{key}: asked {want:g}, learn string says {got!r}')
