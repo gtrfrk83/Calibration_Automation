@@ -311,6 +311,8 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
             extra['keep_rel'] = True
         if p['kind'] == 'OHM4' and 'ocomp' not in p:
             extra['ocomp'] = True
+        if p['kind'] == 'CAP' and not p.get('rel_acquire'):
+            extra['keep_rel'] = True                                   # the cable offset acquired at the cable-only point stays on for the other capacitance points (CM p. 2-39)
         return dict(p, plc=p.get('plc') or 1, **extra)
 
     def compensation(self, p):
@@ -348,6 +350,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
             self.cal.set_output_ohms(v)
             self.compensation(p)
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], f, dc=False)
+        elif k == 'CAP': self.cal.set_output_capacitance(v)
         elif k == 'TEMP' and p['group'] == 'TC': self.cal.set_output_volts(p['source_value'] - (self._tc_offset or 0.0), None, dc=True)
         elif k == 'TEMP':
             self.cal.set_output_ohms(p['source_ohms'])
@@ -367,10 +370,9 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         return self._read()
 
     def virtual_hooks(self, p):
-        """A virtual run has no operator to fit a short or set a capacitance box: the simulated meter is told (a real bench is not touched)."""
+        """A virtual run has no operator to fit a short: the simulated meter is told (a real bench is not touched)."""
         t = self.dmm.t
         if hasattr(t, 'shorted'): t.shorted = p['source'] == 'none'
-        if hasattr(t, 'manual_value') and p['source'] == 'manual': t.manual_value = p['nominal']
 
     @procmods_engine.point_commands()
     def measure(self, p):
@@ -393,6 +395,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
             if p.get('rel_zero'): self.dmm.acquire_reference('DCV')
             ref = self.reference_reading(p)
             reading = self.read_point(p)
+            if p.get('rel_acquire'): self.dmm.acquire_reference('CAP')      # the cable capacitance becomes the relative offset for the other capacitance points
             self.dmm.check_errors('reading ' + p['description'])
             if p['group'] in ('RTD4', 'RTD3'):
                 self.last_eval = dict(center=rtd_cvd.temperature(ref if ref is not None else p['source_ohms']), reference=ref if ref is not None else p['source_ohms'])
@@ -586,8 +589,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return ('TERMINALS switch to REAR. Heavy short cable from the calibrator current output (the manual: a 5725A amplifier in BOOST with the range locked) to the 10A AMPS '
                     'jack and INPUT LO (Figures 18 to 20); the cable must carry 10 A without significant drop. The reference DMM is in series for the DC points.')
         if g == 'CAP':
-            return ('Short shielded banana cable to the IET decade capacitance box (1 nF to 1 uF box for the nF ranges and the 1 uF to 100 uF box above) (Figures 15, 16). The '
-                    'program asks you to set the value of each point.')
+            return ('The calibrator sources the capacitance (NORMAL terminals): short shielded banana cable from its output to the DMM6500 INPUT HI / LO, as short as possible (cable capacitance up to about 300 pF). '
+                    'The first point reads the cable alone with the calibrator in standby; the program then acquires it as the relative offset for the rest.')
         return p['setup']
 
     # ------------------------------------------------------------------ connection

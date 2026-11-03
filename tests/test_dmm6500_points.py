@@ -110,6 +110,12 @@ class PrintedNumbers(unittest.TestCase):
         self.assertAlmostEqual(half('DIGI.10A.2'), 0.033)        # [2-46]
         self.assertFalse([i for i in POINTS if i.startswith('DIGI.10uA')])   # the 10 uA digitize range has no table in the manual
 
+    def test_capacitance_is_sourced_by_the_calibrator_after_a_cable_only_reading(self):
+        self.assertEqual(POINTS['CAP.1']['source'], 'none')                  # owner decision 2026-11-03: the calibrator sources the capacitance (not a decade box)
+        self.assertTrue(POINTS['CAP.1']['rel_acquire'])
+        self.assertEqual({POINTS[f'CAP.{n}']['source'] for n in range(2, 14)}, {'calibrator'})
+        self.assertEqual({s['source'] for s in SPEC['sections'] if s['id'] == 'cap'}, {'calibrator'})
+
     def test_capacitance_units_follow_the_range(self):
         self.assertAlmostEqual(POINTS['CAP.2']['nominal'], 0.1e-9)           # 10 % of 1 nF
         self.assertAlmostEqual(half('CAP.13'), 0.5e-6)                       # 100 uF: 99.5 to 100.5 uF

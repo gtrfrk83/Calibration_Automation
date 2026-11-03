@@ -3698,7 +3698,7 @@
    "title": "Capacitance (1 nF to 100 uF)",
    "page": "2-39 to 2-41",
    "group": "CAP",
-   "source": "manual",
+   "source": "calibrator",
    "terminal": "FRONT",
    "optional": false,
    "points": [
@@ -3716,11 +3716,13 @@
       "1y": 1.25e-10
      },
      "printed_limits": "0.25 to 0.5 nF",
-     "source": "manual",
+     "source": "none",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges",
-      "the first row is the cable capacitance reading"
-     ]
+      "the cable-only reading (no source, calibrator in standby): the limits 0.25 to 0.5 nF are the cable capacitance the manual expects; the relative offset is acquired from it and kept for the other capacitance points (steps 6-8, p. 2-39). The calibrator terminal capacitance is part of this reading: UNVERIFIED that it stays inside 0.25 to 0.5 nF"
+     ],
+     "rel_acquire": true,
+     "input": "open"
     },
     {
      "id": "CAP.2",
@@ -3736,9 +3738,10 @@
       "1y": 5.8e-12
      },
      "printed_limits": "0.0942 to 0.1058 nF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
-      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges",
+      "0.1 nF is below the lowest capacitance the calibrators may be able to source: check the calibrator range (UNVERIFIED), the point is refused by the calibrator if it cannot be made"
      ]
     },
     {
@@ -3755,7 +3758,7 @@
       "1y": 1.06e-11
      },
      "printed_limits": "0.6894 to 0.7106 nF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3774,7 +3777,7 @@
       "1y": 1.4e-11
      },
      "printed_limits": "0.986 to 1.014 nF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3793,7 +3796,7 @@
       "1y": 5e-11
      },
      "printed_limits": "9.95 to 10.05 nF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3812,7 +3815,7 @@
       "1y": 1.4e-10
      },
      "printed_limits": "9.86 to 10.14 nF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3831,7 +3834,7 @@
       "1y": 5e-10
      },
      "printed_limits": "99.5 to 100.5 nF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3850,7 +3853,7 @@
       "1y": 1.4e-09
      },
      "printed_limits": "0.0986 to 0.1014 uF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3869,7 +3872,7 @@
       "1y": 5e-09
      },
      "printed_limits": "0.995 to 1.005 uF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3888,7 +3891,7 @@
       "1y": 1.4e-08
      },
      "printed_limits": "0.986 to 1.014 uF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3907,7 +3910,7 @@
       "1y": 5e-08
      },
      "printed_limits": "9.95 to 10.05 uF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3926,7 +3929,7 @@
       "1y": 1.4e-07
      },
      "printed_limits": "9.86 to 10.14 uF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
@@ -3945,13 +3948,13 @@
       "1y": 5e-07
      },
      "printed_limits": "99.5 to 100.5 uF",
-     "source": "manual",
+     "source": "calibrator",
      "flags": [
       "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
      ]
     }
    ],
-   "setup": "Short shielded banana cable to the 1 nF to 1 uF decade capacitance box (IET Labs) and the 1 uF to 100 uF decade box. Set the box to 0 F, DMM6500 Capacitance on the 1 nF range, Rel Acquire (cable capacitance up to about 300 pF: keep the cable short), then set each value. The standard is set by the operator."
+   "setup": "Owner decision: the calibrator sources the capacitance (the manual uses IET decade boxes). Short shielded banana cable from the calibrator output to INPUT HI / LO (cable capacitance up to about 300 pF: keep it short). DMM6500 Capacitance on the 1 nF range: first the cable-only reading with the calibrator in standby, then Rel Acquire (kept for the rest), then each value."
   }
  ]
 }

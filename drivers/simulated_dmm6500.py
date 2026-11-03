@@ -8,8 +8,7 @@ digitize capture) is written from the Reference and Calibration manuals and is U
     bench, cal_t, dmm_t = make_dmm6500_bench('5522A')                 # 5522A / 5560A / 5520A and the meter on one bench
     bench, cal_t, dmm_t, ref_t = make_dmm6500_bench('5522A', reference=True)     # plus a simulated 3458A reading the same source
 
-Test hooks: dmm_t.gain / dmm_t.offset (per function node), dmm_t.front (TERMINALS switch), dmm_t.errors (queue), dmm_t.sent (every command), dmm_t.shorted (4-wire short fitted), dmm_t.manual_value (the
-capacitance standard the operator sets: the engine sets it in a virtual run), dmm_t.noise (digitize), bench.fail_next (substring: the next matching command times out).
+Test hooks: dmm_t.gain / dmm_t.offset (per function node), dmm_t.front (TERMINALS switch), dmm_t.errors (queue), dmm_t.sent (every command), dmm_t.shorted (4-wire short fitted), dmm_t.noise (digitize), bench.fail_next (substring: the next matching command times out).
 """
 from __future__ import annotations
 
@@ -59,7 +58,6 @@ class SimDMM6500Transport(_SimBase):
         self.offset['VOLT:DC'] = 2.5e-6                       # a 2.5 uV offset that REL removes
         self.front = True
         self.errors, self.sent = [], []
-        self.manual_value = 0.0
         self.noise = 0.0
         self.shorted = False                                    # a 4-wire short is on the input (the engine sets it for the zero points of a virtual run)
         self._power_up()
@@ -92,8 +90,10 @@ class SimDMM6500Transport(_SimBase):
         f = self.bench.fluke
         if node == 'FREQ':
             return float(f['freq']) * 1.000001 if f['operate'] and f['freq'] and f.get('unit', 'V') == 'V' else None
-        if node == 'CAP':
-            return float(self.manual_value) * 1.0005
+        if node == 'CAP':                                       # 0.375 nF of cable plus whatever capacitance the calibrator is sourcing (OUT <n>NF / UF / F)
+            scale = {'F': 1.0, 'NF': 1e-9, 'UF': 1e-6}.get(f.get('unit', ''), None)
+            source = float(f['volts']) * scale if (f['operate'] and scale) else 0.0
+            return 0.375e-9 + source
         if node == 'TEMP':
             tr = self.store.get(':SENS:TEMP:TRAN', 'TC')
             if tr == 'TC':

@@ -216,12 +216,18 @@ def build_part2():
            ('100% 100 nF range', 'nF', '100', '99.5', '100.5', 100), ('10% 1 uF range', 'uF', '0.1', '0.0986', '0.1014', 1), ('100% 1 uF range', 'uF', '1', '0.995', '1.005', 1),
            ('10% 10 uF range', 'uF', '1', '0.986', '1.014', 10), ('100% 10 uF range', 'uF', '10', '9.95', '10.05', 10), ('10% 100 uF range', 'uF', '10', '9.86', '10.14', 100),
            ('100% 100 uF range', 'uF', '100', '99.5', '100.5', 100)]
-    pts = [pt(f'CAP.{n}', 'CAP', nom, rng, unit, lo, hi, 'CAP', '2-41', label, source='manual',
-              flags=['the table prints "(F)"; nF for the nF ranges and uF for the uF ranges'] + (['the first row is the cable capacitance reading'] if n == 1 else []))
-           for n, (label, unit, nom, lo, hi, rng) in enumerate(cap, 1)]
-    out.append(dict(id='cap', title='Capacitance (1 nF to 100 uF)', page='2-39 to 2-41', group='CAP', source='manual', terminal='FRONT', optional=False, points=pts,
-                    setup='Short shielded banana cable to the 1 nF to 1 uF decade capacitance box (IET Labs) and the 1 uF to 100 uF decade box. Set the box to 0 F, DMM6500 Capacitance on the 1 nF range, '
-                          'Rel Acquire (cable capacitance up to about 300 pF: keep the cable short), then set each value. The standard is set by the operator.'))
+    pts = []
+    for n, (label, unit, nom, lo, hi, rng) in enumerate(cap, 1):
+        fl = ['the table prints "(F)"; nF for the nF ranges and uF for the uF ranges']
+        if n == 1:
+            fl.append('the cable-only reading (no source, calibrator in standby): the limits 0.25 to 0.5 nF are the cable capacitance the manual expects; the relative offset is acquired from it and kept for the '
+                      'other capacitance points (steps 6-8, p. 2-39). The calibrator terminal capacitance is part of this reading: UNVERIFIED that it stays inside 0.25 to 0.5 nF')
+        if n == 2:
+            fl.append('0.1 nF is below the lowest capacitance the calibrators may be able to source: check the calibrator range (UNVERIFIED), the point is refused by the calibrator if it cannot be made')
+        pts.append(pt(f'CAP.{n}', 'CAP', nom, rng, unit, lo, hi, 'CAP', '2-41', label, source='none' if n == 1 else 'calibrator', flags=fl, **({'rel_acquire': True, 'input': 'open'} if n == 1 else {})))
+    out.append(dict(id='cap', title='Capacitance (1 nF to 100 uF)', page='2-39 to 2-41', group='CAP', source='calibrator', terminal='FRONT', optional=False, points=pts,
+                    setup='Owner decision: the calibrator sources the capacitance (the manual uses IET decade boxes). Short shielded banana cable from the calibrator output to INPUT HI / LO (cable capacitance up to '
+                          'about 300 pF: keep it short). DMM6500 Capacitance on the 1 nF range: first the cable-only reading with the calibrator in standby, then Rel Acquire (kept for the rest), then each value.'))
     return out
 
 

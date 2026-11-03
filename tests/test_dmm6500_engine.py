@@ -99,6 +99,19 @@ class Thermocouple(Fast):
         io.close()
 
 
+class Capacitance(Fast):
+    def test_cable_reading_becomes_the_relative_offset_and_the_calibrator_sources_the_rest(self):
+        io, bench, ct, dt, rt = build()
+        r1 = io.measure(BY_REF['CAP.1'])                                       # the cable alone, calibrator in standby
+        self.assertAlmostEqual(r1, 0.375e-9, delta=1e-12)
+        self.assertTrue(E.judge(BY_REF['CAP.1'], r1))
+        self.assertTrue(io.dmm.rel_is_on('CAP'))
+        r5 = io.measure(BY_REF['CAP.5'])                                       # 10 nF from the calibrator, cable offset removed by REL
+        self.assertAlmostEqual(r5, 10e-9, delta=BY_REF['CAP.5']['error'])
+        self.assertTrue(E.judge(BY_REF['CAP.5'], r5))
+        io.close()
+
+
 class Rtd(unittest.TestCase):
     def test_manual_example_conversions(self):
         for ohms, want in ((18.999520, -198.8900), (99.99707, -0.0075), (189.99234, 238.6775)):
