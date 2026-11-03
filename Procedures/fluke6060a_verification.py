@@ -20,8 +20,11 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, cast
 
-HERE = Path(__file__).resolve().parent
-sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
+OWN_DIR = Path(__file__).resolve().parent         # Procedures/ (this engine and its window code travel with the procedure, so a package can update them)
+HERE = OWN_DIR.parent                              # the suite folder: ui_theme, procspec, drivers, specs and diagrams sit there
+for _d in (str(HERE), str(OWN_DIR)):
+    if _d not in sys.path:
+        sys.path.append(_d)
 import ui_port
 import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in fluke6060a_view_qt.py
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)

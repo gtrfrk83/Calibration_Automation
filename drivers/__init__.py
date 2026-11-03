@@ -4,6 +4,10 @@
     with Fluke5560A(open_visa('ASRL9::INSTR', baud=9600)) as cal: ...
 
 Add a model by copying drivers/TEMPLATE.md's checklist - see README.txt in this folder.
+
+A driver that is not imported below is still found: `drivers.<Name>` / `from drivers import <Name>` looks through the driver files for a class (or function
+or constant) of that name and imports only that file (see __getattr__ at the end).  So a new driver file dropped into this folder, for example by a procedure
+package, works without this file being edited; the lines below are only the fast path for the drivers the suite already ships.
 """
 from .base import Instrument, InstrumentError, SafetyError
 from .fluke_5560a import SERIAL_DEFAULT as FLUKE_5560A_SERIAL
@@ -43,3 +47,28 @@ def open_visa(address, timeout=10.0, **serial_kwargs):
     matter for ASRL/RS-232 resources."""
     serial = SerialSettings(**serial_kwargs) if serial_kwargs else None
     return VisaTransport(address, timeout=timeout, serial=serial)
+
+
+def __getattr__(name):
+    """Find a driver name that is not imported above: look for `class <name>` / `def <name>` / `<name> =` at the top level of the driver files in this folder
+    and import only the file that defines it (PEP 562).  Lets a new driver file work without an edit to this shared file (a procedure package cannot edit it)."""
+    if name.startswith('_'):
+        raise AttributeError(name)
+    import importlib
+    import re
+    from pathlib import Path
+    pattern = re.compile(r'^(?:class|def)\s+' + re.escape(name) + r'\b|^' + re.escape(name) + r'\s*(?::[^=\n]+)?=', re.M)
+    for folder in __path__:
+        for path in sorted(Path(folder).glob('*.py')):
+            if path.stem.startswith('_') or path.stem == 'selftest':
+                continue
+            try:
+                found = pattern.search(path.read_text(encoding='utf-8', errors='replace'))
+            except OSError:
+                continue
+            if found:
+                module = importlib.import_module(f'{__name__}.{path.stem}')
+                if hasattr(module, name):
+                    globals()[name] = value = getattr(module, name)
+                    return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

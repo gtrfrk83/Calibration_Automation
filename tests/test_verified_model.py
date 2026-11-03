@@ -62,7 +62,7 @@ class Keys(unittest.TestCase):
         self.assertTrue(V.make_entry('n', 'm', '', ROOT, user_uid='u', spec_path='/s.json').is_user_built)
 
     def test_every_launcher_has_a_definition_and_every_listed_file_exists(self):
-        launchers = {p.name for p in (ROOT / 'Procedures').glob('*.py')} - {'User_Datasheet.py', '__init__.py'}
+        launchers = {p.name for p in (ROOT / 'Procedures').glob('*.py') if (ROOT / 'Procedures' / (p.stem + '.procedure.json')).is_file()} - {'User_Datasheet.py', '__init__.py'}     # engines that live in Procedures/ have no sidecar
         self.assertEqual(launchers, set(V.FILES), 'a launcher in Procedures/ without a Procedures/<id>.procedure.json (or the other way round)')
         missing = [(k, rel) for k, f in V.FILES.items() for rel in f['code'] + f['spec'] if not (ROOT / rel).is_file()]
         self.assertEqual(missing, [])

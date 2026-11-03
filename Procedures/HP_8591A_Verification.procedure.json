@@ -10,7 +10,7 @@
  "description": "Automated performance verification of the HP 8591A from the USAF calibration procedure T.O. 33K3-4-2864-1 (127 test points): self-calibration prompt, CAL OUT level (NRP40T on the 96270A) and frequency (typed counter), frequency readout, noise sidebands, span (Table 2), sweep time (Table 3, internal AM), scale fidelity log / linear (Tables 4 to 6), input attenuator (Table 7), reference level (Table 8), RBW switching (Table 9), RBW width (Table 10), frequency response (Tables 11, 12) and displayed average noise level (typed). The document's sweeper, power meter, counter, synthesizer, step attenuators and generators are replaced by the Fluke 96270A; every replacement and every command not read in the 8590 Programming Manual is flagged UNVERIFIED. The 50 s and 100 s sweep-time rows are NOT TESTED (96270A AM minimum 1 Hz).",
  "launcher": "Procedures/HP_8591A_Verification.py",
  "engine": [
-  "hp8591a_verification.py"
+  "Procedures/hp8591a_verification.py"
  ],
  "drivers": [
   "hp_8591a",
@@ -23,8 +23,8 @@
  "fingerprint": {
   "code": [
    "Procedures/HP_8591A_Verification.py",
-   "hp8591a_verification.py",
-   "hp8591a_view_qt.py",
+   "Procedures/hp8591a_verification.py",
+   "Procedures/hp8591a_view_qt.py",
    "qtui/bench_view.py",
    "ui_port.py",
    "procspec.py",
@@ -53,8 +53,8 @@
   "specs/build_hp_8591a_spec.py",
   "drivers/hp_8591a.py",
   "drivers/simulated_8591a.py",
-  "hp8591a_verification.py",
-  "hp8591a_view_qt.py",
+  "Procedures/hp8591a_verification.py",
+  "Procedures/hp8591a_view_qt.py",
   "tests/test_hp8591a.py"
  ],
  "tests": [
