@@ -95,6 +95,7 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'truevolt_verification.py': ('execute', 'reset_then', '_next'),
     'dacq_verification.py': ('execute', 'reset_then', '_next'),
     'keithley2000_verification.py': ('execute', 'reset_then', '_next'),
+    'dmm6500_verification.py': ('execute', 'reset_then', '_next'),
     'agilent34410a_verification.py': ('execute', 'reset_then', '_next'),
     'keysight_53220a_verification.py': ('execute', 'reset_then', '_next'),
     'i400_verification.py': ('execute', 'reset_then', '_next'),

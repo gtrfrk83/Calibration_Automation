@@ -891,7 +891,7 @@ class BK5491B(unittest.TestCase):
 
 # ====================================================================================================== coverage: no engine escapes a decision
 FLAGGED = {          # engine file :: class -> sets MANUAL_OVERRIDE = True
-    'agilent34410a_verification.py::App', 'bk5491b_verification.py::App', 'dacq_verification.py::App', 'fluke6060a_verification.py::App', 'hp8591a_verification.py::App', 'dsb_runtime.py::DsbApp', 'fgen_verification.py::App',
+    'agilent34410a_verification.py::App', 'bk5491b_verification.py::App', 'dacq_verification.py::App', 'dmm6500_verification.py::App', 'fluke6060a_verification.py::App', 'hp8591a_verification.py::App', 'dsb_runtime.py::DsbApp', 'fgen_verification.py::App',
     'fluke8808a_verification.py::App', 'i400_verification.py::App', 'keithley2000_verification.py::App', 'keysight_53220a_verification.py::App',
     'mdo3_verification.py::App', 'mdo4000c_verification.py::App', 'tbs2000b_verification.py::App', 'tds2000c_verification.py::App', 'truevolt_verification.py::App',
     'Procedures/Agilent_34401A.py::App', 'Procedures/Fluke_8846A_Verification.py::App',
@@ -986,7 +986,7 @@ class Coverage(unittest.TestCase):
         pm_bind_tree (ProcModsMixin, or the mixin's own for an App without procedure modifications)."""
         import py_compile
         views = {'truevolt_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'agilent34410a_view_qt.py': 'B.action_bar(self, sh, manual=True)',
-                 'k2000_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'keysight_53220a_view_qt.py': 'B.action_bar(self, sh, manual=True)',
+                 'k2000_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'dmm6500_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'keysight_53220a_view_qt.py': 'B.action_bar(self, sh, manual=True)',
                  'dacq_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'i400_view_qt.py': 'B.action_bar(self, sh, manual=True)',
                  'a34401a_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'f8846a_view_qt.py': 'B.action_bar(self, sh, excel=True, manual=True)',
                  'f8808a_view_qt.py': 'B.action_bar(self, sh, manual=True)', 'bk5491b_view_qt.py': 'B.action_bar(self, sh, manual=True)',

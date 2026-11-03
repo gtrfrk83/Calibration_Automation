@@ -1,0 +1,1683 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.connect",
+   "log": [
+    "DMM6500|>>|*CLS",
+    "DMM6500|>>|*IDN?",
+    "DMM6500|<<|KEITHLEY INSTRUMENTS,MODEL DMM6500,04000000,1.7.12b"
+   ],
+   "method": "KeithleyDMM6500.connect",
+   "result": "returned <KeithleyDMM6500>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEITHLEY INSTRUMENTS,MODEL DMM6500,04000000,1.7.12b"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.cleanup",
+   "log": [],
+   "method": "KeithleyDMM6500.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.reset_to_defaults",
+   "log": [
+    "DMM6500|>>|*RST",
+    "DMM6500|>>|*CLS",
+    "DMM6500|>>|*OPC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SYST:ERR?",
+    "DMM6500|<<|0,\"No error\"",
+    "DMM6500|>>|:SENS:COUN 1",
+    "DMM6500|>>|:SENS:COUN?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:FORM:ASC:PREC 10",
+    "DMM6500|>>|:FORM:ASC:PREC?",
+    "DMM6500|<<|10"
+   ],
+   "method": "KeithleyDMM6500.reset_to_defaults",
+   "result": "returned ResetReport(instrument='DMM6500', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='known measurement state (count 1, ASCII precision)', ok=True, detail='count 1, ASCII precision 10')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     ":SENS:COUN 1"
+    ],
+    [
+     "Q",
+     ":SENS:COUN?",
+     "1"
+    ],
+    [
+     "W",
+     ":FORM:ASC:PREC 10"
+    ],
+    [
+     "Q",
+     ":FORM:ASC:PREC?",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'plc': 1, 'range': 10.0}",
+   "case": "KeithleyDMM6500.configure_point[DCV 10 V]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"VOLT:DC\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"VOLT:DC\"\"",
+    "DMM6500|>>|:SENS:VOLT:DC:RANG 10",
+    "DMM6500|>>|:SENS:VOLT:DC:RANG?",
+    "DMM6500|<<|10",
+    "DMM6500|>>|:SENS:VOLT:DC:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:VOLT:DC:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:VOLT:DC:NPLC 1",
+    "DMM6500|>>|:SENS:VOLT:DC:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:VOLT:DC:AZER ON",
+    "DMM6500|>>|:SENS:VOLT:DC:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:VOLT:DC:INP AUTO",
+    "DMM6500|>>|:SENS:VOLT:DC:INP?",
+    "DMM6500|<<|AUTO",
+    "DMM6500|>>|:SENS:VOLT:DC:REL:STAT OFF",
+    "DMM6500|>>|:SENS:VOLT:DC:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"VOLT:DC\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"VOLT:DC\"\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:RANG 10"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG?",
+     "10"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:INP AUTO"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:INP?",
+     "AUTO"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ac_bandwidth': 30, 'kind': 'ACV', 'range': 1.0}",
+   "case": "KeithleyDMM6500.configure_point[ACV 1 V 1 kHz]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"VOLT:AC\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"VOLT:AC\"\"",
+    "DMM6500|>>|:SENS:VOLT:AC:RANG 1",
+    "DMM6500|>>|:SENS:VOLT:AC:RANG?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:VOLT:AC:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:VOLT:AC:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "DMM6500|>>|:SENS:VOLT:AC:DET:BAND?",
+    "DMM6500|<<|30",
+    "DMM6500|>>|:SENS:VOLT:AC:REL:STAT OFF",
+    "DMM6500|>>|:SENS:VOLT:AC:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"VOLT:AC\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"VOLT:AC\"\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:RANG 1"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:RANG?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:DET:BAND 30"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:DET:BAND?",
+     "30"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCI', 'plc': 1, 'range': 0.1}",
+   "case": "KeithleyDMM6500.configure_point[DCI 100 mA]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"CURR:DC\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"CURR:DC\"\"",
+    "DMM6500|>>|:SENS:CURR:DC:RANG 0.1",
+    "DMM6500|>>|:SENS:CURR:DC:RANG?",
+    "DMM6500|<<|0.1",
+    "DMM6500|>>|:SENS:CURR:DC:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:CURR:DC:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:CURR:DC:NPLC 1",
+    "DMM6500|>>|:SENS:CURR:DC:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:CURR:DC:AZER ON",
+    "DMM6500|>>|:SENS:CURR:DC:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:CURR:DC:REL:STAT OFF",
+    "DMM6500|>>|:SENS:CURR:DC:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"CURR:DC\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"CURR:DC\"\""
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:RANG 0.1"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:RANG?",
+     "0.1"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'ACI', 'range': 1.0}",
+   "case": "KeithleyDMM6500.configure_point[ACI 1 A]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"CURR:AC\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"CURR:AC\"\"",
+    "DMM6500|>>|:SENS:CURR:AC:RANG 1",
+    "DMM6500|>>|:SENS:CURR:AC:RANG?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:CURR:AC:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:CURR:AC:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:CURR:AC:DET:BAND 30",
+    "DMM6500|>>|:SENS:CURR:AC:DET:BAND?",
+    "DMM6500|<<|30",
+    "DMM6500|>>|:SENS:CURR:AC:REL:STAT OFF",
+    "DMM6500|>>|:SENS:CURR:AC:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"CURR:AC\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"CURR:AC\"\""
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:RANG 1"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:RANG?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:DET:BAND 30"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:DET:BAND?",
+     "30"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM4', 'ocomp': True, 'range': 1000.0}",
+   "case": "KeithleyDMM6500.configure_point[OHM4 1 kohm ocomp]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"FRES\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"FRES\"\"",
+    "DMM6500|>>|:SENS:FRES:RANG 1000",
+    "DMM6500|>>|:SENS:FRES:RANG?",
+    "DMM6500|<<|1000",
+    "DMM6500|>>|:SENS:FRES:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:FRES:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:FRES:NPLC 1",
+    "DMM6500|>>|:SENS:FRES:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:FRES:AZER ON",
+    "DMM6500|>>|:SENS:FRES:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:FRES:ODET OFF",
+    "DMM6500|>>|:SENS:FRES:ODET?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:FRES:OCOM ON",
+    "DMM6500|>>|:SENS:FRES:OCOM?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:FRES:REL:STAT OFF",
+    "DMM6500|>>|:SENS:FRES:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"FRES\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"FRES\"\""
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG 1000"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG?",
+     "1000"
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:ODET OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:ODET?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:OCOM ON"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:OCOM?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM4', 'ocomp': False, 'range': 1000000.0}",
+   "case": "KeithleyDMM6500.configure_point[OHM4 1 Mohm no ocomp]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"FRES\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"FRES\"\"",
+    "DMM6500|>>|:SENS:FRES:RANG 1000000",
+    "DMM6500|>>|:SENS:FRES:RANG?",
+    "DMM6500|<<|1000000",
+    "DMM6500|>>|:SENS:FRES:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:FRES:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:FRES:NPLC 1",
+    "DMM6500|>>|:SENS:FRES:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:FRES:AZER ON",
+    "DMM6500|>>|:SENS:FRES:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:FRES:ODET OFF",
+    "DMM6500|>>|:SENS:FRES:ODET?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:FRES:OCOM OFF",
+    "DMM6500|>>|:SENS:FRES:OCOM?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:FRES:REL:STAT OFF",
+    "DMM6500|>>|:SENS:FRES:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"FRES\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"FRES\"\""
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG 1000000"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG?",
+     "1000000"
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:ODET OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:ODET?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:OCOM OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:OCOM?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM2', 'range': 100000000.0}",
+   "case": "KeithleyDMM6500.configure_point[OHM2 100 Mohm]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"RES\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"RES\"\"",
+    "DMM6500|>>|:SENS:RES:RANG 100000000",
+    "DMM6500|>>|:SENS:RES:RANG?",
+    "DMM6500|<<|100000000",
+    "DMM6500|>>|:SENS:RES:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:RES:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:RES:NPLC 1",
+    "DMM6500|>>|:SENS:RES:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:RES:AZER ON",
+    "DMM6500|>>|:SENS:RES:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:RES:REL:STAT OFF",
+    "DMM6500|>>|:SENS:RES:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"RES\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"RES\"\""
+    ],
+    [
+     "W",
+     ":SENS:RES:RANG 100000000"
+    ],
+    [
+     "Q",
+     ":SENS:RES:RANG?",
+     "100000000"
+    ],
+    [
+     "W",
+     ":SENS:RES:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:RES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:RES:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:RES:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:RES:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:RES:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:RES:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:RES:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'CAP', 'range': 1e-09}",
+   "case": "KeithleyDMM6500.configure_point[CAP 1 nF]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"CAP\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"CAP\"\"",
+    "DMM6500|>>|:SENS:CAP:RANG 1e-09",
+    "DMM6500|>>|:SENS:CAP:RANG?",
+    "DMM6500|<<|1e-09",
+    "DMM6500|>>|:SENS:CAP:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:CAP:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:CAP:REL:STAT OFF",
+    "DMM6500|>>|:SENS:CAP:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"CAP\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"CAP\"\""
+    ],
+    [
+     "W",
+     ":SENS:CAP:RANG 1e-09"
+    ],
+    [
+     "Q",
+     ":SENS:CAP:RANG?",
+     "1e-09"
+    ],
+    [
+     "W",
+     ":SENS:CAP:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CAP:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:CAP:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CAP:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'FREQ'}",
+   "case": "KeithleyDMM6500.configure_point[FREQ]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"FREQ\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"FREQ\"\"",
+    "DMM6500|>>|:SENS:FREQ:APER 0.25",
+    "DMM6500|>>|:SENS:FREQ:APER?",
+    "DMM6500|<<|0.25",
+    "DMM6500|>>|:SENS:FREQ:THR:RANG 10",
+    "DMM6500|>>|:SENS:FREQ:THR:RANG?",
+    "DMM6500|<<|10",
+    "DMM6500|>>|:SENS:FREQ:REL:STAT OFF",
+    "DMM6500|>>|:SENS:FREQ:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"FREQ\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"FREQ\"\""
+    ],
+    [
+     "W",
+     ":SENS:FREQ:APER 0.25"
+    ],
+    [
+     "Q",
+     ":SENS:FREQ:APER?",
+     "0.25"
+    ],
+    [
+     "W",
+     ":SENS:FREQ:THR:RANG 10"
+    ],
+    [
+     "Q",
+     ":SENS:FREQ:THR:RANG?",
+     "10"
+    ],
+    [
+     "W",
+     ":SENS:FREQ:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FREQ:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'aperture': 0.001, 'count': 100, 'kind': 'DIGV', 'range': 0.1, 'srate': 1000}",
+   "case": "KeithleyDMM6500.configure_point[DIGV 100 mV]",
+   "log": [
+    "DMM6500|>>|:SENS:DIG:FUNC \"VOLT\"",
+    "DMM6500|>>|:SENS:DIG:FUNC?",
+    "DMM6500|<<|\"VOLT\"",
+    "DMM6500|>>|:SENS:DIG:VOLT:RANG 0.1",
+    "DMM6500|>>|:SENS:DIG:VOLT:RANG?",
+    "DMM6500|<<|0.1",
+    "DMM6500|>>|:SENS:DIG:VOLT:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:DIG:VOLT:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:DIG:VOLT:SRAT 1000",
+    "DMM6500|>>|:SENS:DIG:VOLT:SRAT?",
+    "DMM6500|<<|1000",
+    "DMM6500|>>|:SENS:DIG:VOLT:APER 0.001",
+    "DMM6500|>>|:SENS:DIG:VOLT:APER?",
+    "DMM6500|<<|0.001",
+    "DMM6500|>>|:SENS:DIG:COUN 100",
+    "DMM6500|>>|:SENS:DIG:COUN?",
+    "DMM6500|<<|100",
+    "DMM6500|>>|:SENS:DIG:VOLT:REL:STAT OFF",
+    "DMM6500|>>|:SENS:DIG:VOLT:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:DIG:FUNC \"VOLT\""
+    ],
+    [
+     "Q",
+     ":SENS:DIG:FUNC?",
+     "\"VOLT\""
+    ],
+    [
+     "W",
+     ":SENS:DIG:VOLT:RANG 0.1"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:VOLT:RANG?",
+     "0.1"
+    ],
+    [
+     "W",
+     ":SENS:DIG:VOLT:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:VOLT:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:DIG:VOLT:SRAT 1000"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:VOLT:SRAT?",
+     "1000"
+    ],
+    [
+     "W",
+     ":SENS:DIG:VOLT:APER 0.001"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:VOLT:APER?",
+     "0.001"
+    ],
+    [
+     "W",
+     ":SENS:DIG:COUN 100"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:COUN?",
+     "100"
+    ],
+    [
+     "W",
+     ":SENS:DIG:VOLT:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:VOLT:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'count': 100, 'kind': 'DIGI', 'range': 1.0, 'srate': 1000}",
+   "case": "KeithleyDMM6500.configure_point[DIGI 1 A]",
+   "log": [
+    "DMM6500|>>|:SENS:DIG:FUNC \"CURR\"",
+    "DMM6500|>>|:SENS:DIG:FUNC?",
+    "DMM6500|<<|\"CURR\"",
+    "DMM6500|>>|:SENS:DIG:CURR:RANG 1",
+    "DMM6500|>>|:SENS:DIG:CURR:RANG?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:DIG:CURR:RANG:AUTO OFF",
+    "DMM6500|>>|:SENS:DIG:CURR:RANG:AUTO?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:DIG:CURR:SRAT 1000",
+    "DMM6500|>>|:SENS:DIG:CURR:SRAT?",
+    "DMM6500|<<|1000",
+    "DMM6500|>>|:SENS:DIG:CURR:APER 0.001",
+    "DMM6500|>>|:SENS:DIG:CURR:APER?",
+    "DMM6500|<<|0.001",
+    "DMM6500|>>|:SENS:DIG:COUN 100",
+    "DMM6500|>>|:SENS:DIG:COUN?",
+    "DMM6500|<<|100",
+    "DMM6500|>>|:SENS:DIG:CURR:REL:STAT OFF",
+    "DMM6500|>>|:SENS:DIG:CURR:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:DIG:FUNC \"CURR\""
+    ],
+    [
+     "Q",
+     ":SENS:DIG:FUNC?",
+     "\"CURR\""
+    ],
+    [
+     "W",
+     ":SENS:DIG:CURR:RANG 1"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:CURR:RANG?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:DIG:CURR:RANG:AUTO OFF"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:CURR:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:DIG:CURR:SRAT 1000"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:CURR:SRAT?",
+     "1000"
+    ],
+    [
+     "W",
+     ":SENS:DIG:CURR:APER 0.001"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:CURR:APER?",
+     "0.001"
+    ],
+    [
+     "W",
+     ":SENS:DIG:COUN 100"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:COUN?",
+     "100"
+    ],
+    [
+     "W",
+     ":SENS:DIG:CURR:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:DIG:CURR:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'TEMP', 'tc_type': 'J', 'transducer': 'TC'}",
+   "case": "KeithleyDMM6500.configure_point[TEMP TC J]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"TEMP\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"TEMP\"\"",
+    "DMM6500|>>|:SENS:TEMP:NPLC 1",
+    "DMM6500|>>|:SENS:TEMP:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:TEMP:AZER ON",
+    "DMM6500|>>|:SENS:TEMP:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:TEMP:TRAN TC",
+    "DMM6500|>>|:SENS:TEMP:TRAN?",
+    "DMM6500|<<|TC",
+    "DMM6500|>>|:SENS:TEMP:TC:TYPE J",
+    "DMM6500|>>|:SENS:TEMP:TC:TYPE?",
+    "DMM6500|<<|J",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:RSEL SIM",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:RSEL?",
+    "DMM6500|<<|SIM",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:SIM 0",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:SIM?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:TEMP:UNIT CELS",
+    "DMM6500|>>|:SENS:TEMP:UNIT?",
+    "DMM6500|<<|CELS",
+    "DMM6500|>>|:SENS:TEMP:REL:STAT OFF",
+    "DMM6500|>>|:SENS:TEMP:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"TEMP\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"TEMP\"\""
+    ],
+    [
+     "W",
+     ":SENS:TEMP:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TRAN TC"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TRAN?",
+     "TC"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TC:TYPE J"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TC:TYPE?",
+     "J"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TC:RJUN:RSEL SIM"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TC:RJUN:RSEL?",
+     "SIM"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TC:RJUN:SIM 0"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TC:RJUN:SIM?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:UNIT CELS"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:UNIT?",
+     "CELS"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'TEMP', 'rtd': 'PT100', 'transducer': 'FRTD'}",
+   "case": "KeithleyDMM6500.configure_point[TEMP 4-wire RTD]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"TEMP\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"TEMP\"\"",
+    "DMM6500|>>|:SENS:TEMP:NPLC 1",
+    "DMM6500|>>|:SENS:TEMP:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:TEMP:AZER ON",
+    "DMM6500|>>|:SENS:TEMP:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:TEMP:TRAN FRTD",
+    "DMM6500|>>|:SENS:TEMP:TRAN?",
+    "DMM6500|<<|FRTD",
+    "DMM6500|>>|:SENS:TEMP:RTD:FOUR PT100",
+    "DMM6500|>>|:SENS:TEMP:RTD:FOUR?",
+    "DMM6500|<<|PT100",
+    "DMM6500|>>|:SENS:TEMP:UNIT CELS",
+    "DMM6500|>>|:SENS:TEMP:UNIT?",
+    "DMM6500|<<|CELS",
+    "DMM6500|>>|:SENS:TEMP:REL:STAT OFF",
+    "DMM6500|>>|:SENS:TEMP:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"TEMP\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"TEMP\"\""
+    ],
+    [
+     "W",
+     ":SENS:TEMP:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TRAN FRTD"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TRAN?",
+     "FRTD"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:RTD:FOUR PT100"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:RTD:FOUR?",
+     "PT100"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:UNIT CELS"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:UNIT?",
+     "CELS"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'TEMP', 'rtd': 'PT100', 'transducer': 'TRTD'}",
+   "case": "KeithleyDMM6500.configure_point[TEMP 3-wire RTD]",
+   "log": [
+    "DMM6500|>>|:SENS:FUNC \"TEMP\"",
+    "DMM6500|>>|:SENS:FUNC?",
+    "DMM6500|<<|\"\"TEMP\"\"",
+    "DMM6500|>>|:SENS:TEMP:NPLC 1",
+    "DMM6500|>>|:SENS:TEMP:NPLC?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:TEMP:AZER ON",
+    "DMM6500|>>|:SENS:TEMP:AZER?",
+    "DMM6500|<<|1",
+    "DMM6500|>>|:SENS:TEMP:TRAN TRTD",
+    "DMM6500|>>|:SENS:TEMP:TRAN?",
+    "DMM6500|<<|TRTD",
+    "DMM6500|>>|:SENS:TEMP:RTD:THR PT100",
+    "DMM6500|>>|:SENS:TEMP:RTD:THR?",
+    "DMM6500|<<|PT100",
+    "DMM6500|>>|:SENS:TEMP:UNIT CELS",
+    "DMM6500|>>|:SENS:TEMP:UNIT?",
+    "DMM6500|<<|CELS",
+    "DMM6500|>>|:SENS:TEMP:REL:STAT OFF",
+    "DMM6500|>>|:SENS:TEMP:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC \"TEMP\""
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"\"TEMP\"\""
+    ],
+    [
+     "W",
+     ":SENS:TEMP:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:NPLC?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:AZER ON"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:AZER?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TRAN TRTD"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TRAN?",
+     "TRTD"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:RTD:THR PT100"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:RTD:THR?",
+     "PT100"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:UNIT CELS"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:UNIT?",
+     "CELS"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:REL:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DIODE', 'range': 1.0}",
+   "case": "KeithleyDMM6500.configure_point[unknown kind]",
+   "log": [],
+   "method": "KeithleyDMM6500.configure_point",
+   "result": "raised InstrumentError: DMM6500: no function for kind 'DIODE'",
+   "wire": []
+  },
+  {
+   "call": "{'tc_type': 'K', 'transducer': 'TC'}",
+   "case": "KeithleyDMM6500.configure_temperature[TC K]",
+   "log": [
+    "DMM6500|>>|:SENS:TEMP:TRAN TC",
+    "DMM6500|>>|:SENS:TEMP:TRAN?",
+    "DMM6500|<<|TC",
+    "DMM6500|>>|:SENS:TEMP:TC:TYPE K",
+    "DMM6500|>>|:SENS:TEMP:TC:TYPE?",
+    "DMM6500|<<|K",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:RSEL SIM",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:RSEL?",
+    "DMM6500|<<|SIM",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:SIM 0",
+    "DMM6500|>>|:SENS:TEMP:TC:RJUN:SIM?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:TEMP:UNIT CELS",
+    "DMM6500|>>|:SENS:TEMP:UNIT?",
+    "DMM6500|<<|CELS"
+   ],
+   "method": "KeithleyDMM6500.configure_temperature",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:TEMP:TRAN TC"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TRAN?",
+     "TC"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TC:TYPE K"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TC:TYPE?",
+     "K"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TC:RJUN:RSEL SIM"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TC:RJUN:RSEL?",
+     "SIM"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:TC:RJUN:SIM 0"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:TC:RJUN:SIM?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:TEMP:UNIT CELS"
+    ],
+    [
+     "Q",
+     ":SENS:TEMP:UNIT?",
+     "CELS"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV'",
+   "case": "KeithleyDMM6500.rel_is_on[DCV]",
+   "log": [
+    "DMM6500|>>|:SENS:VOLT:DC:REL:STAT?",
+    "DMM6500|<<|0"
+   ],
+   "method": "KeithleyDMM6500.rel_is_on",
+   "result": "returned False",
+   "wire": [
+    [
+     "Q",
+     ":SENS:VOLT:DC:REL:STAT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV'",
+   "case": "KeithleyDMM6500.acquire_reference[DCV]",
+   "log": [
+    "DMM6500|>>|:SENS:VOLT:DC:REL:ACQ",
+    "DMM6500|>>|:SENS:VOLT:DC:REL:STAT ON",
+    "DMM6500|>>|:SENS:VOLT:DC:REL:STAT?",
+    "DMM6500|<<|1"
+   ],
+   "method": "KeithleyDMM6500.acquire_reference",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:VOLT:DC:REL:ACQ"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:REL:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:REL:STAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV'",
+   "case": "KeithleyDMM6500.rel_is_on[after REL]",
+   "log": [
+    "DMM6500|>>|:SENS:VOLT:DC:REL:STAT?",
+    "DMM6500|<<|1"
+   ],
+   "method": "KeithleyDMM6500.rel_is_on",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     ":SENS:VOLT:DC:REL:STAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.read",
+   "log": [
+    "DMM6500|>>|:READ?",
+    "DMM6500|<<|+1.000000E+00"
+   ],
+   "method": "KeithleyDMM6500.read",
+   "result": "returned 1.0",
+   "wire": [
+    [
+     "Q",
+     ":READ?",
+     "+1.000000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.read[overflow]",
+   "log": [
+    "DMM6500|>>|:READ?",
+    "DMM6500|<<|+9.90000E+37"
+   ],
+   "method": "KeithleyDMM6500.read",
+   "result": "raised InstrumentError: The DMM6500 reported an overflow / invalid reading ('+9.90000E+37'): wrong range or nothing connected.",
+   "wire": [
+    [
+     "Q",
+     ":READ?",
+     "+9.90000E+37"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.read_digitize",
+   "log": [
+    "DMM6500|>>|:SENS:DIG:COUN?",
+    "DMM6500|<<|100",
+    "DMM6500|>>|:TRAC:CLE",
+    "DMM6500|>>|:READ:DIG?",
+    "DMM6500|<<|+1.000000E+00",
+    "DMM6500|>>|:TRAC:DATA? 1,100,\"defbuffer1\",READ",
+    "DMM6500|<<|1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00"
+   ],
+   "method": "KeithleyDMM6500.read_digitize",
+   "result": "returned {'average': 1.0, 'max': 1.001, 'min': 0.999, 'readings': [1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0, 1.0, 1.001, 0.999, 1.0]}",
+   "wire": [
+    [
+     "Q",
+     ":SENS:DIG:COUN?",
+     "100"
+    ],
+    [
+     "W",
+     ":TRAC:CLE"
+    ],
+    [
+     "Q",
+     ":READ:DIG?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     ":TRAC:DATA? 1,100,\"defbuffer1\",READ",
+     "1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00,1.000000E+00,1.001000E+00,9.990000E-01,1.000000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "'1.0E+00', 1.0",
+   "case": "KeithleyDMM6500.range_ok[exact]",
+   "log": [],
+   "method": "KeithleyDMM6500.range_ok",
+   "result": "returned True",
+   "wire": []
+  },
+  {
+   "call": "'1.2', 1.0",
+   "case": "KeithleyDMM6500.range_ok[1.2 x]",
+   "log": [],
+   "method": "KeithleyDMM6500.range_ok",
+   "result": "returned True",
+   "wire": []
+  },
+  {
+   "call": "'10', 1.0",
+   "case": "KeithleyDMM6500.range_ok[10 x]",
+   "log": [],
+   "method": "KeithleyDMM6500.range_ok",
+   "result": "returned False",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.front_rear[FRONT]",
+   "log": [
+    "DMM6500|>>|:ROUT:TERM?",
+    "DMM6500|<<|FRON"
+   ],
+   "method": "KeithleyDMM6500.front_rear",
+   "result": "returned 'FRONT'",
+   "wire": [
+    [
+     "Q",
+     ":ROUT:TERM?",
+     "FRON"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.front_rear[REAR]",
+   "log": [
+    "DMM6500|>>|:ROUT:TERM?",
+    "DMM6500|<<|REAR"
+   ],
+   "method": "KeithleyDMM6500.front_rear",
+   "result": "returned 'REAR'",
+   "wire": [
+    [
+     "Q",
+     ":ROUT:TERM?",
+     "REAR"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "KeithleyDMM6500.check_errors[ok]",
+   "log": [
+    "DMM6500|>>|:SYST:ERR?",
+    "DMM6500|<<|0,\"No error\""
+   ],
+   "method": "KeithleyDMM6500.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "KeithleyDMM6500.check_errors[two errors]",
+   "log": [
+    "DMM6500|>>|:SYST:ERR?",
+    "DMM6500|<<|-113,\"Undefined header\"",
+    "DMM6500|>>|:SYST:ERR?",
+    "DMM6500|<<|1131,\"Parameter, measure range, expected value from 1 to 100000\"",
+    "DMM6500|>>|:SYST:ERR?",
+    "DMM6500|<<|0,\"No error\""
+   ],
+   "method": "KeithleyDMM6500.check_errors",
+   "result": "raised InstrumentError: Keithley DMM6500 reported an error after configuring: -113,\"Undefined header\" | 1131,\"Parameter, measure range, expected value from 1 to 100000\"",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "-113,\"Undefined header\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "1131,\"Parameter, measure range, expected value from 1 to 100000\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeithleyDMM6500.connect[wrong model]",
+   "log": [
+    "DMM6500|>>|*CLS",
+    "DMM6500|>>|*IDN?",
+    "DMM6500|<<|KEYSIGHT,34401A,1,1"
+   ],
+   "method": "KeithleyDMM6500.connect",
+   "result": "raised InstrumentError: Expected a Keithley DMM6500 but the instrument identifies as: 'KEYSIGHT,34401A,1,1'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEYSIGHT,34401A,1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "keithley_dmm6500",
+ "schema": 1
+}

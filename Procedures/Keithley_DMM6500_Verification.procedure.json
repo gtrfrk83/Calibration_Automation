@@ -1,0 +1,56 @@
+{
+ "schema": 1,
+ "id": "Keithley_DMM6500_Verification",
+ "name": "Keithley DMM6500 Performance Verification",
+ "manufacturer": "Keithley",
+ "model": "DMM6500",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 82,
+ "description": "Standalone calibration procedure (simulated bench only: no DMM6500 command verified on a real meter)",
+ "launcher": "Procedures/Keithley_DMM6500_Verification.py",
+ "engine": [
+  "dmm6500_verification.py"
+ ],
+ "drivers": [
+  "keithley_dmm6500",
+  "fluke_5560a",
+  "agilent_3458a"
+ ],
+ "specs": [
+  "specs/keithley_dmm6500_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keithley_DMM6500_Verification.py",
+   "dmm6500_verification.py",
+   "dmm6500_view_qt.py",
+   "rtd_cvd.py",
+   "qtui/bench_view.py",
+   "ui_port.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keithley_dmm6500.py",
+   "drivers/agilent_3458a.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keithley_dmm6500_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_dmm6500"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keithley_DMM6500_Verification.py",
+  "Procedures/Keithley_DMM6500_Verification.procedure.json",
+  "specs/keithley_dmm6500_pv.json",
+  "drivers/keithley_dmm6500.py",
+  "tests/test_dmm6500_points.py"
+ ]
+}
