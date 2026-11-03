@@ -2,9 +2,8 @@
 (section XII in specs/a2la_1888_03_cmc.json, sections V / VI in specs/a2la_1888_03_rf.json).  `python -m unittest tests.test_fluke6060a_uncertainty`
 
 Hand-worked values (divisor 2 for both sheets: no confidence level printed; EMU = 2 x RSS; reported = ceil to 2 figures; CMC floor only when in scope):
-  FREQ 100 MHz, 10 Hz resolution: 8902A counter +/-3 counts or 30 Hz (fc >= 100 MHz) = 30 Hz -> u 15 -> EMU 30 Hz; scope XII 7.1E-12 x 1E8 = 0.00071 Hz -> 30 Hz.
-      TUR = 10 / 30 = 0.33 (the 8902A cannot support the document's +/-10 Hz).
-  MODRATE 1000 Hz: 0.02 Hz + 1E-6/month x 12 x 1000 = 0.012 Hz -> 2 x sqrt(0.01^2 + 0.006^2) = 0.02332 -> 0.024 Hz.
+  FREQ / REFFREQ / MODRATE (owner, 2026-11-03): the lab's GPS-referenced XII Frequency - Measure CMC alone, 7.1E-12 x f: 100 MHz -> 0.00071 Hz = 710 uHz,
+      10 MHz -> 71 uHz, 1 kHz -> 7.1 nHz; TUR > 1000:1 (the 8902A counter spec is no longer part of the figure).
   FMDEV 10 kHz at 250 kHz: 8902A 2 % -> 200 Hz / 2 -> EMU 200 Hz; scope FM 0.15-10 MHz 2.6 % -> 260 Hz (larger) -> 260 Hz, in scope.
   FMDEV 250 kHz at 250 MHz: 8902A 1 % -> EMU 2500 Hz; scope 1.3 % -> 3250 Hz -> 3300 Hz.
   AMDEPTH 30 % at 250 MHz: 8902A 1 % of reading -> 0.3 %; no AM line 10 MHz - 1.3 GHz -> out of scope, 0.3 %.
@@ -64,17 +63,14 @@ class Base(unittest.TestCase):
 
 
 class Budgets(Base):
-    def test_frequency_counter_and_tur(self):
-        r = self.ev('4.1 Table 2 100.00000 MHz')
-        self.assertEqual((r.status, r.scope, r.reported, r.unit), (fu.OK, fu.IN, 30.0, 'Hz'))
-        self.assertAlmostEqual(r.cmc, 7.1e-12 * 1e8, places=12)
-        self.assertAlmostEqual(r.tur(), 1 / 3, places=6)
-
-    def test_modulation_rate(self):
-        r = self.ev('4.3 1000 Hz')
-        self.assertEqual((r.status, r.scope), (fu.OK, fu.IN))
-        self.assertAlmostEqual(r.emu, 2 * math.sqrt(0.01 ** 2 + 0.006 ** 2), places=9)
-        self.assertEqual(r.reported, 0.024)
+    def test_frequency_points_report_the_gps_frequency_measure_cmc_alone(self):
+        """Owner 2026-11-03: frequency uncertainties are the lab's GPS-referenced A2LA XII Frequency - Measure CMC (7.1 pHz/Hz), alone (NOTES 'Frequency - Measure')."""
+        for ref, hz in (('4.1 Table 2 100.00000 MHz', 1e8), ('4.1.5 10 MHz reference output', 1e7), ('4.3 1000 Hz', 1e3)):
+            r = self.ev(ref)
+            self.assertEqual((r.status, r.scope, r.cmc_only, r.components), (fu.OK, fu.IN, True, []), ref)
+            self.assertAlmostEqual(r.cmc, 7.1e-12 * hz, places=15)
+            self.assertEqual(r.reported, fu.ceil_sig(7.1e-12 * hz))
+        self.assertGreater(self.ev('4.1 Table 2 100.00000 MHz').tur(), 1000)
 
     def test_fm_deviation_takes_the_larger_cmc(self):
         r = self.ev('4.5 Table 8 250 kHz 10 kHz')
@@ -227,7 +223,10 @@ class Coverage(Base):
                 self.assertIn(r.scope, (fu.IN, fu.OUT, fu.UNDECIDED), p['ref'])
                 if r.scope == fu.IN:
                     self.assertGreaterEqual(r.reported, r.cmc, p['ref'])
-                self.assertGreaterEqual(r.reported, r.emu * (1 - 1e-12), p['ref'])
+                if r.cmc_only:
+                    self.assertEqual((r.scope, r.components), (fu.IN, []), p['ref'])
+                else:
+                    self.assertGreaterEqual(r.reported, r.emu * (1 - 1e-12), p['ref'])
 
 
 if __name__ == '__main__':
@@ -256,8 +255,8 @@ class Report(Base):
         rows = self.rows_for('6060A-gidep', ['4.5 Table 8 250 MHz 250 kHz', '4.4 Table 6 250 MHz 30 % at 1000 Hz', '4.7 Table 11 harmonics 5 MHz',
                                              '4.2 Table 5 250 MHz -10 dBm relative', '4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 150 kHz -10 dBm relative',
                                              '4.1 Table 2 100.00000 MHz'])
-        self.assertEqual([r['Uncertainty'] for r in rows], ['3.3 kHz', '0.30 % *', '1.7 dB *', '0.067 dB', '0.72 %', '0.050 dB *', '30 Hz'])
-        self.assertEqual([r['TUR'] for r in rows], ['3.7:1', '', '', '37.3:1', '2.5:1', '', '0.3:1'])
+        self.assertEqual([r['Uncertainty'] for r in rows], ['3.3 kHz', '0.30 % *', '1.7 dB *', '0.067 dB', '0.72 %', '0.050 dB *', '710 \u00b5Hz'])
+        self.assertEqual([r['TUR'] for r in rows], ['3.7:1', '', '', '37.3:1', '2.5:1', '', '>1000:1'])
 
     def test_instruction_manual_procedure_is_unchanged(self):
         old = fv.STATE_KEY

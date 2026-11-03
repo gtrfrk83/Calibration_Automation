@@ -63,6 +63,7 @@ class Result:
         self.cmc_if_in = None           # the CMC the scope line would give, for an UNDECIDED point
         self.evaluated_at = None        # the value the budget was worked out at (point unit)
         self.info = ''                  # extra text for the reviewer
+        self.cmc_only = False           # frequency points: the CMC alone is reported
 
     def add(self, name, limit, divisor, source):
         self.components.append(Component(name, limit, divisor, source))
@@ -75,7 +76,11 @@ class Result:
 
     @property
     def value(self):
-        if self.status != OK or self.emu is None:
+        if self.status != OK:
+            return None
+        if self.cmc_only:                   # the laboratory's GPS-referenced Frequency - Measure CMC is the whole uncertainty (owner rule, NOTES 'Frequency - Measure')
+            return self.cmc
+        if self.emu is None:
             return None
         return max(self.emu, self.cmc or 0.0) if self.scope == IN else self.emu
 
@@ -264,42 +269,39 @@ def evaluate(p, reading=None, path=None):
     return r
 
 
+GPS_RULE = ('Owner rule (NOTES "Frequency - Measure"): "All frequency interfaces are tied to Frequency Measure and the budget was calculated using the error of the GPS. '
+            'Everything that accepts an external reference is on it." The A2LA Frequency - Measure CMC (7.1 pHz/Hz, already expanded) is the uncertainty ALONE: no divisor, '
+            'no resolution term and no counter specification combined with it, the same as every other engine\'s frequency points.')
+
+
+def _gps(r, p, reading, standard, value, what):
+    """A frequency point on the lab's GPS-referenced 10 MHz: the Frequency - Measure CMC at the frequency is the reported uncertainty (2026-11-03: 'update the uncertainties
+    on the frequency to match our gps frequency error')."""
+    r.standard = standard
+    r.evaluated_at = value
+    cmc = scope_freq(value)
+    _set_scope(r, cmc, 'XII Frequency - Measure, 10 Hz to 26.5 GHz: 7.1 pHz/Hz (GPS referenced)')
+    if cmc is None:
+        raise LookupError(f'{value:g} Hz is outside the Frequency - Measure line (10 Hz to 26.5 GHz)')
+    r.cmc_only = True
+    r.info = f'Laboratory GPS-referenced Frequency - Measure CMC: 7.1E-12 x {value:g} Hz = {cmc:.3g} Hz (k = 2), reported alone.'
+    r.assumptions += [GPS_RULE, what]
+
+
 def _freq(r, p, reading, path):
-    std = _standard('8902A', path)
-    r.standard = 'HP 8902A frequency counter'
-    fc = p['gen']['freq_mhz'] * 1e6
-    res = float(p['rx']['resolution_hz'])
-    limit = max(3 * res, 30.0) if fc >= 100e6 else 3 * res
-    div, why = std.divisor()
-    r.add('8902A frequency counter accuracy', limit, div,
-          '8902A manual p. 1-21 (sheet note "Frequency Counter", not a sheet row): +/- reference accuracy +/- 3 counts of the least-significant digit'
-          + (', or 30 Hz, whichever is larger (fc >= 100 MHz)' if fc >= 100e6 else '') + f'; {res:g} Hz resolution. Divisor {div:g} ({why})')
-    r.assumptions.append('Reference accuracy term left out: in G-4.1b the 8902A runs on the 6060A\'s own 10 MHz (setup text), so the reference error is common to both and cancels.')
-    r.evaluated_at = _at(p, reading, p['nominal'])
-    cmc = scope_freq(r.evaluated_at)
-    _set_scope(r, cmc, 'XII Frequency - Measure, 10 Hz to 26.5 GHz: 7.1 pHz/Hz')
+    _gps(r, p, reading, 'HP 8902A frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
+         'The 8902A time base must be on the lab\'s GPS-referenced 10 MHz for this step (the document applies the counter\'s reference, REF EXT). Its own counter specification '
+         '(+/-3 counts or 30 Hz, p. 1-21) and the 10 Hz display resolution are not part of the reported figure under this rule.')
 
 
 def _reffreq(r, p, reading, path):
-    r.status, r.reason = NO_SPEC, 'Typed counter reading: no counter specification on file (specs/standards/agilent_53131a_53132a_NOTE.txt)'
-    _set_scope(r, scope_freq(p['nominal']), 'XII Frequency - Measure, 10 Hz to 26.5 GHz: 7.1 pHz/Hz')
+    _gps(r, p, reading, 'Laboratory frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
+         'Typed reading from the lab\'s counter, which runs on the GPS-referenced 10 MHz.')
 
 
 def _modrate(r, p, reading, path):
-    std = _standard('8902A', path)
-    r.standard = 'HP 8902A audio frequency counter'
-    rate = _at(p, reading, p['nominal'])
-    r.evaluated_at = rate
-    if rate > 1000.0 * 1.0001:
-        raise LookupError('8902A audio counter: only the <= 1 kHz row is on the sheet')
-    row, spec = _one(std, 'Audio Frequency Counter', 'demodulated signals, frequency <=1 kHz', 'spec')
-    aging_row, aging = _one(std, 'Internal Time Base Reference [Aging]', 'standard: aging rate', '1 month')
-    div, why = std.divisor()
-    ref = aging['rel'] * AGING_MONTHS * rate if aging['rel'] else 1e-6 * AGING_MONTHS * rate
-    r.add('8902A audio counter', spec['abs'], div, f'{_cite(std, row)}: +/-{spec["abs"]:g} Hz. Divisor {div:g} ({why})')
-    r.add('8902A internal reference', ref, div, f'{_cite(std, aging_row)}: < 1E-6 / month x {AGING_MONTHS} months x {rate:g} Hz')
-    r.assumptions.append(f'The 8902A is on its internal time base, aged {AGING_MONTHS} months since adjustment (the setup does not lock it to a reference for this step).')
-    _set_scope(r, scope_freq(rate), 'XII Frequency - Measure, 10 Hz to 26.5 GHz: 7.1 pHz/Hz')
+    _gps(r, p, reading, 'HP 8902A audio frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
+         'The 8902A time base must be on the lab\'s GPS-referenced 10 MHz for this step. Its audio counter specification (+/-0.02 Hz) is not part of the reported figure under this rule.')
 
 
 def _am_rows(std, fc, rate, depth_ratio):

@@ -2224,6 +2224,10 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- Frequency points (owner, 2026-11-03: "update the uncertainties on the frequency to match our gps frequency error" / "it is listed as frequency measure on our scope"): FREQ
+  (Tables 2, 3), REFFREQ (10 MHz reference) and MODRATE (4.3) report the A2LA XII Frequency - Measure CMC (7.1 pHz/Hz, GPS referenced) ALONE, the lab rule of 'Frequency - Measure'
+  above (`Result.cmc_only`; no divisor, resolution or counter specification): 100 MHz -> 710 uHz, 10 MHz -> 71 uHz, 1 kHz -> 7.1 nHz, TUR >1000:1. Assumes the 8902A time base
+  is on the GPS 10 MHz for those steps (the setup applies the counter's reference). The 8902A counter specification (+/-3 counts or 30 Hz) is no longer printed.
 - Deviation meter (owner, 2026-11-03: "wouldn't the deviation error uncertainties come directly from the 96270?"): yes, the 96270A GENERATES the FM. Source: the owner's 96000 Series
   Product Specifications (8/2026, '96000___pseng0000_0.pdf'), read from the rendered pages: printed p. 10 FM/PM Sine Deviation Accuracy +/-(3 % of setting + 240 mHz); p. 11 chart: applies
   for Fd <= 2 % of Fc (9-11 MHz), <= 0.6 % (11-125 MHz), <= 0.12 % (125 MHz-4 GHz), Fd >= 10 Hz, typical only below 20 Hz rate. ADDED to the 96270A sheet as
@@ -2246,7 +2250,7 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   under the table ONLY when a row's Uncertainty ends in '*' (every other report is unchanged). TUR only for in-scope points (the printed TUR definition says so). No budget: N/A.
   GIDEP procedure only (`UNCERTAINTY_STATE_KEYS`); the Instruction Manual procedure's report is unchanged (its points were not reviewed: typed 10 kHz THD, section errors ...).
   Counts (GIDEP, 220, after the 150 kHz move below): 54 in scope, 53 starred (incl. THD whose scope is undecided), 46 need an input or decision, 59 no spec, 8 N/A. Findings: FREQ
-  30 Hz (8902A +/-3 counts or 30 Hz, p. 1-21) = TUR 0.3:1 against +/-10 Hz; no AM - Measure line between 10 MHz and 1.3 GHz (AM at 150 kHz is on the 2.4 % line).
+  (superseded 2026-11-03, see below: the GPS Frequency - Measure CMC alone) was 30 Hz (8902A +/-3 counts or 30 Hz, p. 1-21) = TUR 0.3:1 against +/-10 Hz; no AM - Measure line between 10 MHz and 1.3 GHz (AM at 150 kHz is on the 2.4 % line).
   Overlapping scope / 8902A lines whose printed conditions all hold: the narrowest modulation-rate band is used (AM 1 kHz at 150 kHz: 2.4 %, not 3.5 %).
   OPEN (fluke6060a_uncertainty.DECISIONS, review page https://claude.ai/artifact/V4Fc1BSztoRqr2Z5E9DSPm): scope of the deviation meter / THD / residual FM (until decided: starred),
   basis of the RF Power - Measure '0.8 %', acceptance of the hand-built tuned-level (no Option 050; IF / RF range structure UNVERIFIED) and 8563E methods. Missing source data:
