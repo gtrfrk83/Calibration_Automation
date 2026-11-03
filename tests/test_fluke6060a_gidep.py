@@ -281,9 +281,18 @@ class UpfrontCalibrations(unittest.TestCase):
         E.load_spec(GIDEP_SPEC)
         return E.POINTS
 
+    def setUp(self):
+        self.answer = False
+        p = mock.patch.object(E.port, 'ask_yes_no', side_effect=lambda title, text, **k: (self.asked.append((title, text, k)), self.answer)[1])
+        p.start(); self.addCleanup(p.stop)
+        self.asked = []
+
     def _app(self, demo=False):
         app = E.App.__new__(E.App)
-        app.demo, app._prep_done, app.calls = demo, set(), []
+        app.demo, app._prep_done, app.calls, app.root = demo, set(), [], None
+        app.status = mock.MagicMock()
+        app.io = mock.MagicMock()
+        app.connected_io = lambda: app.io
         app._run_preps = lambda points, i, p, key, preps: app.calls.append(('preps', i, p['id'], list(preps)))
         app._next = lambda points, i, previous, after_prep=False: app.calls.append(('next', i))
         return app
@@ -308,6 +317,38 @@ class UpfrontCalibrations(unittest.TestCase):
         app._upfront_preps(self._pts())
         self.assertEqual(app.calls, [('next', 0)])
 
+    def test_already_calibrated_skips_all_three_and_logs_it(self):
+        """Owner 2026-11-03: 'give me a skip / already cal'd button'. One question; Yes skips every needed calibration, each skip is written to the command log."""
+        self.answer = True
+        app = self._app()
+        app._upfront_preps(self._pts())
+        self.assertEqual(app.calls, [('next', 0)])
+        self.assertEqual(app._prep_done, {'rx_power', 'rx_am', 'rx_fm'})
+        self.assertEqual(len(self.asked), 1)
+        title, text, k = self.asked[0]
+        self.assertEqual((title, k.get('default')), ('8902A calibration', 'no'))
+        for words in ('RF power sensor', 'AM calibration', 'FM calibration'):
+            self.assertIn(words, text)
+        logged = [c.args[1] for c in app.io.log.add.call_args_list]
+        self.assertEqual(len(logged), 3)
+        self.assertTrue(all('skipped, already calibrated' in t for t in logged))
+
+    def test_no_calibrates_and_a_second_run_on_the_same_connection_asks_nothing(self):
+        app = self._app()
+        app._upfront_preps(self._pts())
+        self.assertEqual(app.calls[0][0], 'preps')
+        app._prep_done |= {'rx_power', 'rx_am', 'rx_fm'}           # the calibrations ran (_preps_done)
+        app.calls.clear(); self.asked.clear()
+        app._upfront_preps(self._pts())                              # the next Run / Run section
+        self.assertEqual((app.calls, self.asked), ([('next', 0)], []))
+
+    def test_execute_keeps_the_calibrations_and_disconnect_forgets_them(self):
+        src = Path(E.__file__).read_text(encoding='utf-8')
+        body = src[src.index('    def execute(self, points):'):src.index('    def reset_run(self):')]
+        self.assertNotIn('self._prep_done = set()', body)
+        disc = src[src.index('    def disconnect(self):'):src.index('    def connected_io(self)')]
+        self.assertIn('self._prep_done = set()', disc)
+
 
 class StaleCheckpoint(unittest.TestCase):
     """Results are keyed by point number: a checkpoint saved before the 100 kHz -> 150 kHz move must not put its 100 kHz readings on the 150 kHz points."""
@@ -325,3 +366,48 @@ class StaleCheckpoint(unittest.TestCase):
         data = dict(results={'1': dict(reading=13.1, ref='4.2 Table 4 100 kHz +13 dBm'), '2': dict(reading=13.0, ref='4.2 Table 4 150 kHz +13 dBm'), '9': dict(reading=1)})
         self.assertEqual(E.drop_stale_results(data, self.pts()), 2)
         self.assertEqual(list(data['results']), ['2'])
+
+
+class CalibrateOncePerConnection(GidepBench):
+    """Owner 2026-11-03: 'remove the need to calibrate the 8902 sensor in each section or give me a skip / already cal'd button'. On the simulated bench: a second Run on the same
+    connection asks for no calibration; on a fresh connection 'already calibrated' (Yes) skips them, and the command log says so."""
+
+    def power_refs(self):
+        return [p['ref'] for p in E.POINTS if p['meas'] == 'level_rx' and p['rx']['mode'] == 'power'][:1]
+
+    def cal_prompts(self):
+        return [t for t in self.titles if t.startswith('Calibrate the 8902A')]
+
+    def setUp(self):
+        super().setUp()
+        self.titles = []
+        inner = self.h.on_confirm
+
+        def operator(title, heading, steps, facts):
+            self.titles.append(title)
+            return inner(title, heading, steps, facts)
+        self.h.on_confirm = operator
+
+    def test_second_run_on_the_same_connection_does_not_calibrate_again(self):
+        self.run_points(refs=self.power_refs())
+        self.assertEqual(self.cal_prompts(), ['Calibrate the 8902A RF power'])
+        self.titles.clear()
+        self.run_points(refs=self.power_refs())
+        self.assertEqual(self.cal_prompts(), [])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])
+
+    def test_already_calibrated_skips_and_is_in_the_command_log(self):
+        self.already_calibrated = True
+        self.run_points(refs=self.power_refs())
+        self.assertEqual(self.cal_prompts(), [])
+        self.assertEqual(self.errors(), [])
+        self.assertTrue(any('RF power sensor (zero and 1 mW calibration) skipped, already calibrated' in line for line in self.app.io.log.lines()))
+        self.assertFalse(any('C1T3SC' in c for c in self.t8902.sent if c), 'no calibration command is sent when it is skipped')
+
+    def test_disconnect_forgets_the_calibrations(self):
+        self.run_points(refs=self.power_refs())
+        self.app.disconnect()
+        self.titles.clear()
+        self.run_points(refs=self.power_refs())
+        self.assertEqual(self.cal_prompts(), ['Calibrate the 8902A RF power'])

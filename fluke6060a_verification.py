@@ -643,6 +643,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._prep_done = set()
         for var in (self.uut_addr, self.rx_addr, self.sa_addr, self.rf_addr, self.lf_model, self.lf_addr):
             var.trace_add('write', self.reset_forget)       # an address changed in the settings: the next Run resets again
+        self.rx_addr.trace_add('write', lambda *_a: self._prep_done.clear())     # another 8902A: its calibrations are asked for again
         self._build_ui()
         self.on_options(save=False)
         self.status.set('DEMO MODE: no commands are sent to any instrument. Enter an Instrument ID, then press Run All.' if demo
@@ -818,6 +819,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if self.io is not None:
             try: self.io.save_log()          # the command log of the failed reset is on disk before the dialog
             except Exception: pass
+        self._prep_done = set()              # the instruments may not be in a known state: the 8902A calibrations are asked for again
         super()._reset_failed(msg, skipped)
 
     def disconnect(self):
@@ -873,7 +875,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if not self.demo and self.io is None: return
         self._mo_pending = None; self._mo_current = None
         self.stop = False; self.busy = True
-        self._prep_done = set()                         # the 8902A is reset at the start of every Run: its calibrations are asked for again
+        # 8902A calibrations are kept for the CONNECTION (owner, 2026-11-03): the Run's reset is IP, which keeps the non-volatile calibration data (driver, manual p. 3-25 / 75).
+        # _prep_done is cleared on disconnect, a failed reset and a change of the 8902A address.
         self.reset_then(lambda: self._upfront_preps(points))     # the Run resets to defaults first (every instrument; the unit under test notice comes first)
 
     def reset_run(self):
@@ -939,6 +942,23 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 port.post(self.root, lambda err=err: self._error(err))
         threading.Thread(target=work, daemon=True).start()
 
+    PREP_NAMES = {'rx_power': 'RF power sensor (zero and 1 mW calibration)', 'rx_am': 'AM calibration', 'rx_fm': 'FM calibration'}
+
+    def _already_calibrated(self, need):
+        """Owner, 2026-11-03: 'give me a skip / already cal'd button'. One question for the calibrations still needed on this connection: Yes = they were already done (skipped,
+        written to the command log), No (the default, also Esc / close) = calibrate now. Returns True when the technician skips them."""
+        listed = '\n'.join(f'  - {self.PREP_NAMES[k]}' for k in need)
+        if not port.ask_yes_no('8902A calibration', f'This run needs these 8902A calibrations:\n{listed}\n\nHave they already been done on this 8902A '
+                               f'(same sensor module, not power-cycled since)?\n\nYes = already calibrated, skip them (noted in the command log).\n'
+                               f'No = calibrate now.', default='no', parent=self.root):
+            return False
+        for k in need:
+            self._prep_done.add(k)
+            try: self.connected_io().log.add('--', f'operator: 8902A {self.PREP_NAMES[k]} skipped, already calibrated', '8902A')
+            except Exception: pass
+        self.status.set('8902A calibrations skipped: already calibrated')
+        return True
+
     def _upfront_preps(self, points):
         """The 8902A calibrations (RF power sensor, AM, FM) the points of this run need are done once, here, before the first point, not at the first section that needs each one."""
         need, first = [], None
@@ -947,7 +967,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 if p['meas'] == 'derived' or p.get('skip') or p.get('unavailable'): continue
                 for k in self.preps_for(p):
                     if k not in need and k not in self._prep_done: need.append(k); first = first or p
-        if not need: self._next(points, 0, None); return
+        if not need or self._already_calibrated(need): self._next(points, 0, None); return
         self._upfront = True
         self._run_preps(points, 0, first, prompt_key(first), need)
 
@@ -972,7 +992,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if p['meas'] == 'derived':
             self._derive_point(p); port.after(self.root,30, lambda: self._next(points, i + 1, previous)); return
         need = [] if self.demo else [k for k in self.preps_for(p) if k not in self._prep_done]
-        if need:
+        if need and not self._already_calibrated(need):
             self._run_preps(points, i, p, key, need); return
         if not self.demo and key != previous:
             if p['meas'] == 'selftest':

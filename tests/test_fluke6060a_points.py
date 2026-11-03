@@ -150,6 +150,10 @@ class Bench(unittest.TestCase):
         self.h = H.EngineHarness().start(E)
         self.addCleanup(self.h.stop) if hasattr(self.h, 'stop') else None
         p = mock.patch('time.sleep', side_effect=lambda s: None); p.start(); self.addCleanup(p.stop)
+        real_yes_no = E.port.ask_yes_no
+        self.already_calibrated = False          # the 8902A question ('already calibrated?'): No, so the simulated calibrations run as before
+        p = mock.patch.object(E.port, 'ask_yes_no', side_effect=lambda title, text, **k: self.already_calibrated if title == '8902A calibration' else real_yes_no(title, text, **k))
+        p.start(); self.addCleanup(p.stop)
         E.configure()
         self.app = E.App(self.h.root, '6060A', demo=self.DEMO)
         self.h.app = self.app

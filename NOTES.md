@@ -2224,6 +2224,14 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- 8902A calibrations once per connection, and a skip (owner, 2026-11-03: "remove the need to calibrate the 8902 sensor in each section or give me a skip/already cal'd button"):
+  every Run used to clear `_prep_done`, so each Run / Run section asked for the RF power sensor, AM and FM calibrations again. The Run's reset is IP, which keeps the 8902A's
+  non-volatile calibration data (driver docstring, manual p. 3-25 / 75), so `_prep_done` now lasts for the CONNECTION: cleared on disconnect, a failed reset and a change of the
+  8902A address. When calibrations are still needed, ONE question ('8902A calibration', `App._already_calibrated`, default No): Yes = already calibrated, they are skipped and
+  each skip is written to the command log ('operator: 8902A ... skipped, already calibrated'); No / Esc / close = calibrate as before. A yes/no rather than a third button on the
+  calibration prompt: `operator_prompt` has two buttons in every port (Tk, Qt, scripted) and changing it is a shared-UI change. UNVERIFIED: that IP keeps the AM / FM
+  calibration factors (the driver says 'non-volatile calibration data'). Tests: `tests/test_fluke6060a_gidep.py` (UpfrontCalibrations, CalibrateOncePerConnection); the
+  simulated-bench tests answer No so the calibrations still run there.
 - Frequency points (owner, 2026-11-03: "update the uncertainties on the frequency to match our gps frequency error" / "it is listed as frequency measure on our scope"): FREQ
   (Tables 2, 3), REFFREQ (10 MHz reference) and MODRATE (4.3) report the A2LA XII Frequency - Measure CMC (7.1 pHz/Hz, GPS referenced) ALONE, the lab rule of 'Frequency - Measure'
   above (`Result.cmc_only`; no divisor, resolution or counter specification): 100 MHz -> 710 uHz, 10 MHz -> 71 uHz, 1 kHz -> 7.1 nHz, TUR >1000:1. Assumes the 8902A time base
