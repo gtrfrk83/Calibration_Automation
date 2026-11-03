@@ -29,6 +29,7 @@ EXPECTED = {
     '5522A': (99.0, 2.576),    # Operators Manual printed p. 1-8: "Specification Confidence Interval 99 %" (single column)
     '5520A': (99.0, 2.576),    # Service Manual printed p. 1-7: "Specification Confidence Interval 99 %" (single column)
     '5560A': (95.0, 2.0),      # Product Specifications: 99 % (k = 2.58) AND 95 % (k = 2) columns; the stored numbers are the 95 % column
+    '5700A': (None, 2.0),      # Service Manual PN 791996 Rev. 9 (3/96) Chapter 1: no confidence level printed
     '5790B': (99.0, 2.576),    # Operators Manual printed p. 1-9: 99 %, k = 2.58 (one 50 MHz /AF row is 95 %, see note 20 of the sheet)
     '8563E': (None, 2.0),      # no level printed
     '96270A': (None, 2.0),     # no level printed
