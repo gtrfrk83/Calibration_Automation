@@ -2845,7 +2845,8 @@
     "8902A|>>|T3",
     "8902A|<<|+0099950000E-11",
     "8902A|>>|C0",
-    "8902A|--|serial poll -> 0"
+    "8902A|--|serial poll -> 0",
+    "8902A|--|1 mW calibration check: 0.9995 mW, shown 0.999 mW (0.999 to 1.000 mW)"
    ],
    "method": "HP8902A.calibrate_power_sensor",
    "result": "returned 0.0009995",
