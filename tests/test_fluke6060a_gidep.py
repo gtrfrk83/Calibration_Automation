@@ -518,3 +518,39 @@ class AmFilterAt400Hz(GidepBench):
         sent = self.t8902.sent[n:]
         self.assertIn('H1', sent)
         self.assertNotIn('H2', sent[sent.index('H1'):])
+
+
+class PllLockWait(GidepBench):
+    """Owner bench 2026-11-03: 'output is UNCAL (0.0 dBm): 000000,000010,000400: main or reference PLL unlocked' at 244.99 MHz although the carrier is approached from 242 MHz.
+    When the PLL unlock is the only UNCAL reason the driver reads IU again (up to 5 x 0.4 s) and goes on once it locks; a lasting unlock still stops the run."""
+
+    def setUp(self):
+        super().setUp()
+        self.t6.approach_band = (242.0, 245.0)
+        self.slept = []
+        real = E.drivers.fluke_6060a.time.sleep
+        p = mock.patch.object(E.drivers.fluke_6060a.time, 'sleep', side_effect=lambda s: self.slept.append(s))
+        p.start(); self.addCleanup(p.stop)
+
+    def point(self):
+        return next(p for p in E.POINTS if p['func'] == 'SPUR' and p['meas'] == 'spur' and p['gen']['freq_mhz'] == 244.99 and p['gen']['level_dbm'] == 0)
+
+    def test_a_loop_that_locks_within_the_wait_goes_on(self):
+        self.t6.pll_settle_reads = 2
+        self.run_points(refs=[self.point()['ref']])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])
+        self.assertTrue([l for l in self.app.io.log.lines() if 'PLL unlocked' in l and 'waiting 0.4 s for lock' in l])
+
+    def test_a_lasting_unlock_still_stops_the_run(self):
+        p = self.point()
+        p['gen'].pop('approach_mhz')                                     # set directly: the simulated PLL stays unlocked
+        self.run_points(refs=[p['ref']])
+        self.assertTrue(any('PLL unlocked' in (d[3] or '') for d in self.errors()), self.h.dialogs[-3:])
+        self.assertEqual(len([l for l in self.app.io.log.lines() if 'waiting 0.4 s for lock' in l]), E.drivers.Fluke6060A.PLL_LOCK_TRIES)
+
+    def test_another_uncal_reason_does_not_wait(self):
+        from drivers.fluke_6060a import Fluke6060A
+        self.assertFalse(Fluke6060A._pll_only((0, 0o010, 0o001)))
+        self.assertFalse(Fluke6060A._pll_only((0o002, 0o010, 0)))
+        self.assertTrue(Fluke6060A._pll_only((0, 0o010, 0)))

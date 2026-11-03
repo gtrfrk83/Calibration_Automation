@@ -60,6 +60,8 @@ class Sim6060ATransport(_SimBase):
         # (lo, hi) MHz entered other than at lo, or by a step that is not upward by at most 1 MHz, reports 'main or reference PLL unlocked' (UNCAL field 2, 0o010).
         self.approach_band = None
         self.pll_unlocked = False
+        self.pll_settle_reads = 0           # opt-in: after a frequency change the PLL reads 'unlocked' for this many IU queries, then locks (a loop still settling)
+        self._pll_settling = 0
         self.reset_all()
 
     # ---- state ------------------------------------------------------------------------------------------------------------------------------
@@ -162,7 +164,7 @@ class Sim6060ATransport(_SimBase):
             f3 |= 0o002
         if not s['rf_on']:
             f3 |= 0o400
-        return (f1, 0o010 if self.pll_unlocked else 0, f3)
+        return (f1, 0o010 if (self.pll_unlocked or self._pll_settling) else 0, f3)
 
     def _step(self, key, size_key, sign, lo, hi, scale=1.0):
         s = self.s
@@ -187,7 +189,10 @@ class Sim6060ATransport(_SimBase):
             fields, self.rejected = tuple(self.rejected), [0, 0, 0]
             return self._fmt(fields)
         if head == 'IU':
-            return self._fmt(self._uncal())
+            out = self._fmt(self._uncal())
+            if self._pll_settling:
+                self._pll_settling -= 1
+            return out
         if head == 'II':
             return f'{self.modes:05d}'
         if head == 'IM':
@@ -233,6 +238,7 @@ class Sim6060ATransport(_SimBase):
                         self.pll_unlocked = not (abs(new - lo) < 1 or stepped)
                     else:
                         self.pll_unlocked = False
+                self._pll_settling = self.pll_settle_reads
                 self._changed()
         elif head == 'AP':
             dbm = n if suffix == 'DB' else (20 * math.log10(n * {'V': 1, 'MV': 1e-3, 'UV': 1e-6, 'NV': 1e-9}.get(suffix, 1) / math.sqrt(0.05)) if n else -999)

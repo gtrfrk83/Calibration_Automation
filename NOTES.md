@@ -2224,6 +2224,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- PLL lock wait (owner bench 2026-11-03: 'output is UNCAL (0.0 dBm): 000000,000010,000400: main or reference PLL unlocked' on a 244.99 MHz spur point, which already has the
+  242-243-244 MHz approach): `Fluke6060A.check_uncal` reads IU again, at most `PLL_LOCK_TRIES` (5) x `PLL_LOCK_WAIT_S` (0.4 s), when the PLL unlock (field 2, 0o010) is the
+  ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
+  simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
+  needs changing: finer steps, or the 6060A's own step keys).
 - FM deviation read-back (owner bench 2026-11-03): 'read-back refused: fm_dev_hz: asked 10000, learn string says 1000.0' on the first Table 8 point (10 kHz on 250 kHz) while
   the 6060A FRONT PANEL showed 10.0 kHz. The bench LM99 'BOABAAAAAAEGAAAKAAAAAAAAAAADNAJAAAAPECEAAAGEAAABJCEEBBBGBLKKHFAC' (one letter of the on-screen copy fixed by the
   checksum) has chars 41-44 'AAGE' = 100 and char 57 'B', the same resolution character as the preset's 5.00 kHz (500). So the FM field holds the three DISPLAYED digits

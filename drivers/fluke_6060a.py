@@ -508,10 +508,26 @@ class Fluke6060A(Instrument):
         self.last_uncal = names
         return tuple(fields), (f'{reply}: ' + '; '.join(names)) if names else f'none ({reply})'
 
+    PLL_LOCK_TRIES, PLL_LOCK_WAIT_S = 5, 0.4      # a choice of this driver (bench 2026-11-03), not a manual figure
+
     def check_uncal(self, context=''):
         codes, text = self.uncal()
+        tries = 0
+        while self._pll_only(codes) and tries < self.PLL_LOCK_TRIES:
+            # Owner bench 2026-11-03: 'main or reference PLL unlocked' right after a frequency change near 244.99 MHz. When it is the ONLY UNCAL reason the loop may still be
+            # locking: IU is read again (at most PLL_LOCK_TRIES x PLL_LOCK_WAIT_S), and the run goes on only if it clears. Any other reason stops at once, as before.
+            tries += 1
+            self.log.add('--', f'PLL unlocked{" (" + context + ")" if context else ""}: waiting {self.PLL_LOCK_WAIT_S:g} s for lock ({tries}/{self.PLL_LOCK_TRIES})', self.label)
+            time.sleep(self.PLL_LOCK_WAIT_S)
+            codes, text = self.uncal()
         if any(codes):
             raise InstrumentError(f'{self.MODEL} output is UNCAL{" (" + context + ")" if context else ""}: {text}')
+
+    @staticmethod
+    def _pll_only(codes) -> bool:
+        """True when the UNCAL codes are exactly 'main or reference PLL unlocked' (field 2, 0o010) and nothing else."""
+        codes = tuple(codes) + (0, 0, 0)
+        return codes[1] == 0o010 and not codes[0] and not codes[2]
 
     def compare(self, expect: dict, state: dict | None = None) -> list:
         """Mismatches between a learn state and what was asked (empty list = equal). Keys: frequency_hz (1 Hz), amplitude_dbm (0.05 dB), am_depth_pct (0.5), fm_dev_hz
