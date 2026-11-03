@@ -6,6 +6,9 @@
                 u = sqrt((A_pp / 2)^2 + A_offset^2) / divisor, from the calibrator's square-wave amplitude (Vpp) and DC offset specifications.
   CONDUCTANCE   a resistance source read as conductance (S): the resistance budget (calibrator + CMC floor, as any ohms point) carried over as a relative
                 uncertainty, U_G = G x U_R / R.
+  CURRENT_VIA_R a DC voltage source through a measured resistor, the meter reads the current I = V / R (Keithley 485, Table 3-2): the DC volts budget
+                (calibrator + CMC floor, as any DCV point) and the resistor's expanded uncertainty (step.resistor.u_ppm, k = 2) combined as relative terms,
+                U_I = I x sqrt((U_V / V)^2 + (U_R / R)^2).  No value while the resistor's uncertainty is not entered (the calibrator alone would understate it).
 Expanded at k = 2, rounded up to two figures, never combined with a CMC where the lab's scope has no line for the quantity (square waves: owner decision
 2026-10-28, calibrator specification alone, no flag).  The value is None when the calibrator's sheet has no row for the point (the report then stays blank).
 
@@ -14,7 +17,7 @@ from __future__ import annotations
 
 import math
 
-KINDS = ('DUTY', 'SQUARE_PEAK', 'CONDUCTANCE')
+KINDS = ('DUTY', 'SQUARE_PEAK', 'CONDUCTANCE', 'CURRENT_VIA_R')
 K = 2.0
 
 
@@ -42,6 +45,18 @@ def evaluate(p, model):
         g = 1.0 / r
         acc = b.hit.limit / r * g if b.hit is not None else None
         return b.value / r * g, acc, 'S'
+    if kind == 'CURRENT_VIA_R':
+        u_ppm = (p.get('resistor') or {}).get('u_ppm')
+        if u_ppm is None:
+            return None
+        import uncertainty_budget
+        v, i = abs(float(a['value'])), abs(float(p['nominal']))
+        b = uncertainty_budget.build('DCV', v, 'V', standard=model)
+        if b.value is None or not v:
+            return None
+        r_rel = float(u_ppm) * 1e-6
+        acc = i * math.sqrt((b.hit.limit / v) ** 2 + r_rel ** 2) if b.hit is not None else None
+        return i * math.sqrt((b.value / v) ** 2 + r_rel ** 2), acc, 'A'
     std = _standard(model)
     if std is None:
         return None

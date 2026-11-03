@@ -68,7 +68,8 @@
     "Fluke 101 Performance Verification": "Fluke_101_Verification.py",
     "Fluke 6060A/AN Signal Generator Performance Verification, GIDEP T.O. 33K3-4-911-1 (GPIB)": "Fluke_6060A_GIDEP_Verification.py",
     "HP 8902A Power Sensor Cal Factors": "HP_8902A_Cal_Factors.py",
-    "HP 8591A Spectrum Analyzer Performance Verification, T.O. 33K3-4-2864-1 (GPIB)": "HP_8591A_Verification.py"
+    "HP 8591A Spectrum Analyzer Performance Verification, T.O. 33K3-4-2864-1 (GPIB)": "HP_8591A_Verification.py",
+    "Keithley 485 Picoammeter Performance Verification": "Keithley_485_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -139,7 +140,8 @@
     "Fluke_101_Verification.py": "1",
     "Fluke_6060A_GIDEP_Verification.py": "1",
     "HP_8902A_Cal_Factors.py": "1",
-    "HP_8591A_Verification.py": "1"
+    "HP_8591A_Verification.py": "1",
+    "Keithley_485_Verification.py": "1"
   },
   "records": [
     [
@@ -624,6 +626,13 @@
       "8591A",
       "Spectrum Analyzer",
       "HP_8591A_Verification.py"
+    ],
+    [
+      "Keithley 485 Picoammeter Performance Verification",
+      "Keithley",
+      "485",
+      "Picoammeter",
+      "Keithley_485_Verification.py"
     ]
   ],
   "FILES": {

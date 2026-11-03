@@ -69,6 +69,8 @@ Included
                             175 = 52 points, 177 = 51, 179 = 54 (adds 3 temperature points, TEMP kind, degC). Steps are numbered in table order (the tables print no numbers): ids 2-1..2-52 (175), 3-1..3-54 (177 / 179).
                             THREE printed values are corrected (step.printed_limits keeps the printed text; the report row Description says 'limits corrected'); format-only changes keep step.printed_text.
                             Frequency rows (AC / DC volts frequency) are sourced as AC volts and read in Hz / kHz: unc_kind FREQ (the Frequency - Measure CMC alone). build_170_spec.py checks every limit against the published accuracy and fails on a disagreement.
+  keithley_485_pv.json      Keithley 485 Instruction Manual Table 3-2 (p. 3-2): zero check + 7 ranges at + / - current (15 points; ids F-1, 3-2-1 .. 3-2-14); kind DCV = the calibrator
+                            volts V = I x R through the measured resistance box (RESISTORS in build_keithley_485_spec.py), read in nA / uA / mA; unc_kind CURRENT_VIA_R; tested by tests/test_keithley_485_points.py.
   fluke_101_pv.json         Fluke 101 Users Manual (printed pp. 20-22): 29 points, one per range at 90 %, AC volts / AC mV at 60 and 400 Hz; limits computed from the published 1-year accuracy, rounded inward; ids 1-1 .. 1-29;
                             written by build_fluke_101_spec.py; tested by tests/test_fluke_101_points.py.
   fluke_365_pv.json         Fluke 365 Detachable Jaw True-rms Clamp Meter Calibration Manual, Table 2 (printed pp. 7-8), 32 points (schema 3, written by build_fluke_365_spec.py from the page images, read twice):
