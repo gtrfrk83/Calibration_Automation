@@ -19,11 +19,11 @@ import drivers  # noqa: E402
 import rtd_cvd  # noqa: E402
 from drivers.simulated_dmm6500 import make_dmm6500_bench  # noqa: E402
 
-CAL_NAMES = {'5522A': 'Fluke 5522A', '5560A': 'Fluke 5560A', '5520A': 'Fluke 5520A'}
+CAL_NAMES = {'5560A': 'Fluke 5560A'}              # the 5700A (alone and with the 5725A) has its own test classes below; the 5520A and 5522A are not offered (owner, 2026-11-03)
 BY_REF = {p['ref']: p for p in E.POINTS}
 
 
-def build(cal='5522A', reference=True):
+def build(cal='5560A', reference=True):
     bench, ct, dt, *rt = make_dmm6500_bench(cal, reference=reference)
     io = E.IO('v', 'v', CAL_NAMES[cal], 9600, 'USB', transports=(dt, ct, *rt), virtual=True)
     return io, bench, ct, dt, (rt[0] if rt else None)
@@ -96,6 +96,131 @@ class Thermocouple(Fast):
         self.assertAlmostEqual(io._tc_offset, 2.0e-6, places=7)
         self.assertAlmostEqual(bench.fluke['volts'], -0.007659 - 2.0e-6, places=9)       # the calibrator was programmed with the table value minus the offset
         self.assertLess(abs(reading - (-190.0)), 0.2)
+        io.close()
+
+
+class Calibrator5700A(Fast):
+    """The 5700A (original; owner decision 2026-11-03): sourced by drivers/fluke_5700a.py on drivers/simulated_5700a.py, which is hand-written from the Series II guide (UNVERIFIED)."""
+
+    @staticmethod
+    def manual_ids():
+        import calibrator_fit as cf
+        offer = cf.make_offer('5700A', cf.dmm_requests(E.fit_requests(E.POINTS)), per_point_manual=True)
+        return {r.key: why for r, why in offer.manual}
+
+    def build(self):
+        bench, ct, dt, rt = make_dmm6500_bench('5700A', reference=True)
+        io = E.IO('v', 'v', 'Fluke 5700A', 9600, 'USB', transports=(dt, ct, rt), virtual=True)
+        manual = self.manual_ids()
+        io.is_manual = lambda p: p['id'] in manual or (p['kind'] == 'CAP' and p['source'] == 'calibrator')
+        return io, bench, ct, dt
+
+    def test_every_point_passes_the_ones_it_cannot_source_go_to_the_operators_standard(self):
+        io, bench, ct, dt = self.build()
+        n_manual = 0
+        for p in E.POINTS:
+            with self.subTest(point=p['ref']):
+                reading = io.measure(p)
+                self.assertTrue(E.judge(p, reading, io.last_eval.get('center')), (reading, p['nominal']))
+                n_manual += bool(io.is_manual(p))
+        self.assertEqual(n_manual, 25)                                           # 13 the sheet does not cover + 12 capacitance points
+        io.close()
+
+    def test_which_points_the_5700a_cannot_make(self):
+        refs = sorted(p['ref'] for p in E.POINTS if p['id'] in self.manual_ids())
+        self.assertEqual([r for r in refs if r.startswith('ACV')], ['ACV.750.100kHz', 'ACV.750.50kHz'])
+        self.assertEqual(len([r for r in refs if '10A' in r]), 11)               # the rear 10 A range: DC, digitize and AC
+        self.assertEqual(len(refs), 13)
+
+    def test_the_5700a_is_driven_with_its_own_commands_and_ends_in_standby(self):
+        io, bench, ct, dt = self.build()
+        io.measure(BY_REF['DCV.10.1'])
+        io.measure(BY_REF['OHM4.1000'])
+        io.measure(BY_REF['ACI.1A.1000'])
+        sent = ct.sent
+        self.assertIn('OUT 10 V, 0 HZ', sent)
+        self.assertIn('OUT 1000 OHM', sent)
+        self.assertIn('EXTSENSE ON', sent)
+        self.assertIn('CUR_POST NORMAL', sent)
+        self.assertIn('OUT 1 A, 1000 HZ', sent)
+        self.assertFalse(bench.fluke['operate'])
+        self.assertFalse([c for c in sent if c.startswith(('CAL', 'FORMAT', 'DIAG', 'SP_SET'))])
+        io.close()
+
+    def test_a_fault_stops_before_the_output_is_operated(self):
+        io, bench, ct, dt = self.build()
+        ct.refuse = 'OUT 10 V'
+        with self.assertRaises(drivers.InstrumentError):
+            io.measure(BY_REF['DCV.10.1'])
+        self.assertNotIn('OPER', ct.sent[-6:])
+        io.close()
+
+    def test_the_rtd_3_wire_points_use_external_sense_too(self):
+        io, bench, ct, dt = self.build()
+        io.measure(BY_REF['RTD3.2'])
+        self.assertIn('EXTSENSE ON', ct.sent)
+        io.close()
+
+
+class Combo5700A5725A(Calibrator5700A):
+    """The 5700A with its 5725A amplifier: the 13 points above the 5700A's own range are made through the amplifier, only the 12 capacitance points go to the operator's own standard."""
+
+    def build(self):
+        bench, ct, dt, rt = make_dmm6500_bench('5700A', reference=True)
+        io = E.IO('v', 'v', 'Fluke 5700A + 5725A', 9600, 'USB', transports=(dt, ct, rt), virtual=True)
+        manual = self.manual_ids()
+        amp = E.amplifier_points([p for p in E.POINTS if p['id'] in manual])
+        io.uses_amp = lambda p: p['id'] in amp
+        io.is_manual = lambda p: (p['id'] in manual and p['id'] not in amp) or (p['kind'] == 'CAP' and p['source'] == 'calibrator')
+        self.amp_ids = amp
+        return io, bench, ct, dt
+
+    test_every_point_passes_the_ones_it_cannot_source_go_to_the_operators_standard = None      # the 5700A-alone version of this test (25 operator points) does not apply
+
+    def test_every_point_passes_and_only_capacitance_is_left_to_the_operator(self):
+        io, bench, ct, dt = self.build()
+        left = []
+        for p in E.POINTS:
+            with self.subTest(point=p['ref']):
+                reading = io.measure(p)
+                self.assertTrue(E.judge(p, reading, io.last_eval.get('center')), (p['ref'], reading, p['nominal']))
+                if io.is_manual(p):
+                    left.append(p['ref'])
+        self.assertEqual(sorted(left), sorted(f'CAP.{n}' for n in range(2, 14)))
+        self.assertEqual(len(self.amp_ids), 13)
+        io.close()
+
+    def test_the_amplifier_is_switched_in_with_the_output_in_standby_and_out_again_after_the_point(self):
+        io, bench, ct, dt = self.build()
+        io.measure(BY_REF['DCI.10A.1'])
+        sent = ct.sent
+        i = sent.index('BTYPE IB5725')
+        self.assertLess(sent.index('STBY'), i)                                    # standby first
+        self.assertLess(i, sent.index('BOOST ON'))
+        self.assertLess(sent.index('BOOST ON'), sent.index('RANGELCK ON'))
+        self.assertLess(sent.index('RANGELCK ON'), sent.index('OUT 10 A, 0 HZ'))
+        self.assertIn('CUR_POST IB5725', sent)
+        self.assertLess(sent.index('OUT 10 A, 0 HZ'), sent.index('OPER'))
+        self.assertEqual([c for c in sent if '?' not in c][-1], 'CUR_POST NORMAL')
+        self.assertIn('BOOST OFF', sent)
+        self.assertFalse(ct.boost)
+        io.close()
+
+    def test_voltage_points_use_the_voltage_amplifier(self):
+        io, bench, ct, dt = self.build()
+        io.measure(BY_REF['ACV.750.100kHz'])
+        self.assertIn('BTYPE VB5725', ct.sent)
+        self.assertNotIn('CUR_POST IB5725', ct.sent)
+        io.measure(BY_REF['ACV.750.1kHz'])                                         # the 5700A makes this one by itself: no BOOST
+        self.assertEqual(ct.sent[-12:].count('BOOST ON'), 0)
+        io.close()
+
+    def test_a_missing_or_unpowered_5725a_is_an_error_before_the_output_is_operated(self):
+        io, bench, ct, dt = self.build()
+        ct.amp_connected = False
+        with self.assertRaises(drivers.InstrumentError):
+            io.measure(BY_REF['DCI.10A.1'])
+        self.assertNotIn('OPER', ct.sent)
         io.close()
 
 
@@ -214,7 +339,7 @@ class SpecLoading(unittest.TestCase):
         import report_pdf
         for ref in ('DCV.10.1', 'DIGV.1.1', 'DIGI.1A.1', 'FREQ.2', 'TC.2', 'RTD4.1', 'ZR.1', 'OHM4.1', 'CAP.2', 'ACI.1A.1000', 'DCI.10A.1'):
             p = BY_REF[ref]
-            row = report_pdf.point_row(E.effective(p), E.effective(p)['nominal'], False, section=p['section_title'], standard='5522A')
+            row = report_pdf.point_row(E.effective(p), E.effective(p)['nominal'], False, section=p['section_title'], standard='5560A')
             self.assertTrue(row['Description'], ref)
             self.assertTrue(row['Nominal'], ref)
 
@@ -241,7 +366,17 @@ class Window(unittest.TestCase):
             self.assertEqual(len(app.active_points()), 189 - 11)
             for need in ('ref_entry', 'dmm_entry', 'cal_entry', 'period_combo'):
                 self.assertTrue(hasattr(app, need), need)
-            self.assertIn('Fluke 5522A', app.cal_choices())
+            self.assertEqual(app.cal_choices(), ['Fluke 5560A', 'Fluke 5700A', 'Fluke 5700A + 5725A'])       # no 5520A / 5522A
+            self.assertIn('Fluke 5700A', app.cal_choices())
+            self.assertFalse(any(app.is_manual(p) for p in app.active_points()))                     # a 5560A / 5522A sources every point
+            app.cal_model.set('Fluke 5700A')
+            self.assertEqual(sum(1 for p in app.active_points() if app.is_manual(p)), 25)
+            self.assertIn('no capacitance', app.manual_reason(next(p for p in app.active_points() if p['ref'] == 'CAP.2')))
+            app.cal_model.set('Fluke 5700A + 5725A')
+            self.assertEqual(sum(1 for p in app.active_points() if app.is_manual(p)), 12)             # capacitance only
+            self.assertEqual(sum(1 for p in app.active_points() if app.uses_amp(p)), 13)
+            self.assertEqual(app.cal_key, '5700A')
+            app.cal_model.set('Fluke 5560A')
             app.on_select()
             root.close()
         finally:

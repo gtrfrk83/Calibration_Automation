@@ -15,7 +15,8 @@
  "drivers": [
   "keithley_dmm6500",
   "fluke_5560a",
-  "agilent_3458a"
+  "agilent_3458a",
+  "fluke_5700a"
  ],
  "specs": [
   "specs/keithley_dmm6500_pv.json"
@@ -33,7 +34,8 @@
    "drivers/transport.py",
    "drivers/keithley_dmm6500.py",
    "drivers/agilent_3458a.py",
-   "drivers/fluke_5560a.py"
+   "drivers/fluke_5560a.py",
+   "drivers/fluke_5700a.py"
   ],
   "spec": [
    "specs/keithley_dmm6500_pv.json"
@@ -51,6 +53,8 @@
   "Procedures/Keithley_DMM6500_Verification.procedure.json",
   "specs/keithley_dmm6500_pv.json",
   "drivers/keithley_dmm6500.py",
-  "tests/test_dmm6500_points.py"
+  "tests/test_dmm6500_points.py",
+  "drivers/fluke_5700a.py",
+  "tests/test_fluke5700a_driver.py"
  ]
 }

@@ -5,8 +5,8 @@ strings are the ones drivers/keithley_dmm6500.py sends; the reply FORMATS of the
 are the ones the driver's tolerant parser is written against.  The behaviour (ranges, overflow, offset compensation limited to 10 kohm, the front / rear switch, the
 digitize capture) is written from the Reference and Calibration manuals and is UNVERIFIED.  When a bench session has recorded real replies, replace this with a replay.
 
-    bench, cal_t, dmm_t = make_dmm6500_bench('5522A')                 # 5522A / 5560A / 5520A and the meter on one bench
-    bench, cal_t, dmm_t, ref_t = make_dmm6500_bench('5522A', reference=True)     # plus a simulated 3458A reading the same source
+    bench, cal_t, dmm_t = make_dmm6500_bench('5560A')                 # 5560A / 5700A (and, for other procedures, 5522A / 5520A) and the meter on one bench
+    bench, cal_t, dmm_t, ref_t = make_dmm6500_bench('5560A', reference=True)     # plus a simulated 3458A reading the same source
 
 Test hooks: dmm_t.gain / dmm_t.offset (per function node), dmm_t.front (TERMINALS switch), dmm_t.errors (queue), dmm_t.sent (every command), dmm_t.shorted (4-wire short fitted), dmm_t.noise (digitize), bench.fail_next (substring: the next matching command times out).
 """
@@ -59,6 +59,7 @@ class SimDMM6500Transport(_SimBase):
         self.front = True
         self.errors, self.sent = [], []
         self.noise = 0.0
+        self.external_value = None                              # a standard the operator connects (the engine sets it in a virtual run for the points it hands to 'your own standard')
         self.shorted = False                                    # a 4-wire short is on the input (the engine sets it for the zero points of a virtual run)
         self._power_up()
 
@@ -88,6 +89,8 @@ class SimDMM6500Transport(_SimBase):
         """The true value of the selected function from the bench, or None when nothing suitable is connected (an open / overflow reading)."""
         node = self._node()
         f = self.bench.fluke
+        if self.external_value is not None:
+            return float(self.external_value) + (0.375e-9 if node == 'CAP' else 0.0)      # the operator's capacitance standard sits behind the same cable
         if node == 'FREQ':
             return float(f['freq']) * 1.000001 if f['operate'] and f['freq'] and f.get('unit', 'V') == 'V' else None
         if node == 'CAP':                                       # 0.375 nF of cable plus whatever capacitance the calibrator is sourcing (OUT <n>NF / UF / F)
@@ -242,11 +245,16 @@ class SimDMM6500Transport(_SimBase):
         return self.read()
 
 
-def make_dmm6500_bench(cal='5522A', bus='USB', reference=False):
+def make_dmm6500_bench(cal='5560A', bus='USB', reference=False):
     """(bench, calibrator transport, DMM6500 transport) or, with reference=True, plus a simulated 3458A on the same bench."""
     bench = SimBench()
     bench.freq_aware = True
-    cal_t, dmm_t = SimFlukeComp(bench, cal), SimDMM6500Transport(bench, bus)
+    if cal == '5700A':
+        from .simulated_5700a import SimFluke5700ATransport
+        cal_t = SimFluke5700ATransport(bench)
+    else:
+        cal_t = SimFlukeComp(bench, cal)
+    dmm_t = SimDMM6500Transport(bench, bus)
     if not reference:
         return bench, cal_t, dmm_t
     from .simulated_3458a import Sim3458ATransport

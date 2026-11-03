@@ -1,5 +1,5 @@
 """Writes specs/dmm6500_tar_below_4.md: the DMM6500 verification points whose TAR (UUT tolerance / calibrator published accuracy, tartur.py) is below 4:1, for each calibrator
-the procedure can drive (5522A, 5560A, 5520A).  The 5520A figures use the project's 5520A specification table (the 5520A driver's own specification flags still apply).
+the procedure can drive (5560A, 5700A, 5700A + 5725A; the 5520A and 5522A are not offered, owner 2026-11-03).  For the 5700A + 5725A the points made through the amplifier use the 5725A rows of the sheet.
 
 TAR is the one the user asked for; the TUR (against the reported expanded uncertainty, max of budget and the lab's CMC) is listed beside it.  Points sourced by the manual's reference
 DMM (1 ohm and 10 ohm, 10 uA to 10 mA) are marked: the calibrator is not the standard there, so its TAR is shown but is not the deciding ratio.  A blank TAR means no specification
@@ -14,8 +14,28 @@ import dmm6500_verification as E     # noqa: E402
 import procspec                      # noqa: E402
 import tartur                        # noqa: E402
 
-CALS = ('5522A', '5560A', '5520A')
+CALS = ('5560A', '5700A', '5700A + 5725A')      # the 5520A and 5522A are not offered for this procedure (owner, 2026-11-03)
 THRESHOLD = 4.0
+
+
+def amp_row(p, q):
+    """TAR of a point made through the 5725A amplifier, from the 5700A sheet's 5725A rows (specmanager variant '5725a'); None when no row covers it."""
+    import specmanager as sm
+    row = next((s for s in sm.standards() if s['model'] == '5700A'), None)
+    std = sm.StandardSpec(row['id']) if row else None
+    if std is None:
+        return None
+    hit = std.lookup(q['kind'], p['nominal'], p.get('frequency'), variant='5725a')
+    if hit is None or not q['high'] > q['low']:
+        return None
+    tol = (q['high'] - q['low']) / 2
+    return dict(tar=tol / hit.limit, tur=None, tolerance=tol, accuracy=hit.limit, uncertainty=None, reason='')
+
+
+def _manual_5700a():
+    import calibrator_fit
+    offer = calibrator_fit.make_offer('5700A', calibrator_fit.dmm_requests(E.fit_requests(E.POINTS)), per_point_manual=True)
+    return {r.key for r, _why in offer.manual}
 
 
 def fmt(value, unit):
@@ -38,9 +58,11 @@ def main():
     sections = []
     for cal in CALS:
         low, blank = [], []
+        base = cal.split(' + ')[0]
+        amp_ids = E.amplifier_points([p for p in points if p['id'] in _manual_5700a()]) if '+' in cal else set()
         for p in points:
             q = E.effective(p)
-            r = tartur.compute(q, q['low'], q['high'], standard=cal)
+            r = (amp_row(p, q) if p['id'] in amp_ids else None) or tartur.compute(q, q['low'], q['high'], standard=base)
             if r['tar'] is None:
                 blank.append((p, r))
             elif r['tar'] < THRESHOLD:

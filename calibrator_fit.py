@@ -28,7 +28,7 @@ HERE = Path(__file__).resolve().parent
 STANDARDS_DIR = HERE / 'specs' / 'standards'
 
 # What the repository can say about commands on each calibrator (shown in the picker tooltip).  Filled from the driver COMMANDS registry, so it cannot drift.
-MODEL_FILES = {'5520A': 'fluke_5520a_standard.json', '5522A': 'fluke_5522a_standard.json', '5560A': 'fluke_5560a_standard.json'}
+MODEL_FILES = {'5520A': 'fluke_5520a_standard.json', '5522A': 'fluke_5522a_standard.json', '5560A': 'fluke_5560a_standard.json', '5700A': 'fluke_5700a_standard.json'}
 KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP', 'TEMP', 'SQUARE', 'DUTY')
 UNIT = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM': 'ohm', 'CAP': 'F', 'TEMP': 'degC', 'SQUARE': 'V', 'DUTY': '%'}
 NAME = {'DCV': 'DC volts', 'ACV': 'AC volts', 'DCI': 'DC current', 'ACI': 'AC current', 'OHM': 'resistance', 'CAP': 'capacitance',

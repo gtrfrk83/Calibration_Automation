@@ -50,7 +50,7 @@ def build_ui(self):
     f.note('Optional. With a reference meter the 1 ohm / 10 ohm and DC current (10 uA to 10 mA, 10 A) limits are centred on its reading, as the manual describes; without one they are '
            'centred on the calibrator setting. Leave blank for none.')
     calbox = f.row('Calibrator', f.combo(self.cal_model, self.cal_choices(), 14))
-    B.calibrator_note(f, self.cal_offer, widgets=(calbox,))
+    B.calibrator_note(f, self.cal_offer57, widgets=(calbox,))
     f.row('Calibrator interface', f.combo(self.cal_interface, list(CAL_INTERFACES), 10, command=self.on_cal_interface))
     self.cal_entry = f.row('Calibrator port / address', f.combo(self.cal_addr, (), 34, state='normal'), fill=True)
     f.row('Calibrator baud (RS-232 only)', f.combo(self.cal_baud, ['9600', '19200', '4800', '2400', '1200'], 9))

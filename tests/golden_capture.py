@@ -228,6 +228,8 @@ from tests import golden_5491b as _g5491b  # noqa: E402  (B&K 5491B driver cases
 COVERAGE['bk_5491b'] = _g5491b.COVERAGE
 from tests import golden_dmm6500 as _gdmm6500  # noqa: E402  (Keithley DMM6500 driver cases; fake replies, not recorded)
 COVERAGE['keithley_dmm6500'] = _gdmm6500.COVERAGE
+from tests import golden_5700a as _g5700a  # noqa: E402  (Fluke 5700A driver cases; simulated replies, not recorded)
+COVERAGE['fluke_5700a'] = _g5700a.COVERAGE
 from tests import golden_6060a as _g6060a  # noqa: E402  (Fluke 6060A, HP 8902A, HP 8563E drivers and the 96270A power-meter methods)
 COVERAGE['fluke_6060a'] = _g6060a.COVERAGE
 from tests import golden_8591a as _g8591a  # noqa: E402  (HP 8591A driver and the 96270A AM method)
@@ -240,6 +242,7 @@ LINT_FILES.append('tektronix_tbs2000b')
 LINT_FILES.append('keysight_53220a')
 LINT_FILES.append('bk_5491b')
 LINT_FILES.append('keithley_dmm6500')
+LINT_FILES.append('fluke_5700a')
 LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address']
 LINT_FILES.append('hp_8591a')
 LINT_FILES += ['tektronix_tbs1000', 'tektronix_tbs1000c']
@@ -1789,6 +1792,7 @@ DRIVER_CASES['tektronix_tbs2000b'] = _tbs2000b.driver_cases
 DRIVER_CASES['keysight_53220a'] = _g53220a.driver_cases
 DRIVER_CASES['bk_5491b'] = _g5491b.driver_cases
 DRIVER_CASES['keithley_dmm6500'] = _gdmm6500.driver_cases
+DRIVER_CASES['fluke_5700a'] = _g5700a.driver_cases
 DRIVER_CASES['fluke_6060a'] = _g6060a.driver_cases
 DRIVER_CASES['hp_8591a'] = _g8591a.driver_cases
 

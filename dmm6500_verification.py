@@ -2,7 +2,7 @@
 
 Test points and limits are NOT written in this file: they are loaded from specs/keithley_dmm6500_pv.json, built by specs/build_dmm6500_spec.py from the Keithley DMM6500
 Calibration and Adjustment Manual DMM6500-905-01 Rev. E, section 2 (printed pp. 2-6 to 2-48).  The manual prints one interval (1 year, 18 to 28 C).  Two-way: the program sets the
-function and range over USB, LAN or GPIB (SCPI, DMM6500 Reference Manual DMM6500-901-01 Rev. C), sources the point from a Fluke 5560A, 5522A or 5520A, reads the meter back with
+function and range over USB, LAN or GPIB (SCPI, DMM6500 Reference Manual DMM6500-901-01 Rev. C), sources the point from a Fluke 5560A or a Fluke 5700A (alone or with its 5725A amplifier), reads the meter back with
 :READ? (digitize: the average of a captured buffer) and judges it.  Adjustment is NOT part of this program.
 
 STATUS: simulated bench only.  No DMM6500 command has been verified on a real instrument (bench-first workflow, NOTES.md), so every driver command is UNVERIFIED and the
@@ -42,14 +42,15 @@ NAMES = dict(procspec.NAMES, DIGV='Digitize DC voltage', DIGI='Digitize DC curre
 REPORT_KIND = {'DIGV': 'DCV', 'DIGI': 'DCI'}      # the report / uncertainty tables know the plain function names
 PERIODS = {'1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
-CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
-CAL_OFFERED_ONLY_IF_FIT = ('Fluke 5520A',)
+# Owner decision 2026-11-03: the 5520A and 5522A are NOT offered for this procedure (their accuracy against the DMM6500 limits: TAR below 4:1 at over 100 of 176 points).
+CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5700A': ('5700A', drivers.Fluke5700A), 'Fluke 5700A + 5725A': ('5700A', drivers.Fluke5700A)}
+AMPLIFIER_MODELS = ('Fluke 5700A + 5725A',)  # the 5700A with its 5725A amplifier (BOOST): the points above the 5700A's own range are made through it
+FIT_MODELS = {'Fluke 5700A': '5700A', 'Fluke 5700A + 5725A': '5700A'}      # calibrators with a per-point 'your own standard' path: calibrator_fit (their published specification) decides which points they cannot source
 INTERFACES = ('USB', 'LAN', 'GPIB')
 CAL_INTERFACES = ('RS-232', 'GPIB')
 CAL_PORT_DEFAULT = {'RS-232': 'COM9', 'GPIB': 'GPIB0::4::INSTR'}   # editable; the GPIB address is only an example (UNVERIFIED, set the calibrator's real address)
 ZERO_CHOICES = ('Include', 'Skip')         # the 4-wire short zero checks are not part of the manufacturer's customer report (p. 2-41)
 HV_CONFIRM = 100.0                         # volts: a high-voltage confirmation before any DC / AC volts point of this size or more
-ZCOMP_LIMIT = 110e3                        # ohm: 5522A impedance compensation exists only below this (5522A Operators Manual p. 6-49)
 # Settling times from OPER to the first reading (seconds). ENGINEERING ESTIMATES except where the manual states one (5 minutes after 0 V on the 100 mV DC range and for the
 # thermal offset of the thermocouple cable, p. 2-8 / 2-19; 5 minutes with the 4-wire short fitted, p. 2-42). Tunable through the procedure modifications ('dmm6500.settle.*').
 SETTLE = dict(default=3.0, ac=10.0, rel_zero=300.0, tc_offset=300.0, short_first=300.0, short=5.0, dci=5.0, ohm=3.0, ohm_high=5.0, cap=2.0)
@@ -124,6 +125,43 @@ def describe(p):
     return f"{name}: {p['desc']}" + (f" @ {procspec._fmt(p['frequency'], 'Hz')}" if p.get('frequency') and p['kind'] != 'FREQ' and '@' not in p['desc'] and ' at ' not in p['desc'] else '')
 
 
+def fit_requests(points):
+    """What each point asks of a calibrator, for calibrator_fit: digitize is plain DC, a thermocouple point is a dc voltage (the table value), an RTD point a resistance. Capacitance is
+    left out (calibrator_fit has no row for it here: App.is_manual handles it from the driver's CANNOT list)."""
+    out = []
+    for p in points:
+        if p['source'] != 'calibrator' or p['kind'] == 'CAP':
+            continue
+        q = dict(p)
+        if p['kind'] in ('DIGV', 'DIGI'): q['kind'] = REPORT_KIND[p['kind']]
+        elif p['kind'] == 'TEMP' and p['group'] == 'TC': q.update(kind='DCV', nominal=p['source_value'])
+        elif p['kind'] == 'TEMP': q.update(kind='OHM4', nominal=p['source_ohms'])
+        q.pop('low', None); q.pop('high', None)
+        out.append(q)
+    return out
+
+
+def amplifier_points(points):
+    """Ids of the points (those the 5700A alone cannot source) that the 5725A amplifier rows of the 5700A's published specification cover (specmanager variant '5725a'): AC volts 75 V to 750 V
+    from 30 kHz to 100 kHz, DC current 2.2 A to 11 A, AC current 1 A to 11 A from 40 Hz to 10 kHz. Empty when the sheet is not installed."""
+    try:
+        import specmanager as sm
+        std = sm.for_model('5700A') if hasattr(sm, 'for_model') else None
+        if std is None:
+            row = next((s for s in sm.standards() if s['model'] == '5700A'), None)
+            std = sm.StandardSpec(row['id']) if row else None
+    except Exception:
+        return set()
+    if std is None:
+        return set()
+    out = set()
+    for q in fit_requests(points):
+        kind = {'OHM4': 'OHM'}.get(q['kind'], q['kind'])
+        if std.lookup(kind, q['nominal'], q.get('frequency'), variant='5725a') is not None:
+            out.add(q['id'])
+    return out
+
+
 def apply_period(points, period):
     """Set each point's 'error' (the allowed +/- error about the centre) and the absolute low / high about the nominal, from the chosen period."""
     for p in points:
@@ -159,7 +197,6 @@ def judge(p, reading, center=None) -> bool:
 
 def find_diagram(cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_dmm6500_<cal>_<GROUP>.png, then diagrams/hook_dmm6500_<GROUP>.png (owner-supplied; none is invented)."""
-    cal = '5522A' if cal == '5520A' else cal
     for name in (f'hook_dmm6500_{cal}_{group}', f'hook_dmm6500_{group}'):
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
@@ -237,6 +274,13 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         self.cal = cal_cls(cal_t, self.log, label=cal_name)
         self.ref = drivers.Agilent3458A(ref_t, self.log, label='3458A') if ref_t is not None else None
         self.last_eval = {}
+        self.is_manual = lambda p: False        # the App sets this: points measured with a standard the technician connects
+        self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
+        self._amp = None
+        self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
+        self._amp = None
+        self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
+        self._amp = None
         self._tc_offset = None
         self._short_settled = False
         try:
@@ -316,13 +360,13 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         return dict(p, plc=p.get('plc') or 1, **extra)
 
     def compensation(self, p):
-        """Resistance outputs: the 5522A impedance compensation (WIRE4 below 110 kohm for the 4-wire points, NONE for 110 kohm and up and for 2-wire), set once and read back.
-        The 5560A / 5520A have no such command in the project manuals: the operator sets the calibrator's own 4-wire / 2-wire mode (the hook-up prompt says so)."""
+        """Resistance outputs: external sense for the 4-wire points and the RTD points, none for 2-wire; set once and read back (the 5700A: EXTSENSE). The manual selects external
+        sense (EX SNS) for the 3-wire RTD points too (p. 2-23 step 11) and for every 4-wire resistance range. The 5560A has no such command in the project manuals: the operator sets
+        its own 4-wire / 2-wire mode (the hook-up prompt says so)."""
         if not hasattr(self.cal, 'set_compensation'):
             return
-        four = p['kind'] == 'OHM4' or p['group'] == 'RTD4'
-        ohms = p.get('source_ohms', p['nominal'])
-        self.cal.set_compensation('WIRE4' if (four and ohms < ZCOMP_LIMIT) else 'NONE')
+        four = p['kind'] == 'OHM4' or p['group'] in ('RTD4', 'RTD3')
+        self.cal.set_compensation('WIRE4' if four else 'NONE')
 
     def measure_offset(self):
         """Thermocouple cable thermal offset (CM p. 2-19 steps 2-14): DC volts, 100 mV range, input impedance Auto, autozero on, 1 PLC, calibrator at 0 V in operate, settle
@@ -373,6 +417,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         """A virtual run has no operator to fit a short: the simulated meter is told (a real bench is not touched)."""
         t = self.dmm.t
         if hasattr(t, 'shorted'): t.shorted = p['source'] == 'none'
+        if hasattr(t, 'external_value'): t.external_value = p['nominal'] if self.is_manual(p) else None      # a standard the operator connects
 
     @procmods_engine.point_commands()
     def measure(self, p):
@@ -381,16 +426,25 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         try:
             self.check_terminals(p)
             if self.virtual: self.virtual_hooks(p)
-            if p['group'] == 'TC':
+            manual = self.is_manual(p)
+            if p['group'] == 'TC' and not manual:
                 if p['ref'] == 'TC.1' or self._tc_offset is None: self._tc_offset = self.measure_offset()
             if p['group'] != 'SHORT4': self._short_settled = False
             self.dmm.configure_point(self.meter_point(p))
             self.dmm.check_errors('configuring ' + p['description'])
-            if p['source'] == 'calibrator':
+            amp = p['source'] == 'calibrator' and not manual and self.uses_amp(p)
+            if hasattr(self.cal, 'amplifier_on') and not amp and self._amp is not None:
+                self.cal.amplifier_off(); self._amp = None                # a point the 5700A makes by itself: the amplifier is taken out
+            if p['source'] == 'calibrator' and not manual:
+                if amp and self._amp != ('V' if p['kind'] in ('DCV', 'ACV', 'DIGV') else 'I'):
+                    if self._amp is not None: self.cal.amplifier_off()
+                    self._amp = 'V' if p['kind'] in ('DCV', 'ACV', 'DIGV') else 'I'
+                    self.cal.amplifier_on(self._amp)                       # the output is still in standby here
                 if p.get('rel_zero'): self.cal.set_output_volts(0, None, dc=True)
                 else: self.source(p)
                 self.cal.check_error(p['description'])        # the calibrator refuses outputs it cannot make; never operate then
                 self.cal.operate_unverified()
+                if hasattr(self.cal, 'wait_settled'): self.cal.wait_settled(self.pm_param('dmm6500.settle.cal_report', 60.0))
             time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
             if p.get('rel_zero'): self.dmm.acquire_reference('DCV')
             ref = self.reference_reading(p)
@@ -404,6 +458,9 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
             return reading
         finally:
             self.standby()
+            if self._amp is not None and hasattr(self.cal, 'amplifier_off'):
+                try: self.cal.amplifier_off()
+                finally: self._amp = None                              # the amplifier is taken out at the end of every point that used it (the output is in standby)
 
 
 class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
@@ -422,8 +479,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.dmm_addr = port.var(s.get('dmm_addr', ''))
         self.ref_addr = port.var(s.get('ref_addr', ''))
         self.zero_checks = port.var(s.get('zero_checks', ZERO_CHOICES[0]) if s.get('zero_checks', ZERO_CHOICES[0]) in ZERO_CHOICES else ZERO_CHOICES[0])
-        kinds_for_fit = [dict(p, kind=REPORT_KIND.get(p['kind'], p['kind'])) for p in POINTS if p['kind'] != 'TEMP']
-        self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(kinds_for_fit), unverified=drivers.Fluke5520A.unverified_summary())
+        self.cal_offer57 = calibrator_fit.make_offer('5700A', calibrator_fit.dmm_requests(fit_requests(POINTS)), per_point_manual=True, unverified=drivers.Fluke5700A.unverified_summary())
+        self._fit_manual = {r.key: reason for r, reason in self.cal_offer57.manual}         # point id -> why the 5700A cannot make it (calibrator_fit)
+        self._amp_points = amplifier_points([p for p in POINTS if p['id'] in self._fit_manual])     # of those, the ones the 5725A amplifier rows cover
+        self._amp_points = amplifier_points([p for p in POINTS if p['id'] in self._fit_manual])     # of those, the ones the 5725A amplifier rows cover
+        self._amp_points = amplifier_points([p for p in POINTS if p['id'] in self._fit_manual])     # of those, the ones the 5725A amplifier rows cover
         self.cal_model = port.var(s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
         self.cal_interface = port.var(s.get('cal_interface', CAL_INTERFACES[0]))
         if self.cal_interface.get() not in CAL_INTERFACES: self.cal_interface.set(CAL_INTERFACES[0])
@@ -448,8 +508,35 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
 
     def cal_choices(self):
-        """The calibrator picker's values: the 5520A only when its published specification covers every point (calibrator_fit)."""
-        return [n for n in CALIBRATORS if n not in CAL_OFFERED_ONLY_IF_FIT or self.cal_offer.offered]
+        """The calibrator picker's values (the 5520A and 5522A are not offered for this procedure)."""
+        return list(CALIBRATORS)
+
+    @property
+    def amp_selected(self):
+        return self.cal_model.get() in AMPLIFIER_MODELS
+
+    def uses_amp(self, p):
+        """True when the point is made through the 5725A amplifier: the 5700A + 5725A is selected and the point is above what the 5700A makes alone and inside the 5725A rows."""
+        return self.amp_selected and p['id'] in self._amp_points
+
+    def is_manual(self, p):
+        """True when the selected calibrator cannot make this point: the technician connects another standard (the meter is still read automatically)."""
+        if p['source'] != 'calibrator':
+            return False
+        if p['kind'] == 'CAP' and 'CAP' in getattr(CALIBRATORS[self.cal_model.get()][1], 'CANNOT', ()):
+            return True
+        if self.uses_amp(p):
+            return False
+        if self.uses_amp(p):
+            return False
+        if self.uses_amp(p):
+            return False
+        return self.cal_key in FIT_MODELS.values() and p['id'] in self._fit_manual
+
+    def manual_reason(self, p):
+        if p['kind'] == 'CAP' and 'CAP' in getattr(CALIBRATORS[self.cal_model.get()][1], 'CANNOT', ()):
+            return f'the {self.cal_key} has no capacitance output'
+        return self._fit_manual.get(p['id'], '')
 
     def active(self, p):
         if p.get('skip'): return False                               # a point skipped by a procedure modification
@@ -491,7 +578,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
         def build(mods):
             _bench, ft, dt, rt = make_dmm6500_bench(CALIBRATORS[cal_model][0], reference=True)
-            return IO('sim', 'sim', cal_model, 9600, self.interface.get(), transports=(dt, ft, rt), mods=mods, virtual=True, cal_interface=self.cal_interface.get())
+            io = IO('sim', 'sim', cal_model, 9600, self.interface.get(), transports=(dt, ft, rt), mods=mods, virtual=True, cal_interface=self.cal_interface.get())
+            io.is_manual = self.is_manual
+            io.uses_amp = self.uses_amp
+            return io
         return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p))
 
     # ------------------------------------------------------------------ table
@@ -508,7 +598,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _row(self, p):
         cells, tags = self.shell_cells(p['id'], p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'])
-        return (p['id'], p['description'], *cells), tags
+        return (p['id'], p['description'] + ('  [your standard]' if self.is_manual(p) else ''), *cells), tags
 
     def refresh(self):
         keep = self.ui_view.table_selection(self)
@@ -542,7 +632,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'])
         notes = ''.join(f'\n  - {x}' for x in (p.get('flags') or []) if x)
         printed = f'  |  Printed in the manual: {p["printed_limits"]}' if p.get('printed_limits') else ''
-        ref = ''
+        ref = ('\nYour own standard is used for this point: ' + self.manual_reason(p)) if self.is_manual(p) else ''
         if p.get('ref_dmm'): ref = '\nLimits are about the reference DMM reading (3458A) when one is connected, else about the calibrator setting.'
         elif p.get('std_relative'): ref = '\nLimits are about the calibrator setting (the manual centres them on the actual source value).'
         self.detail.set(f'{p["description"]}\nManual page {p["page"]}{printed}{ref}{notes}\n'
@@ -552,13 +642,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def setup_text(self, p):
         g = p['group']
         five60 = self.cal_key == '5560A'
-        by_hand = self.cal_key in ('5560A', '5520A')              # no compensation command is sent: the operator sets the calibrator's own 4-wire / 2-wire mode
-        out = 'OUTPUT V/ohm HI / LO' if five60 else 'NORMAL HI / LO'
+        by_hand = self.cal_key == '5560A'                         # no compensation command is sent: the operator sets the calibrator's own 4-wire / 2-wire mode (the 5700A: EXTSENSE is sent)
+        out = {'5560A': 'OUTPUT V/ohm HI / LO', '5700A': 'OUTPUT HI / LO'}.get(self.cal_key, 'NORMAL HI / LO')
         base = 'Shielded cable, shield to the calibrator LO. '
         if g == 'DCV':
             return base + f'Calibrator {out} to the DMM6500 INPUT HI / LO; low-thermal connections for the 100 mV and 1 V ranges (Figure 1).'
         if g in ('ACV', 'ACV750'):
-            extra = ' For 740 V at 50 kHz and 100 kHz the manual puts a Fluke 5725A amplifier behind the calibrator; check the calibrator can make the point.' if g == 'ACV750' else ''
+            extra = (' For 740 V at 50 kHz and 100 kHz the manual puts a Fluke 5725A amplifier behind the calibrator: ' + ('the program turns the 5700A BOOST on for those points; connect the 5700A to the 5725A with its amplifier cable and the 5725A output to the DMM6500 INPUT HI / LO (Figure 3).' if self.amp_selected
+                     else 'select "Fluke 5700A + 5725A" or use your own standard.')) if g == 'ACV750' else ''
             return base + f'Low-capacitance cable (below 1000 pF; below 150 pF for 750 V). Calibrator {out} to the DMM6500 INPUT HI / LO (Figures 2, 3).' + extra
         if g == 'FREQ':
             return 'The manual uses a Keithley 3390 generator; here the calibrator sources an AC voltage at the test frequency: ' + f'{out} to the DMM6500 INPUT HI / LO (Figure 5).'
@@ -566,7 +657,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return ('DC voltage source for the type J table values: ' + f'{out} to the DMM6500 INPUT HI / LO, low-thermal (Figure 6). The program first measures the cable offset '
                     '(100 mV DC range, 0 V, 5 minutes) and subtracts it from each source value.')
         if g in ('RTD4', 'RTD3'):
-            comp = ('The program sets the 5522A impedance compensation (WIRE4) for the 4-wire points.' if not by_hand and g == 'RTD4'
+            comp = ('The program turns the 5700A external sense on (EXTSENSE ON).' if not by_hand
                     else f'Set the {self.cal_key}\'s own external-sense mode ({"4-wire" if g == "RTD4" else "3-wire / 2-wire as the manual shows"}); no compensation command is sent to a {self.cal_key}.')
             wires = ('4-wire: calibrator force HI / LO to INPUT HI / LO and SENSE HI / LO to the DMM6500 SENSE Ohms 4 WIRE HI / LO (Figure 7)' if g == 'RTD4' else
                      '3-wire: INPUT HI / LO and SENSE LO as in Figure 8 (SENSE HI not required; HI-LO lead resistance mismatch below 0.1 ohm, add 0.25 degC per 0.1 ohm)')
@@ -574,20 +665,20 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g == 'SHORT4':
             return 'Model 8610 / 8620 4-wire short on the front panel in the orientation of Figure 17 (INPUT / SENSE HI and LO). No calibrator output.'
         if g == 'OHM4':
-            comp = ('The program sets the 5522A impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up.' if not by_hand else
-                    f'Set the {self.cal_key}\'s own 4-wire (external sense) mode for the points below 110 kohm; no compensation command is sent to a {self.cal_key}.')
+            comp = ('The program turns the 5700A external sense on (EXTSENSE ON).' if not by_hand else
+                    f'Set the {self.cal_key}\'s own 4-wire (external sense) mode; no compensation command is sent to a {self.cal_key}.')
             return (f'4-wire, shielded Teflon cable: calibrator {out} (force) to INPUT HI / LO and the calibrator SENSE HI / LO to the DMM6500 SENSE Ohms 4 WIRE HI / LO (Figure 9); '
                     f'calibrator external sense ON. {comp} With a reference meter, it sits in the 4-wire loop for the 1 ohm and 10 ohm points.')
         if g == 'OHM2':
             return (f'2-wire: calibrator {out} to INPUT HI / LO only (Figure 10), no sense leads, calibrator external sense OFF; shielded Teflon cable. '
-                    + ('The program sets the 5522A compensation to NONE.' if not by_hand else f'Set the {self.cal_key} to its 2-wire mode.'))
+                    + ('The program turns the 5700A external sense off.' if not by_hand else f'Set the {self.cal_key} to its 2-wire mode.'))
         if g in ('DCI_LOW', 'DCI', 'DIGI', 'ACI'):
-            amps = 'VI AUX output and OUTPUT LO' if five60 else 'AUX HI and AUX LO'
+            amps = {'5560A': 'VI AUX output and OUTPUT LO', '5700A': 'OUTPUT HI and OUTPUT LO (current post NORMAL: UNVERIFIED for an original 5700A)'}.get(self.cal_key, 'AUX HI and AUX LO')
             ref = ' The reference DMM (3458A, current function) is in series with the DMM6500 (Figure 11).' if g == 'DCI_LOW' else ''
             return f'Calibrator {amps} to the DMM6500 AMPS 3A and INPUT LO jacks (Figures 12 to 14). Check the calibrator range, its fuse and the DMM6500 AMPS fuse (3 A, 250 V) first.' + ref
         if g == 'REAR10A':
-            return ('TERMINALS switch to REAR. Heavy short cable from the calibrator current output (the manual: a 5725A amplifier in BOOST with the range locked) to the 10A AMPS '
-                    'jack and INPUT LO (Figures 18 to 20); the cable must carry 10 A without significant drop. The reference DMM is in series for the DC points.')
+            return ('TERMINALS switch to REAR. Heavy short cable from the amplifier output (the manual: a 5725A in BOOST with the range locked; ' + ('the program sets BOOST and the range lock for the 5700A + 5725A' if self.amp_selected else 'select "Fluke 5700A + 5725A" or use your own standard')
+                    + ') to the 10A AMPS jack and INPUT LO (Figures 18 to 20); the cable must carry 10 A without significant drop. A 3458A cannot read 10 A, so those points are centred on the calibrator setting.')
         if g == 'CAP':
             return ('The calibrator sources the capacitance (NORMAL terminals): short shielded banana cable from its output to the DMM6500 INPUT HI / LO, as short as possible (cable capacitance up to about 300 pF). '
                     'The first point reads the cable alone with the calibrator in standby; the program then acquires it as the relative offset for the rest.')
@@ -614,10 +705,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.virtual:          # demo: the real IO / driver code over a simulated meter, calibrator and reference meter
             from drivers.simulated_dmm6500 import make_dmm6500_bench
             self._vb = make_dmm6500_bench(self.cal_key, self.interface.get(), reference=True)
-            return IO('virtual', 'virtual', self.cal_model.get(), 9600, self.interface.get(), transports=(self._vb[2], self._vb[1], self._vb[3]), mods=self.pm_state, virtual=True,
-                      cal_interface=self.cal_interface.get())
-        return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), ref_address=self.ref_addr.get(), mods=self.pm_state,
-                  cal_interface=self.cal_interface.get())
+            io = IO('virtual', 'virtual', self.cal_model.get(), 9600, self.interface.get(), transports=(self._vb[2], self._vb[1], self._vb[3]), mods=self.pm_state, virtual=True,
+                    cal_interface=self.cal_interface.get())
+        else:
+            io = IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), ref_address=self.ref_addr.get(), mods=self.pm_state,
+                    cal_interface=self.cal_interface.get())
+        io.is_manual = self.is_manual
+        io.uses_amp = self.uses_amp
+        return io
 
     def test_connections(self):
         if self.fast_demo: port.message('info', 'Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
@@ -710,6 +805,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             facts.append(('Diagram', f'not installed (expected diagrams/hook_dmm6500_{self.cal_key}_{group}.png)'))
         self.connected_io().standby()
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p))]
+        if self.uses_amp(p):
+            steps.append(('5725A amplifier', 'The 5725A is in the circuit for this group: connect it to the 5700A with its amplifier cable and power it on. The program sets BOOST (and the range lock) with the output in standby.'))
         if p['terminal'] == 'REAR':
             steps.append(('Terminals', 'Set the TERMINALS switch to REAR and allow about 60 seconds of thermal settling (adjustment notes, p. 3-4). The program reads the switch.'))
         elif p['terminal'] == 'FRONT':
@@ -723,6 +820,20 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
             steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
 
+    def _prompt_manual(self, p):
+        """The selected calibrator cannot make this point: the technician connects another standard and applies the stated value."""
+        f = f' at {procspec._fmt(p["frequency"], "Hz")}' if p.get('frequency') and p['kind'] != 'FREQ' else ''
+        value = (f'{procspec._fmt(p["amplitude"], "V")} rms at {procspec._fmt(p["nominal"], "Hz")}' if p['kind'] == 'FREQ' else f'{procspec._fmt(p["nominal"], p["unit"])}{f}')
+        self.connected_io().standby()
+        steps = [('Why', self.manual_reason(p)),
+                 ('Standard', f'Disconnect the calibrator. Connect your own standard to the meter as for {GROUP_TITLE[p["group"]]} and apply {value} (the manual names a 5725A amplifier for 750 V '
+                              'above the calibrator range, and a current amplifier for the 10 A range). Use a standard accurate enough for the limits.'),
+                 ('Wiring', self.setup_text(p))]
+        return port.operator_prompt('Your own standard is needed', f'Point {p["id"]}: {p["description"]}', steps,
+                                    facts=[('Next point', f'{p["id"]} of {len(POINTS)}'), ('Manual page', p['page'])],
+                                    caution='The meter is read automatically once you press Continue. Apply the value first and let it settle.',
+                                    ok='Standard applied - measure', image=find_diagram(self.cal_key, p['group']), parent=self.root)
+
     def _next(self, points, i, previous):
         if i >= len(points) or self.stop:
             self.busy = False; self.save()
@@ -731,22 +842,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try: p, previous = self.pm_step(points, i, previous)          # live edits: applied here, between two points (procmods_live)
         except procmods_engine.LiveApplyError as exc: self._error(exc); return
         if p is None: port.after(self.root, 30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
-        key = (p['source'], p['terminal'], p['group'])
-        if not self.fast_demo and key != previous and not self._prompt_setup(p):
+        manual = self.is_manual(p)
+        key = f'MANUAL{p["id"]}' if manual else (p['source'], p['terminal'], p['group'], self.uses_amp(p))
+        if not self.fast_demo and key != previous and not (self._prompt_manual(p) if manual else self._prompt_setup(p)):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
-        if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV', 'DIGV') and abs(p['nominal']) >= HV_CONFIRM:
+        if not self.fast_demo and p['source'] == 'calibrator' and not manual and p['kind'] in ('DCV', 'ACV', 'DIGV') and abs(p['nominal']) >= HV_CONFIRM:
             if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
-        if not self.fast_demo and not self.virtual and p['source'] == 'manual':
-            v, _r, u = ui.si_row([p['nominal']], p['unit'])
-            if not port.ask_yes_no('Set the standard', f'Set the decade capacitance box to {v[0]} {u} ({p["description"]}), then continue. Cancel stops the run.'):
-                self.busy = False; self.status.set('Paused: the capacitance standard was not set'); return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
         if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
-            self.mo_finish(p, reading, True, lambda: self._record(p, reading, True)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+            self.mo_finish(p, reading, True, lambda: self._record(p, reading, True, {'manual': manual, 'amp': self.uses_amp(p)})); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
             def work():
                 try:
@@ -762,6 +870,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _done(self, points, i, p, reading, key):
         ev = dict(getattr(self.io, 'last_eval', None) or {}) if self.io is not None else {}
+        ev['manual'] = self.is_manual(p)
+        ev['amp'] = self.uses_amp(p)
         self.mo_finish(p, reading, bool(self.demo), lambda: self._record(p, reading, bool(self.demo), ev)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _reading_failed(self, points, i, p, key, exc):
@@ -821,8 +931,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         for p in POINTS:
             if not self.active(p): continue
             row = self.found_left_row(p, lambda r: report_pdf.point_row(effective(p, r.get('center')), r['reading'], r['result'] == 'FAIL', section=self.report_section(p),
-                                                                        standard=self.standard_for(p)))
-            if row: rows.append(row); pts.append(effective(p, (self.results.get(str(p['id'])) or {}).get('center')))
+                                                                        standard=None if (r.get('manual') or r.get('amp')) else self.standard_for(p)))
+            if row:
+                if (self.results.get(str(p['id'])) or {}).get('manual') or (self.results.get(str(p['id'])) or {}).get('amp'): row['Uncertainty'] = ''      # own standard: none applies; amplifier: the budget has no 5725A rows yet
+                rows.append(row); pts.append(effective(p, (self.results.get(str(p['id'])) or {}).get('center')))
         return rows, pts
 
     def export_pdf(self):
@@ -836,13 +948,17 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path: return
         demo = self.any_synthetic()
+        manual_ids = [p['ref'] for p in POINTS if (self.results.get(str(p['id'])) or {}).get('manual')]
+        amp_ids = [p['ref'] for p in POINTS if (self.results.get(str(p['id'])) or {}).get('amp')]
         try:
             if details.get('show_tar_tur'):
                 import tartur_wiring
-                rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [tartur_wiring.point_fields(p, self.standard_for(p)) for p in pts])
+                rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [dict(TAR='', TUR='') if (p['ref'] in manual_ids or p['ref'] in amp_ids) else tartur_wiring.point_fields(p, self.standard_for(p)) for p in pts])
             ref_note = 'reference meter: 3458A' if (self.io is not None and self.io.ref is not None) else 'no reference meter: limits about the calibrator setting'
+            header_extra = ([('Operator-supplied standard', 'Points measured with a standard connected by the technician: ' + ', '.join(manual_ids))] if manual_ids else []) + \
+                           ([('5725A amplifier', 'Points made through the 5725A amplifier (uncertainty and TAR not computed here): ' + ', '.join(amp_ids))] if amp_ids else [])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', 'Keithley DMM6500'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                                                                 ('Limits applied', self.period.get()), ('Source', 'Keithley DMM6500 Calibration and Adjustment Manual DMM6500-905-01 Rev. E, pp. 2-2 to 2-48; ' + ref_note)],
+                                                                 ('Limits applied', self.period.get()), ('Source', 'Keithley DMM6500 Calibration and Adjustment Manual DMM6500-905-01 Rev. E, pp. 2-2 to 2-48; ' + ref_note), *header_extra],
                                              demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, self.cal_key), snapshot_context=report_pdf.context_for(self))
         except ImportError:
             port.message('error', 'PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
