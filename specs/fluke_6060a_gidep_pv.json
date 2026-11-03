@@ -5294,7 +5294,11 @@
      "gen": {
       "freq_mhz": 244.0,
       "level_dbm": 13,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5308,6 +5312,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5327,7 +5332,7 @@
      "unit": "dBc",
      "func": "SPUR",
      "description": "Spur at 244.99006 MHz, carrier 244.99 MHz +0 dBm (limit < -35 dBc) (typed)",
-     "manual_prompt": "Carrier 244.99 MHz at +0 dBm. Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at 244.99006 MHz (60 Hz from the carrier); type its level relative to the carrier in dBc (limit < -35 dBc).",
+     "manual_prompt": "Carrier 244.99 MHz at +0 dBm (reach it from 242 MHz upward in 1 MHz steps: set directly it can show UNCAL). Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at {spur} MHz ({float(off_hz):g} Hz from the carrier); type its level relative to the carrier in dBc (limit < {SPUR_LIMIT_DBC} dBc).",
      "flags": [
       "Typed reading: a spur this close to the carrier cannot be separated from it with the 8563E settings the program uses (UNVERIFIED that the analyzer can resolve it at all)."
      ],
@@ -5345,7 +5350,7 @@
      "unit": "dBc",
      "func": "SPUR",
      "description": "Spur at 244.99012 MHz, carrier 244.99 MHz +0 dBm (limit < -35 dBc) (typed)",
-     "manual_prompt": "Carrier 244.99 MHz at +0 dBm. Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at 244.99012 MHz (120 Hz from the carrier); type its level relative to the carrier in dBc (limit < -35 dBc).",
+     "manual_prompt": "Carrier 244.99 MHz at +0 dBm (reach it from 242 MHz upward in 1 MHz steps: set directly it can show UNCAL). Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at {spur} MHz ({float(off_hz):g} Hz from the carrier); type its level relative to the carrier in dBc (limit < {SPUR_LIMIT_DBC} dBc).",
      "flags": [
       "Typed reading: a spur this close to the carrier cannot be separated from it with the 8563E settings the program uses (UNVERIFIED that the analyzer can resolve it at all)."
      ],
@@ -5363,7 +5368,7 @@
      "unit": "dBc",
      "func": "SPUR",
      "description": "Spur at 244.99018 MHz, carrier 244.99 MHz +0 dBm (limit < -35 dBc) (typed)",
-     "manual_prompt": "Carrier 244.99 MHz at +0 dBm. Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at 244.99018 MHz (180 Hz from the carrier); type its level relative to the carrier in dBc (limit < -35 dBc).",
+     "manual_prompt": "Carrier 244.99 MHz at +0 dBm (reach it from 242 MHz upward in 1 MHz steps: set directly it can show UNCAL). Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at {spur} MHz ({float(off_hz):g} Hz from the carrier); type its level relative to the carrier in dBc (limit < {SPUR_LIMIT_DBC} dBc).",
      "flags": [
       "Typed reading: a spur this close to the carrier cannot be separated from it with the 8563E settings the program uses (UNVERIFIED that the analyzer can resolve it at all)."
      ],
@@ -5376,7 +5381,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 0,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "off",
@@ -5390,6 +5400,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an OFFSET from the carrier (both sides, the worse is taken; UNVERIFIED reading of the table: the document lists absolute frequencies, one side).",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5404,7 +5415,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 0,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "off",
@@ -5418,6 +5434,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an OFFSET from the carrier (both sides, the worse is taken; UNVERIFIED reading of the table: the document lists absolute frequencies, one side).",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5432,7 +5449,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 0,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "off",
@@ -5446,6 +5468,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an OFFSET from the carrier (both sides, the worse is taken; UNVERIFIED reading of the table: the document lists absolute frequencies, one side).",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5460,7 +5483,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 0,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "off",
@@ -5474,6 +5502,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an OFFSET from the carrier (both sides, the worse is taken; UNVERIFIED reading of the table: the document lists absolute frequencies, one side).",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5488,7 +5517,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 0,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5502,6 +5536,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5516,7 +5551,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5530,6 +5570,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5544,7 +5585,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5558,6 +5604,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5572,7 +5619,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5586,6 +5638,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5600,7 +5653,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5614,6 +5672,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5628,7 +5687,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5642,6 +5706,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5656,7 +5721,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5670,6 +5740,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5684,7 +5755,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5698,6 +5774,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."
@@ -5712,7 +5789,12 @@
      "gen": {
       "freq_mhz": 244.99,
       "level_dbm": 1,
-      "am": null
+      "am": null,
+      "approach_mhz": [
+       242.0,
+       243.0,
+       244.0
+      ]
      },
      "sa": {
       "kind": "abs",
@@ -5726,6 +5808,7 @@
      "strict_high": true,
      "unit": "dBc",
      "flags": [
+      "The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.",
       "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4440A -> 8563E).",
       "Read as an ABSOLUTE frequency.",
       "The analyzer window, RBW and reference level are this procedure's choice; the reading is the highest peak in that window minus the carrier level."

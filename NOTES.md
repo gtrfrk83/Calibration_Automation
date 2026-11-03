@@ -2224,6 +2224,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- Spur carriers 244 / 244.99 MHz from 242 MHz (owner bench 2026-11-03: "we keep getting an uncal message on the 6060 unless we start at 242MHz and increment up to the
+  244MHz"): the builder gives every Table 12 point whose carrier is above 242 and below 245 MHz `gen.approach_mhz` (242, 243 [, 244]); `IO._configure` sets those
+  frequencies first (each read back), then the carrier, and the UNCAL check runs as before once the point is configured. The three typed spurs at 244.99 MHz (nothing is
+  programmed) say so in their prompt. UNVERIFIED which carriers need it beyond the two seen. `drivers/simulated_6060a.py` `approach_band` (opt-in) reports 'main or
+  reference PLL unlocked' when the band is entered other than at its lower edge or by an upward step of at most 1 MHz; the GIDEP tests set (242, 245).
 - Deviation meter, no RF-off read-back (owner, 2026-11-03: "the deviation meter errors out while trying to read if the output of the 6060 is off....can we remove that check?
   the output will never be on in the deviation meter mode"): `IO._devmeter` is set once a deviation-meter point has put the 6060A on the carrier and cleared at the start of any
   point that uses the 6060A output; while it is set, `IO.standby()` (point end, abort, wiring prompt) does NOT send RO0 + LM99 and logs 'RF OFF read-back skipped:

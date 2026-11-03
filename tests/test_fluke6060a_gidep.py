@@ -463,3 +463,39 @@ class DeviationMeterNoRfCheck(GidepBench):
         back = self.t6.sent[m:]
         self.assertIn('RO1', back)
         self.assertIn('RO0', back[back.index('RO1'):], 'the next point switches RF on and confirms it off again')
+
+
+class SpurCarrierApproach(GidepBench):
+    """Owner bench 2026-11-03: 'we keep getting an uncal message on the 6060 unless we start at 242MHz and increment up to the 244MHz. If we try to go directly to 244MHz we get
+    the uncal message'. The Table 12 carriers 244 and 244.99 MHz are reached from 242 MHz in 1 MHz steps (spec gen.approach_mhz); the simulator models the UNCAL (opt-in band)."""
+
+    def setUp(self):
+        super().setUp()
+        self.t6.approach_band = (242.0, 245.0)
+
+    def spurs(self, mhz):
+        return [p for p in E.POINTS if p['func'] == 'SPUR' and p['meas'] == 'spur' and p['gen']['freq_mhz'] == mhz]
+
+    def test_the_spec_carries_the_approach_only_where_needed(self):
+        self.assertEqual({tuple(p['gen']['approach_mhz']) for p in self.spurs(244.0)}, {(242.0, 243.0)})
+        self.assertEqual({tuple(p['gen']['approach_mhz']) for p in self.spurs(244.99)}, {(242.0, 243.0, 244.0)})
+        self.assertTrue(all('approach_mhz' not in p['gen'] for p in self.spurs(185.0)))
+        typed = [p for p in E.POINTS if p['func'] == 'SPUR' and p['meas'] == 'manual']
+        self.assertTrue(typed and all('from 242 MHz upward' in p['manual_prompt'] for p in typed))
+
+    def test_244_mhz_carriers_run_without_uncal(self):
+        refs = [p['ref'] for p in self.spurs(244.0) + self.spurs(244.99)]
+        n = len(self.t6.sent)
+        self.run_points(refs=refs)
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])
+        sent = self.t6.sent[n:]
+        i242, i243 = sent.index('FR242.00000MZ'), sent.index('FR243.00000MZ')
+        self.assertLess(i242, i243)
+        self.assertLess(i243, sent.index('FR244.00000MZ'))
+
+    def test_set_directly_the_simulated_6060a_reports_uncal(self):
+        p = self.spurs(244.99)[0]
+        p['gen'].pop('approach_mhz')
+        self.run_points(refs=[p['ref']])
+        self.assertTrue(any('UNCAL' in (d[3] or '') or 'PLL' in (d[3] or '') for d in self.errors()), self.h.dialogs[-3:])

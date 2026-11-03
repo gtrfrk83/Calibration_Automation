@@ -526,6 +526,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self._mod_on = False
         if p['meas'] == 'level_pm':
             self._pm_ready(p)
+        for mhz in g.get('approach_mhz') or ():                # owner bench 2026-11-03: 244 / 244.99 MHz set directly gives UNCAL; reached from 242 MHz in 1 MHz steps it does not
+            gen.set_frequency(mhz)                             # each step read back; the UNCAL check is made once the point is configured
         gen.set_frequency(g['freq_mhz'])
         if 'section_no' in p:
             gen.select_section(p['section_no'], rf_on=True)

@@ -56,6 +56,10 @@ class Sim6060ATransport(_SimBase):
         self.io = (3, 1, 0)                 # first field always 3; second 1 = -570 NV memory (8 would add -651 low-rate FM)
         self.valid_after_polls = 1
         self.ext_level = 'valid'            # level of an external modulation input: 'valid' | 'ext_lo' | 'ext_hi' | 'invalid'
+        # Owner bench 2026-11-03: 244 MHz set directly gave UNCAL; from 242 MHz upward in 1 MHz steps it did not. Opt-in (None = always locked, the old behaviour): a band
+        # (lo, hi) MHz entered other than at lo, or by a step that is not upward by at most 1 MHz, reports 'main or reference PLL unlocked' (UNCAL field 2, 0o010).
+        self.approach_band = None
+        self.pll_unlocked = False
         self.reset_all()
 
     # ---- state ------------------------------------------------------------------------------------------------------------------------------
@@ -65,6 +69,7 @@ class Sim6060ATransport(_SimBase):
 
     def reset_all(self):
         self.bench.rf_source = preset_state()
+        self.pll_unlocked = False
         self.rejected = [0, 0, 0]
         self.modes = 0
         self.mask = 192
@@ -157,7 +162,7 @@ class Sim6060ATransport(_SimBase):
             f3 |= 0o002
         if not s['rf_on']:
             f3 |= 0o400
-        return (f1, 0, f3)
+        return (f1, 0o010 if self.pll_unlocked else 0, f3)
 
     def _step(self, key, size_key, sign, lo, hi, scale=1.0):
         s = self.s
@@ -218,7 +223,16 @@ class Sim6060ATransport(_SimBase):
             if not 0.1e6 <= hz <= 1050e6:
                 self._reject(1, 0o001)
             else:
+                prev = s['frequency_hz']
                 s['frequency_hz'] = round(hz / 10.0) * 10
+                if self.approach_band:
+                    lo, hi = (x * 1e6 for x in self.approach_band)
+                    new = s['frequency_hz']
+                    if lo <= new < hi:
+                        stepped = lo <= prev < hi and 0 < new - prev <= 1e6 + 1 and not self.pll_unlocked
+                        self.pll_unlocked = not (abs(new - lo) < 1 or stepped)
+                    else:
+                        self.pll_unlocked = False
                 self._changed()
         elif head == 'AP':
             dbm = n if suffix == 'DB' else (20 * math.log10(n * {'V': 1, 'MV': 1e-3, 'UV': 1e-6, 'NV': 1e-9}.get(suffix, 1) / math.sqrt(0.05)) if n else -999)

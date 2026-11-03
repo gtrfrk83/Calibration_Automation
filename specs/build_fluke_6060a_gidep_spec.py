@@ -54,6 +54,20 @@ TABLE12 = [('245.00000', 185, 13), ('312.00000', 244, 13),
            ('254.99000', 244.99, 0), ('254.99000', 244.99, 1), ('264.99000', 244.99, 1), ('274.99000', 244.99, 1), ('284.99000', 244.99, 1), ('364.99000', 244.99, 1),
            ('444.99000', 244.99, 1), ('1244.99000', 244.99, 1), ('1289.98000', 244.99, 1)]
 SPUR_LIMIT_DBC = -35
+APPROACH_FROM_MHZ, APPROACH_BAND = 242.0, (242.0, 245.0)     # owner bench 2026-11-03: a carrier of 244 / 244.99 MHz set directly gave UNCAL; from 242 MHz upward in 1 MHz steps it did not
+APPROACH_NOTE = ('The 6060A is taken to this carrier from 242 MHz upward in 1 MHz steps (each read back): set directly, 244 MHz gave UNCAL on the bench (owner, 2026-11-03). '
+                 'UNVERIFIED which carriers need it; only those from 242 to 245 MHz get the approach.')
+
+
+def approach(carrier_mhz):
+    """The intermediate frequencies (MHz) before the carrier, or [] when the carrier is outside APPROACH_BAND."""
+    if not APPROACH_BAND[0] < carrier_mhz < APPROACH_BAND[1]:
+        return []
+    out, f = [], APPROACH_FROM_MHZ
+    while f < carrier_mhz - 1e-9:
+        out.append(f)
+        f += 1.0
+    return out
 RESFM_MHZ, RESFM_DBM, RESFM_MAX_HZ = 520, 13, 200                                                     # 4.8
 RESAM_DBM, RESAM_MAX_PCT = 9, 0.1                                                                     # 4.9 (the frequency stays at 520 MHz)
 COUNT_RES_HZ = 10
@@ -224,13 +238,16 @@ def build_spec():
                     low=-200.0, high=float(SPUR_LIMIT_DBC), strict_high=True, unit='dBc')
         if off_hz < 1000:
             add(s, '4.7 Table 12', meas='manual', group='SA', nominal=base['nominal'], low=-200.0, high=base['high'], strict_high=True, unit='dBc', tag=base['tag'], func='SPUR', description=base['description'] + ' (typed)',
-                manual_prompt=(f'Carrier {carrier:g} MHz at {dbm:+d} dBm. Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at {spur} MHz ({float(off_hz):g} Hz from the carrier); type its level relative to the carrier in dBc (limit < {SPUR_LIMIT_DBC} dBc).'),
+                manual_prompt=(f'Carrier {carrier:g} MHz at {dbm:+d} dBm' + (' (reach it from 242 MHz upward in 1 MHz steps: set directly it can show UNCAL)' if approach(carrier) else '')
+                               + '. Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at {spur} MHz ({float(off_hz):g} Hz from the carrier); type its level relative to the carrier in dBc (limit < {SPUR_LIMIT_DBC} dBc).'),
                 flags=['Typed reading: a spur this close to the carrier cannot be separated from it with the 8563E settings the program uses (UNVERIFIED that the analyzer can resolve it at all).'])
             continue
         near = off_hz <= 1000000
         sa = dict(kind='off', target_hz=float(off_hz)) if near else dict(kind='abs', target_hz=float(smhz * D(10) ** 6))
-        add(s, '4.7 Table 12', meas='spur', gen=dict(freq_mhz=num(carrier), level_dbm=dbm, am=None), sa=sa, **base,
-            flags=[UNV + ' (E4440A -> 8563E).', ('Read as an OFFSET from the carrier (both sides, the worse is taken; UNVERIFIED reading of the table: the document lists absolute frequencies, one side).' if near else
+        steps = approach(carrier)
+        gen = dict(freq_mhz=num(carrier), level_dbm=dbm, am=None, **({'approach_mhz': steps} if steps else {}))
+        add(s, '4.7 Table 12', meas='spur', gen=gen, sa=sa, **base,
+            flags=([APPROACH_NOTE] if steps else []) + [UNV + ' (E4440A -> 8563E).', ('Read as an OFFSET from the carrier (both sides, the worse is taken; UNVERIFIED reading of the table: the document lists absolute frequencies, one side).' if near else
                                                  'Read as an ABSOLUTE frequency.'), 'The analyzer window, RBW and reference level are this procedure\'s choice; the reading is the highest peak in that window minus the carrier level.'])
 
     # 4.8 residual FM
