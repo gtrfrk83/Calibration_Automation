@@ -528,7 +528,9 @@ class Fluke6060A(Instrument):
         state = self.learn()
         bad = self.compare(expect, state)
         if bad:
-            raise InstrumentError(f'{self.MODEL} read-back refused: ' + '; '.join(bad))
+            raw = state.get('raw', '')
+            fm = (f"; FM field chars 41-44 {raw[40:44]!r}, resolution char 57 {raw[56:57]!r}" if any(b.startswith('fm_') for b in bad) and len(raw) == LEARN_LEN else '')
+            raise InstrumentError(f'{self.MODEL} read-back refused: ' + '; '.join(bad) + f' (learn string {raw}{fm})')      # the raw reply on screen (bench 2026-11-03)
         return state
 
     # ---- setters: write once, IR, settle, read back, compare ---------------------------------------------------------------------------------------

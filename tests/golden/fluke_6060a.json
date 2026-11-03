@@ -286,7 +286,7 @@
     "6060A|<<|BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC"
    ],
    "method": "Fluke6060A.verify",
-   "result": "raised InstrumentError: Fluke 6060A read-back refused: rf_on: asked True, learn string says False",
+   "result": "raised InstrumentError: Fluke 6060A read-back refused: rf_on: asked True, learn string says False (learn string BOABAAAAPPJMAAAKAAAAAAAABBOBKDAAAAAPECEAABPEAAABDAEEBBAGBLKKMPAC)",
    "wire": [
     [
      "Q",
