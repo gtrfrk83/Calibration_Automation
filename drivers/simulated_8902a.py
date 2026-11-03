@@ -40,6 +40,9 @@ class Sim8902ATransport(_SimBase):
         self.cf_table = {}                  # MHz -> %
         self.cf_ref = 100.0
         self.recal = True                   # tuned RF level needs a range calibration until C1 has run
+        # Tuned RF level below its range (2.5 MHz, manual p. 1-22): the real 8902A showed error 20 at 150 kHz (owner bench 2026-11-03). Opt-in (None = accept, the old
+        # behaviour): the Instruction Manual 6060A procedure still measures 4A-8 at 0.4 MHz (owner decision pending); the GIDEP tests set 2.5.
+        self.tuned_floor_mhz = None
         self._reset_state()
 
     # ---- state ------------------------------------------------------------------------------------------------------------------------------
@@ -282,6 +285,8 @@ class Sim8902ATransport(_SimBase):
             res = RES_HZ.get(self.res, 10.0)
             return encode_reading(round(f * (1 + e['freq_ppm'] * 1e-6) / res) * res)
         if fn == 'S4':
+            if self.tuned_floor_mhz and self.tuned_mhz is not None and self.tuned_mhz < self.tuned_floor_mhz:     # error 20 like the real receiver (owner bench 2026-11-03)
+                return self._error(20)
             if not have_signal or not self._near(f, 50e3):
                 return self._error(96)
             if level < -127.0:

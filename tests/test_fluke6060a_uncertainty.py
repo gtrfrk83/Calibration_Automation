@@ -92,11 +92,11 @@ class Budgets(Base):
         self.assertIsNone(r.cmc)
 
     def test_a_carrier_below_150_khz_has_no_8902a_spec(self):
-        for ref in ('4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 150 kHz -10 dBm relative'):
+        for ref in ('4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 2.5 MHz -10 dBm relative'):
             p = copy.deepcopy(self.points[ref])
             if p.get('gen'):
                 p['gen']['freq_mhz'] = 0.1
-            p['description'] = p['description'].replace('150 kHz', '100 kHz')
+            p['description'] = p['description'].replace('150 kHz', '100 kHz').replace('2.5 MHz', '100 kHz')
             r = fu.evaluate(p, path=self.db)
             self.assertEqual(r.status, fu.NO_SPEC, ref)
             self.assertIn('150 kHz', r.reason)
@@ -112,9 +112,17 @@ class Budgets(Base):
         self.assertEqual(r.reported, 0.72)
         self.assertAlmostEqual(r.tur(), 1.8 / 0.72, places=6)
 
-    def test_150_khz_relative_level_is_budgeted_but_out_of_scope(self):
-        r = self.ev('4.2 Table 5 150 kHz -10 dBm relative')
-        self.assertEqual((r.status, r.scope, r.reported), (fu.OK, fu.OUT, 0.05))
+    def test_tuned_level_is_not_budgeted_below_2_5_mhz(self):
+        """The 8902A tuned RF level rows hold 2.5 MHz to 1300 MHz (p. 1-22): at 150 kHz (error 20 on the bench, 2026-11-03) there is no budget."""
+        p = copy.deepcopy(self.points['4.2 Table 5 2.5 MHz -10 dBm relative'])
+        p['description'] = p['description'].replace('2.5 MHz', '150 kHz')
+        r = fu.evaluate(p, path=self.db)
+        self.assertEqual(r.status, fu.NO_SPEC)
+        self.assertIn('2.5 MHz', r.reason)
+
+    def test_2_5_mhz_relative_level_is_budgeted_but_out_of_scope(self):
+        r = self.ev('4.2 Table 5 2.5 MHz -10 dBm relative')
+        self.assertEqual((r.status, r.scope, r.reported), (fu.OK, fu.OUT, 0.05))      # the RF Attenuation line starts at 10 MHz
 
     def test_relative_level_uses_the_attenuation_cmc_floor(self):
         r = self.ev('4.2 Table 5 250 MHz -10 dBm relative')
@@ -122,10 +130,11 @@ class Budgets(Base):
         self.assertEqual((r.scope, r.cmc, r.reported), (fu.IN, 0.067, 0.067))
         self.assertAlmostEqual(r.tur(), 2.5 / 0.067, places=6)
 
-    def test_relative_level_beyond_120_db_is_out_of_scope_with_noise_term(self):
-        r = self.ev('4.2 Table 5 520 MHz -127 dBm relative')
-        self.assertEqual((r.status, r.scope), (fu.OK, fu.OUT))
-        self.assertIn('8902A noise error', [c.name for c in r.components])
+    def test_the_deepest_relative_level_is_120_db_in_scope(self):
+        """Owner 2026-11-03: Table 5 stops at -120 dB. -120 dB at 520 MHz is on the 110-120 dB attenuation line (0.22 dB); no noise term (that is below -120 dBm)."""
+        r = self.ev('4.2 Table 5 520 MHz -120 dBm relative')
+        self.assertEqual((r.status, r.scope, r.cmc), (fu.OK, fu.IN, 0.22))
+        self.assertNotIn('8902A noise error', [c.name for c in r.components])
         self.assertTrue(any('UNVERIFIED' in a for a in r.assumptions))
 
     def test_harmonic_includes_the_analyzer_own_second_harmonic(self):
@@ -253,7 +262,7 @@ class Report(Base):
 
     def test_gidep_rows_star_what_the_scope_does_not_cover(self):
         rows = self.rows_for('6060A-gidep', ['4.5 Table 8 250 MHz 250 kHz', '4.4 Table 6 250 MHz 30 % at 1000 Hz', '4.7 Table 11 harmonics 5 MHz',
-                                             '4.2 Table 5 250 MHz -10 dBm relative', '4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 150 kHz -10 dBm relative',
+                                             '4.2 Table 5 250 MHz -10 dBm relative', '4.4 Table 6 150 kHz 30 % at 1000 Hz', '4.2 Table 5 2.5 MHz -10 dBm relative',
                                              '4.1 Table 2 100.00000 MHz'])
         self.assertEqual([r['Uncertainty'] for r in rows], ['3.3 kHz', '0.30 % *', '1.7 dB *', '0.067 dB', '0.72 %', '0.050 dB *', '710 \u00b5Hz'])
         self.assertEqual([r['TUR'] for r in rows], ['3.7:1', '', '', '37.3:1', '2.5:1', '', '>1000:1'])

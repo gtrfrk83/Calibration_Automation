@@ -414,6 +414,7 @@ def _fmdev(r, p, reading, path):
     r.assumptions.append('The printed "+/- 1 digit" is not included (the sheet does not store the display resolution).')
 
 
+TUNED_MIN_HZ = 2.5e6           # the 8902A tuned RF level is specified from 2.5 MHz to 1300 MHz (p. 1-22; the sheet's tuned-level rows)
 TUNED_RES_DB = 0.01             # tuned RF level display resolution in dB (assumption, listed)
 
 
@@ -438,6 +439,8 @@ def _level_rel(r, p, reading, path):
         raise LookupError(f'8902A: carrier {fc / 1e3:g} kHz is below its 150 kHz RF input range: tuned RF level not specified')
     div, why = std.divisor()
     lin_row, lin = _one(std, 'Tuned RF Level [Relative', 'Detector linearity, IF synchronous detector', 'spec')
+    if not (lin_row['freq_lo'] <= fc <= lin_row['freq_hi']):           # the tuned RF level rows hold 2.5 MHz to 1300 MHz (p. 1-22)
+        raise LookupError(f'8902A tuned RF level is specified from {lin_row["freq_lo"] / 1e6:g} MHz to {lin_row["freq_hi"] / 1e6:g} MHz: not at {fc / 1e6:g} MHz')
     per10 = _spec(lin_row, 'spec, per 10 dB')['abs']
     lin_limit = min(lin['abs'] * delta, per10) if delta <= 10 else per10 * delta / 10.0
     r.add('8902A detector linearity (sync)', lin_limit, div,
@@ -483,9 +486,9 @@ def _level(r, p, reading, path):
         r.status = NEEDS_INPUT
         r.reason = ('Needs the 11722A sensor\'s cal-factor uncertainty at this frequency (its calibration certificate) and the 6060A output SWR (mismatch). '
                     'On the sheet: power reference 1.2 %, range linearity 0.02 dB, range-to-range 0.02 dB, sensor SWR 1.15.')
-    elif fc < 150e3:
+    elif fc < TUNED_MIN_HZ:
         r.standard = 'HP 8902A tuned RF level'
-        r.status, r.reason = NO_SPEC, f'8902A: carrier {fc / 1e3:g} kHz is below its 150 kHz RF input range: tuned RF level not specified'
+        r.status, r.reason = NO_SPEC, f'8902A tuned RF level is specified from 2.5 MHz (p. 1-22): not at {fc / 1e6:g} MHz'
     else:
         r.standard = 'HP 8902A tuned RF level (absolute)'
         r.status = NEEDS_INPUT

@@ -25,11 +25,15 @@ COUNT_STEP_MHZ = D('0.00001')                                                 # 
 REF_LOW_HZ, REF_HIGH_HZ = 9999940, 10000060                                   # 4.1.5
 DOC_LOW_MHZ = 0.1                                                              # the document's low carrier for Tables 4 to 7: 100 kHz
 LOW_MHZ = 0.15                                                                 # used instead (owner, 2026-11-03): the 8902A RF input starts at 150 kHz
-TABLE4_FREQS = (LOW_MHZ, 250, 520)                                             # 150 kHz (document: 100 kHz), 250 MHz, 520 MHz (Tables 4 to 7)
+TABLE4_FREQS = (LOW_MHZ, 250, 520)                                             # 150 kHz (document: 100 kHz), 250 MHz, 520 MHz (Tables 4, 6, 7)
+TUNED_LOW_MHZ = 2.5                                                            # Table 5 low carrier (owner, 2026-11-03): the 8902A tuned RF level is specified from 2.5 MHz (p. 1-22);
+TABLE5_FREQS = (TUNED_LOW_MHZ, 250, 520)                                       # 0.15MZ with S4 gave error 20 on the bench (2026-11-03)
+MOVED_TUNED = ('Carrier changed from the document\'s 100 kHz to 2.5 MHz (owner, 2026-11-03): the 8902A tuned RF level is specified from 2.5 MHz to 1300 MHz (manual p. 1-22); '
+               'at 150 kHz it showed error 20 (value out of range) on the bench. The 6060A level below 2.5 MHz is not verified by Table 5; the limits are the document\'s.')
 MOVED = (f'Carrier changed from the document\'s 100 kHz to 150 kHz (owner, 2026-11-03): the 8902A RF input range starts at 150 kHz. '
          'The 6060A between 100 kHz and 150 kHz is not verified by this procedure; the limits are the document\'s (they do not depend on the carrier).')
 TABLE4_LEVELS = ((13, '10.5', '15.5'), (10, '7.5', '12.5'), (0, '-2.5', '2.5'))
-TABLE5_LEVELS = (0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100, -110, -120, -127)   # 0 dBm is the reference
+TABLE5_LEVELS = (0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100, -110, -120)   # 0 dBm is the reference; the document's -127 dBm row is left out (owner, 2026-11-03: 'stop at -120dB')
 TABLE5_TOL = D('2.5')
 MOD_LEVEL_DBM, MOD_CARRIER_MHZ = 1, 300           # 4.3: AMPL 1 dBm (printed); the carrier is not printed (RCL 9,8 is a stored state): 300 MHz is this procedure's choice
 AM_LEVEL_DBM = 7                                   # 4.4
@@ -129,7 +133,7 @@ def build_spec():
             if dbm == 0:
                 kw['flags'] = kw['flags'] + ['The document also asks to record the power-meter indication and the TI frequency at 0 dBm (the MMR Ext RF Atten value): the 8902A tuned level of Table 5 needs no such offset, so only the reading is kept.']
             add(s, '4.2 Table 4', tag=f'{nm} {lvl(dbm)} dBm', func='LEVEL', description=f'Level {lvl(dbm)} dBm at {nm} (Table 4)', gen=dict(freq_mhz=num(fm), level_dbm=dbm), nominal=float(dbm), low=f(D(lo)), high=f(D(hi)), unit='dBm', **kw)
-    for fm in TABLE4_FREQS:
+    for fm in TABLE5_FREQS:
         nm = fname(fm)
         s = section(f'G-4.2b-{fm:g}', f'Amplitude: tuned RF level at {nm} (Table 5)', f'8902A tuned RF level at {nm}: the 0 dBm reading is the reference, each lower level is compared with it (limits are relative, +/-2.5 dB). '
                     'Keep the 6060A level unchanged while the 8902A recalibrates.', 'RX')
@@ -137,9 +141,9 @@ def build_spec():
         for lv in TABLE5_LEVELS:
             tag = f'{nm} {lvl(lv)} dBm'
             flags = [UNV + ' (N5530SE26 microwave measurement receiver tuned RF level -> 8902A tuned RF level).']
-            moved = dict(moved_from=fname(DOC_LOW_MHZ)) if fm == LOW_MHZ else {}
+            moved = dict(moved_from=fname(DOC_LOW_MHZ)) if fm == TUNED_LOW_MHZ else {}
             if moved:
-                flags.append(MOVED)
+                flags.append(MOVED_TUNED)
             if lv == 0:
                 add(s, '4.2 Table 5', tag=tag + ' reference', func='LEVEL', meas='level_rx', description=f'Reference level 0 dBm at {nm} (recorded; Table 5 is relative to it)', gen=dict(freq_mhz=num(fm), level_dbm=0), rx=dict(freq_mhz=fm, mode='tuned'),
                     nominal=0.0, low=-140.0, high=5.0, unit='dBm', flags=flags + ['Record only: the document gives this row as "Reference" with no limit; the wide limits only reject an impossible reading. The Table 5 limits are judged on the relative rows.'], **moved)
@@ -149,7 +153,7 @@ def build_spec():
                     nominal=float(lv), low=-140.0, high=5.0, unit='dBm', flags=flags + ['Record only: the limit is on the relative row that follows (this reading minus the 0 dBm reference).'], **moved)
             add(s, '4.2 Table 5', tag=tag + ' relative', func='LEVEL_REL', meas='derived', description=f'Level {lv:+g} dBm at {nm} relative to the 0 dBm reference (Table 5)',
                 derive=dict(kind='section', inputs=[ref0, m['ref']], constant=0), band_label=nm, zero_key=None, nominal=float(lv), low=f(D(lv) - TABLE5_TOL), high=f(D(lv) + TABLE5_TOL), unit='dB',
-                flags=['Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).'] + ([MOVED] if moved else []), **moved)
+                flags=['Limit: the applied level +/-2.5 dB, relative to the 0 dBm reference (Table 5).'] + ([MOVED_TUNED] if moved else []), **moved)
 
     # 4.3 internal modulation source
     s = section('G-4.3', 'Internal modulation source', f'RF OUTPUT to the 8902A RF INPUT. {MOD_CARRIER_MHZ} MHz, +{MOD_LEVEL_DBM} dBm, INT AM 90 %, 1 kHz then 400 Hz; the 8902A audio frequency counter reads the modulation rate.', 'RX')
@@ -247,14 +251,16 @@ def build_spec():
         source=dict(cite=f'{DOC}, Calibration Procedure for Synthesized Signal Generator 6060 A/AN (Fluke), 30 April 2017 (GIDEP)', limits_text='GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)',
                     note='Points and limits are the document\'s own tables. Its measuring instruments (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (8902A, 96270A + NRP40T, 8563E); '
                          'each replacement is flagged UNVERIFIED on the point. The Calibration Performance Table is "Not Required"; Appendix A (reference oscillator adjustment) is not built.'),
-        options=dict(count_resolution_hz=COUNT_RES_HZ, fm_max_khz=FM_MAX_KHZ),
+        options=dict(count_resolution_hz=COUNT_RES_HZ, fm_max_khz=FM_MAX_KHZ, checkpoint_requires_ref=True),     # points were renumbered on 2026-11-03: a saved result must name its point
         constants=dict(harm_count=HARM_COUNT),
         discrepancies=[
             'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) needs a counter this program does not drive: that reading is typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.',
             'Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.',
             'Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.',
             'The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.',
-            'Tables 4 to 7: the document\'s 100 kHz carrier is moved to 150 kHz (owner, 2026-11-03), where the 8902A RF input range starts; the 6060A between 100 and 150 kHz is not verified.',
+            'Tables 4, 6 and 7: the document\'s 100 kHz carrier is moved to 150 kHz (owner, 2026-11-03), where the 8902A RF input range starts; the 6060A between 100 and 150 kHz is not verified.',
+            'Table 5: the document\'s -127 dBm row is left out at every carrier (owner, 2026-11-03: "delete the -127db test points...stop at -120dB"); the levels end at -120 dBm.',
+            'Table 5: the document\'s 100 kHz carrier is moved to 2.5 MHz (owner, 2026-11-03), where the 8902A tuned RF level starts (error 20 at 150 kHz); the 6060A level below 2.5 MHz is not verified by Table 5.',
             'Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 8902A frequency counter covers the display range (+/-1 count).'],
         sections=sections)
 

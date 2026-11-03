@@ -40,20 +40,25 @@ def builder():
 class SpecTests(unittest.TestCase):
     def test_counts_and_groups(self):
         got = {s['id']: len(s['points']) for s in SPEC['sections']}
-        self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-0.15': 27, 'G-4.2b-250': 27, 'G-4.2b-520': 27, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
+        self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-2.5': 25, 'G-4.2b-250': 25, 'G-4.2b-520': 25, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
                                'G-4.4-520': 8, 'G-4.5': 9, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
-        self.assertEqual(len(points()), 220)
+        self.assertEqual(len(points()), 214)
         self.assertEqual({p['group'] for p in points()}, {'POWERON', 'REFOSC', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
 
-    def test_the_100_khz_carrier_is_moved_to_150_khz(self):
-        """Owner 2026-11-03: every Tables 4 to 7 point at the document's 100 kHz now runs at 150 kHz with the document's limits, says so on the point, and carries moved_from."""
+    def test_the_100_khz_carrier_is_moved_to_150_khz_and_2_5_mhz_for_table_5(self):
+        """Owner 2026-11-03: Tables 4, 6, 7 at the document's 100 kHz run at 150 kHz (the 8902A RF input); Table 5 (tuned RF level) at 2.5 MHz, where the 8902A tuned level starts."""
         moved = [p for p in points() if p.get('moved_from')]
-        self.assertEqual(len(moved), 38)
+        self.assertEqual(len(moved), 36)
         self.assertEqual({p['moved_from'] for p in moved}, {'100 kHz'})
-        self.assertTrue(all(any('100 kHz to 150 kHz' in f for f in p['flags']) for p in moved))
-        self.assertTrue(all('150 kHz' in p['ref'] for p in moved))
+        t5 = [p for p in moved if p['section'].startswith('G-4.2b')]
+        rest = [p for p in moved if not p['section'].startswith('G-4.2b')]
+        self.assertEqual((len(t5), len(rest)), (25, 11))
+        self.assertTrue(all(any('100 kHz to 2.5 MHz' in f for f in p['flags']) and '2.5 MHz' in p['ref'] for p in t5))
+        self.assertTrue(all(any('100 kHz to 150 kHz' in f for f in p['flags']) and '150 kHz' in p['ref'] for p in rest))
         self.assertFalse([p['ref'] for p in points() if (p.get('gen') or {}).get('freq_mhz') is not None and 0.01 < p['gen']['freq_mhz'] < 0.15])
-        self.assertTrue(any('moved to 150 kHz' in d for d in SPEC['discrepancies']))
+        self.assertFalse([p['ref'] for p in points() if p.get('meas') == 'level_rx' and p['rx']['mode'] == 'tuned' and p['gen']['freq_mhz'] < 2.5])
+        self.assertTrue(any('moved to 150 kHz' in d for d in SPEC['discrepancies']) and any('moved to 2.5 MHz' in d for d in SPEC['discrepancies']))
+        self.assertIs(SPEC['options']['checkpoint_requires_ref'], True)
 
     def test_json_is_what_the_builder_makes(self):
         self.assertEqual(json.loads(json.dumps(builder().build_spec())), SPEC)
@@ -81,7 +86,7 @@ class SpecTests(unittest.TestCase):
 
     def test_table_5_is_relative_to_the_0_dbm_reference_with_2_5_db(self):
         rel = [p for p in points() if p['func'] == 'LEVEL_REL']
-        self.assertEqual(len(rel), 39)
+        self.assertEqual(len(rel), 36)
         for p in rel:
             self.assertEqual(p['meas'], 'derived')
             self.assertAlmostEqual(p['high'] - p['nominal'], 2.5)
@@ -89,9 +94,10 @@ class SpecTests(unittest.TestCase):
             self.assertEqual(p['derive']['constant'], 0)
         m10 = by_ref('4.2 Table 5 250 MHz -10 dBm relative')
         self.assertEqual((m10['low'], m10['high']), (-12.5, -7.5))
-        m127 = by_ref('4.2 Table 5 520 MHz -127 dBm relative')
-        self.assertEqual((m127['low'], m127['high']), (-129.5, -124.5))
-        self.assertEqual(m127['derive']['inputs'], ['4.2 Table 5 520 MHz 0 dBm reference', '4.2 Table 5 520 MHz -127 dBm'])
+        m120 = by_ref('4.2 Table 5 520 MHz -120 dBm relative')
+        self.assertEqual((m120['low'], m120['high']), (-122.5, -117.5))
+        self.assertEqual(m120['derive']['inputs'], ['4.2 Table 5 520 MHz 0 dBm reference', '4.2 Table 5 520 MHz -120 dBm'])
+        self.assertFalse([p['ref'] for p in points() if p['func'] in ('LEVEL', 'LEVEL_REL') and p['nominal'] < -120], 'owner 2026-11-03: stop at -120 dB')
 
     def test_modulation_tables_6_7_8(self):
         am = {(p['gen']['freq_mhz'], p['gen']['am']['rate_hz'], p['gen']['am']['pct']): (p['low'], p['high']) for p in points() if p['func'] == 'AMDEPTH'}
@@ -170,6 +176,7 @@ class GidepBench(T.Bench):
         E.SPEC_PATH, E.STATE_KEY, E.VARIANT_LABEL = GIDEP_SPEC, '6060A-gidep', 'GIDEP T.O. 33K3-4-911-1'
         super().setUp()
         self.t6.fm_max_khz = 500.0                                       # the simulated unit accepts the document's 500 kHz range
+        self.t8902.tuned_floor_mhz = 2.5                                 # tuned RF level below 2.5 MHz: error 20, like the bench 8902A (2026-11-03)
 
         def ask(p, **k):                                               # a typed reading in the middle of the limits, in the unit the entry box shows
             _lim, _unit, scale = manual_override.entry_scale(p)
@@ -180,7 +187,7 @@ class GidepBench(T.Bench):
 class GidepEngine(GidepBench):
     def test_state_is_kept_apart_from_the_instruction_manual_procedure(self):
         self.assertEqual(E.STATE_KEY, '6060A-gidep')
-        self.assertEqual(len(E.POINTS), 220)
+        self.assertEqual(len(E.POINTS), 214)
         self.assertEqual(E.SPEC['source']['limits_text'], 'GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)')
 
     def test_points_the_instruments_cannot_program_are_listed_not_tested(self):
@@ -208,7 +215,7 @@ class GidepEngine(GidepBench):
     def test_every_point_passes_on_the_simulated_bench_and_rf_is_off_after_each(self):
         self.run_points('', seconds=3000)
         self.assertEqual(self.errors(), [])
-        self.assertEqual(len(self.app.found), 213)
+        self.assertEqual(len(self.app.found), 207)
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 
@@ -411,3 +418,22 @@ class CalibrateOncePerConnection(GidepBench):
         self.titles.clear()
         self.run_points(refs=self.power_refs())
         self.assertEqual(self.cal_prompts(), ['Calibrate the 8902A RF power'])
+
+
+class TunedLevelFloor(GidepBench):
+    """Owner bench 2026-11-03: the 8902A tuned RF level at 150 kHz showed error 20 (value out of range); its range is 2.5 MHz to 1300 MHz (p. 1-22). The simulator now does the same,
+    and the Table 5 low carrier is 2.5 MHz."""
+
+    def test_the_simulated_8902a_refuses_a_tuned_level_at_150_khz_with_error_20(self):
+        self.connect()
+        with self.assertRaises(Exception) as cm:
+            self.app.io.rx.tuned_rf_level_dbm(0.15)
+        self.assertIn('error 20', str(cm.exception))
+
+    def test_table_5_low_carrier_is_2_5_mhz_and_runs_clean(self):
+        low = [p for p in E.POINTS if p['section'] == 'G-4.2b-2.5']
+        self.assertEqual(len(low), 25)
+        self.assertTrue(all(p['gen']['freq_mhz'] == 2.5 for p in low if p.get('gen')))
+        self.run_points(refs=[p['ref'] for p in low if p['meas'] != 'derived'])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])

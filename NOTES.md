@@ -2224,6 +2224,14 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- Table 5 low carrier 2.5 MHz and no -127 dBm rows (owner, 2026-11-03: bench 8902A showed error 20 doing tuned RF level at 150 kHz; "delete the -127db test points...stop at
+  -120dB"): the 8902A tuned RF level is specified 2.5 MHz to 1300 MHz (p. 1-22), so Table 5's moved carrier is 2.5 MHz (`TUNED_LOW_MHZ`; Tables 4, 6, 7 stay at 150 kHz), each
+  point flagged 'Carrier changed from the document's 100 kHz to 2.5 MHz'. Table 5 levels end at -120 dBm (6 points removed): 214 points. The points after Table 5 are
+  renumbered, so the GIDEP spec option `checkpoint_requires_ref` makes a loaded checkpoint drop every result without a ref (only the GIDEP procedure; the Instruction Manual
+  procedure's old checkpoints are kept). Uncertainty: the tuned-level budget now checks the sheet rows' 2.5-1300 MHz band (it was given at 150 kHz before, wrongly); at
+  2.5 MHz it is budgeted and starred (RF Attenuation starts at 10 MHz). `drivers/simulated_8902a.py` can refuse a tuned level below a floor with error 20
+  (`tuned_floor_mhz`, opt-in; the GIDEP tests set 2.5). OPEN: the Instruction Manual procedure's 4A-8 measures the tuned level at 0.4 MHz (18 points): the bench 8902A
+  will most likely give error 20 there too; its simulator default (no floor) keeps that procedure's tests as they were until the owner decides.
 - 8902A calibrations once per connection, and a skip (owner, 2026-11-03: "remove the need to calibrate the 8902 sensor in each section or give me a skip/already cal'd button"):
   every Run used to clear `_prep_done`, so each Run / Run section asked for the RF power sensor, AM and FM calibrations again. The Run's reset is IP, which keeps the 8902A's
   non-volatile calibration data (driver docstring, manual p. 3-25 / 75), so `_prep_done` now lasts for the CONNECTION: cleared on disconnect, a failed reset and a change of the
