@@ -49,6 +49,11 @@ NOTES = {
 
 SHEET = 'Fluke Calibration 96270A 27 GHz Low Phase Noise RF Reference Source, Technical Data, pub. 6002252B_EN (3/2020), p.6 "96270A summary specifications"'
 PERIOD = '1 yr'     # the table prints no calibration period; stored under the default period so the manager finds it (flagged in problems)
+# FM rows (owner, 2026-11-03): the 96000 Series Product Specifications (8/2026, 15 PDF pages, '96000___pseng0000_0.pdf', sha256 f22d6cc270601305...), read from the RENDERED page
+# images (pdftoppm -r 110 / 300): printed p. 10 (PDF p. 11) 'Frequency and Phase Modulation' table, printed p. 11 (PDF p. 12) chart 'FM Deviation Limits and Performance
+# Specifications', printed p. 1 (PDF p. 2) 'Performance': 1-year interval, Tcal +/-5 degC, 'Unless otherwise noted, specifications are stated at a 99 % confidence level'.
+SPEC_2026 = 'Fluke 96000 Series RF Reference Source Product Specifications (8/2026)'
+FM_REGIONS = ((9e6, 11e6, 2.0, 220e3), (11e6, 125e6, 0.6, 750e3), (125e6, 4e9, 0.12, 4.8e6))     # carrier band Hz, Fd <= % of Fc where the accuracy applies (chart), largest Fd there
 
 NOTES.update({
     '6': 'SOURCE OF THE ROWS BELOW: ' + SHEET + ' (rendered page image checked against the first transcription from a screenshot of the same table). Specified values are as printed; "typical" values are marked in the row label. '
@@ -62,6 +67,8 @@ NOTES.update({
          'Spurious >= 3 kHz offset: <= -84 dBc at 500 MHz, <= -78 dBc at 1 GHz, <= -66 dBc at 4 GHz, <= -48 dBc at 27 GHz. Phase noise at 1 GHz: -144 dBc/Hz typical, 10 kHz to 100 kHz offset.',
     '9': 'Printed, not stored: modulation AM, FM, PM internal/external to 4 GHz; frequency sweep 1 mHz to 4 GHz (Leveling Head) and 1 mHz to 27 GHz (Microwave O/P), linear or log; '
          'internal 300 MHz frequency counter; power meter readout for Rohde & Schwarz NRP-Z series thermal sensors (list cut off in the screenshot).',
+    '10': 'FM rows: 96000 Series Product Specifications (8/2026), printed pp. 10-11 (PDF pp. 11-12), read from the rendered page images: accuracy +/-(3 % of setting + 240 mHz); '
+         'applies where Fd <= 2 % / 0.6 % / 0.12 % of Fc (chart); typical only for rates below 20 Hz.',
 })
 
 
@@ -118,6 +125,19 @@ def build():
            _row('Attenuation, at 110 dB (relative to +10 dBm, 10 Hz to 128 MHz)', D(0.15), 'dB', (10.0, 128e6), 'relative to +10 dBm, at 110 dB')]
     functions.append(dict(name='Attenuation Accuracy (into 50 ohm) [Leveling Head O/P]', direction='output', page=None, ranges=att))
 
+    fm = []
+    for f_lo, f_hi, pct, fd_max in FM_REGIONS:
+        r = _row(f'FM internal sine deviation accuracy, carrier {f_lo / 1e6:g} MHz to {f_hi / 1e6:g} MHz, Fd <= {pct:g} % of Fc', _spec(rel=0.03, abs_=0.24, unit='Hz'), 'Hz',
+                 (f_lo, f_hi), amp=(10.0, fd_max), resolution=0.1)
+        r['params'] = [dict(tag='', lo=10.0, hi=fd_max, unit='Hz', text=f'10 Hz to {pct:g} % of Fc', annot='', notes=['10']),
+                       dict(tag='', lo=f_lo, hi=f_hi, unit='Hz', text=f'{f_lo / 1e6:g} MHz to {f_hi / 1e6:g} MHz', annot='', notes=[]),
+                       dict(tag='rate', lo=20.0, hi=300e3, unit='Hz', text='20 Hz to 300 kHz', annot='', notes=['10'])]
+        r['qualifiers'] = [dict(tag='rate', lo=20.0, hi=300e3, unit='Hz'), dict(tag='fd_pct_fc', lo=0.0, hi=pct, unit='%')]
+        r['page'] = 11
+        r['variant'] = 'FM deviation accuracy'
+        fm.append(r)
+    functions.append(dict(name='FM Deviation Accuracy [Internal Sine]', direction='output', page=11, ranges=fm))
+
     data = dict(schema=1, standard=dict(
         manufacturer='Fluke', model='96270A', description='RF Reference Source (96000 Series; 96270A with microwave output, 96040A leveling head)',
         confidence_text='[Not Specified] - not printed on the specification table',
@@ -144,6 +164,12 @@ def build():
     w('Frequency', '+/-0.05 ppm +/- 5 uHz stored for the full 1 mHz to 27 GHz; the table does not tie it to a period or to a temperature. Resolution 10 uHz taken from the table and stored on this row; '
                    'the budget would add it as u(resolution) = 10 uHz / sqrt(12).')
     w('Attenuation', 'Printed "10 Hz to 128 MHz", relative to +10 dBm; at 110 dB the value is 0.15 dB. Stored as two rows by attenuation, not by a numeric amplitude range.')
+    w('FM Deviation Accuracy', f'From {SPEC_2026}, printed p. 10 (PDF p. 11): "FM/PM Sine Deviation Accuracy +/-(3 % of setting + 240 mHz)" ("Typically +/-(0.25 % of setting + 240 mHz), '
+      'for <=50 kHz rate" is typical, not stored). Footnote 4 and the chart on printed p. 11: the accuracy applies for Fd <= 2 % of Fc (9 to 11 MHz), <= 0.6 % (11 to 125 MHz), <= 0.12 % '
+      '(125 MHz to 4 GHz), Fd >= 10 Hz; "Specifications are typical for modulation rates < 20 Hz" (rate qualifier 20 Hz to 300 kHz). The Fd / Fc limit is the qualifier fd_pct_fc (a lookup '
+      'by amplitude alone does not apply it). Deviation resolution 0.1 Hz. Carrier 9 MHz to 4 GHz; modulation is not available above 4 GHz.')
+    w('standard', f'{SPEC_2026}, printed p. 1: "Unless otherwise noted, specifications are stated at a 99 % confidence level" (1-year interval, Tcal +/-5 degC). confidence_pct is NOT changed '
+      'here: it would change the divisor of the level rows the MDO procedures use (owner decision); until then the divisor stays k = 2 (the conservative choice).')
     w('Operating limits', 'Level / frequency limits (notes 2, 3, 7), connector data (notes 4, 5) and the VSWR / harmonics / spurious / phase-noise data (note 8) are notes only; the schema has no field for them.')
     problems.extend(sm.validate_data(data))
     data['problems'] = problems

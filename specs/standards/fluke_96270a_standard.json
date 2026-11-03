@@ -13,7 +13,7 @@
   "approve_date": "",
   "source_pdf": "96270A Technical Data 6002252B_EN.pdf (specification rows); 96270 Operator Manual.pdf (operating limits only)",
   "sheet_generated": "",
-  "built": "2026-10-21T21:35:09"
+  "built": "2026-11-03T12:19:34"
  },
  "notes": {
   "1": "Manual p.1-2 (PDF p.8): \"Complete specifications for the Product are at www.fluke.com.\" The Operators Manual prints no accuracy, flatness, stability, harmonic, spurious or 90 d / 1 yr / 2 yr specification. No confidence level / coverage factor is printed anywhere.",
@@ -24,7 +24,8 @@
   "6": "SOURCE OF THE ROWS BELOW: Fluke Calibration 96270A 27 GHz Low Phase Noise RF Reference Source, Technical Data, pub. 6002252B_EN (3/2020), p.6 \"96270A summary specifications\" (rendered page image checked against the first transcription from a screenshot of the same table). Specified values are as printed; \"typical\" values are marked in the row label. The page says \"Refer to the 96270A Extended Specifications for detailed specifications\"; that document (confidence level, calibration period, 75 ohm head) was not supplied. Performance is specified at 23 degC +/- 5 degC (operating 0 to 50 degC, storage -20 to +70 degC).",
   "7": "Printed on the same table, NOT accuracy and not stored as rows: Frequency / level range: Leveling Head O/P [50 ohm] 1 mHz to 4 GHz, -130 to +24 dBm to 125 MHz, +14 dBm at 4 GHz; Microwave O/P Direct 1 mHz to 27 GHz [with LL option], -4 [-100] to +24 dBm, above 1.4 GHz +20 dBm [above 20 GHz +18 dBm]; Microwave O/P with HF option 1 kHz to 27 GHz [with LL option], -10 [-35] to +18 dBm, above 1.4 GHz +14 dBm [above 20 GHz +12 dBm]. Resolution 10 uHz and 0.001 dB.",
   "8": "Printed, not stored (limits that are not an uncertainty of the output): VSWR (Leveling Head O/P, 50 ohm): <= 1.05 to 100 MHz, <= 1.1 to 2 GHz, 1.0 + 0.05 x f(GHz) from 2 to 4 GHz; Microwave O/P direct <= 2.0 (typical), HF option splitter device <= 1.22. Harmonics <= 1 GHz: -60 dBc, > 1 GHz: -55 dBc; sub-harmonics <= 4 GHz: none, > 4 GHz: -60 dBc. Spurious >= 3 kHz offset: <= -84 dBc at 500 MHz, <= -78 dBc at 1 GHz, <= -66 dBc at 4 GHz, <= -48 dBc at 27 GHz. Phase noise at 1 GHz: -144 dBc/Hz typical, 10 kHz to 100 kHz offset.",
-  "9": "Printed, not stored: modulation AM, FM, PM internal/external to 4 GHz; frequency sweep 1 mHz to 4 GHz (Leveling Head) and 1 mHz to 27 GHz (Microwave O/P), linear or log; internal 300 MHz frequency counter; power meter readout for Rohde & Schwarz NRP-Z series thermal sensors (list cut off in the screenshot)."
+  "9": "Printed, not stored: modulation AM, FM, PM internal/external to 4 GHz; frequency sweep 1 mHz to 4 GHz (Leveling Head) and 1 mHz to 27 GHz (Microwave O/P), linear or log; internal 300 MHz frequency counter; power meter readout for Rohde & Schwarz NRP-Z series thermal sensors (list cut off in the screenshot).",
+  "10": "FM rows: 96000 Series Product Specifications (8/2026), printed pp. 10-11 (PDF pp. 11-12), read from the rendered page images: accuracy +/-(3 % of setting + 240 mHz); applies where Fd <= 2 % / 0.6 % / 0.12 % of Fc (chart); typical only for rates below 20 Hz."
  },
  "functions": [
   {
@@ -1067,6 +1068,235 @@
      "res_src": ""
     }
    ]
+  },
+  {
+   "name": "FM Deviation Accuracy [Internal Sine]",
+   "direction": "output",
+   "page": 11,
+   "ranges": [
+    {
+     "label": "FM internal sine deviation accuracy, carrier 9 MHz to 11 MHz, Fd <= 2 % of Fc",
+     "page": 11,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 220000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 2 % of Fc",
+       "annot": "",
+       "notes": [
+        "10"
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 9000000.0,
+       "hi": 11000000.0,
+       "unit": "Hz",
+       "text": "9 MHz to 11 MHz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "rate",
+       "lo": 20.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "20 Hz to 300 kHz",
+       "annot": "",
+       "notes": [
+        "10"
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.24,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.03 of value + 0.24 Hz) "
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "FM deviation accuracy",
+     "amp_lo": 10.0,
+     "amp_hi": 220000.0,
+     "unit": "Hz",
+     "freq_lo": 9000000.0,
+     "freq_hi": 11000000.0,
+     "qualifiers": [
+      {
+       "tag": "rate",
+       "lo": 20.0,
+       "hi": 300000.0,
+       "unit": "Hz"
+      },
+      {
+       "tag": "fd_pct_fc",
+       "lo": 0.0,
+       "hi": 2.0,
+       "unit": "%"
+      }
+     ],
+     "range_max": null,
+     "resolution": 0.1,
+     "res_src": "printed"
+    },
+    {
+     "label": "FM internal sine deviation accuracy, carrier 11 MHz to 125 MHz, Fd <= 0.6 % of Fc",
+     "page": 11,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 750000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 0.6 % of Fc",
+       "annot": "",
+       "notes": [
+        "10"
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 11000000.0,
+       "hi": 125000000.0,
+       "unit": "Hz",
+       "text": "11 MHz to 125 MHz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "rate",
+       "lo": 20.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "20 Hz to 300 kHz",
+       "annot": "",
+       "notes": [
+        "10"
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.24,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.03 of value + 0.24 Hz) "
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "FM deviation accuracy",
+     "amp_lo": 10.0,
+     "amp_hi": 750000.0,
+     "unit": "Hz",
+     "freq_lo": 11000000.0,
+     "freq_hi": 125000000.0,
+     "qualifiers": [
+      {
+       "tag": "rate",
+       "lo": 20.0,
+       "hi": 300000.0,
+       "unit": "Hz"
+      },
+      {
+       "tag": "fd_pct_fc",
+       "lo": 0.0,
+       "hi": 0.6,
+       "unit": "%"
+      }
+     ],
+     "range_max": null,
+     "resolution": 0.1,
+     "res_src": "printed"
+    },
+    {
+     "label": "FM internal sine deviation accuracy, carrier 125 MHz to 4000 MHz, Fd <= 0.12 % of Fc",
+     "page": 11,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 4800000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 0.12 % of Fc",
+       "annot": "",
+       "notes": [
+        "10"
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 125000000.0,
+       "hi": 4000000000.0,
+       "unit": "Hz",
+       "text": "125 MHz to 4000 MHz",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "rate",
+       "lo": 20.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "20 Hz to 300 kHz",
+       "annot": "",
+       "notes": [
+        "10"
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.24,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.03 of value + 0.24 Hz) "
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "FM deviation accuracy",
+     "amp_lo": 10.0,
+     "amp_hi": 4800000.0,
+     "unit": "Hz",
+     "freq_lo": 125000000.0,
+     "freq_hi": 4000000000.0,
+     "qualifiers": [
+      {
+       "tag": "rate",
+       "lo": 20.0,
+       "hi": 300000.0,
+       "unit": "Hz"
+      },
+      {
+       "tag": "fd_pct_fc",
+       "lo": 0.0,
+       "hi": 0.12,
+       "unit": "%"
+      }
+     ],
+     "range_max": null,
+     "resolution": 0.1,
+     "res_src": "printed"
+    }
+   ]
   }
  ],
  "problems": [
@@ -1119,6 +1349,16 @@
    "level": "warn",
    "where": "Attenuation",
    "what": "Printed \"10 Hz to 128 MHz\", relative to +10 dBm; at 110 dB the value is 0.15 dB. Stored as two rows by attenuation, not by a numeric amplitude range."
+  },
+  {
+   "level": "warn",
+   "where": "FM Deviation Accuracy",
+   "what": "From Fluke 96000 Series RF Reference Source Product Specifications (8/2026), printed p. 10 (PDF p. 11): \"FM/PM Sine Deviation Accuracy +/-(3 % of setting + 240 mHz)\" (\"Typically +/-(0.25 % of setting + 240 mHz), for <=50 kHz rate\" is typical, not stored). Footnote 4 and the chart on printed p. 11: the accuracy applies for Fd <= 2 % of Fc (9 to 11 MHz), <= 0.6 % (11 to 125 MHz), <= 0.12 % (125 MHz to 4 GHz), Fd >= 10 Hz; \"Specifications are typical for modulation rates < 20 Hz\" (rate qualifier 20 Hz to 300 kHz). The Fd / Fc limit is the qualifier fd_pct_fc (a lookup by amplitude alone does not apply it). Deviation resolution 0.1 Hz. Carrier 9 MHz to 4 GHz; modulation is not available above 4 GHz."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Fluke 96000 Series RF Reference Source Product Specifications (8/2026), printed p. 1: \"Unless otherwise noted, specifications are stated at a 99 % confidence level\" (1-year interval, Tcal +/-5 degC). confidence_pct is NOT changed here: it would change the divisor of the level rows the MDO procedures use (owner decision); until then the divisor stays k = 2 (the conservative choice)."
   },
   {
    "level": "warn",

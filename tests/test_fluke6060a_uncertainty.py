@@ -285,3 +285,51 @@ class Report(Base):
         self.assertIn('* Not covered by the laboratory', texts[0])
         self.assertIn('certificate 1888.03', ' '.join(texts[0].split()))
         self.assertNotIn('Not covered by the laboratory', texts[1])
+
+
+class DeviationMeter(Base):
+    """Tables 9, 10 (owner, 2026-11-03: "the deviation error uncertainties come directly from the 96270"): the 96270A generates the FM, so its FM deviation accuracy is the
+    budget. 96000 Series Product Specifications (8/2026) p. 10: +/-(3 % of setting + 240 mHz); p. 11 chart: applies for Fd <= 0.6 % of Fc (11-125 MHz), <= 0.12 % (125 MHz-4 GHz).
+      10 kHz: 300.24 Hz / 2 -> EMU 300.24 Hz (+ 0.1 Hz / sqrt 12, negligible) -> 310 Hz = 0.31 kHz; TUR 3 / 0.31.   47 kHz: 1410.24 Hz -> 1.5 kHz; TUR 3 / 1.5 = 2.0."""
+
+    def dm(self, mhz, rate, khz):
+        return next(p for p in self.points.values() if p['func'] == 'DEVMETER' and p['fmsrc'] == dict(carrier_mhz=float(mhz), level_dbm=p['fmsrc']['level_dbm'],
+                                                                                                          dev_khz=float(khz), rate_hz=float(rate)))
+
+    def test_budget_from_the_96270a_fm_accuracy(self):
+        r = fu.evaluate(self.dm(30, 100, 10), path=self.db)
+        self.assertEqual((r.status, r.scope, r.unit), (fu.OK, fu.UNDECIDED, 'kHz'))
+        self.assertAlmostEqual(r.components[0].limit, 0.30024, places=9)
+        self.assertEqual(r.reported, 0.31)
+        self.assertEqual(fu.evaluate(self.dm(250, 4000, 47), path=self.db).reported, 1.5)
+        self.assertAlmostEqual(fu.evaluate(self.dm(500, 8000, 47), path=self.db).tur(), 2.0, places=9)
+
+    def test_outside_the_specified_deviation_region_stays_blank(self):
+        r = fu.evaluate(self.dm(30, 100, 300), path=self.db)            # 0.6 % of 30 MHz = 180 kHz
+        self.assertEqual(r.status, fu.NO_SPEC)
+        self.assertIn('0.6 %', r.reason)
+        self.assertEqual(fu.evaluate(self.dm(500, 100, 370), path=self.db).reported, 12.0)      # 0.12 % of 500 MHz = 600 kHz: specified
+
+    def test_report_text_is_in_hz_below_1_khz(self):
+        old = fv.STATE_KEY
+        try:
+            fv.STATE_KEY = '6060A-gidep'
+            self.assertEqual(fv.point_uncertainty(self.dm(30, 100, 10), None), ('310 Hz *', ''))
+            self.assertEqual(fv.point_uncertainty(self.dm(30, 100, 47), None), ('1.5 kHz *', ''))
+        finally:
+            fv.STATE_KEY = old
+
+    def test_an_old_sheet_without_the_fm_rows_says_how_to_fix_it(self):
+        from unittest import mock
+        real = fu._rows
+        with mock.patch.object(fu, '_rows', side_effect=lambda std, function, label='': [] if function.startswith('FM Deviation') else real(std, function, label)):
+            r = fu.evaluate(self.dm(30, 100, 10), path=self.db)
+        self.assertEqual(r.status, fu.NO_SPEC)
+        self.assertIn('Import JSON', r.reason)
+
+    def test_the_96270a_sheet_rows_as_printed(self):
+        data = json.loads((ROOT / 'specs' / 'standards' / 'fluke_96270a_standard.json').read_text(encoding='utf-8'))
+        fm = next(f for f in data['functions'] if f['name'] == 'FM Deviation Accuracy [Internal Sine]')
+        got = [(r['freq_lo'], r['freq_hi'], next(q['hi'] for q in r['qualifiers'] if q['tag'] == 'fd_pct_fc'), r['specs'][0]['rel'], r['specs'][0]['abs']) for r in fm['ranges']]
+        self.assertEqual(got, [(9e6, 11e6, 2.0, 0.03, 0.24), (11e6, 125e6, 0.6, 0.03, 0.24), (125e6, 4e9, 0.12, 0.03, 0.24)])
+        self.assertIsNone(data['standard']['confidence_pct'], 'the 99 % of the 2026 spec is an owner decision (it changes the MDO level budgets)')

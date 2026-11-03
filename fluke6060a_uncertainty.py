@@ -474,7 +474,8 @@ def _level(r, p, reading, path):
     cmc, text = scope_rf_power(fc, lv)
     if p['meas'] == 'level_pm':
         r.standard = 'Fluke 96270A + R&S NRP40T (power meter)'
-        r.status, r.reason = NO_SPEC, 'No NRP40T sheet and no 96270A power-meter readout specification on file'
+        r.status, r.reason = NO_SPEC, ('No NRP40T sheet on file. The 96000 Series Product Specifications (8/2026, printed p. 13) give the power meter readout no accuracy '
+                                       '(the sensor carries it) and list only R&S NRP-Z thermal sensors (51, 52, 55.03, 55.04, 56, 57, 58): the NRP40T is not among them')
     elif (p.get('rx') or {}).get('mode') == 'power':
         r.standard = 'HP 8902A RF power (11722A sensor)'
         r.status = NEEDS_INPUT
@@ -500,13 +501,36 @@ def _level(r, p, reading, path):
 
 
 def _devmeter(r, p, reading, path):
+    """Deviation meter (Tables 9, 10): the 96270A GENERATES the FM and the 6060A display is typed, so the budget is the 96270A's FM deviation accuracy at the set
+    deviation (96000 Series Product Specifications 8/2026, the sheet's 'FM Deviation Accuracy [Internal Sine]' rows: +/-(3 % of setting + 240 mHz) where Fd <= 2 / 0.6 /
+    0.12 % of Fc, rates 20 Hz to 300 kHz) plus the 96270A deviation resolution (0.1 Hz / sqrt 12). In kHz, the unit of the point."""
     r.standard = 'Fluke 96270A FM output'
-    r.status, r.reason = NO_SPEC, 'The 96270A sheet has no FM deviation accuracy row (Operator Manual FM specifications not transcribed)'
-    m = re.search(r'meter ([\d.]+) MHz, rate (\d+) Hz, ([\d.]+) kHz', p.get('description', ''))
-    if m:
-        fc, rate, dev = float(m.group(1)) * 1e6, float(m.group(2)), float(m.group(3)) * 1e3
-        pct = scope_fm(fc, rate, dev)
-        _set_scope(r, None if pct is None else pct / 100.0 * dev / 1e3, f'Frequency Modulation - Measure via footnote 9: {pct} % of reading' if pct else '', 'scope.DEVMETER')
+    src = p.get('fmsrc') or {}
+    fc, rate, dev = src.get('carrier_mhz', 0) * 1e6, float(src.get('rate_hz') or 0), float(src.get('dev_khz') or 0) * 1e3
+    r.evaluated_at = dev / 1e3
+    pct = scope_fm(fc, rate, dev)
+    _set_scope(r, None if pct is None else pct / 100.0 * dev / 1e3, f'Frequency Modulation - Measure via footnote 9: {pct} % of reading' if pct else '', 'scope.DEVMETER')
+    std = _standard('96270A', path)
+    rows = [row for row in _rows(std, 'FM Deviation Accuracy [Internal Sine]')]
+    if not rows:
+        raise LookupError('The 96270A sheet in the standards database has no FM deviation accuracy rows: import specs/standards/fluke_96270a_standard.json again '
+                          '(Standards Specs > Import JSON); the rows were added 2026-11-03')
+    hits = [row for row in rows if row['freq_lo'] <= fc <= row['freq_hi'] and _qual(row, 'rate', rate) and row['amp_lo'] <= dev
+            and _qual(row, 'fd_pct_fc', dev / fc * 100.0 if fc else 1e9)]
+    if not hits:
+        raise LookupError(f'96270A FM deviation accuracy is not specified at {dev / 1e3:g} kHz on a {fc / 1e6:g} MHz carrier (rate {rate:g} Hz): '
+                          'the accuracy applies for Fd <= 2 % / 0.6 % / 0.12 % of Fc (Product Specifications p. 11 chart)')
+    row = hits[0]
+    spec = _spec(row, std.period)
+    div, why = std.divisor()
+    limit_hz = spec['rel'] * dev + spec['abs']
+    r.add('96270A FM deviation accuracy', limit_hz / 1e3, div, f'{_cite(std, row)}: +/-({spec["rel"] * 100:g} % of setting + {spec["abs"] * 1e3:g} mHz) = {limit_hz:g} Hz. Divisor {div:g} ({why})')
+    res, _src = std.resolution(sm.Hit(row, spec, dev))
+    if res:
+        r.add('96270A deviation resolution', res / 1e3, math.sqrt(12), f'{res:g} Hz / sqrt(12)')
+    r.assumptions += ['The 6060A display resolution (typed reading) is not included, as for every other point (the scope CMC also excludes the unit under test).',
+                      'The 96000 Series Product Specifications state 99 % confidence; the 96270A sheet still says "not specified", so the divisor is 2 (conservative) until the '
+                      'owner sets the sheet to 99 % (that would also change the MDO level budgets).']
 
 
 # ---- 8563E: relative amplitude (dBc) ----------------------------------------------------------------------------------------------------------

@@ -181,7 +181,8 @@ def point_uncertainty(p, reading):
         res = fu.evaluate(p, reading=reading)
         if res.reported is None:
             return '', ''
-        text = uncertainty.format_value(res.reported, res.unit)
+        value, unit = (res.reported * 1e3, 'Hz') if res.unit == 'kHz' else (res.reported, res.unit)      # format_value adds its own SI prefix ('310 mkHz' otherwise)
+        text = uncertainty.format_value(value, unit)
         if not res.covered:
             return text + ' *', ''
         return text, tartur.format_ratio(res.tur())

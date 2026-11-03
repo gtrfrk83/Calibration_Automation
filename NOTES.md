@@ -2224,6 +2224,15 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- Deviation meter (owner, 2026-11-03: "wouldn't the deviation error uncertainties come directly from the 96270?"): yes, the 96270A GENERATES the FM. Source: the owner's 96000 Series
+  Product Specifications (8/2026, '96000___pseng0000_0.pdf'), read from the rendered pages: printed p. 10 FM/PM Sine Deviation Accuracy +/-(3 % of setting + 240 mHz); p. 11 chart: applies
+  for Fd <= 2 % of Fc (9-11 MHz), <= 0.6 % (11-125 MHz), <= 0.12 % (125 MHz-4 GHz), Fd >= 10 Hz, typical only below 20 Hz rate. ADDED to the 96270A sheet as
+  'FM Deviation Accuracy [Internal Sine]' (3 rows, qualifiers rate and fd_pct_fc; `specs/build_96270a_standard_from_manual.py`); the existing level rows are unchanged. A lab PC's
+  lab_registry.sqlite3 only gets the rows through Standards Specs > Import JSON (seed() skips a model already loaded); until then the points say so (NO SPEC).
+  Result: 48 of the 54 deviation-meter points budgeted (0.31 kHz at 10 kHz ... 12 kHz at 370 kHz), 3 blank (300 kHz on 30 MHz is above 0.6 % of Fc), 6 NOT TESTED as before;
+  scope still the owner's decision (starred until then). The engine prints kHz uncertainties in Hz below 1 kHz ('310 Hz', not format_value's '310 mkHz').
+  OPEN: the same document states 99 % confidence ('unless otherwise noted'); the sheet's confidence is left 'not specified' (divisor 2, conservative) because 99 % would
+  also change the MDO level budgets. The power meter readout (p. 13) has no accuracy and lists only NRP-Z thermal sensors: the NRP40T is not among them.
 - Low carrier 150 kHz (owner, 2026-11-03: "change the test points with a 100kHz carrier to 150kHz to meet the range of our 8902"): the 38 Tables 4-7 points at the document's
   100 kHz run at 150 kHz (`LOW_MHZ` in the builder) with the document's limits (they do not depend on the carrier); each says so in its flags, carries `moved_from: '100 kHz'`, and
   the spec's discrepancies list it. The 6060A between 100 and 150 kHz is not verified. 150 kHz is keyed in (0.15MZ, UNVERIFIED on the bench; 0.1MZ gave error 10 / 20).
