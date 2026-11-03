@@ -34,7 +34,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^10 position (measured value 9.93242 GΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^10 position (measured value 9.93242 GΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -61,7 +61,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^9 position (measured value 1.010135 GΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^9 position (measured value 1.010135 GΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -88,7 +88,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^8 position (measured value 99.9569 MΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^8 position (measured value 99.9569 MΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -115,7 +115,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^7 position (measured value 10.014901 MΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^7 position (measured value 10.014901 MΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -142,7 +142,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^6 position (measured value 999.6345 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^6 position (measured value 999.6345 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -169,7 +169,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^5 position (measured value 99.97457 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^5 position (measured value 99.97457 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -196,7 +196,7 @@
     ],
     [
      "Resistor",
-     "Set the resistance box to the 10^4 position (measured value 10.00129 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^4 position (measured value 10.00129 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
     ],
     [
      "Calibrator",
@@ -214,17 +214,36 @@
    "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
   }
  },
- "resistors": {
-  "10^2": 100.0213,
-  "10^3": 999.802,
-  "10^4": 10001.29,
-  "10^5": 99974.57,
-  "10^6": 999634.5,
-  "10^7": 10014901.0,
-  "10^8": 99956900.0,
-  "10^9": 1010135000.0,
-  "10^10": 9932420000.0,
-  "10^11": 99707000000.0
+ "resistance_box": {
+  "name": "Agilent 16340A RC Box",
+  "serial": "1937J00597",
+  "asset": "ATS-4225",
+  "certificate": "Keysight WO-01470653",
+  "calibrated": "2026-07-24",
+  "ohms": {
+   "10^2": 100.0213,
+   "10^3": 999.802,
+   "10^4": 10001.29,
+   "10^5": 99974.57,
+   "10^6": 999634.5,
+   "10^7": 10014901.0,
+   "10^8": 99956900.0,
+   "10^9": 1010135000.0,
+   "10^10": 9932420000.0,
+   "10^11": 99707000000.0
+  },
+  "u_ppm_k2": {
+   "10^2": 66.999787,
+   "10^3": 66.1000198,
+   "10^4": 66.0099987,
+   "10^5": 1.2,
+   "10^6": 1.66,
+   "10^7": 5.35,
+   "10^8": 60.0,
+   "10^9": 193.0,
+   "10^10": 240.0,
+   "10^11": 206.0
+  }
  },
  "steps": [
   {
@@ -271,7 +290,7 @@
    "resistor": {
     "position": "10^10",
     "ohms": 9932420000.0,
-    "u_ppm": null
+    "u_ppm": 240.0
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "2 nA range, +1.9000 nA",
@@ -308,7 +327,7 @@
    "resistor": {
     "position": "10^10",
     "ohms": 9932420000.0,
-    "u_ppm": null
+    "u_ppm": 240.0
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "2 nA range, -1.9000 nA",
@@ -345,7 +364,7 @@
    "resistor": {
     "position": "10^9",
     "ohms": 1010135000.0,
-    "u_ppm": null
+    "u_ppm": 193.0
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "20 nA range, +19.000 nA",
@@ -382,7 +401,7 @@
    "resistor": {
     "position": "10^9",
     "ohms": 1010135000.0,
-    "u_ppm": null
+    "u_ppm": 193.0
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "20 nA range, -19.000 nA",
@@ -419,7 +438,7 @@
    "resistor": {
     "position": "10^8",
     "ohms": 99956900.0,
-    "u_ppm": null
+    "u_ppm": 60.0
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "200 nA range, +190.00 nA",
@@ -456,7 +475,7 @@
    "resistor": {
     "position": "10^8",
     "ohms": 99956900.0,
-    "u_ppm": null
+    "u_ppm": 60.0
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "200 nA range, -190.00 nA",
@@ -493,7 +512,7 @@
    "resistor": {
     "position": "10^7",
     "ohms": 10014901.0,
-    "u_ppm": null
+    "u_ppm": 5.35
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "2 µA range, +1.9000 µA",
@@ -530,7 +549,7 @@
    "resistor": {
     "position": "10^7",
     "ohms": 10014901.0,
-    "u_ppm": null
+    "u_ppm": 5.35
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "2 µA range, -1.9000 µA",
@@ -567,7 +586,7 @@
    "resistor": {
     "position": "10^6",
     "ohms": 999634.5,
-    "u_ppm": null
+    "u_ppm": 1.66
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "20 µA range, +19.000 µA",
@@ -604,7 +623,7 @@
    "resistor": {
     "position": "10^6",
     "ohms": 999634.5,
-    "u_ppm": null
+    "u_ppm": 1.66
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "20 µA range, -19.000 µA",
@@ -641,7 +660,7 @@
    "resistor": {
     "position": "10^5",
     "ohms": 99974.57,
-    "u_ppm": null
+    "u_ppm": 1.2
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "200 µA range, +190.00 µA",
@@ -678,7 +697,7 @@
    "resistor": {
     "position": "10^5",
     "ohms": 99974.57,
-    "u_ppm": null
+    "u_ppm": 1.2
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "200 µA range, -190.00 µA",
@@ -715,7 +734,7 @@
    "resistor": {
     "position": "10^4",
     "ohms": 10001.29,
-    "u_ppm": null
+    "u_ppm": 66.0099987
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "2 mA range, +1.9000 mA",
@@ -752,7 +771,7 @@
    "resistor": {
     "position": "10^4",
     "ohms": 10001.29,
-    "u_ppm": null
+    "u_ppm": 66.0099987
    },
    "unc_kind": "CURRENT_VIA_R",
    "report_desc": "2 mA range, -1.9000 mA",

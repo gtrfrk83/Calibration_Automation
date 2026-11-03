@@ -11,7 +11,7 @@ Every current, limit and resolution below was read from the RENDERED PAGE IMAGES
 Method (Table 3-2): a DC voltage V is applied through a measured resistor R in a shielded fixture, so the 485 reads I = V / R.  The calibrator setting is
     V = I (required current) x R (measured value of the resistor)
 so the current is exactly the required current and the printed 'Allowable Readings' are judged unchanged.  R comes from the lab's resistance box
-(RESISTORS below, one decade per range).  When the box is recalibrated: edit RESISTORS (and RESISTOR_U_PPM) here and run this script again.
+(RESISTORS below, one decade per range).  When the box is recalibrated: edit BOX, RESISTORS and RESISTOR_U here and run this script again.
 
 Negative current (step 10, 'reverse the + and - test leads at the DC calibrator and repeat all checks'): the calibrator sources -V instead (the same current
 reversal with the leads left in place); each range is checked + then - so the resistor is changed once per range.
@@ -46,9 +46,22 @@ RESISTORS = {
     10: '9932420000',
     11: '99707000000',
 }
-# switch position -> expanded uncertainty (k = 2) of the measured value, in ppm, from the box's calibration certificate.  NOT SUPPLIED YET: while a position
-# has no value here, the points on that resistor print no Uncertainty / TAR / TUR (the calibrator alone would understate it).
-RESISTOR_U_PPM: dict[int, str] = {}
+# switch position -> expanded uncertainty (k = 2, ~95 %) of the measured value from the box's calibration report: (relative part in ppm (uOhm/Ohm), absolute
+# part in ohms).  A position missing here prints no Uncertainty / TAR / TUR on its points (the calibrator alone would understate it).
+BOX = dict(name='Agilent 16340A RC Box', serial='1937J00597', asset='ATS-4225', certificate='Keysight WO-01470653', calibrated='2026-07-24')
+RESISTOR_U = {
+    2: ('66', '0.0001'),            # 100 ohm thru 10 kOhm: 0.0066 % + 0.1 mOhm
+    3: ('66', '0.0001'),
+    4: ('66', '0.0001'),
+    5: ('1.2', '0'),                # 100 kOhm: 1.2 uOhm/Ohm
+    6: ('1.66', '0'),               # 1 MOhm
+    7: ('5.35', '0'),               # 10 MOhm
+    8: ('60', '0'),                 # 100 MOhm
+    9: ('193', '0'),                # 1 GOhm
+    10: ('240', '0'),               # 10 GOhm
+    11: ('206', '0'),               # 100 GOhm
+}
+RESISTOR_U_PPM = {pos: (D(rel) + D(ab) / D(RESISTORS[pos]) * D(10) ** 6) for pos, (rel, ab) in RESISTOR_U.items()}
 
 VOLT_STEP = D('0.00001')          # calibrator setting rounded to 10 uV (finer than the 5520A / 5522A 33 V range step; < 1 ppm of 19 V)
 
@@ -105,7 +118,7 @@ def group_for(rng, pos, r: D):
         summary=f'Calibrator NORMAL HI / LO -> resistance box at {position_text(pos)} ({ohms_text(r)}) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the {rng} range.',
         steps=[
             ['Standby', 'The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself).'],
-            ['Resistor', f'Set the resistance box to the {position_text(pos)} position (measured value {ohms_text(r)}). It must be in a shielded (metal) enclosure, '
+            ['Resistor', f'Set the {BOX["name"]} (asset {BOX["asset"]}) to the {position_text(pos)} position (measured value {ohms_text(r)}). It must be in a shielded (metal) enclosure, '
                          'as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value.'],
             ['Calibrator', 'Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground '
                            '(Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)'],
@@ -147,7 +160,7 @@ def build_steps():
                         applied=dict(value=clean(s * volts), frequency=None),
                         nominal=clean(s * current),
                         dsb_out=f'{s * volts:.5f} V DC',          # the full 10 uV setting (the engine's own wording rounds to 6 figures)
-                        resistor=dict(position=position_text(pos), ohms=clean(r), u_ppm=float(RESISTOR_U_PPM[pos]) if pos in RESISTOR_U_PPM else None),
+                        resistor=dict(position=position_text(pos), ohms=clean(r), u_ppm=clean(RESISTOR_U_PPM[pos]) if pos in RESISTOR_U_PPM else None),
                         unc_kind='CURRENT_VIA_R',
                         report_desc=f'{rng} range, {"+" if sign > 0 else "-"}{cur} {unit}',
                         settle=settle, group=key,
@@ -174,7 +187,8 @@ def build_spec():
                           'V = I x R through the lab\'s resistance box (measured values in specs/build_keithley_485_spec.py); the technician selects the range and types the reading.')),
         models={MODEL: dict(name='Keithley 485', brand='Keithley', model_note='Keithley Model 485 Autoranging Picoammeter (4 1/2 digit, 2 nA to 2 mA)')},
         groups=groups,
-        resistors={position_text(k): clean(D(v)) for k, v in RESISTORS.items()},
+        resistance_box=dict(BOX, ohms={position_text(k): clean(D(v)) for k, v in RESISTORS.items()},
+                            u_ppm_k2={position_text(k): clean(v) for k, v in RESISTOR_U_PPM.items()}),
         steps=steps)
 
 

@@ -116,12 +116,27 @@ class Spec(unittest.TestCase):
 
 
 class Uncertainty(unittest.TestCase):
-    def test_blank_until_the_resistor_uncertainty_is_entered(self):
+    def test_box_uncertainties_are_the_certificate(self):
+        # Keysight WO-01470653 (Agilent 16340A S/N 1937J00597, ATS-4225), k = 2: 10 kOhm 0.0066 % + 0.1 mOhm, 100 kOhm 1.2, 1 MOhm 1.66, 10 MOhm 5.35,
+        # 100 MOhm 60, 1 GOhm 193, 10 GOhm 240 uOhm/Ohm
+        want = {'10^4': D('66') + D('0.0001') / D('10001.29') * D(10) ** 6, '10^5': D('1.2'), '10^6': D('1.66'), '10^7': D('5.35'),
+                '10^8': D('60'), '10^9': D('193'), '10^10': D('240')}
+        self.assertEqual((SPEC['resistance_box']['asset'], SPEC['resistance_box']['serial']), ('ATS-4225', '1937J00597'))
+        for p in numeric():
+            self.assertAlmostEqual(p['resistor']['u_ppm'], float(want[p['resistor']['position']]), places=6)
+
+    def test_every_point_prints_an_uncertainty_and_ratios_with_every_calibrator(self):
         import handheld_unc
         for cal in ('5520A', '5522A', '5560A'):
             for p in numeric():
-                self.assertIsNone(p['resistor']['u_ppm'])
-                self.assertEqual(handheld_unc.text(p, cal), '', (cal, p['id']))
+                self.assertTrue(handheld_unc.text(p, cal), (cal, p['id']))
+                r = handheld_unc.ratios(p, cal, float(D(p['low']) * D(str(p['factor']))), float(D(p['high']) * D(str(p['factor']))))
+                self.assertTrue(r['TAR'] and r['TUR'], (cal, p['id']))
+
+    def test_blank_when_a_resistor_has_no_uncertainty(self):
+        import handheld_unc
+        p = dict(numeric()[0], resistor=dict(numeric()[0]['resistor'], u_ppm=None))
+        self.assertEqual(handheld_unc.text(p, '5560A'), '')
 
     def test_rule_combines_the_dc_volts_budget_and_the_resistor(self):
         import math
