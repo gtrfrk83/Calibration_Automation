@@ -87,7 +87,7 @@ class DriversDeclareReset(unittest.TestCase):
         """Only these resets are backed by a manual page; everything else is flagged unverified in the report."""
         ok = sorted(c.__name__ for c in all_driver_classes()
                     if not c.RESET_EXEMPT and cmdreg.merge_commands(c)['reset'].verified)
-        self.assertEqual(ok, ['Agilent3458A', 'BK5491B', 'Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke6060A', 'Fluke8808A', 'Fluke8808ACal', 'Fluke96270A', 'HP8563E', 'HP8591A', 'HP8902A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x', 'TektronixMDO3', 'TektronixTBS2000B', 'TektronixTDS2000C'])     # TBS2000B: FACtory, Programmer Manual p. 92
+        self.assertEqual(ok, ['Agilent3458A', 'BK5491B', 'Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke6060A', 'Fluke8808A', 'Fluke8808ACal', 'Fluke96270A', 'HP5334B', 'HP8563E', 'HP8591A', 'HP8902A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x', 'TektronixMDO3', 'TektronixTBS2000B', 'TektronixTDS2000C'])     # TBS2000B: FACtory, Programmer Manual p. 92
 
 
 # ------------------------------------------------------------------------------------------------------------------------------

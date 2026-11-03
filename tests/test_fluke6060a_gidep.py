@@ -43,7 +43,7 @@ class SpecTests(unittest.TestCase):
         self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-2.5': 25, 'G-4.2b-250': 25, 'G-4.2b-520': 25, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
                                'G-4.4-520': 8, 'G-4.5': 9, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
         self.assertEqual(len(points()), 214)
-        self.assertEqual({p['group'] for p in points()}, {'POWERON', 'REFOSC', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
+        self.assertEqual({p['group'] for p in points()}, {'POWERON', 'CTRA', 'CTRC', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
 
     def test_the_100_khz_carrier_is_moved_to_150_khz_and_2_5_mhz_for_table_5(self):
         """Owner 2026-11-03: Tables 4, 6, 7 at the document's 100 kHz run at 150 kHz (the 8902A RF input); Table 5 (tuned RF level) at 2.5 MHz, where the 8902A tuned level starts."""
@@ -76,7 +76,8 @@ class SpecTests(unittest.TestCase):
             self.assertAlmostEqual(p['high'] - p['nominal'], 10.0, places=3)
             self.assertAlmostEqual(p['nominal'] - p['low'], 10.0, places=3)
         ref = by_ref('4.1.5 10 MHz reference output')
-        self.assertEqual((ref['low'], ref['high'], ref['meas']), (9999940.0, 10000060.0, 'manual'))
+        self.assertEqual((ref['low'], ref['high'], ref['meas'], ref['ctr']), (9999940.0, 10000060.0, 'ctr_freq', {'channel': 'A', 'gate_s': 1.0}))       # owner 2026-11-03: the 5334B
+        self.assertTrue(all(p['meas'] == 'ctr_freq' and p['ctr'] == {'channel': 'C', 'gate_s': 1.0} and 'rx' not in p for p in pts))
 
     def test_table_4_limits(self):
         got = {(p['gen']['freq_mhz'], p['gen']['level_dbm']): (p['low'], p['high'], p['meas']) for s in SPEC['sections'] if s['id'] == 'G-4.2a' for p in s['points']}
@@ -176,12 +177,19 @@ class GidepBench(T.Bench):
         E.SPEC_PATH, E.STATE_KEY, E.VARIANT_LABEL = GIDEP_SPEC, '6060A-gidep', 'GIDEP T.O. 33K3-4-911-1'
         super().setUp()
         self.t6.fm_max_khz = 500.0                                       # the simulated unit accepts the document's 500 kHz range
+        from drivers.simulated_5334b import Sim5334BTransport
+        self.t5334 = Sim5334BTransport(self.bench)                         # the 5334B counter (owner 2026-11-03: the frequency points)
         self.t8902.tuned_floor_mhz = 2.5                                 # tuned RF level below 2.5 MHz: error 20, like the bench 8902A (2026-11-03)
 
         def ask(p, **k):                                               # a typed reading in the middle of the limits, in the unit the entry box shows
             _lim, _unit, scale = manual_override.entry_scale(p)
             return manual_override.parse_reading(p, str((p['low'] + p['high']) / 2 / float(scale)))
         self.app.mo_ask = ask
+
+
+    def connect(self, lf=True, lf_model='Keysight 33220A', **tr):
+        tr.setdefault('ctr', self.t5334)
+        return super().connect(lf, lf_model, **tr)
 
 
 class GidepEngine(GidepBench):
@@ -245,9 +253,9 @@ class GidepEngine(GidepBench):
         self.assertEqual(HP8902A._tune(HP8902A, 520.0), ('tune.mhz', {'mhz': 520.0}))
 
     def test_typed_points_are_marked_manual_and_judged(self):
-        self.run_points(refs=['4.1.5 10 MHz reference output', '4.6 Table 9 30 MHz 100 Hz 10 kHz'])
+        self.run_points(refs=['4.6 Table 9 30 MHz 100 Hz 10 kHz'])
         found = {E.POINTS[int(k) - 1]['ref']: r for k, r in self.app.found.items()}
-        self.assertEqual(len(found), 2)
+        self.assertEqual(len(found), 1)
         self.assertTrue(all(r['manual'] and r['result'] == 'PASS' for r in found.values()))
         self.assertFalse(rf_state(self.bench)['rf_on'])                                    # the 6060A RF stayed off
         self.assertEqual(self.pm.state['OUTP'], '0')                                       # the 96270A output is off again after the deviation-meter point
@@ -255,10 +263,34 @@ class GidepEngine(GidepBench):
         self.assertIn('FM:DEV 10000', self.pm.sent)
         self.assertEqual(rf_state(self.bench)['frequency_hz'], 30000000)                    # the 6060A carrier frequency was set to the 96270A carrier (30 MHz), read back
         self.assertIn('FM:INT:FREQ 100', self.pm.sent)
-        self.app.mo_ask = lambda p, **k: manual_override.parse_reading(p, '10.001')       # 10.001 MHz: outside +/-6 ppm
-        self.app.found.clear(); self.app.results.clear()
+
+    def test_the_5334b_reads_the_10_mhz_reference_and_the_frequency_tables(self):
+        """Owner 2026-11-03: 'can we automate the frequency portion to use the 5334?' (5334B, Options 010 and 030). The 10 MHz reference on FREQ A (no RF), Tables 2 and 3 on
+        FREQ C (RF on, read back off after), each at a 1 s gate; nothing typed."""
+        refs = ['4.1.5 10 MHz reference output', '4.1 Table 2 100.00000 MHz', '4.1 Table 3 499.99999 MHz']
+        n = len(self.t5334.sent)
+        self.run_points(refs=refs)
+        self.assertEqual(self.errors(), [])
+        found = {E.POINTS[int(k) - 1]['ref']: r for k, r in self.app.found.items()}
+        self.assertEqual(sorted(found), sorted(refs))
+        self.assertTrue(all(r['result'] == 'PASS' and not r['manual'] for r in found.values()))
+        self.assertAlmostEqual(found['4.1.5 10 MHz reference output']['reading'], 10_000_003.0, places=3)
+        sent = self.t5334.sent[n:]
+        self.assertEqual([c for c in sent if c.startswith('FN')], ['FN1', 'FN3', 'FN3'])
+        self.assertEqual(sorted(set(c for c in sent if c.startswith('GA'))), ['GA1.000'])
+        self.assertFalse(rf_state(self.bench)['rf_on'])
+
+    def test_a_10_mhz_reading_outside_6_ppm_fails(self):
+        self.t5334.input_a_hz = 10.001e6
         self.run_points(refs=['4.1.5 10 MHz reference output'])
         self.assertEqual([r['result'] for r in self.app.found.values()], ['FAIL'])
+
+    def test_no_gps_reference_at_the_counter_stops_with_a_clear_message(self):
+        self.t5334.no_oscillator = True
+        self.app.mo_failed = lambda p, exc: None                          # no typed replacement: the run stops on the error
+        self.run_points(refs=['4.1 Table 2 100.00000 MHz'])
+        self.assertTrue(any('no time base oscillator' in (d[3] or '') for d in self.errors()), self.h.dialogs[-3:])
+        self.assertFalse(rf_state(self.bench)['rf_on'], 'RF is off after the failed point')
 
     def test_relative_level_rows_are_computed_from_the_reference(self):
         self.run_points(refs=['4.2 Table 5 250 MHz 0 dBm reference', '4.2 Table 5 250 MHz -10 dBm', '4.2 Table 5 250 MHz -10 dBm relative'])

@@ -237,7 +237,7 @@ LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevo
 LINT_FILES.append('tektronix_tbs2000b')
 LINT_FILES.append('keysight_53220a')
 LINT_FILES.append('bk_5491b')
-LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address']
+LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address', 'hp_5334b']
 LINT_FILES.append('hp_8591a')
 LINT_FILES += ['tektronix_tbs1000', 'tektronix_tbs1000c']
 

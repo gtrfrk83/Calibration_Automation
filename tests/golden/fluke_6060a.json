@@ -7356,6 +7356,487 @@
      "-300"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.connect",
+   "log": [
+    "5334B|>>|ID",
+    "5334B|<<|HP 5334B",
+    "5334B|>>|IN",
+    "5334B|>>|WA1",
+    "5334B|--|serial poll -> 0"
+   ],
+   "method": "HP5334B.connect",
+   "result": "returned <HP5334B>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q",
+     "ID",
+     "HP 5334B\r\n"
+    ],
+    [
+     "W",
+     "IN"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "W",
+     "WA1"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.identify",
+   "log": [
+    "5334B|>>|ID",
+    "5334B|<<|HP 5334B"
+   ],
+   "method": "HP5334B.identify",
+   "result": "returned 'HP 5334B'",
+   "wire": [
+    [
+     "Q",
+     "ID",
+     "HP 5334B\r\n"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.status",
+   "log": [
+    "5334B|--|serial poll -> 0"
+   ],
+   "method": "HP5334B.status",
+   "result": "returned {'data_ready': False, 'error': False, 'failure': False, 'local': False, 'no_oscillator': False, 'rqs': False, 'value': 0}",
+   "wire": [
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "HP5334B.check_status",
+   "log": [
+    "5334B|--|serial poll -> 0"
+   ],
+   "method": "HP5334B.check_status",
+   "result": "returned {'data_ready': False, 'error': False, 'failure': False, 'local': False, 'no_oscillator': False, 'rqs': False, 'value': 0}",
+   "wire": [
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.error_number",
+   "log": [
+    "5334B|>>|TE",
+    "5334B|<<|0.0"
+   ],
+   "method": "HP5334B.error_number",
+   "result": "returned '0.0'",
+   "wire": [
+    [
+     "Q",
+     "TE",
+     "0.0\r\n"
+    ]
+   ]
+  },
+  {
+   "call": "'F   +4.58341265E+05'",
+   "case": "HP5334B.parse_reading",
+   "log": [],
+   "method": "HP5334B.parse_reading",
+   "result": "returned 458341.265",
+   "wire": []
+  },
+  {
+   "call": "'O+9.99999999999E+99'",
+   "case": "HP5334B.parse_reading[overflow]",
+   "log": [],
+   "method": "HP5334B.parse_reading",
+   "result": "raised InstrumentError: 5334B: overflow reading 'O+9.99999999999E+99' (p. 3-85): the measurement is incorrect (no or wrong input signal?)",
+   "wire": []
+  },
+  {
+   "call": "'S  +1.000000000E-07'",
+   "case": "HP5334B.parse_reading[not a frequency]",
+   "log": [],
+   "method": "HP5334B.parse_reading",
+   "result": "raised InstrumentError: 5334B: 'S' reading 'S  +1.000000000E-07' is not a frequency (F, p. 3-84)",
+   "wire": []
+  },
+  {
+   "call": "'C', 1.0, 111111110.0",
+   "case": "HP5334B.measure_frequency_hz[C]",
+   "log": [
+    "5334B|>>|FN3",
+    "5334B|>>|GA1.000",
+    "5334B|>>|RE",
+    "5334B|<<|F  +1.111111100E+08",
+    "5334B|--|serial poll -> 0"
+   ],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "returned 111111110.0",
+   "wire": [
+    [
+     "W",
+     "FN3"
+    ],
+    [
+     "W",
+     "GA1.000"
+    ],
+    [
+     "W",
+     "RE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     6.0
+    ],
+    [
+     "R",
+     "F  +1.111111100E+08\r\n"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'A', 1.0",
+   "case": "HP5334B.measure_frequency_hz[A, 10 MHz reference]",
+   "log": [
+    "5334B|>>|FN1",
+    "5334B|>>|GA1.000",
+    "5334B|>>|RE",
+    "5334B|<<|F  +1.000000300E+07",
+    "5334B|--|serial poll -> 0"
+   ],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "returned 10000003.0",
+   "wire": [
+    [
+     "W",
+     "FN1"
+    ],
+    [
+     "W",
+     "GA1.000"
+    ],
+    [
+     "W",
+     "RE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     6.0
+    ],
+    [
+     "R",
+     "F  +1.000000300E+07\r\n"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ]
+   ]
+  },
+  {
+   "call": "'C', 1.0, 50000000.0",
+   "case": "HP5334B.measure_frequency_hz[C below 90 MHz]",
+   "log": [],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "raised InstrumentError: 5334B: 5e+07 Hz is outside the FREQ C range 9e+07 to 1.3e+09 Hz (Table 1-1)",
+   "wire": []
+  },
+  {
+   "call": "'C', 200.0",
+   "case": "HP5334B.measure_frequency_hz[bad gate]",
+   "log": [],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "raised InstrumentError: 5334B gate time 200 s is outside 0.001 to 99.999 s",
+   "wire": []
+  },
+  {
+   "call": "'C', 1.0",
+   "case": "HP5334B.measure_frequency_hz[no signal]",
+   "log": [
+    "5334B|>>|FN3",
+    "5334B|>>|GA1.000",
+    "5334B|>>|RE",
+    "5334B|--|serial poll -> 0"
+   ],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "raised InstrumentError: HP 5334B: no FREQ C reading within 6 s: simulated read timed out (no reading: no input signal?). Status byte clean: is the signal at INPUT C?",
+   "wire": [
+    [
+     "W",
+     "FN3"
+    ],
+    [
+     "W",
+     "GA1.000"
+    ],
+    [
+     "W",
+     "RE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     6.0
+    ],
+    [
+     "R!",
+     "simulated read timed out (no reading: no input signal?)"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ]
+   ]
+  },
+  {
+   "call": "'C', 1.0",
+   "case": "HP5334B.measure_frequency_hz[no oscillator]",
+   "log": [
+    "5334B|>>|FN3",
+    "5334B|>>|GA1.000",
+    "5334B|>>|RE",
+    "5334B|<<|F  +1.111111100E+08",
+    "5334B|--|serial poll -> 32"
+   ],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "raised InstrumentError: HP 5334B: no time base oscillator after FREQ C reading (status byte 32). With the rear TIME BASE switch on EXT the 10 MHz reference (the lab GPS) must be connected to TIME BASE IN/OUT.",
+   "wire": [
+    [
+     "W",
+     "FN3"
+    ],
+    [
+     "W",
+     "GA1.000"
+    ],
+    [
+     "W",
+     "RE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     6.0
+    ],
+    [
+     "R",
+     "F  +1.111111100E+08\r\n"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     32
+    ]
+   ]
+  },
+  {
+   "call": "'C', 1.0",
+   "case": "HP5334B.measure_frequency_hz[error state]",
+   "log": [
+    "5334B|>>|FN3",
+    "5334B|>>|GA1.000",
+    "5334B|>>|RE",
+    "5334B|--|serial poll -> 4",
+    "5334B|>>|TE",
+    "5334B|<<|4.0"
+   ],
+   "method": "HP5334B.measure_frequency_hz",
+   "result": "raised InstrumentError: HP 5334B reports an error after FREQ C (no reading): TE '4.0' (status byte 4; Tables 3-3 / 3-4, p. 3-48 / 3-49). In remote the counter then ignores commands until it is cleared.",
+   "wire": [
+    [
+     "W",
+     "FN3"
+    ],
+    [
+     "W",
+     "GA1.000"
+    ],
+    [
+     "W",
+     "RE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     6.0
+    ],
+    [
+     "R!",
+     "simulated read timed out (no reading: no input signal?)"
+    ],
+    [
+     "ctl",
+     "read_stb",
+     4
+    ],
+    [
+     "Q",
+     "TE",
+     "4.0\r\n"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.reset_to_defaults",
+   "log": [
+    "5334B|>>|IN",
+    "5334B|--|serial poll -> 0",
+    "5334B|>>|WA1"
+   ],
+   "method": "HP5334B.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5334B', ok=True, exempt=False, steps=[ResetStep(name='reset (IN)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='status byte clean'), ResetStep(name='wait to be addressed again (WA1; IN clears it)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "IN"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "read_stb",
+     0
+    ],
+    [
+     "W",
+     "WA1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.go_local",
+   "log": [],
+   "method": "HP5334B.go_local",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.cleanup",
+   "log": [],
+   "method": "HP5334B.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "HP5334B.connect[wrong model]",
+   "log": [
+    "5334B|>>|ID",
+    "5334B|<<|HP 5335A"
+   ],
+   "method": "HP5334B.connect",
+   "result": "raised InstrumentError: Expected HP 5334B at HP-IB address 3 but the ID reply is 'HP 5335A'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q",
+     "ID",
+     "HP 5335A"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
   }
  ],
  "name": "fluke_6060a",

@@ -46,6 +46,8 @@ def build_ui(self):
     f.note('Measuring receiver: frequency, tuned RF level, RF power (11722A), AM, FM, distortion, modulation rate. Empty: the points that need it offer a typed reading.', column=1)
     self.sa_entry = f.row('8563E GPIB address', f.combo(self.sa_addr, (), 34, state='normal'), fill=True)
     f.note('Spectrum analyzer: harmonics and spurs (4A-11). Empty: those points offer a typed reading.', column=1)
+    self.ctr_entry = f.row('5334B GPIB address', f.combo(self.ctr_addr, (), 34, state='normal'), fill=True)
+    f.note('HP 5334B counter (Option 030 C channel), rear TIME BASE on the GPS 10 MHz: the GIDEP frequency points (10 MHz reference, Tables 2 and 3). Empty: not used.', column=1)
     self.rf_entry = f.row('96270A address / resource', f.combo(self.rf_addr, (), 34, state='normal'), fill=True)
     f.note('The 96270A in power-meter mode with the R&S NRP40T sensor (4A-5, 4A-6; the sensor is UNVERIFIED). Empty: those points offer a typed reading.', column=1)
     f.rule()
@@ -66,5 +68,5 @@ def build_ui(self):
 
 
 def set_choices(self, which, values):
-    """The drop-down values of the 6060A ('uut'), 8902A ('rx'), 8563E ('sa'), 96270A ('rf') or LF generator ('lf') address box."""
-    {'uut': self.uut_entry, 'rx': self.rx_entry, 'sa': self.sa_entry, 'rf': self.rf_entry, 'lf': self.lf_entry}[which].configure(values=values)
+    """The drop-down values of the 6060A ('uut'), 8902A ('rx'), 8563E ('sa'), 5334B ('ctr'), 96270A ('rf') or LF generator ('lf') address box."""
+    {'uut': self.uut_entry, 'rx': self.rx_entry, 'sa': self.sa_entry, 'ctr': self.ctr_entry, 'rf': self.rf_entry, 'lf': self.lf_entry}[which].configure(values=values)

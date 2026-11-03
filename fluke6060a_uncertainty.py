@@ -289,12 +289,21 @@ def _gps(r, p, reading, standard, value, what):
 
 
 def _freq(r, p, reading, path):
+    if p.get('meas') == 'ctr_freq':
+        _gps(r, p, reading, 'HP 5334B counter (FREQ C) on the GPS 10 MHz', _at(p, reading, p['nominal']),
+             'The 5334B time base is the lab GPS 10 MHz (rear TIME BASE on EXT; its status byte reports a missing oscillator). Its own specification (resolution + time base '
+             'error) and the 1 Hz resolution of a 1 s gate are not part of the reported figure under this rule.')
+        return
     _gps(r, p, reading, 'HP 8902A frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
          'The 8902A time base must be on the lab\'s GPS-referenced 10 MHz for this step (the document applies the counter\'s reference, REF EXT). Its own counter specification '
          '(+/-3 counts or 30 Hz, p. 1-21) and the 10 Hz display resolution are not part of the reported figure under this rule.')
 
 
 def _reffreq(r, p, reading, path):
+    if p.get('meas') == 'ctr_freq':
+        _gps(r, p, reading, 'HP 5334B counter (FREQ A) on the GPS 10 MHz', _at(p, reading, p['nominal']),
+             'The 5334B time base is the lab GPS 10 MHz (rear TIME BASE on EXT).')
+        return
     _gps(r, p, reading, 'Laboratory frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
          'Typed reading from the lab\'s counter, which runs on the GPS-referenced 10 MHz.')
 
