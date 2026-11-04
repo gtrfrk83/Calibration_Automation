@@ -289,6 +289,8 @@ class Ctx:
     full_scale: Optional[Decimal] = None
     resolution: Optional[Decimal] = None
     frequency: Optional[Decimal] = None
+    span: Optional[Decimal] = None          # the range's span: full scale for a unipolar range, twice full scale for a bipolar one
+    ambient: Optional[Decimal] = None       # the lab temperature in degC the temperature-coefficient terms are evaluated at (None = not set: they add nothing)
 
 
 @dataclass(frozen=True)
@@ -305,7 +307,8 @@ class Tol:
         return Tol(self.minus + other.minus, self.plus + other.plus)
 
 
-TERM_KINDS = ('pct_reading', 'pct_range', 'counts', 'abs', 'ppm_reading', 'ppm_range', 'db')
+TC_KINDS = ('tc_pct_reading', 'tc_pct_range', 'tc_ppm_reading', 'tc_ppm_range', 'tc_abs')     # per degC outside a stated temperature band
+TERM_KINDS = ('pct_reading', 'pct_range', 'counts', 'abs', 'ppm_reading', 'ppm_range', 'db', 'pct_span', 'ppm_span') + TC_KINDS
 
 
 @dataclass
@@ -313,6 +316,8 @@ class Term:
     kind: str
     value: Decimal
     basis: str = 'amplitude'          # db only: 'amplitude' (20 log) or 'power' (10 log)
+    lo: Optional[Decimal] = None      # tc_* only: the temperature band (degC) inside which the coefficient adds nothing
+    hi: Optional[Decimal] = None
 
     def __post_init__(self):
         if self.kind not in TERM_KINDS:
@@ -322,11 +327,40 @@ class Term:
             raise ExprError('bad_value', 'a tolerance term cannot be negative (the sign is the +/- of the whole expression)')
         if self.kind == 'db' and self.basis not in ('amplitude', 'power'):
             raise ExprError('bad_term', "dB basis must be 'amplitude' or 'power'")
+        if self.kind in TC_KINDS:
+            if self.lo is None or self.hi is None:
+                raise ExprError('ambiguous_band', 'a temperature coefficient needs its band, e.g. "per degC outside 18 to 28 degC"')
+            self.lo, self.hi = dec(self.lo, 'band low'), dec(self.hi, 'band high')
+            if self.lo > self.hi:
+                raise ExprError('bad_value', 'the temperature band is upside down')
 
     def evaluate(self, ctx):
         with localcontext() as c:
             c.prec = PREC
             v, k = self.value, self.kind
+            if k in TC_KINDS:
+                t = getattr(ctx, 'ambient', None)
+                out = D(0) if t is None else max(D(0), self.lo - dec(t), dec(t) - self.hi)       # degC beyond the band
+                base = k[3:]
+                if out == 0:
+                    return Tol(D(0), D(0))
+                if base == 'abs':
+                    x = v * out
+                elif base.endswith('reading'):
+                    if ctx.reading is None:
+                        raise ExprError('missing_context', f'{k} needs the reading')
+                    x = abs(ctx.reading) * v / (100 if base.startswith('pct') else 1000000) * out
+                else:
+                    if ctx.full_scale is None:
+                        raise ExprError('missing_context', f'{k} needs the range full scale')
+                    x = abs(ctx.full_scale) * v / (100 if base.startswith('pct') else 1000000) * out
+                return Tol(x, x)
+            if k in ('pct_span', 'ppm_span'):
+                sp = getattr(ctx, 'span', None)
+                if sp is None:
+                    raise ExprError('missing_context', f'{k} needs the range span')
+                x = abs(sp) * v / (100 if k == 'pct_span' else 1000000)
+                return Tol(x, x)
             if k in ('pct_reading', 'ppm_reading', 'db') and ctx.reading is None:
                 raise ExprError('missing_context', f'{k} needs the reading')
             if k == 'pct_reading':
@@ -360,6 +394,13 @@ class Term:
             return f'{v} ppm of reading'
         if k == 'ppm_range':
             return f'{v} ppm of range'
+        if k == 'pct_span':
+            return f'{v} % of span'
+        if k == 'ppm_span':
+            return f'{v} ppm of span'
+        if k in TC_KINDS:
+            what = {'tc_pct_reading': '% of reading', 'tc_pct_range': '% of range', 'tc_ppm_reading': 'ppm of reading', 'tc_ppm_range': 'ppm of range'}.get(k) or (format_si(self.value, unit) if unit else '')
+            return f'{v} {what}'.strip() + f' per degC outside {fmt(self.lo)} to {fmt(self.hi)} degC' if k != 'tc_abs' else f'{what} per degC outside {fmt(self.lo)} to {fmt(self.hi)} degC'
         if k == 'counts':
             return f'{v} count' + ('' if self.value == 1 else 's')
         if k == 'db':
@@ -370,6 +411,8 @@ class Term:
         d = {'t': self.kind, 'v': fmt(self.value)}
         if self.kind == 'db' and self.basis != 'amplitude':
             d['basis'] = self.basis
+        if self.kind in TC_KINDS:
+            d['lo'], d['hi'] = fmt(self.lo), fmt(self.hi)
         return d
 
 
@@ -381,7 +424,7 @@ class Expr:
     printed: str = ''
 
     def __post_init__(self):
-        if self.op not in ('sum', 'max', 'min'):
+        if self.op not in ('sum', 'max', 'min', 'rss'):
             raise ExprError('bad_op', f'unknown operation {self.op!r}')
 
     def evaluate(self, ctx):
@@ -393,6 +436,10 @@ class Expr:
             for p in parts[1:]:
                 out = out + p
             return out
+        if self.op == 'rss':                                 # root-sum-square of the parts, each side on its own
+            with localcontext() as c:
+                c.prec = PREC
+                return Tol(sum((p.minus ** 2 for p in parts), D(0)).sqrt(), sum((p.plus ** 2 for p in parts), D(0)).sqrt())
         pick = max if self.op == 'max' else min
         return Tol(pick(p.minus for p in parts), pick(p.plus for p in parts))
 
@@ -427,7 +474,7 @@ class Expr:
         for i in d.get('items', []):
             if not isinstance(i, dict):
                 raise ExprError('bad_expr', 'expression item is not an object')
-            items.append(cls.from_dict(i, _depth + 1) if 'op' in i else Term(i.get('t'), i.get('v'), i.get('basis', 'amplitude')))
+            items.append(cls.from_dict(i, _depth + 1) if 'op' in i else Term(i.get('t'), i.get('v'), i.get('basis', 'amplitude'), i.get('lo'), i.get('hi')))
         return cls(d.get('op', 'sum'), items, d.get('printed', ''))
 
 
@@ -435,8 +482,9 @@ def sum_of(*terms, printed=''):
     return Expr('sum', list(terms), printed)
 
 
-_BASIS_REF = r'(?:of\s+)?(?:reading|rdg|input(?:\s+value)?|i\.?v\.?|iv|value)'
+_BASIS_REF = r'(?:of\s+)?(?:reading|rdg|input(?:\s+value)?|i\.?v\.?|iv|value|setting|output|nominal|programmed(?:\s+value)?|set\s+value)'      # a source's setting / output is the nominal the point is evaluated at: the same basis as a reading
 _BASIS_RNG = r'(?:of\s+)?(?:range|rng|full[\s-]*scale|f\.?s\.?|fs)'
+_BASIS_SPAN = r'(?:of\s+)?span'
 _NUMRE = r'[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?'
 
 
@@ -493,7 +541,7 @@ def parse_expr(text, unit='', default_basis=None):
 def _parse(s, unit, default_basis):
     s = s.strip()
     s = re.sub(r'^(?:±|\+/-|\+-)\s*', '', s).strip()
-    m = re.match(r'^(max|min)\s*\((.*)\)$', s, re.I | re.S)
+    m = re.match(r'^(max|min|rss)\s*\((.*)\)$', s, re.I | re.S)
     if m:
         return Expr(m.group(1).lower(), [_parse(p, unit, default_basis) for p in _split_top(m.group(2), ',;')])
     while s.startswith('(') and s.endswith(')') and len(_split_top(s[1:-1], '\x00')) == 1 and _balanced(s[1:-1]):
@@ -517,8 +565,37 @@ def _balanced(s):
     return depth == 0
 
 
+_PER_C = r'(?:/|per\s+)\s*(?:°\s*C|deg\s*C|degC|C)\b'
+_BAND = rf'(?:\s*(?:outside|beyond|outside\s+of)\s*(?P<lo>{_NUMRE})\s*(?:to|-|–|and)\s*(?P<hi>{_NUMRE})\s*(?:°\s*C|deg\s*C|degC|C)?)?'
+
+
+def _parse_tc(t, unit, default_basis=None):
+    """'0.002 % of reading per degC outside 18 to 28 degC', '2 ppm of range / degC outside 18 to 28 C', '5 uV per degC outside 18 to 28 degC'.  The band is required."""
+    m = re.match(rf'^(?P<v>{_NUMRE})\s*(?P<u>%|ppm)\s*(?:(?P<ref>{_BASIS_REF})|(?P<rng>{_BASIS_RNG}))?\s*{_PER_C}{_BAND}\s*$', t, re.I)
+    if m:
+        basis = 'range' if m.group('rng') else 'reading' if m.group('ref') else default_basis
+        if basis not in ('reading', 'range'):
+            raise ExprError('ambiguous_basis', f'{t!r}: say of reading or of range (or give default_basis)')
+        return Term(('tc_pct_' if m.group('u') == '%' else 'tc_ppm_') + basis, m.group('v'), lo=m.group('lo'), hi=m.group('hi'))
+    m = re.match(rf'^(?P<q>.*?)\s*{_PER_C}{_BAND}\s*$', t, re.I)
+    if m and re.match(rf'^{_NUMRE}\s*[^\s%]', m.group('q').strip()) and 'ppm' not in m.group('q').lower():
+        try:
+            q = parse_quantity(m.group('q').strip(), unit or None)
+        except DsError as e:
+            raise ExprError(e.code, str(e)) from None
+        return Term('tc_abs', q, lo=m.group('lo'), hi=m.group('hi'))
+    return None
+
+
 def _parse_term(t, unit, default_basis):
     t = t.strip().replace('µ', 'u').replace('μ', 'u')
+    if re.search(r'(?:/|\bper\b)\s*(?:°\s*C|deg\s*C|degC|C)\b', t, re.I):
+        tc = _parse_tc(t, unit, default_basis)
+        if tc is not None:
+            return tc
+    m = re.match(rf'^({_NUMRE})\s*(%|ppm)\s*{_BASIS_SPAN}\s*$', t, re.I)
+    if m:
+        return Term('pct_span' if m.group(2) == '%' else 'ppm_span', m.group(1))
     m = re.match(rf'^({_NUMRE})\s*(%|ppm)\s*(?:{_BASIS_REF}|(?P<rng>{_BASIS_RNG}))?\s*$', t, re.I)
     if m:
         value, pct = m.group(1), m.group(2) == '%'
@@ -896,7 +973,9 @@ class Function:
             return Limit(point.nominal, low, high, None if low is None else point.nominal - low, None if high is None else high - point.nominal,
                          'override', one_sided=low is None or high is None)
         res_pt = self.resolution_of(point)
-        ctx = Ctx(point.nominal, rng.full_scale if rng else None, res_pt, point.frequency)
+        span = None if rng is None else (rng.full_scale if rng.unipolar else rng.full_scale * 2)
+        amb = ds.options.get('ambient_c') if ds else None
+        ctx = Ctx(point.nominal, rng.full_scale if rng else None, res_pt, point.frequency, span, None if amb in (None, '') else dec(amb, 'lab temperature'))
         tops = self.governing(point)
         if not tops:
             raise DsError('no_spec', f'{self.id}: no specification covers range {point.range_id!r} at frequency {fmt(point.frequency) if point.frequency is not None else "-"}')
@@ -1495,7 +1574,9 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
             for t in ex.terms() if isinstance(ex, Expr) else []:
                 if t.kind == 'counts' and not any(r.resolution for r in fn.ranges if e.range_id in (None, r.id)) and not any(q.resolution for q in fn.points if e.range_id in (None, q.range_id)):
                     add('expr_context', f'Specification entry {i + 1} uses counts but no range has a resolution.', where=ew)
-                if t.kind in ('pct_range', 'ppm_range') and not fn.ranges:
+                if t.kind in TC_KINDS and ds.options.get('ambient_c') in (None, ''):
+                    add('tc_ambient', f'Specification entry {i + 1} has a temperature coefficient but the datasheet has no lab temperature (option ambient_c): the term adds nothing to the limits.', 'warn', ew)
+                if t.kind in ('pct_range', 'ppm_range', 'pct_span', 'ppm_span') and not fn.ranges:
                     add('expr_context', f'Specification entry {i + 1} uses a percentage of range but there are no ranges.', where=ew)
                 if t.kind == 'abs' and info['unit'] == '':
                     add('unit_mismatch', f'Specification entry {i + 1}: a fixed term has no unit in a pass / fail function.', where=ew)

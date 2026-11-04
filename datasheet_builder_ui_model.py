@@ -1176,7 +1176,7 @@ class EditorModel:
                 res['text'] = f'{res["normalised"]} is readable. Add a range to see a worked example.'
                 res['ok'] = True
                 return res
-            ctx = db.Ctx(rd, rng.full_scale if rng else None, rng.resolution if rng else None, f)
+            ctx = db.Ctx(rd, rng.full_scale if rng else None, rng.resolution if rng else None, f, None if rng is None else (rng.full_scale if rng.unipolar else rng.full_scale * 2))
             tol = expr.evaluate(ctx)
             if str(minus_text).strip():
                 mt = db.parse_expr(minus_text, fn.unit, default_basis).evaluate(ctx)
