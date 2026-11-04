@@ -1,0 +1,1014 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke5700A.open[GPIB]",
+   "log": [
+    "5700A|>>|*IDN?",
+    "5700A|<<|FLUKE,5700A,SIM00001,1.0+1.0+1.0"
+   ],
+   "method": "Fluke5700A.open",
+   "result": "returned <Fluke5700A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5700A,SIM00001,1.0+1.0+1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.cleanup[GPIB]",
+   "log": [
+    "5700A|>>|STBY",
+    "5700A|>>|ISR?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.open[RS232]",
+   "log": [
+    "5700A|>>|*IDN?",
+    "5700A|<<|FLUKE,5700A,SIM00001,1.0+1.0+1.0",
+    "5700A|>>|REMOTE"
+   ],
+   "method": "Fluke5700A.open",
+   "result": "returned <Fluke5700A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5700A,SIM00001,1.0+1.0+1.0"
+    ],
+    [
+     "W",
+     "REMOTE"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.cleanup[RS232]",
+   "log": [
+    "5700A|>>|STBY",
+    "5700A|>>|ISR?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.reset_to_defaults",
+   "log": [
+    "5700A|>>|*RST",
+    "5700A|>>|*CLS",
+    "5700A|>>|*OPC?",
+    "5700A|<<|1",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|STBY",
+    "5700A|>>|ISR?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5700A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output in STANDBY (STBY, ISR? bit 0 = 0)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.clear_status",
+   "log": [
+    "5700A|>>|*CLS"
+   ],
+   "method": "Fluke5700A.clear_status",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "*CLS"
+    ]
+   ]
+  },
+  {
+   "call": "10.0, None, True",
+   "case": "Fluke5700A.set_output_volts[dc]",
+   "log": [
+    "5700A|>>|OUT 10 V, 0 HZ"
+   ],
+   "method": "Fluke5700A.set_output_volts",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 10 V, 0 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "1.0, 1000.0",
+   "case": "Fluke5700A.set_output_volts[ac]",
+   "log": [
+    "5700A|>>|OUT 1 V, 1000 HZ"
+   ],
+   "method": "Fluke5700A.set_output_volts",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 1 V, 1000 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "0.001, None, True",
+   "case": "Fluke5700A.set_output_amps[dc]",
+   "log": [
+    "5700A|>>|CUR_POST NORMAL",
+    "5700A|>>|CUR_POST?",
+    "5700A|<<|NORMAL",
+    "5700A|>>|OUT 0.001 A, 0 HZ"
+   ],
+   "method": "Fluke5700A.set_output_amps",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CUR_POST NORMAL"
+    ],
+    [
+     "Q",
+     "CUR_POST?",
+     "NORMAL"
+    ],
+    [
+     "W",
+     "OUT 0.001 A, 0 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "1.0, 4900.0",
+   "case": "Fluke5700A.set_output_amps[ac]",
+   "log": [
+    "5700A|>>|CUR_POST NORMAL",
+    "5700A|>>|CUR_POST?",
+    "5700A|<<|NORMAL",
+    "5700A|>>|OUT 1 A, 4900 HZ"
+   ],
+   "method": "Fluke5700A.set_output_amps",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CUR_POST NORMAL"
+    ],
+    [
+     "Q",
+     "CUR_POST?",
+     "NORMAL"
+    ],
+    [
+     "W",
+     "OUT 1 A, 4900 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "100000.0",
+   "case": "Fluke5700A.set_output_ohms",
+   "log": [
+    "5700A|>>|OUT 100000 OHM"
+   ],
+   "method": "Fluke5700A.set_output_ohms",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 100000 OHM"
+    ]
+   ]
+  },
+  {
+   "call": "'WIRE4'",
+   "case": "Fluke5700A.set_compensation[WIRE4]",
+   "log": [
+    "5700A|>>|EXTSENSE ON",
+    "5700A|>>|ISR?",
+    "5700A|<<|4",
+    "5700A|>>|RCOMP OFF",
+    "5700A|>>|ISR?",
+    "5700A|<<|4"
+   ],
+   "method": "Fluke5700A.set_compensation",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "EXTSENSE ON"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "4"
+    ],
+    [
+     "W",
+     "RCOMP OFF"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "4"
+    ]
+   ]
+  },
+  {
+   "call": "'NONE'",
+   "case": "Fluke5700A.set_compensation[NONE]",
+   "log": [
+    "5700A|>>|EXTSENSE OFF",
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|>>|RCOMP OFF",
+    "5700A|>>|ISR?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.set_compensation",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "EXTSENSE OFF"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ],
+    [
+     "W",
+     "RCOMP OFF"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke5700A.check_error[ok]",
+   "log": [
+    "5700A|>>|FAULT?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.check_error",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.operate",
+   "log": [
+    "5700A|>>|OPER",
+    "5700A|>>|ISR?",
+    "5700A|<<|1"
+   ],
+   "method": "Fluke5700A.operate",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "0",
+   "case": "Fluke5700A.isr",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|4097"
+   ],
+   "method": "Fluke5700A.isr",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "4097"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.is_operating",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|4097"
+   ],
+   "method": "Fluke5700A.is_operating",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "4097"
+    ]
+   ]
+  },
+  {
+   "call": "5.0, 0.0",
+   "case": "Fluke5700A.wait_settled",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|4097"
+   ],
+   "method": "Fluke5700A.wait_settled",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "4097"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.standby",
+   "log": [
+    "5700A|>>|STBY",
+    "5700A|>>|ISR?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.standby",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.operate_unverified",
+   "log": [
+    "5700A|>>|OPER"
+   ],
+   "method": "Fluke5700A.operate_unverified",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OPER"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.standby_quiet",
+   "log": [
+    "5700A|>>|STBY"
+   ],
+   "method": "Fluke5700A.standby_quiet",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "'V'",
+   "case": "Fluke5700A.amplifier_on[V]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|RANGELCK OFF",
+    "5700A|>>|BTYPE VB5725",
+    "5700A|>>|BTYPE?",
+    "5700A|<<|VB5725,IB5725"
+   ],
+   "method": "Fluke5700A.amplifier_on",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "W",
+     "RANGELCK OFF"
+    ],
+    [
+     "W",
+     "BTYPE VB5725"
+    ],
+    [
+     "Q",
+     "BTYPE?",
+     "VB5725,IB5725"
+    ]
+   ]
+  },
+  {
+   "call": "740.0, 100000.0",
+   "case": "Fluke5700A.set_output_volts[amplifier]",
+   "log": [
+    "5700A|>>|OUT 740 V, 100000 HZ"
+   ],
+   "method": "Fluke5700A.set_output_volts",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 740 V, 100000 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_activate[V]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|8"
+   ],
+   "method": "Fluke5700A.amplifier_activate",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "8"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_confirm[V]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|8"
+   ],
+   "method": "Fluke5700A.amplifier_confirm",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "8"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_off[V]",
+   "log": [
+    "5700A|>>|OUT 0 V, 0 HZ",
+    "5700A|>>|RANGELCK OFF",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|##|ISR? after the amplifier was taken out: 0 (binary 0000000000000000); BOOST bit 0, RLOCK bit 0 (not required to be 0)"
+   ],
+   "method": "Fluke5700A.amplifier_off",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 0 V, 0 HZ"
+    ],
+    [
+     "W",
+     "RANGELCK OFF"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'I'",
+   "case": "Fluke5700A.amplifier_on[I]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|RANGELCK OFF",
+    "5700A|>>|BTYPE IB5725",
+    "5700A|>>|BTYPE?",
+    "5700A|<<|VB5725,IB5725",
+    "5700A|>>|CUR_POST IB5725",
+    "5700A|>>|CUR_POST?",
+    "5700A|<<|IB5725"
+   ],
+   "method": "Fluke5700A.amplifier_on",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "W",
+     "RANGELCK OFF"
+    ],
+    [
+     "W",
+     "BTYPE IB5725"
+    ],
+    [
+     "Q",
+     "BTYPE?",
+     "VB5725,IB5725"
+    ],
+    [
+     "W",
+     "CUR_POST IB5725"
+    ],
+    [
+     "Q",
+     "CUR_POST?",
+     "IB5725"
+    ]
+   ]
+  },
+  {
+   "call": "10.0, None, True",
+   "case": "Fluke5700A.set_output_amps[amplifier]",
+   "log": [
+    "5700A|>>|OUT 10 A, 0 HZ"
+   ],
+   "method": "Fluke5700A.set_output_amps",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 10 A, 0 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_activate[I]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|8",
+    "5700A|>>|RANGELCK ON",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.amplifier_activate",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "8"
+    ],
+    [
+     "W",
+     "RANGELCK ON"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_confirm[I]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|40"
+   ],
+   "method": "Fluke5700A.amplifier_confirm",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "40"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_off[I]",
+   "log": [
+    "5700A|>>|OUT 0 A, 0 HZ",
+    "5700A|>>|RANGELCK OFF",
+    "5700A|>>|CUR_POST NORMAL",
+    "5700A|>>|CUR_POST?",
+    "5700A|<<|NORMAL",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|##|ISR? after the amplifier was taken out: 0 (binary 0000000000000000); BOOST bit 0, RLOCK bit 0 (not required to be 0)"
+   ],
+   "method": "Fluke5700A.amplifier_off",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 0 A, 0 HZ"
+    ],
+    [
+     "W",
+     "RANGELCK OFF"
+    ],
+    [
+     "W",
+     "CUR_POST NORMAL"
+    ],
+    [
+     "Q",
+     "CUR_POST?",
+     "NORMAL"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "10.0, None, True",
+   "case": "Fluke5700A.set_output_amps[no amplifier, over range]",
+   "log": [
+    "5700A|>>|CUR_POST NORMAL",
+    "5700A|>>|CUR_POST?",
+    "5700A|<<|NORMAL",
+    "5700A|>>|OUT 10 A, 0 HZ"
+   ],
+   "method": "Fluke5700A.set_output_amps",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CUR_POST NORMAL"
+    ],
+    [
+     "Q",
+     "CUR_POST?",
+     "NORMAL"
+    ],
+    [
+     "W",
+     "OUT 10 A, 0 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "'I'",
+   "case": "Fluke5700A.amplifier_on[not connected]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|RANGELCK OFF",
+    "5700A|>>|BTYPE IB5725",
+    "5700A|>>|BTYPE?",
+    "5700A|<<|VB5725,IB5725",
+    "5700A|>>|CUR_POST IB5725",
+    "5700A|>>|CUR_POST?",
+    "5700A|<<|IB5725"
+   ],
+   "method": "Fluke5700A.amplifier_on",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "W",
+     "RANGELCK OFF"
+    ],
+    [
+     "W",
+     "BTYPE IB5725"
+    ],
+    [
+     "Q",
+     "BTYPE?",
+     "VB5725,IB5725"
+    ],
+    [
+     "W",
+     "CUR_POST IB5725"
+    ],
+    [
+     "Q",
+     "CUR_POST?",
+     "IB5725"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.amplifier_confirm[not connected]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|>>|FAULT?",
+    "5700A|<<|540"
+   ],
+   "method": "Fluke5700A.amplifier_confirm",
+   "result": "raised InstrumentError: 5700A: the amplifier is not active: BOOST (bit 3) is not set in ISR? (answered '0', binary 0000000000000000; FAULT? answered '540'). Is the 5725A cabled to the 5700A, powered on and not in standby?",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "540"
+    ]
+   ]
+  },
+  {
+   "call": "'V'",
+   "case": "Fluke5700A.amplifier_on[output operating]",
+   "log": [
+    "5700A|>>|ISR?",
+    "5700A|<<|4097",
+    "5700A|>>|STBY",
+    "5700A|>>|ISR?",
+    "5700A|<<|0",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|RANGELCK OFF",
+    "5700A|>>|BTYPE VB5725",
+    "5700A|>>|BTYPE?",
+    "5700A|<<|VB5725,IB5725"
+   ],
+   "method": "Fluke5700A.amplifier_on",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ISR?",
+     "4097"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "ISR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "W",
+     "RANGELCK OFF"
+    ],
+    [
+     "W",
+     "BTYPE VB5725"
+    ],
+    [
+     "Q",
+     "BTYPE?",
+     "VB5725,IB5725"
+    ]
+   ]
+  },
+  {
+   "call": "1e+30, None, True",
+   "case": "Fluke5700A.set_output_volts[out of range]",
+   "log": [
+    "5700A|>>|OUT 1e+30 V, 0 HZ"
+   ],
+   "method": "Fluke5700A.set_output_volts",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 1e+30 V, 0 HZ"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.read_error[fault]",
+   "log": [
+    "5700A|>>|FAULT?",
+    "5700A|<<|540"
+   ],
+   "method": "Fluke5700A.read_error",
+   "result": "returned '540'",
+   "wire": [
+    [
+     "Q",
+     "FAULT?",
+     "540"
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "Fluke5700A.check_error[fault]",
+   "log": [
+    "5700A|>>|FAULT?",
+    "5700A|<<|540",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
+    "5700A|>>|EXPLAIN? 540",
+    "5700A|<<|simulated fault 540"
+   ],
+   "method": "Fluke5700A.check_error",
+   "result": "raised InstrumentError: 5700A rejected the setting (configuring): fault 540 - simulated fault 540. Last commands: >> FAULT? | << 540 | >> FAULT? | << 0 | >> EXPLAIN? 540 | << simulated fault 540",
+   "wire": [
+    [
+     "Q",
+     "FAULT?",
+     "540"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "Q",
+     "EXPLAIN? 540",
+     "simulated fault 540"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5700A.read_error[none]",
+   "log": [
+    "5700A|>>|FAULT?",
+    "5700A|<<|0"
+   ],
+   "method": "Fluke5700A.read_error",
+   "result": "returned '0'",
+   "wire": [
+    [
+     "Q",
+     "FAULT?",
+     "0"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_5700a",
+ "schema": 1
+}

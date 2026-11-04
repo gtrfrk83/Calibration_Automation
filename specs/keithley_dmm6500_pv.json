@@ -1,0 +1,3963 @@
+{
+ "schema": 1,
+ "manufacturer": "Keithley",
+ "model": "DMM6500",
+ "title": "DMM6500 Performance Verification",
+ "idn_match": [
+  "DMM6500"
+ ],
+ "source": {
+  "document": "Keithley Model DMM6500 Calibration and Adjustment Manual (DMM6500-905-01 Rev. E, June 2022)",
+  "pages": "2-6 to 2-48",
+  "note": "ONE interval: 1 year, 18-28 C (ambient within 5 C of TCAL), calculated from the one-year specification without test-equipment uncertainty (p. 2-4). The DMM6500 data sheet is not in the manual set, so the limits cannot be recomputed here."
+ },
+ "periods": [
+  "1y"
+ ],
+ "default_period": "1y",
+ "front_rear_switch": true,
+ "equipment": {
+  "calibrator": "Fluke 5720A / 5730A (+ 5725A for 750 V above 20 kHz) in the manual; this procedure drives the lab calibrator",
+  "frequency": "Keithley 3390 function generator in the manual"
+ },
+ "general": [
+  "Warm up the DMM6500 for at least 30 minutes (p. 2-2); 18 to 28 C, relative humidity 80 % or less, no direct airflow on the input terminals.",
+  "Restore factory defaults first (MENU > Info/Manage > System Reset, p. 2-6); the program sends *RST and tells the operator.",
+  "Do not connect through a scanner or other switching equipment (p. 2-6). Terminals rated CAT II 300 V; 1000 V dc / 750 V ac maximum input; 500 V peak to chassis."
+ ],
+ "sections": [
+  {
+   "id": "dcv",
+   "title": "DC voltage",
+   "page": "2-6 to 2-9",
+   "group": "DCV",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "DCV.0",
+     "kind": "DCV",
+     "desc": "Relative offset (100 mV range, calibrator at 0 V)",
+     "nominal": 0.0,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 1e-05
+     },
+     "printed_limits": "-0.01 to 0.01 mV",
+     "source": "calibrator",
+     "rel_zero": true
+    },
+    {
+     "id": "DCV.0.1.1",
+     "kind": "DCV",
+     "desc": "Full scale (+) 0.1 mV range",
+     "nominal": 0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 6.5e-06
+     },
+     "printed_limits": "99.9935 to 100.0065 mV",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.0.1.2",
+     "kind": "DCV",
+     "desc": "Half scale (+) 0.1 mV range",
+     "nominal": 0.05,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 5e-06
+     },
+     "printed_limits": "49.995 to 50.005 mV",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.0.1.3",
+     "kind": "DCV",
+     "desc": "Half scale (-) 0.1 mV range",
+     "nominal": -0.05,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 5e-06
+     },
+     "printed_limits": "-50.005 to -49.995 mV",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.0.1.4",
+     "kind": "DCV",
+     "desc": "Full scale (-) 0.1 mV range",
+     "nominal": -0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 6.5e-06
+     },
+     "printed_limits": "-100.0065 to -99.9935 mV",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1.1",
+     "kind": "DCV",
+     "desc": "Full scale (+) 1 V range",
+     "nominal": 1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 3.1e-05
+     },
+     "printed_limits": "0.999969 to 1.000031 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1.2",
+     "kind": "DCV",
+     "desc": "Half scale (+) 1 V range",
+     "nominal": 0.5,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 2.1e-05
+     },
+     "printed_limits": "0.499979 to 0.500021 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1.3",
+     "kind": "DCV",
+     "desc": "Half scale (-) 1 V range",
+     "nominal": -0.5,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 2.1e-05
+     },
+     "printed_limits": "-0.500021 to -0.499979 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1.4",
+     "kind": "DCV",
+     "desc": "Full scale (-) 1 V range",
+     "nominal": -1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 3.1e-05
+     },
+     "printed_limits": "-1.000031 to -0.999969 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.10.1",
+     "kind": "DCV",
+     "desc": "Full scale (+) 10 V range",
+     "nominal": 10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 0.0003
+     },
+     "printed_limits": "9.9997 to 10.0003 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.10.2",
+     "kind": "DCV",
+     "desc": "Half scale (+) 10 V range",
+     "nominal": 5.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 0.00018
+     },
+     "printed_limits": "4.99982 to 5.00018 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.10.3",
+     "kind": "DCV",
+     "desc": "Half scale (-) 10 V range",
+     "nominal": -5.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 0.00018
+     },
+     "printed_limits": "-5.00018 to -4.99982 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.10.4",
+     "kind": "DCV",
+     "desc": "Full scale (-) 10 V range",
+     "nominal": -10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-8",
+     "quick": false,
+     "limits": {
+      "1y": 0.0003
+     },
+     "printed_limits": "-10.0003 to -9.9997 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.100.1",
+     "kind": "DCV",
+     "desc": "Full scale (+) 100 V range",
+     "nominal": 100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.0046
+     },
+     "printed_limits": "99.954 to 100.0046 V",
+     "source": "calibrator",
+     "flags": [
+      "printed lower limit 99.954 is a missing digit: 99.9954 is used (the upper limit prints 100.0046); the negative full scale prints +/- 0.0054 V against +/- 0.0046 V here"
+     ]
+    },
+    {
+     "id": "DCV.100.2",
+     "kind": "DCV",
+     "desc": "Half scale (+) 100 V range",
+     "nominal": 50.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.00315
+     },
+     "printed_limits": "49.99685 to 50.00315 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.100.3",
+     "kind": "DCV",
+     "desc": "Half scale (-) 100 V range",
+     "nominal": -50.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.00315
+     },
+     "printed_limits": "-50.00315 to -49.99685 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.100.4",
+     "kind": "DCV",
+     "desc": "Full scale (-) 100 V range",
+     "nominal": -100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.0054
+     },
+     "printed_limits": "-100.0054 to -99.9946 V",
+     "source": "calibrator",
+     "flags": [
+      "the negative full scale prints +/- 0.0054 V against +/- 0.0046 V for the positive full scale; stored as printed"
+     ]
+    },
+    {
+     "id": "DCV.1000.1",
+     "kind": "DCV",
+     "desc": "Full scale (+) 1000 V range",
+     "nominal": 1000.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.056
+     },
+     "printed_limits": "999.944 to 1000.056 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1000.2",
+     "kind": "DCV",
+     "desc": "Half scale (+) 1000 V range",
+     "nominal": 500.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.026
+     },
+     "printed_limits": "499.974 to 500.026 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1000.3",
+     "kind": "DCV",
+     "desc": "Half scale (-) 1000 V range",
+     "nominal": -500.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.026
+     },
+     "printed_limits": "-500.026 to -499.974 V",
+     "source": "calibrator"
+    },
+    {
+     "id": "DCV.1000.4",
+     "kind": "DCV",
+     "desc": "Full scale (-) 1000 V range",
+     "nominal": -1000.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-9",
+     "quick": false,
+     "limits": {
+      "1y": 0.069
+     },
+     "printed_limits": "-1000.069 to -999.931 V",
+     "source": "calibrator",
+     "flags": [
+      "printed +/- 0.069 V against +/- 0.056 V for the positive full scale (footnote: add 0.02 mV per volt above +/- 500 V); stored as printed"
+     ]
+    }
+   ],
+   "setup": "Low-thermal cable, shield to the calibrator output LO (100 mV and 1 V ranges). DMM6500: DC voltage, input impedance Auto. Calibrator at 0 V in operate, allow 5 minutes of thermal settling, enable relative offset on the 100 mV range, then source the full-scale and half-scale values of each range, allowing the reading to settle (p. 2-7, 2-8)."
+  },
+  {
+   "id": "acv",
+   "title": "AC voltage",
+   "page": "2-10 to 2-14",
+   "group": "ACV",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "ACV.0.1.20Hz",
+     "kind": "ACV",
+     "desc": "100 mV at 20 Hz",
+     "nominal": 0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 9e-05
+     },
+     "printed_limits": "99.91 to 100.09 mV",
+     "frequency": 20.0,
+     "source": "calibrator",
+     "ac_bandwidth": 3
+    },
+    {
+     "id": "ACV.0.1.1kHz",
+     "kind": "ACV",
+     "desc": "100 mV at 1 kHz",
+     "nominal": 0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 9e-05
+     },
+     "printed_limits": "99.91 to 100.09 mV",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.0.1.50kHz",
+     "kind": "ACV",
+     "desc": "100 mV at 50 kHz",
+     "nominal": 0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.00017
+     },
+     "printed_limits": "99.83 to 100.17 mV",
+     "frequency": 50000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.0.1.100kHz",
+     "kind": "ACV",
+     "desc": "100 mV at 100 kHz",
+     "nominal": 0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.00068
+     },
+     "printed_limits": "99.32 to 100.68 mV",
+     "frequency": 100000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.1.20Hz",
+     "kind": "ACV",
+     "desc": "1 V at 20 Hz",
+     "nominal": 1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.0009
+     },
+     "printed_limits": "0.9991 to 1.0009 V",
+     "frequency": 20.0,
+     "source": "calibrator",
+     "ac_bandwidth": 3
+    },
+    {
+     "id": "ACV.1.1kHz",
+     "kind": "ACV",
+     "desc": "1 V at 1 kHz",
+     "nominal": 1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.0009
+     },
+     "printed_limits": "0.9991 to 1.0009 V",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.1.50kHz",
+     "kind": "ACV",
+     "desc": "1 V at 50 kHz",
+     "nominal": 1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.0017
+     },
+     "printed_limits": "0.9983 to 1.0017 V",
+     "frequency": 50000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.1.100kHz",
+     "kind": "ACV",
+     "desc": "1 V at 100 kHz",
+     "nominal": 1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.0068
+     },
+     "printed_limits": "0.9932 to 1.0068 V",
+     "frequency": 100000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.10.20Hz",
+     "kind": "ACV",
+     "desc": "10 V at 20 Hz",
+     "nominal": 10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.009
+     },
+     "printed_limits": "9.991 to 10.009 V",
+     "frequency": 20.0,
+     "source": "calibrator",
+     "ac_bandwidth": 3
+    },
+    {
+     "id": "ACV.10.1kHz",
+     "kind": "ACV",
+     "desc": "10 V at 1 kHz",
+     "nominal": 10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.009
+     },
+     "printed_limits": "9.991 to 10.009 V",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.10.50kHz",
+     "kind": "ACV",
+     "desc": "10 V at 50 kHz",
+     "nominal": 10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.017
+     },
+     "printed_limits": "9.983 to 10.017 V",
+     "frequency": 50000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.10.100kHz",
+     "kind": "ACV",
+     "desc": "10 V at 100 kHz",
+     "nominal": 10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.068
+     },
+     "printed_limits": "9.932 to 10.068 V",
+     "frequency": 100000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.100.20Hz",
+     "kind": "ACV",
+     "desc": "100 V at 20 Hz",
+     "nominal": 100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.09
+     },
+     "printed_limits": "99.91 to 100.09 V",
+     "frequency": 20.0,
+     "source": "calibrator",
+     "ac_bandwidth": 3
+    },
+    {
+     "id": "ACV.100.1kHz",
+     "kind": "ACV",
+     "desc": "100 V at 1 kHz",
+     "nominal": 100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.09
+     },
+     "printed_limits": "99.91 to 100.09 V",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.100.50kHz",
+     "kind": "ACV",
+     "desc": "100 V at 50 kHz",
+     "nominal": 100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.17
+     },
+     "printed_limits": "99.83 to 100.17 V",
+     "frequency": 50000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.100.100kHz",
+     "kind": "ACV",
+     "desc": "100 V at 100 kHz",
+     "nominal": 100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "ACV",
+     "page": "2-12",
+     "quick": false,
+     "limits": {
+      "1y": 0.68
+     },
+     "printed_limits": "99.32 to 100.68 V",
+     "frequency": 100000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACV.750.50Hz",
+     "kind": "ACV",
+     "desc": "740 V at 50 Hz",
+     "nominal": 740.0,
+     "unit": "V",
+     "range": 750.0,
+     "group": "ACV750",
+     "page": "2-14",
+     "quick": false,
+     "limits": {
+      "1y": 0.67
+     },
+     "printed_limits": "739.33 to 740.67 V",
+     "frequency": 50.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "note": ""
+    },
+    {
+     "id": "ACV.750.1kHz",
+     "kind": "ACV",
+     "desc": "740 V at 1 kHz",
+     "nominal": 740.0,
+     "unit": "V",
+     "range": 750.0,
+     "group": "ACV750",
+     "page": "2-14",
+     "quick": false,
+     "limits": {
+      "1y": 0.67
+     },
+     "printed_limits": "739.33 to 740.67 V",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "note": ""
+    },
+    {
+     "id": "ACV.750.50kHz",
+     "kind": "ACV",
+     "desc": "740 V at 50 kHz",
+     "nominal": 740.0,
+     "unit": "V",
+     "range": 750.0,
+     "group": "ACV750",
+     "page": "2-14",
+     "quick": false,
+     "limits": {
+      "1y": 1.34
+     },
+     "printed_limits": "738.66 to 741.34 V",
+     "frequency": 50000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "note": "50 kHz and 100 kHz: the manual uses a Fluke 5725A amplifier behind the calibrator"
+    },
+    {
+     "id": "ACV.750.100kHz",
+     "kind": "ACV",
+     "desc": "740 V at 100 kHz",
+     "nominal": 740.0,
+     "unit": "V",
+     "range": 750.0,
+     "group": "ACV750",
+     "page": "2-14",
+     "quick": false,
+     "limits": {
+      "1y": 5.04
+     },
+     "printed_limits": "734.96 to 745.04 V",
+     "frequency": 100000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "note": "50 kHz and 100 kHz: the manual uses a Fluke 5725A amplifier behind the calibrator"
+    }
+   ],
+   "setup": "Shielded low-capacitance cable (load below 1000 pF on the 100 mV to 100 V ranges, below 150 pF on 750 V). DMM6500: AC voltage, detector bandwidth 30 Hz (3 Hz for the 20 Hz points, UNVERIFIED choice). The 740 V points: calibrator in standby while connecting (p. 2-13)."
+  },
+  {
+   "id": "digv",
+   "title": "Digitize DC voltage",
+   "page": "2-14 to 2-16",
+   "group": "DCV",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "DIGV.0.1.1",
+     "kind": "DIGV",
+     "desc": "Full scale (+) digitize 0.1 mV range",
+     "nominal": 0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 6e-05
+     },
+     "printed_limits": "99.94 to 100.06 mV",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.0.1.2",
+     "kind": "DIGV",
+     "desc": "Half scale (+) digitize 0.1 mV range",
+     "nominal": 0.05,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 5e-05
+     },
+     "printed_limits": "49.95 to 50.05 mV",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.0.1.3",
+     "kind": "DIGV",
+     "desc": "Half scale (-) digitize 0.1 mV range",
+     "nominal": -0.05,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 5e-05
+     },
+     "printed_limits": "-50.05 to -49.95 mV",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.0.1.4",
+     "kind": "DIGV",
+     "desc": "Full scale (-) digitize 0.1 mV range",
+     "nominal": -0.1,
+     "unit": "mV",
+     "range": 0.1,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 6e-05
+     },
+     "printed_limits": "-100.06 to -99.94 mV",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1.1",
+     "kind": "DIGV",
+     "desc": "Full scale (+) digitize 1 V range",
+     "nominal": 1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.0004
+     },
+     "printed_limits": "0.9996 to 1.0004 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1.2",
+     "kind": "DIGV",
+     "desc": "Half scale (+) digitize 1 V range",
+     "nominal": 0.5,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.00025
+     },
+     "printed_limits": "0.49975 to 0.50025 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1.3",
+     "kind": "DIGV",
+     "desc": "Half scale (-) digitize 1 V range",
+     "nominal": -0.5,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.00025
+     },
+     "printed_limits": "-0.50025 to -0.49975 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1.4",
+     "kind": "DIGV",
+     "desc": "Full scale (-) digitize 1 V range",
+     "nominal": -1.0,
+     "unit": "V",
+     "range": 1.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.0004
+     },
+     "printed_limits": "-1.0004 to -0.9996 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.10.1",
+     "kind": "DIGV",
+     "desc": "Full scale (+) digitize 10 V range",
+     "nominal": 10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.004
+     },
+     "printed_limits": "9.996 to 10.004 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.10.2",
+     "kind": "DIGV",
+     "desc": "Half scale (+) digitize 10 V range",
+     "nominal": 5.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.0025
+     },
+     "printed_limits": "4.9975 to 5.0025 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.10.3",
+     "kind": "DIGV",
+     "desc": "Half scale (-) digitize 10 V range",
+     "nominal": -5.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.0025
+     },
+     "printed_limits": "-5.0025 to -4.9975 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.10.4",
+     "kind": "DIGV",
+     "desc": "Full scale (-) digitize 10 V range",
+     "nominal": -10.0,
+     "unit": "V",
+     "range": 10.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.004
+     },
+     "printed_limits": "-10.004 to -9.996 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.100.1",
+     "kind": "DIGV",
+     "desc": "Full scale (+) digitize 100 V range",
+     "nominal": 100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.04
+     },
+     "printed_limits": "99.96 to 100.04 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.100.2",
+     "kind": "DIGV",
+     "desc": "Half scale (+) digitize 100 V range",
+     "nominal": 50.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.025
+     },
+     "printed_limits": "49.975 to 50.025 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.100.3",
+     "kind": "DIGV",
+     "desc": "Half scale (-) digitize 100 V range",
+     "nominal": -50.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.025
+     },
+     "printed_limits": "-50.025 to -49.975 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.100.4",
+     "kind": "DIGV",
+     "desc": "Full scale (-) digitize 100 V range",
+     "nominal": -100.0,
+     "unit": "V",
+     "range": 100.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.04
+     },
+     "printed_limits": "-100.04 to -99.96 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1000.1",
+     "kind": "DIGV",
+     "desc": "Full scale (+) digitize 1000 V range",
+     "nominal": 1000.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.4
+     },
+     "printed_limits": "999.6 to 1000.4 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1000.2",
+     "kind": "DIGV",
+     "desc": "Half scale (+) digitize 1000 V range",
+     "nominal": 500.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.25
+     },
+     "printed_limits": "499.75 to 500.25 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1000.3",
+     "kind": "DIGV",
+     "desc": "Half scale (-) digitize 1000 V range",
+     "nominal": -500.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.25
+     },
+     "printed_limits": "-500.25 to -499.75 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGV.1000.4",
+     "kind": "DIGV",
+     "desc": "Full scale (-) digitize 1000 V range",
+     "nominal": -1000.0,
+     "unit": "V",
+     "range": 1000.0,
+     "group": "DCV",
+     "page": "2-16",
+     "quick": false,
+     "limits": {
+      "1y": 0.4
+     },
+     "printed_limits": "-1000.4 to -999.6 V",
+     "source": "calibrator",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    }
+   ],
+   "setup": "DMM6500: Digitize Voltage, sample rate 1000, aperture Auto (1 ms here), count 100. Calibrator at 0.00000 mV and settled first; each reading is the AVERAGE of the 100 digitized readings (the STATISTICS swipe screen). The 5720A / 5730A 1000 V range 0 V setting is not verified (p. 2-15)."
+  },
+  {
+   "id": "freq",
+   "title": "Frequency",
+   "page": "2-17 to 2-18",
+   "group": "FREQ",
+   "source": "generator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "FREQ.1",
+     "kind": "FREQ",
+     "desc": "10 Hz at 10 V",
+     "nominal": 10.0,
+     "unit": "Hz",
+     "range": null,
+     "group": "FREQ",
+     "page": "2-18",
+     "quick": false,
+     "limits": {
+      "1y": 0.003
+     },
+     "printed_limits": "9.997 to 10.003 Hz",
+     "frequency": 10.0,
+     "amplitude": 10,
+     "source": "generator",
+     "flags": []
+    },
+    {
+     "id": "FREQ.2",
+     "kind": "FREQ",
+     "desc": "1 kHz at 5 V",
+     "nominal": 1000.0,
+     "unit": "kHz",
+     "range": null,
+     "group": "FREQ",
+     "page": "2-18",
+     "quick": false,
+     "limits": {
+      "1y": 0.1
+     },
+     "printed_limits": "0.9999 to 1.0001 kHz",
+     "frequency": 1000.0,
+     "amplitude": 5,
+     "source": "generator",
+     "flags": [
+      "the manual prints the column header (Hz) but the 1 kHz to 300 kHz rows are in kHz; read in kHz"
+     ]
+    },
+    {
+     "id": "FREQ.3",
+     "kind": "FREQ",
+     "desc": "10 kHz at 5 V",
+     "nominal": 10000.0,
+     "unit": "kHz",
+     "range": null,
+     "group": "FREQ",
+     "page": "2-18",
+     "quick": false,
+     "limits": {
+      "1y": 0.9
+     },
+     "printed_limits": "9.9991 to 10.0009 kHz",
+     "frequency": 10000.0,
+     "amplitude": 5,
+     "source": "generator",
+     "flags": [
+      "the manual prints the column header (Hz) but the 1 kHz to 300 kHz rows are in kHz; read in kHz"
+     ]
+    },
+    {
+     "id": "FREQ.4",
+     "kind": "FREQ",
+     "desc": "100 kHz at 5 V",
+     "nominal": 100000.0,
+     "unit": "kHz",
+     "range": null,
+     "group": "FREQ",
+     "page": "2-18",
+     "quick": false,
+     "limits": {
+      "1y": 9.0
+     },
+     "printed_limits": "99.991 to 100.009 kHz",
+     "frequency": 100000.0,
+     "amplitude": 5,
+     "source": "generator",
+     "flags": [
+      "the manual prints the column header (Hz) but the 1 kHz to 300 kHz rows are in kHz; read in kHz"
+     ]
+    },
+    {
+     "id": "FREQ.5",
+     "kind": "FREQ",
+     "desc": "300 kHz at 5 V",
+     "nominal": 300000.0,
+     "unit": "kHz",
+     "range": null,
+     "group": "FREQ",
+     "page": "2-18",
+     "quick": false,
+     "limits": {
+      "1y": 27.0
+     },
+     "printed_limits": "299.973 to 300.027 kHz",
+     "frequency": 300000.0,
+     "amplitude": 5,
+     "source": "generator",
+     "flags": [
+      "the manual prints the column header (Hz) but the 1 kHz to 300 kHz rows are in kHz; read in kHz"
+     ]
+    }
+   ],
+   "setup": "The manual uses a Keithley 3390 function generator on INPUT HI / LO. DMM6500: Frequency, aperture 250 ms, threshold range 10 V. Sine at the listed amplitude (RMS amplitude not stated: UNVERIFIED, 10 V at 10 Hz and 5 V above)."
+  },
+  {
+   "id": "tc",
+   "title": "Simulated thermocouple (type J)",
+   "page": "2-18 to 2-20",
+   "group": "TC",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "TC.1",
+     "kind": "TEMP",
+     "desc": "Type J, -190 degC",
+     "nominal": -190.0,
+     "unit": "C",
+     "range": null,
+     "group": "TC",
+     "page": "2-20",
+     "quick": false,
+     "limits": {
+      "1y": 0.2
+     },
+     "printed_limits": "-190.2 to -189.8 C",
+     "source": "calibrator",
+     "source_value": -0.007659,
+     "source_unit": "V",
+     "transducer": "TC",
+     "tc_type": "J"
+    },
+    {
+     "id": "TC.2",
+     "kind": "TEMP",
+     "desc": "Type J, 0 degC",
+     "nominal": 0.0,
+     "unit": "C",
+     "range": null,
+     "group": "TC",
+     "page": "2-20",
+     "quick": false,
+     "limits": {
+      "1y": 0.2
+     },
+     "printed_limits": "-0.2 to 0.2 C",
+     "source": "calibrator",
+     "source_value": 0.0,
+     "source_unit": "V",
+     "transducer": "TC",
+     "tc_type": "J"
+    },
+    {
+     "id": "TC.3",
+     "kind": "TEMP",
+     "desc": "Type J, 750 degC",
+     "nominal": 750.0,
+     "unit": "C",
+     "range": null,
+     "group": "TC",
+     "page": "2-20",
+     "quick": false,
+     "limits": {
+      "1y": 0.2
+     },
+     "printed_limits": "749.8 to 750.2 C",
+     "source": "calibrator",
+     "source_value": 0.042281,
+     "source_unit": "V",
+     "transducer": "TC",
+     "tc_type": "J"
+    }
+   ],
+   "setup": "Source values are the NIST Monograph 175 type J voltages (-7.659 mV, 0 mV, 42.281 mV). First measure the cable offset: DMM6500 DC voltage, 100 mV range, input impedance Auto, autozero on, 1 PLC, calibrator at 0 V in operate, wait 5 minutes, record the offset to 1 uV; then DMM6500 Temperature, transducer TC, type J, simulated reference junction 0 degC, 1 PLC, autozero on, and set the calibrator to the table value MINUS the measured offset (p. 2-19, 2-20 step 19)."
+  },
+  {
+   "id": "rtd",
+   "title": "Simulated RTD (PT100)",
+   "page": "2-20 to 2-24",
+   "group": "RTD",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "RTD4.1",
+     "kind": "TEMP",
+     "desc": "PT100 4-wire, 19 ohm",
+     "nominal": 19.0,
+     "unit": "ohm",
+     "range": null,
+     "group": "RTD4",
+     "page": "2-24",
+     "quick": false,
+     "limits": {
+      "1y": 0.06
+     },
+     "limit_unit": "C",
+     "printed_limits": "+/- 0.06 degC",
+     "source": "calibrator",
+     "source_value": 19.0,
+     "source_unit": "ohm",
+     "transducer": "FRTD",
+     "rtd": "PT100",
+     "std_relative": true,
+     "example_temperature": -198.89,
+     "cvd": {
+      "R0": 100,
+      "alpha": "0.00385055",
+      "beta": "0.10863",
+      "delta": "1.4999"
+     }
+    },
+    {
+     "id": "RTD4.2",
+     "kind": "TEMP",
+     "desc": "PT100 4-wire, 100 ohm",
+     "nominal": 100.0,
+     "unit": "ohm",
+     "range": null,
+     "group": "RTD4",
+     "page": "2-24",
+     "quick": false,
+     "limits": {
+      "1y": 0.06
+     },
+     "limit_unit": "C",
+     "printed_limits": "+/- 0.06 degC",
+     "source": "calibrator",
+     "source_value": 100.0,
+     "source_unit": "ohm",
+     "transducer": "FRTD",
+     "rtd": "PT100",
+     "std_relative": true,
+     "example_temperature": -0.0075,
+     "cvd": {
+      "R0": 100,
+      "alpha": "0.00385055",
+      "beta": "0.10863",
+      "delta": "1.4999"
+     }
+    },
+    {
+     "id": "RTD4.3",
+     "kind": "TEMP",
+     "desc": "PT100 4-wire, 190 ohm",
+     "nominal": 190.0,
+     "unit": "ohm",
+     "range": null,
+     "group": "RTD4",
+     "page": "2-24",
+     "quick": false,
+     "limits": {
+      "1y": 0.06
+     },
+     "limit_unit": "C",
+     "printed_limits": "+/- 0.06 degC",
+     "source": "calibrator",
+     "source_value": 190.0,
+     "source_unit": "ohm",
+     "transducer": "FRTD",
+     "rtd": "PT100",
+     "std_relative": true,
+     "example_temperature": 238.6775,
+     "cvd": {
+      "R0": 100,
+      "alpha": "0.00385055",
+      "beta": "0.10863",
+      "delta": "1.4999"
+     }
+    },
+    {
+     "id": "RTD3.1",
+     "kind": "TEMP",
+     "desc": "PT100 3-wire, 19 ohm",
+     "nominal": 19.0,
+     "unit": "ohm",
+     "range": null,
+     "group": "RTD3",
+     "page": "2-24",
+     "quick": false,
+     "limits": {
+      "1y": 0.75
+     },
+     "limit_unit": "C",
+     "printed_limits": "+/- 0.75 degC",
+     "source": "calibrator",
+     "source_value": 19.0,
+     "source_unit": "ohm",
+     "transducer": "TRTD",
+     "rtd": "PT100",
+     "std_relative": true,
+     "example_temperature": -198.89,
+     "cvd": {
+      "R0": 100,
+      "alpha": "0.00385055",
+      "beta": "0.10863",
+      "delta": "1.4999"
+     }
+    },
+    {
+     "id": "RTD3.2",
+     "kind": "TEMP",
+     "desc": "PT100 3-wire, 100 ohm",
+     "nominal": 100.0,
+     "unit": "ohm",
+     "range": null,
+     "group": "RTD3",
+     "page": "2-24",
+     "quick": false,
+     "limits": {
+      "1y": 0.75
+     },
+     "limit_unit": "C",
+     "printed_limits": "+/- 0.75 degC",
+     "source": "calibrator",
+     "source_value": 100.0,
+     "source_unit": "ohm",
+     "transducer": "TRTD",
+     "rtd": "PT100",
+     "std_relative": true,
+     "example_temperature": -0.0075,
+     "cvd": {
+      "R0": 100,
+      "alpha": "0.00385055",
+      "beta": "0.10863",
+      "delta": "1.4999"
+     }
+    },
+    {
+     "id": "RTD3.3",
+     "kind": "TEMP",
+     "desc": "PT100 3-wire, 190 ohm",
+     "nominal": 190.0,
+     "unit": "ohm",
+     "range": null,
+     "group": "RTD3",
+     "page": "2-24",
+     "quick": false,
+     "limits": {
+      "1y": 0.75
+     },
+     "limit_unit": "C",
+     "printed_limits": "+/- 0.75 degC",
+     "source": "calibrator",
+     "source_value": 190.0,
+     "source_unit": "ohm",
+     "transducer": "TRTD",
+     "rtd": "PT100",
+     "std_relative": true,
+     "example_temperature": 238.6775,
+     "cvd": {
+      "R0": 100,
+      "alpha": "0.00385055",
+      "beta": "0.10863",
+      "delta": "1.4999"
+     }
+    }
+   ],
+   "setup": "Calibrator resistance 19, 100 and 190 ohm with EXTERNAL SENSE on (4-wire: INPUT and SENSE to the calibrator; 3-wire: SENSE HI not required, HI-LO lead resistance mismatch below 0.1 ohm, add 0.25 degC per 0.1 ohm). DMM6500: Temperature, transducer 4-wire RTD or 3-wire RTD, RTD type PT100. The expected temperature is the Callendar-Van Dusen value of the ACTUAL source resistance (R0 100, alpha 0.00385055, beta 0.10863, delta 1.4999, ITS-90); limit +/- 0.06 degC (4-wire) or +/- 0.75 degC (3-wire) about it (p. 2-21 to 2-24)."
+  },
+  {
+   "id": "short4",
+   "title": "Zero values with the 4-wire short",
+   "page": "2-41 to 2-43",
+   "group": "SHORT4",
+   "source": "none",
+   "terminal": "FRONT",
+   "optional": true,
+   "points": [
+    {
+     "id": "ZR.1",
+     "kind": "OHM4",
+     "desc": "4-wire short, 1 ohm range",
+     "nominal": 0.0,
+     "unit": "ohm",
+     "range": 1.0,
+     "group": "SHORT4",
+     "page": "2-42",
+     "quick": false,
+     "limits": {
+      "1y": 0.0002
+     },
+     "printed_limits": "-0.0002 to 0.0002 ohm",
+     "source": "none",
+     "input": "short",
+     "ocomp": true
+    },
+    {
+     "id": "ZR.10",
+     "kind": "OHM4",
+     "desc": "4-wire short, 10 ohm range",
+     "nominal": 0.0,
+     "unit": "ohm",
+     "range": 10.0,
+     "group": "SHORT4",
+     "page": "2-42",
+     "quick": false,
+     "limits": {
+      "1y": 0.0002
+     },
+     "printed_limits": "-0.0002 to 0.0002 ohm",
+     "source": "none",
+     "input": "short",
+     "ocomp": true
+    },
+    {
+     "id": "ZR.100",
+     "kind": "OHM4",
+     "desc": "4-wire short, 100 ohm range",
+     "nominal": 0.0,
+     "unit": "ohm",
+     "range": 100.0,
+     "group": "SHORT4",
+     "page": "2-42",
+     "quick": false,
+     "limits": {
+      "1y": 0.002
+     },
+     "printed_limits": "-0.002 to 0.002 ohm",
+     "source": "none",
+     "input": "short",
+     "ocomp": true
+    },
+    {
+     "id": "ZR.1k",
+     "kind": "OHM4",
+     "desc": "4-wire short, 1000 ohm range",
+     "nominal": 0.0,
+     "unit": "ohm",
+     "range": 1000.0,
+     "group": "SHORT4",
+     "page": "2-42",
+     "quick": false,
+     "limits": {
+      "1y": 0.006
+     },
+     "printed_limits": "-0.006 to 0.006 ohm",
+     "source": "none",
+     "input": "short",
+     "ocomp": true
+    },
+    {
+     "id": "ZR.10k",
+     "kind": "OHM4",
+     "desc": "4-wire short, 10000 ohm range",
+     "nominal": 0.0,
+     "unit": "ohm",
+     "range": 10000.0,
+     "group": "SHORT4",
+     "page": "2-42",
+     "quick": false,
+     "limits": {
+      "1y": 0.06
+     },
+     "printed_limits": "-0.06 to 0.06 ohm",
+     "source": "none",
+     "input": "short",
+     "ocomp": true
+    },
+    {
+     "id": "ZR.100k",
+     "kind": "OHM4",
+     "desc": "4-wire short, 100000 ohm range",
+     "nominal": 0.0,
+     "unit": "ohm",
+     "range": 100000.0,
+     "group": "SHORT4",
+     "page": "2-42",
+     "quick": false,
+     "limits": {
+      "1y": 1.0
+     },
+     "printed_limits": "-1 to 1 ohm",
+     "source": "none",
+     "input": "short",
+     "ocomp": false,
+     "flags": [
+      "the manual (p. 2-42 step 5 and 9) asks for offset compensation ON on the 100 kohm range, but offset compensation is limited to 1 ohm to 10 kohm (p. 2-25; the meter refused it on the bench 2026-11-04): measured with offset compensation OFF; the printed limit +/- 1 ohm is kept"
+     ]
+    },
+    {
+     "id": "ZV.1000",
+     "kind": "DCV",
+     "desc": "DC volts zero, 4-wire short, 1000 V range",
+     "nominal": 0.0,
+     "unit": "uV",
+     "range": 1000.0,
+     "group": "SHORT4",
+     "page": "2-43",
+     "quick": false,
+     "limits": {
+      "1y": 0.006
+     },
+     "printed_limits": "-6000 to 6000 (unit not printed: uV)",
+     "source": "none",
+     "input": "short",
+     "flags": [
+      "the table prints no unit; microvolts used (the 1000 V range zero would otherwise be +/- 6000 V)"
+     ]
+    },
+    {
+     "id": "ZV.100",
+     "kind": "DCV",
+     "desc": "DC volts zero, 4-wire short, 100 V range",
+     "nominal": 0.0,
+     "unit": "uV",
+     "range": 100.0,
+     "group": "SHORT4",
+     "page": "2-43",
+     "quick": false,
+     "limits": {
+      "1y": 0.0006
+     },
+     "printed_limits": "-600 to 600 (unit not printed: uV)",
+     "source": "none",
+     "input": "short",
+     "flags": [
+      "the table prints no unit; microvolts used (the 1000 V range zero would otherwise be +/- 6000 V)"
+     ]
+    },
+    {
+     "id": "ZV.10",
+     "kind": "DCV",
+     "desc": "DC volts zero, 4-wire short, 10 V range",
+     "nominal": 0.0,
+     "unit": "uV",
+     "range": 10.0,
+     "group": "SHORT4",
+     "page": "2-43",
+     "quick": false,
+     "limits": {
+      "1y": 5e-05
+     },
+     "printed_limits": "-50 to 50 (unit not printed: uV)",
+     "source": "none",
+     "input": "short",
+     "flags": [
+      "the table prints no unit; microvolts used (the 1000 V range zero would otherwise be +/- 6000 V)"
+     ]
+    },
+    {
+     "id": "ZV.1",
+     "kind": "DCV",
+     "desc": "DC volts zero, 4-wire short, 1 V range",
+     "nominal": 0.0,
+     "unit": "uV",
+     "range": 1.0,
+     "group": "SHORT4",
+     "page": "2-43",
+     "quick": false,
+     "limits": {
+      "1y": 6e-06
+     },
+     "printed_limits": "-6 to 6 (unit not printed: uV)",
+     "source": "none",
+     "input": "short",
+     "flags": [
+      "the table prints no unit; microvolts used (the 1000 V range zero would otherwise be +/- 6000 V)"
+     ]
+    },
+    {
+     "id": "ZV.0.1",
+     "kind": "DCV",
+     "desc": "DC volts zero, 4-wire short, 0.1 V range",
+     "nominal": 0.0,
+     "unit": "uV",
+     "range": 0.1,
+     "group": "SHORT4",
+     "page": "2-43",
+     "quick": false,
+     "limits": {
+      "1y": 3.5e-06
+     },
+     "printed_limits": "-3.5 to 3.5 (unit not printed: uV)",
+     "source": "none",
+     "input": "short",
+     "flags": [
+      "the table prints no unit; microvolts used (the 1000 V range zero would otherwise be +/- 6000 V)"
+     ]
+    }
+   ],
+   "setup": "Model 8610 or 8620 4-wire short on the front panel in the orientation of Figure 17 (p. 2-42), 4W Res with offset compensation ON, 1 ohm range first, allow 5 minutes, no relative offset; then DC volts in DESCENDING range order from 1000 V to 100 mV with the short left on. Not part of the Customer Calibration Data Report (p. 2-41), so optional."
+  },
+  {
+   "id": "ohm4",
+   "title": "4-wire resistance (1 ohm to 10 Mohm)",
+   "page": "2-24 to 2-27",
+   "group": "OHM4",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "OHM4.1",
+     "kind": "OHM4",
+     "desc": "1 ohm on the 1 ohm range",
+     "nominal": 1.0,
+     "unit": "ohm",
+     "range": 1.0,
+     "group": "OHM4",
+     "page": "2-26",
+     "quick": false,
+     "limits": {
+      "1y": 0.000285
+     },
+     "std_relative": true,
+     "printed_limits": "0.999688 to 1.000258 ohm about 0.999973",
+     "source": "calibrator",
+     "ocomp": true,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.10",
+     "kind": "OHM4",
+     "desc": "10 ohm on the 10 ohm range",
+     "nominal": 10.0,
+     "unit": "ohm",
+     "range": 10.0,
+     "group": "OHM4",
+     "page": "2-26",
+     "quick": false,
+     "limits": {
+      "1y": 0.00105
+     },
+     "std_relative": true,
+     "printed_limits": "9.99878 to 10.00088 ohm about 9.99983",
+     "source": "calibrator",
+     "ocomp": true,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.100",
+     "kind": "OHM4",
+     "desc": "100 ohm on the 100 ohm range",
+     "nominal": 100.0,
+     "unit": "ohm",
+     "range": 100.0,
+     "group": "OHM4",
+     "page": "2-26",
+     "quick": false,
+     "limits": {
+      "1y": 0.0105
+     },
+     "std_relative": true,
+     "printed_limits": "99.987 to 100.008 ohm about 99.9975",
+     "source": "calibrator",
+     "ocomp": true,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.1000",
+     "kind": "OHM4",
+     "desc": "1 kohm on the 1 kohm range",
+     "nominal": 1000.0,
+     "unit": "kohm",
+     "range": 1000.0,
+     "group": "OHM4",
+     "page": "2-26",
+     "quick": false,
+     "limits": {
+      "1y": 0.08
+     },
+     "std_relative": true,
+     "printed_limits": "0.99991 to 1.00007 kohm about 0.99999",
+     "source": "calibrator",
+     "ocomp": true,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.10000",
+     "kind": "OHM4",
+     "desc": "10 kohm on the 10 kohm range",
+     "nominal": 10000.0,
+     "unit": "kohm",
+     "range": 10000.0,
+     "group": "OHM4",
+     "page": "2-26",
+     "quick": false,
+     "limits": {
+      "1y": 0.81
+     },
+     "std_relative": true,
+     "printed_limits": "9.99901 to 10.00063 kohm about 9.99982",
+     "source": "calibrator",
+     "ocomp": true,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.100000",
+     "kind": "OHM4",
+     "desc": "100 kohm on the 100 kohm range",
+     "nominal": 100000.0,
+     "unit": "kohm",
+     "range": 100000.0,
+     "group": "OHM4",
+     "page": "2-27",
+     "quick": false,
+     "limits": {
+      "1y": 8.5
+     },
+     "std_relative": true,
+     "printed_limits": "99.9928 to 100.0098 kohm about 100.0012",
+     "source": "calibrator",
+     "ocomp": false,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.1000000",
+     "kind": "OHM4",
+     "desc": "1 Mohm on the 1 Mohm range",
+     "nominal": 1000000.0,
+     "unit": "Mohm",
+     "range": 1000000.0,
+     "group": "OHM4",
+     "page": "2-27",
+     "quick": false,
+     "limits": {
+      "1y": 106.0
+     },
+     "std_relative": true,
+     "printed_limits": "0.99986 to 1.000072 Mohm about 0.999966",
+     "source": "calibrator",
+     "ocomp": false,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    },
+    {
+     "id": "OHM4.10000000",
+     "kind": "OHM4",
+     "desc": "10 Mohm on the 10 Mohm range",
+     "nominal": 10000000.0,
+     "unit": "Mohm",
+     "range": 10000000.0,
+     "group": "OHM4",
+     "page": "2-27",
+     "quick": false,
+     "limits": {
+      "1y": 4100.0
+     },
+     "std_relative": true,
+     "printed_limits": "9.99521 to 10.00341 Mohm about 9.99931",
+     "source": "calibrator",
+     "ocomp": false,
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    }
+   ],
+   "setup": "Shielded Teflon-insulated 4-wire cable: INPUT and SENSE to the calibrator, calibrator in 4-wire (external sense ON). DMM6500: 4W Res, offset compensation ON and open-lead detector OFF for 1 ohm to 10 kohm; offset compensation OFF for 100 kohm to 10 Mohm (10 Mohm: SENSE HI optional). The 1 ohm and 10 ohm values are characterised with the reference DMM. Limits are about the reference reading (p. 2-24 to 2-27)."
+  },
+  {
+   "id": "ohm2",
+   "title": "2-wire resistance (100 Mohm)",
+   "page": "2-27 to 2-28",
+   "group": "OHM2",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "OHM2.100M",
+     "kind": "OHM2",
+     "desc": "100 Mohm on the 100 Mohm range (2-wire)",
+     "nominal": 100000000.0,
+     "unit": "Mohm",
+     "range": 100000000.0,
+     "group": "OHM2",
+     "page": "2-28",
+     "quick": false,
+     "limits": {
+      "1y": 203000.0
+     },
+     "std_relative": true,
+     "printed_limits": "99.798 to 100.204 Mohm about 100.001",
+     "source": "calibrator",
+     "flags": [
+      "the manual marks the table \"for example only\": the half-width is taken from the example row (printed limits minus the printed actual value); the limits are centred on the reference reading"
+     ]
+    }
+   ],
+   "setup": "Calibrator in 2-wire (external sense OFF), shielded Teflon cables to INPUT HI / LO only. DMM6500: 2W Res, 100 Mohm range."
+  },
+  {
+   "id": "dci_low",
+   "title": "DC current 10 uA to 10 mA (reference DMM)",
+   "page": "2-29 to 2-31",
+   "group": "DCI_LOW",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "DCI.10uA.1",
+     "kind": "DCI",
+     "desc": "10 uA on the 10 uA range",
+     "nominal": 1e-05,
+     "unit": "uA",
+     "range": 1e-05,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 5e-09
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00500 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.10uA.2",
+     "kind": "DCI",
+     "desc": "5 uA on the 10 uA range",
+     "nominal": 5e-06,
+     "unit": "uA",
+     "range": 1e-05,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.75e-09
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00275 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.10uA.3",
+     "kind": "DCI",
+     "desc": "-5 uA on the 10 uA range",
+     "nominal": -5e-06,
+     "unit": "uA",
+     "range": 1e-05,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.75e-09
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00275 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.10uA.4",
+     "kind": "DCI",
+     "desc": "-10 uA on the 10 uA range",
+     "nominal": -1e-05,
+     "unit": "uA",
+     "range": 1e-05,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 5e-09
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00500 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.100uA.1",
+     "kind": "DCI",
+     "desc": "100 uA on the 100 uA range",
+     "nominal": 0.0001,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 5e-08
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.0500 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.100uA.2",
+     "kind": "DCI",
+     "desc": "50 uA on the 100 uA range",
+     "nominal": 5e-05,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.75e-08
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.0275 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.100uA.3",
+     "kind": "DCI",
+     "desc": "-50 uA on the 100 uA range",
+     "nominal": -5e-05,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.75e-08
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.0275 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.100uA.4",
+     "kind": "DCI",
+     "desc": "-100 uA on the 100 uA range",
+     "nominal": -0.0001,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 5e-08
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.0500 uA",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.1mA.1",
+     "kind": "DCI",
+     "desc": "1 mA on the 1 mA range",
+     "nominal": 0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 5e-07
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.000500 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.1mA.2",
+     "kind": "DCI",
+     "desc": "0.5 mA on the 1 mA range",
+     "nominal": 0.0005,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.75e-07
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.000275 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.1mA.3",
+     "kind": "DCI",
+     "desc": "-0.5 mA on the 1 mA range",
+     "nominal": -0.0005,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.75e-07
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.000275 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.1mA.4",
+     "kind": "DCI",
+     "desc": "-1 mA on the 1 mA range",
+     "nominal": -0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 5e-07
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.000500 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.10mA.1",
+     "kind": "DCI",
+     "desc": "10 mA on the 10 mA range",
+     "nominal": 0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.5e-06
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00250 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.10mA.2",
+     "kind": "DCI",
+     "desc": "5 mA on the 10 mA range",
+     "nominal": 0.005,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 1.5e-06
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00150 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.10mA.3",
+     "kind": "DCI",
+     "desc": "-5 mA on the 10 mA range",
+     "nominal": -0.005,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 1.5e-06
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00150 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    },
+    {
+     "id": "DCI.10mA.4",
+     "kind": "DCI",
+     "desc": "-10 mA on the 10 mA range",
+     "nominal": -0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DCI_LOW",
+     "page": "2-31",
+     "quick": false,
+     "limits": {
+      "1y": 2.5e-06
+     },
+     "std_relative": true,
+     "printed_limits": "+/- 0.00250 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints the unit \"uA\" for every range; the range's own unit (mA) is used"
+     ]
+    }
+   ],
+   "setup": "Calibrator, reference DMM (8508A / 8588A 200 uA range for 10 uA and 100 uA; 2 mA / 20 mA ranges for 1 mA / 10 mA) and the DMM6500 in series. Zero the reference DMM for system offset first; relative offset on the DMM6500 disabled. Limits are the printed tolerance about the reference DMM reading (p. 2-30, 2-31). The zero-current check needs the cables removed (separate set-up); its limit is not printed and it is not built."
+  },
+  {
+   "id": "dci",
+   "title": "DC current 100 mA to 3 A",
+   "page": "2-32 to 2-33",
+   "group": "DCI",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "DCI.100mA.1",
+     "kind": "DCI",
+     "desc": "100 mA on the 100 mA range",
+     "nominal": 0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 2.5e-05
+     },
+     "printed_limits": "99.975 to 100.025 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(A)\" for the 100 mA range; values are in mA"
+     ]
+    },
+    {
+     "id": "DCI.100mA.2",
+     "kind": "DCI",
+     "desc": "50 mA on the 100 mA range",
+     "nominal": 0.05,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 1.5e-05
+     },
+     "printed_limits": "49.985 to 50.015 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(A)\" for the 100 mA range; values are in mA"
+     ]
+    },
+    {
+     "id": "DCI.100mA.3",
+     "kind": "DCI",
+     "desc": "-50 mA on the 100 mA range",
+     "nominal": -0.05,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 1.5e-05
+     },
+     "printed_limits": "-50.015 to -49.985 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(A)\" for the 100 mA range; values are in mA"
+     ]
+    },
+    {
+     "id": "DCI.100mA.4",
+     "kind": "DCI",
+     "desc": "-100 mA on the 100 mA range",
+     "nominal": -0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 2.5e-05
+     },
+     "printed_limits": "-100.025 to -99.975 mA",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(A)\" for the 100 mA range; values are in mA"
+     ]
+    },
+    {
+     "id": "DCI.1A.1",
+     "kind": "DCI",
+     "desc": "1 A on the 1 A range",
+     "nominal": 1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00045
+     },
+     "printed_limits": "0.99955 to 1.00045 A",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.1A.2",
+     "kind": "DCI",
+     "desc": "0.5 A on the 1 A range",
+     "nominal": 0.5,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00025
+     },
+     "printed_limits": "0.49975 to 0.50025 A",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.1A.3",
+     "kind": "DCI",
+     "desc": "-0.5 A on the 1 A range",
+     "nominal": -0.5,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00025
+     },
+     "printed_limits": "-0.50025 to -0.49975 A",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.1A.4",
+     "kind": "DCI",
+     "desc": "-1 A on the 1 A range",
+     "nominal": -1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00045
+     },
+     "printed_limits": "-1.00045 to -0.99955 A",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.3A.1",
+     "kind": "DCI",
+     "desc": "2 A on the 3 A range",
+     "nominal": 2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00112
+     },
+     "printed_limits": "1.99888 to 2.00112 A",
+     "source": "calibrator",
+     "flags": [
+      "3 A range full scale is 2 A: the Fluke 57xxA / 5725A are not accurate above 2.2 A"
+     ]
+    },
+    {
+     "id": "DCI.3A.2",
+     "kind": "DCI",
+     "desc": "1.5 A on the 3 A range",
+     "nominal": 1.5,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00087
+     },
+     "printed_limits": "1.49913 to 1.50087 A",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.3A.3",
+     "kind": "DCI",
+     "desc": "-1.5 A on the 3 A range",
+     "nominal": -1.5,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00087
+     },
+     "printed_limits": "-1.50087 to -1.49913 A",
+     "source": "calibrator",
+     "flags": []
+    },
+    {
+     "id": "DCI.3A.4",
+     "kind": "DCI",
+     "desc": "-2 A on the 3 A range",
+     "nominal": -2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DCI",
+     "page": "2-33",
+     "quick": false,
+     "limits": {
+      "1y": 0.00112
+     },
+     "printed_limits": "-2.00112 to -1.99888 A",
+     "source": "calibrator",
+     "flags": [
+      "3 A range full scale is 2 A: the Fluke 57xxA / 5725A are not accurate above 2.2 A"
+     ]
+    }
+   ],
+   "setup": "Calibrator current output to AMPS 3A and INPUT LO. Zero verify with the calibrator in STANDBY first (no limit printed: not built); then the table values for each range."
+  },
+  {
+   "id": "digi",
+   "title": "Digitize current 100 uA to 3 A",
+   "page": "2-33 to 2-36",
+   "group": "DIGI",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "DIGI.100uA.1",
+     "kind": "DIGI",
+     "desc": "100 uA on the 100 uA range (digitize)",
+     "nominal": 0.0001,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DIGI",
+     "page": "2-34",
+     "quick": false,
+     "limits": {
+      "1y": 1.2e-07
+     },
+     "std_relative": true,
+     "printed_limits": "99.878 to 100.118 uA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100uA.2",
+     "kind": "DIGI",
+     "desc": "50 uA on the 100 uA range (digitize)",
+     "nominal": 5e-05,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DIGI",
+     "page": "2-34",
+     "quick": false,
+     "limits": {
+      "1y": 8.5e-08
+     },
+     "std_relative": true,
+     "printed_limits": "49.9141 to 50.0841 uA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100uA.3",
+     "kind": "DIGI",
+     "desc": "-50 uA on the 100 uA range (digitize)",
+     "nominal": -5e-05,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DIGI",
+     "page": "2-34",
+     "quick": false,
+     "limits": {
+      "1y": 8.5e-08
+     },
+     "std_relative": true,
+     "printed_limits": "-50.0843 to -49.9143 uA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit",
+      "the printed setpoint -49.993 is -49.9993 about the printed limits (centre); the printed limits are used"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100uA.4",
+     "kind": "DIGI",
+     "desc": "-100 uA on the 100 uA range (digitize)",
+     "nominal": -0.0001,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "DIGI",
+     "page": "2-34",
+     "quick": false,
+     "limits": {
+      "1y": 1.2e-07
+     },
+     "std_relative": true,
+     "printed_limits": "-100.1185 to -99.8785 uA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1mA.1",
+     "kind": "DIGI",
+     "desc": "1 mA on the 1 mA range (digitize)",
+     "nominal": 0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 1e-06
+     },
+     "std_relative": true,
+     "printed_limits": "0.998993 to 1.000993 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1mA.2",
+     "kind": "DIGI",
+     "desc": "0.5 mA on the 1 mA range (digitize)",
+     "nominal": 0.0005,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 6.5e-07
+     },
+     "std_relative": true,
+     "printed_limits": "0.499348 to 0.500648 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1mA.3",
+     "kind": "DIGI",
+     "desc": "-0.5 mA on the 1 mA range (digitize)",
+     "nominal": -0.0005,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 6.5e-07
+     },
+     "std_relative": true,
+     "printed_limits": "-0.500659 to -0.499359 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1mA.4",
+     "kind": "DIGI",
+     "desc": "-1 mA on the 1 mA range (digitize)",
+     "nominal": -0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 1e-06
+     },
+     "std_relative": true,
+     "printed_limits": "-1.001017 to -0.999017 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10mA.1",
+     "kind": "DIGI",
+     "desc": "10 mA on the 10 mA range (digitize)",
+     "nominal": 0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 8e-06
+     },
+     "std_relative": true,
+     "printed_limits": "9.99204 to 10.00804 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10mA.2",
+     "kind": "DIGI",
+     "desc": "5 mA on the 10 mA range (digitize)",
+     "nominal": 0.005,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 5.5e-06
+     },
+     "std_relative": true,
+     "printed_limits": "4.99454 to 5.00554 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10mA.3",
+     "kind": "DIGI",
+     "desc": "-5 mA on the 10 mA range (digitize)",
+     "nominal": -0.005,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 5.5e-06
+     },
+     "std_relative": true,
+     "printed_limits": "-5.00553 to -4.99453 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10mA.4",
+     "kind": "DIGI",
+     "desc": "-10 mA on the 10 mA range (digitize)",
+     "nominal": -0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 8e-06
+     },
+     "std_relative": true,
+     "printed_limits": "-10.00806 to -9.99206 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100mA.1",
+     "kind": "DIGI",
+     "desc": "100 mA on the 100 mA range (digitize)",
+     "nominal": 0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 8e-05
+     },
+     "std_relative": true,
+     "printed_limits": "99.92 to 100.08 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100mA.2",
+     "kind": "DIGI",
+     "desc": "50 mA on the 100 mA range (digitize)",
+     "nominal": 0.05,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 5.5e-05
+     },
+     "std_relative": true,
+     "printed_limits": "49.945 to 50.055 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100mA.3",
+     "kind": "DIGI",
+     "desc": "-50 mA on the 100 mA range (digitize)",
+     "nominal": -0.05,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 5.5e-05
+     },
+     "std_relative": true,
+     "printed_limits": "-50.055 to -49.945 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.100mA.4",
+     "kind": "DIGI",
+     "desc": "-100 mA on the 100 mA range (digitize)",
+     "nominal": -0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 8e-05
+     },
+     "std_relative": true,
+     "printed_limits": "-100.08 to -99.92 mA",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1A.1",
+     "kind": "DIGI",
+     "desc": "1 A on the 1 A range (digitize)",
+     "nominal": 1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 0.001
+     },
+     "std_relative": true,
+     "printed_limits": "0.999 to 1.001 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1A.2",
+     "kind": "DIGI",
+     "desc": "0.5 A on the 1 A range (digitize)",
+     "nominal": 0.5,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 0.00065
+     },
+     "std_relative": true,
+     "printed_limits": "0.49935 to 0.50065 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1A.3",
+     "kind": "DIGI",
+     "desc": "-0.5 A on the 1 A range (digitize)",
+     "nominal": -0.5,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 0.00065
+     },
+     "std_relative": true,
+     "printed_limits": "-0.50065 to -0.49935 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.1A.4",
+     "kind": "DIGI",
+     "desc": "-1 A on the 1 A range (digitize)",
+     "nominal": -1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "DIGI",
+     "page": "2-35",
+     "quick": false,
+     "limits": {
+      "1y": 0.001
+     },
+     "std_relative": true,
+     "printed_limits": "-1.001 to -0.999 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.3A.1",
+     "kind": "DIGI",
+     "desc": "2 A on the 3 A range (digitize)",
+     "nominal": 2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DIGI",
+     "page": "2-36",
+     "quick": false,
+     "limits": {
+      "1y": 0.003
+     },
+     "std_relative": true,
+     "printed_limits": "1.997 to 2.003 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.3A.2",
+     "kind": "DIGI",
+     "desc": "1.5 A on the 3 A range (digitize)",
+     "nominal": 1.5,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DIGI",
+     "page": "2-36",
+     "quick": false,
+     "limits": {
+      "1y": 0.00255
+     },
+     "std_relative": true,
+     "printed_limits": "1.49745 to 1.50255 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.3A.3",
+     "kind": "DIGI",
+     "desc": "-1.5 A on the 3 A range (digitize)",
+     "nominal": -1.5,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DIGI",
+     "page": "2-36",
+     "quick": false,
+     "limits": {
+      "1y": 0.00255
+     },
+     "std_relative": true,
+     "printed_limits": "-1.50255 to -1.49745 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.3A.4",
+     "kind": "DIGI",
+     "desc": "-2 A on the 3 A range (digitize)",
+     "nominal": -2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "DIGI",
+     "page": "2-36",
+     "quick": false,
+     "limits": {
+      "1y": 0.003
+     },
+     "std_relative": true,
+     "printed_limits": "-2.003 to -1.997 A",
+     "source": "calibrator",
+     "flags": [
+      "the setpoint column holds a typical reference value; the unit label \"(A)\" is the range's own unit"
+     ],
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    }
+   ],
+   "setup": "DMM6500: Digitize Current, sample rate 1000, aperture Auto (1 ms here), count 100; the reading is the average of the 100 readings. Calibrator current output to AMPS 3A and INPUT LO. The 10 uA digitize range is asked for in step 5 but has no table: not built."
+  },
+  {
+   "id": "aci",
+   "title": "AC current 100 uA to 3 A",
+   "page": "2-36 to 2-38",
+   "group": "ACI",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "ACI.100uA.20",
+     "kind": "ACI",
+     "desc": "100 uA at 20 Hz on the 100 uA range",
+     "nominal": 0.0001,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 1.7e-07
+     },
+     "printed_limits": "99.83 to 100.17 uA",
+     "frequency": 20.0,
+     "source": "calibrator",
+     "ac_bandwidth": 3,
+     "flags": []
+    },
+    {
+     "id": "ACI.100uA.1000",
+     "kind": "ACI",
+     "desc": "100 uA at 1000 Hz on the 100 uA range",
+     "nominal": 0.0001,
+     "unit": "uA",
+     "range": 0.0001,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 1.7e-07
+     },
+     "printed_limits": "99.83 to 100.17 uA",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.1mA.20",
+     "kind": "ACI",
+     "desc": "1 mA at 20 Hz on the 1 mA range",
+     "nominal": 0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-06
+     },
+     "printed_limits": "0.9986 to 1.0014 mA",
+     "frequency": 20.0,
+     "source": "calibrator",
+     "ac_bandwidth": 3,
+     "flags": []
+    },
+    {
+     "id": "ACI.1mA.1000",
+     "kind": "ACI",
+     "desc": "1 mA at 1000 Hz on the 1 mA range",
+     "nominal": 0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-06
+     },
+     "printed_limits": "0.9986 to 1.0014 mA",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.1mA.4900",
+     "kind": "ACI",
+     "desc": "1 mA at 4900 Hz on the 1 mA range",
+     "nominal": 0.001,
+     "unit": "mA",
+     "range": 0.001,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-06
+     },
+     "printed_limits": "0.9986 to 1.0014 mA",
+     "frequency": 4900.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.10mA.40",
+     "kind": "ACI",
+     "desc": "10 mA at 40 Hz on the 10 mA range",
+     "nominal": 0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-05
+     },
+     "printed_limits": "9.986 to 10.014 mA",
+     "frequency": 40.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": [
+      "printed 9.986 to 10.14 mA; 10.014 mA is used for the upper limit (print error, 1 A row is +/- 0.14 %)"
+     ]
+    },
+    {
+     "id": "ACI.10mA.1000",
+     "kind": "ACI",
+     "desc": "10 mA at 1000 Hz on the 10 mA range",
+     "nominal": 0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-05
+     },
+     "printed_limits": "9.986 to 10.014 mA",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": [
+      "printed 9.986 to 10.14 mA; 10.014 mA is used for the upper limit (print error, 1 A row is +/- 0.14 %)"
+     ]
+    },
+    {
+     "id": "ACI.10mA.4900",
+     "kind": "ACI",
+     "desc": "10 mA at 4900 Hz on the 10 mA range",
+     "nominal": 0.01,
+     "unit": "mA",
+     "range": 0.01,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-05
+     },
+     "printed_limits": "9.986 to 10.014 mA",
+     "frequency": 4900.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": [
+      "printed 9.986 to 10.14 mA; 10.014 mA is used for the upper limit (print error, 1 A row is +/- 0.14 %)"
+     ]
+    },
+    {
+     "id": "ACI.100mA.40",
+     "kind": "ACI",
+     "desc": "100 mA at 40 Hz on the 100 mA range",
+     "nominal": 0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 0.00014
+     },
+     "printed_limits": "99.86 to 100.14 mA",
+     "frequency": 40.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.100mA.1000",
+     "kind": "ACI",
+     "desc": "100 mA at 1000 Hz on the 100 mA range",
+     "nominal": 0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 0.00014
+     },
+     "printed_limits": "99.86 to 100.14 mA",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.100mA.4900",
+     "kind": "ACI",
+     "desc": "100 mA at 4900 Hz on the 100 mA range",
+     "nominal": 0.1,
+     "unit": "mA",
+     "range": 0.1,
+     "group": "ACI",
+     "page": "2-37",
+     "quick": false,
+     "limits": {
+      "1y": 0.00014
+     },
+     "printed_limits": "99.86 to 100.14 mA",
+     "frequency": 4900.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.1A.40",
+     "kind": "ACI",
+     "desc": "1 A at 40 Hz on the 1 A range",
+     "nominal": 1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 0.0014
+     },
+     "printed_limits": "0.9986 to 1.0014 A",
+     "frequency": 40.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.1A.1000",
+     "kind": "ACI",
+     "desc": "1 A at 1000 Hz on the 1 A range",
+     "nominal": 1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 0.0014
+     },
+     "printed_limits": "0.9986 to 1.0014 A",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.1A.4900",
+     "kind": "ACI",
+     "desc": "1 A at 4900 Hz on the 1 A range",
+     "nominal": 1.0,
+     "unit": "A",
+     "range": 1.0,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 0.0014
+     },
+     "printed_limits": "0.9986 to 1.0014 A",
+     "frequency": 4900.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.3A.40",
+     "kind": "ACI",
+     "desc": "2 A at 40 Hz on the 3 A range",
+     "nominal": 2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 0.0048
+     },
+     "printed_limits": "1.9952 to 2.0048 A",
+     "frequency": 40.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.3A.1000",
+     "kind": "ACI",
+     "desc": "2 A at 1000 Hz on the 3 A range",
+     "nominal": 2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 0.0048
+     },
+     "printed_limits": "1.9952 to 2.0048 A",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    },
+    {
+     "id": "ACI.3A.4900",
+     "kind": "ACI",
+     "desc": "2 A at 4900 Hz on the 3 A range",
+     "nominal": 2.0,
+     "unit": "A",
+     "range": 3.0,
+     "group": "ACI",
+     "page": "2-38",
+     "quick": false,
+     "limits": {
+      "1y": 0.0048
+     },
+     "printed_limits": "1.9952 to 2.0048 A",
+     "frequency": 4900.0,
+     "source": "calibrator",
+     "ac_bandwidth": 30,
+     "flags": []
+    }
+   ],
+   "setup": "DMM6500: AC Current, detector bandwidth 30 Hz (3 Hz for 20 Hz, UNVERIFIED choice). Calibrator AC current output to AMPS 3A and INPUT LO."
+  },
+  {
+   "id": "rear10a",
+   "title": "Rear-panel 10 A range (DC, digitize, AC)",
+   "page": "2-43 to 2-48",
+   "group": "REAR10A",
+   "source": "calibrator",
+   "terminal": "REAR",
+   "optional": false,
+   "points": [
+    {
+     "id": "DCI.10A.1",
+     "kind": "DCI",
+     "desc": "10 A on the 10 A range",
+     "nominal": 10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-45",
+     "quick": false,
+     "limits": {
+      "1y": 0.0245
+     },
+     "printed_limits": "9.9755 to 10.0245 A",
+     "source": "calibrator",
+     "terminal": "REAR"
+    },
+    {
+     "id": "DCI.10A.2",
+     "kind": "DCI",
+     "desc": "5 A on the 10 A range",
+     "nominal": 5.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-45",
+     "quick": false,
+     "limits": {
+      "1y": 0.0135
+     },
+     "printed_limits": "4.9865 to 5.0135 A",
+     "source": "calibrator",
+     "terminal": "REAR"
+    },
+    {
+     "id": "DCI.10A.3",
+     "kind": "DCI",
+     "desc": "-5 A on the 10 A range",
+     "nominal": -5.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-45",
+     "quick": false,
+     "limits": {
+      "1y": 0.0135
+     },
+     "printed_limits": "-5.0135 to -4.9865 A",
+     "source": "calibrator",
+     "terminal": "REAR"
+    },
+    {
+     "id": "DCI.10A.4",
+     "kind": "DCI",
+     "desc": "-10 A on the 10 A range",
+     "nominal": -10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-45",
+     "quick": false,
+     "limits": {
+      "1y": 0.0245
+     },
+     "printed_limits": "-10.0245 to -9.9755 A",
+     "source": "calibrator",
+     "terminal": "REAR"
+    },
+    {
+     "id": "DIGI.10A.1",
+     "kind": "DIGI",
+     "desc": "UUT zero on the 10 A range (digitize)",
+     "nominal": 0.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-46",
+     "quick": false,
+     "limits": {
+      "1y": 0.008
+     },
+     "printed_limits": "-0.008 to 0.008 A",
+     "source": "none",
+     "terminal": "REAR",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10A.2",
+     "kind": "DIGI",
+     "desc": "10 A on the 10 A range (digitize)",
+     "nominal": 10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-46",
+     "quick": false,
+     "limits": {
+      "1y": 0.033
+     },
+     "printed_limits": "9.967 to 10.033 A",
+     "source": "calibrator",
+     "terminal": "REAR",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10A.3",
+     "kind": "DIGI",
+     "desc": "5 A on the 10 A range (digitize)",
+     "nominal": 5.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-46",
+     "quick": false,
+     "limits": {
+      "1y": 0.0205
+     },
+     "printed_limits": "4.9795 to 5.0205 A",
+     "source": "calibrator",
+     "terminal": "REAR",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10A.4",
+     "kind": "DIGI",
+     "desc": "-5 A on the 10 A range (digitize)",
+     "nominal": -5.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-46",
+     "quick": false,
+     "limits": {
+      "1y": 0.0205
+     },
+     "printed_limits": "-5.0205 to -4.9795 A",
+     "source": "calibrator",
+     "terminal": "REAR",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "DIGI.10A.5",
+     "kind": "DIGI",
+     "desc": "-10 A on the 10 A range (digitize)",
+     "nominal": -10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-46",
+     "quick": false,
+     "limits": {
+      "1y": 0.033
+     },
+     "printed_limits": "-10.033 to -9.967 A",
+     "source": "calibrator",
+     "terminal": "REAR",
+     "srate": 1000,
+     "count": 100,
+     "aperture": 0.001,
+     "statistic": "average"
+    },
+    {
+     "id": "ACI.10A.40",
+     "kind": "ACI",
+     "desc": "10 A at 40 Hz",
+     "nominal": 10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-48",
+     "quick": false,
+     "limits": {
+      "1y": 0.046
+     },
+     "printed_limits": "9.954 to 10.046 A",
+     "frequency": 40.0,
+     "source": "calibrator",
+     "terminal": "REAR",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACI.10A.1000",
+     "kind": "ACI",
+     "desc": "10 A at 1000 Hz",
+     "nominal": 10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-48",
+     "quick": false,
+     "limits": {
+      "1y": 0.046
+     },
+     "printed_limits": "9.954 to 10.046 A",
+     "frequency": 1000.0,
+     "source": "calibrator",
+     "terminal": "REAR",
+     "ac_bandwidth": 30
+    },
+    {
+     "id": "ACI.10A.4900",
+     "kind": "ACI",
+     "desc": "10 A at 4900 Hz",
+     "nominal": 10.0,
+     "unit": "A",
+     "range": 10.0,
+     "group": "REAR10A",
+     "page": "2-48",
+     "quick": false,
+     "limits": {
+      "1y": 0.046
+     },
+     "printed_limits": "9.954 to 10.046 A",
+     "frequency": 4900.0,
+     "source": "calibrator",
+     "terminal": "REAR",
+     "ac_bandwidth": 30
+    }
+   ],
+   "setup": "TERMINALS switch to REAR. Calibrator with its current amplifier (5725A, BOOST, range lock ON): amplifier OUTPUT HI to the 10A AMPS jack, OUTPUT LO to INPUT LO; heavy short cables. DC: relative offset applied with the calibrator in STANDBY, the DMM6500 zero reading is verified (no limit printed: not built), reference DMM readings recorded."
+  },
+  {
+   "id": "cap",
+   "title": "Capacitance (1 nF to 100 uF)",
+   "page": "2-39 to 2-41",
+   "group": "CAP",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "optional": false,
+   "points": [
+    {
+     "id": "CAP.1",
+     "kind": "CAP",
+     "desc": "1 nF range cable REL",
+     "nominal": 3.75e-10,
+     "unit": "nF",
+     "range": 1e-09,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.25e-10
+     },
+     "printed_limits": "0.25 to 0.5 nF",
+     "source": "none",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges",
+      "the cable-only reading (no source, calibrator in standby): the limits 0.25 to 0.5 nF are the cable capacitance the manual expects; the relative offset is acquired from it and kept for the other capacitance points (steps 6-8, p. 2-39). The calibrator terminal capacitance is part of this reading: UNVERIFIED that it stays inside 0.25 to 0.5 nF"
+     ],
+     "rel_acquire": true,
+     "input": "open"
+    },
+    {
+     "id": "CAP.2",
+     "kind": "CAP",
+     "desc": "10% 1 nF range",
+     "nominal": 1e-10,
+     "unit": "nF",
+     "range": 1e-09,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 5.8e-12
+     },
+     "printed_limits": "0.0942 to 0.1058 nF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges",
+      "0.1 nF is below the lowest capacitance the calibrators may be able to source: check the calibrator range (UNVERIFIED), the point is refused by the calibrator if it cannot be made"
+     ]
+    },
+    {
+     "id": "CAP.3",
+     "kind": "CAP",
+     "desc": "70% 1 nF range",
+     "nominal": 7e-10,
+     "unit": "nF",
+     "range": 1e-09,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.06e-11
+     },
+     "printed_limits": "0.6894 to 0.7106 nF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.4",
+     "kind": "CAP",
+     "desc": "10% 10 nF range",
+     "nominal": 1e-09,
+     "unit": "nF",
+     "range": 1e-08,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-11
+     },
+     "printed_limits": "0.986 to 1.014 nF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.5",
+     "kind": "CAP",
+     "desc": "100% 10 nF range",
+     "nominal": 1e-08,
+     "unit": "nF",
+     "range": 1e-08,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 5e-11
+     },
+     "printed_limits": "9.95 to 10.05 nF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.6",
+     "kind": "CAP",
+     "desc": "10% 100 nF range",
+     "nominal": 1e-08,
+     "unit": "nF",
+     "range": 1e-07,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-10
+     },
+     "printed_limits": "9.86 to 10.14 nF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.7",
+     "kind": "CAP",
+     "desc": "100% 100 nF range",
+     "nominal": 1e-07,
+     "unit": "nF",
+     "range": 1e-07,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 5e-10
+     },
+     "printed_limits": "99.5 to 100.5 nF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.8",
+     "kind": "CAP",
+     "desc": "10% 1 uF range",
+     "nominal": 1e-07,
+     "unit": "uF",
+     "range": 1e-06,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-09
+     },
+     "printed_limits": "0.0986 to 0.1014 uF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.9",
+     "kind": "CAP",
+     "desc": "100% 1 uF range",
+     "nominal": 1e-06,
+     "unit": "uF",
+     "range": 1e-06,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 5e-09
+     },
+     "printed_limits": "0.995 to 1.005 uF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.10",
+     "kind": "CAP",
+     "desc": "10% 10 uF range",
+     "nominal": 1e-06,
+     "unit": "uF",
+     "range": 1e-05,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-08
+     },
+     "printed_limits": "0.986 to 1.014 uF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.11",
+     "kind": "CAP",
+     "desc": "100% 10 uF range",
+     "nominal": 1e-05,
+     "unit": "uF",
+     "range": 1e-05,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 5e-08
+     },
+     "printed_limits": "9.95 to 10.05 uF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.12",
+     "kind": "CAP",
+     "desc": "10% 100 uF range",
+     "nominal": 1e-05,
+     "unit": "uF",
+     "range": 0.0001,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 1.4e-07
+     },
+     "printed_limits": "9.86 to 10.14 uF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    },
+    {
+     "id": "CAP.13",
+     "kind": "CAP",
+     "desc": "100% 100 uF range",
+     "nominal": 0.0001,
+     "unit": "uF",
+     "range": 0.0001,
+     "group": "CAP",
+     "page": "2-41",
+     "quick": false,
+     "limits": {
+      "1y": 5e-07
+     },
+     "printed_limits": "99.5 to 100.5 uF",
+     "source": "calibrator",
+     "flags": [
+      "the table prints \"(F)\"; nF for the nF ranges and uF for the uF ranges"
+     ]
+    }
+   ],
+   "setup": "Owner decision: the calibrator sources the capacitance (the manual uses IET decade boxes). Short shielded banana cable from the calibrator output to INPUT HI / LO (cable capacitance up to about 300 pF: keep it short). DMM6500 Capacitance on the 1 nF range: first the cable-only reading with the calibrator in standby, then Rel Acquire (kept for the rest), then each value."
+  }
+ ]
+}

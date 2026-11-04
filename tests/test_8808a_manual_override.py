@@ -438,7 +438,7 @@ class OnlyThe8808A(unittest.TestCase):
                       if re.search(r'^\s*MANUAL_OVERRIDE\s*=\s*True', p.read_text(encoding='utf-8'), re.M))
         self.assertEqual(hits, sorted([
             'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'agilent34410a_verification.py', 'bk5491b_verification.py',
-            'dacq_verification.py', 'Procedures/fluke6060a_verification.py', 'dsb_override.py', 'dsb_runtime.py', 'fgen_verification.py', 'fluke8808a_verification.py', 'Procedures/hp8591a_verification.py', 'i400_verification.py',
+            'dacq_verification.py', 'dmm6500_verification.py', 'Procedures/fluke6060a_verification.py', 'dsb_override.py', 'dsb_runtime.py', 'fgen_verification.py', 'fluke8808a_verification.py', 'Procedures/hp8591a_verification.py', 'i400_verification.py',
             'keithley2000_verification.py', 'keysight_53220a_verification.py', 'mdo3_verification.py', 'mdo4000c_verification.py',
             'tbs2000b_verification.py', 'tds2000c_verification.py', 'truevolt_verification.py']))
 

@@ -424,7 +424,7 @@ class Rule5Sources(Base):
         self.assertEqual(set(codes(chk, 5)), {'waived'})
 
     def test_many_uncovered_points_in_one_section_are_one_finding(self):
-        pts = tuple((1100 + 50 * i, 'r2000') for i in range(6))
+        pts = tuple((1200 + 50 * i, 'r2000') for i in range(6))      # above every calibrator's range (the 5700A reaches 1100 V DC)
         ds = dcv_sheet(points=pts, ranges=((2000, 'r2000'),))
         f = [f for f in self.check(ds, dry_run_on=False).findings if f.rule == 5]
         self.assertEqual(len(f), 1)

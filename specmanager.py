@@ -683,9 +683,11 @@ DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket tex
     # 'auxiliary' (5520A dual-output AUX rows) and '7 day' (5520A resistance floor with only a 7 day ohms zero) are excluded from a plain lookup; no other sheet has either word.
     # 'vpp' (33250A sine amplitude, a +/-(% + mVpp) sheet in peak-to-peak) is excluded from a plain AC volts lookup: its rows are in Vpp, a plain lookup value is V rms; ask for variant='Vpp' (or 'Sinewave into 50 Ohm').
     # 'option 002' (3458A high-stability DC volts, the lab's unit per the owner) is preferred in a plain lookup; the standard-stability rows stay selectable with variant='standard stability'.
+    # '5725a' (the 5700A's separate 5725A amplifier rows) and 'wideband' (its Option 5700A-03 module) are excluded from a plain lookup: they are other output terminals, so the base 5700A rows must answer a plain lookup; no other sheet has either word.
     'DCV': dict(prefer=('option 002',), exclude=('auxiliary',)),
-    'ACV': dict(prefer=('sinewave', 'sync, acband <= 2 mhz'), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary', 'vpp')),
-    'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave')),
+    'DCI': dict(exclude=('5725a',)),
+    'ACV': dict(prefer=('sinewave', 'sync, acband <= 2 mhz'), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary', 'vpp', '5725a', 'wideband')),
+    'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave', '5725a')),
     'OHM': dict(prefer=('4-wire',), exclude=('7 day',)),
     'FREQ': dict(prefer=('field service',), exclude=('scope', 'duty')),
 }

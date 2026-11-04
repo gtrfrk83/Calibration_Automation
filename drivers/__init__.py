@@ -24,6 +24,8 @@ from .scpi_dmm import Agilent34401A, Fluke8846A, ScpiDmm
 from .fluke_8808a import Fluke8808A
 from .fluke_8808a_cal import Fluke8808ACal
 from .bk_5491b import BK5491B
+from .keithley_dmm6500 import KeithleyDMM6500
+from .fluke_5700a import Fluke5700A
 from .fluke_6060a import Fluke6060A
 from .hp_8902a import HP8902A, RecalRequired
 from .hp_8563e import HP8563E

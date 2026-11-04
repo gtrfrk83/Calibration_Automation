@@ -287,7 +287,7 @@ def _tidy(reading: str, limit_decimals: int) -> str:
 
 
 KIND_NAMES = {'DCV': 'DC Volts', 'ACV': 'AC Volts', 'DCI': 'DC Current', 'ACI': 'AC Current', 'OHM2': '2-wire Ohms',
-              'OHM4': '4-wire Ohms', 'FREQ': 'Frequency', 'CAP': 'Capacitance'}
+              'OHM4': '4-wire Ohms', 'FREQ': 'Frequency', 'CAP': 'Capacitance', 'TEMP': 'Temperature'}
 
 
 def _trim(number: str) -> str:
@@ -312,14 +312,14 @@ def point_description(p) -> str:
     function in the section heading, so this is just the range, plus the filter and, for zero offsets, the input."""
     kind = p['kind']
     zero = p.get('zero_offset') or p.get('source') == 'none'
-    range_text = _si(p['range'], 'V' if kind == 'FREQ' else p['unit']) + ' range'
+    range_text = _si(p['range'], 'V' if kind == 'FREQ' else p['unit']) + ' range' if p.get('range') is not None else ''     # a temperature point has no range (DMM6500)
     if zero:
         state = p.get('input') or ('open' if kind in ('DCI', 'ACI') else 'shorted')
         return f'{KIND_NAMES[kind]}, {range_text} ({state})'
-    parts = [range_text]
+    parts = [range_text] if range_text else []
     if p.get('filter_hz'):
         parts.append(f"{p['filter_hz']:g} Hz filter")
-    if p.get('mixed'):                       # a section that mixes functions needs the function name
+    if p.get('mixed') or kind == 'TEMP':     # a section that mixes functions needs the function name (a temperature point has no range to print)
         parts.insert(0, KIND_NAMES[kind])
     return ', '.join(parts)
 
