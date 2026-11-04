@@ -163,16 +163,16 @@ def build_spec():
                        '0.5 V pk-pk, about -2 dBm into 50 ohm).'])
 
     # 4.2 amplitude
-    s = section('G-4.2a', 'Amplitude: power meter (Table 4)', f'{fname(LOW_MHZ)}: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.', 'RXPWR')
+    s = section('G-4.2a', 'Amplitude: power meter (Table 4)', 'The 8902A RF power with the 11722A sensor module at all three frequencies (owner, 2026-11-04: "just use the 8902"). 13, 10 and 0 dBm at each frequency.', 'RXPWR')
     for fm in TABLE4_FREQS:
         for dbm, lo, hi in TABLE4_LEVELS:
             nm = fname(fm)
             if fm < 1:
                 kw = dict(meas='level_rx', group='RXPWR', rx=dict(freq_mhz=fm, mode='power'), flags=[UNV + ' (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).', MOVED],
                           moved_from=fname(DOC_LOW_MHZ))
-            else:
-                kw = dict(meas='level_pm', group='PM', zero_key=f'G@{fm:g}', band_label=nm, pm=dict(freq_mhz=fm), flags=[UNV + ' (E4418B + 8482A -> NRP40T on the 96270A).',
-                                                                                                                     'UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode.'])
+            else:                                                       # owner 2026-11-04: the 8902A + 11722A here too (was the NRP40T on the 96270A, carried over from the Instruction Manual procedure)
+                kw = dict(meas='level_rx', group='RXPWR', rx=dict(freq_mhz=fm, mode='power'), flags=[UNV + ' (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).',
+                          'The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded).'])
             if dbm == 0:
                 kw['flags'] = kw['flags'] + ['The document also asks to record the power-meter indication and the TI frequency at 0 dBm (the MMR Ext RF Atten value): the 8902A tuned level of Table 5 needs no such offset, so only the reading is kept.']
             add(s, '4.2 Table 4', tag=f'{nm} {lvl(dbm)} dBm', func='LEVEL', description=f'Level {lvl(dbm)} dBm at {nm} (Table 4)', gen=dict(freq_mhz=num(fm), level_dbm=dbm), nominal=float(dbm), low=f(D(lo)), high=f(D(hi)), unit='dBm', **kw)

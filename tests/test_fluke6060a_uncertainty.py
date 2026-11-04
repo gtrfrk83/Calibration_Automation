@@ -162,8 +162,10 @@ class Budgets(Base):
     def test_typed_spur_and_power_meter_have_no_spec(self):
         typed = next(p for p in self.points.values() if p['func'] == 'SPUR' and p['meas'] == 'manual')
         self.assertEqual(fu.evaluate(typed, path=self.db).status, fu.NO_SPEC)
-        pm = next(p for p in self.points.values() if p['meas'] == 'level_pm')
-        self.assertEqual(fu.evaluate(pm, path=self.db).status, fu.NO_SPEC)
+        self.assertFalse([p for p in self.points.values() if p['meas'] == 'level_pm'])          # owner 2026-11-04: Table 4 is on the 8902A + 11722A at every frequency
+        for ref in ('4.2 Table 4 150 kHz +13 dBm', '4.2 Table 4 250 MHz +13 dBm', '4.2 Table 4 520 MHz 0 dBm'):
+            r = self.ev(ref)
+            self.assertEqual((r.status, r.scope), (fu.NEEDS_INPUT, fu.IN), ref)      # the 11722A cal-factor uncertainty is still an open input
 
     def test_absolute_tuned_level_needs_the_sensor_input(self):
         r = self.ev('4.2 Table 5 250 MHz -10 dBm')

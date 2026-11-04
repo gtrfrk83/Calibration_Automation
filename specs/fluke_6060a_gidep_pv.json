@@ -404,7 +404,7 @@
    "id": "G-4.2a",
    "title": "Amplitude: power meter (Table 4)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "150 kHz: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.",
+   "setup": "The 8902A RF power with the 11722A sensor module at all three frequencies (owner, 2026-11-04: \"just use the 8902\"). 13, 10 and 0 dBm at each frequency.",
    "group": "RXPWR",
    "points": [
     {
@@ -497,16 +497,15 @@
      "low": 10.5,
      "high": 15.5,
      "unit": "dBm",
-     "meas": "level_pm",
-     "group": "PM",
-     "zero_key": "G@250",
-     "band_label": "250 MHz",
-     "pm": {
-      "freq_mhz": 250
+     "meas": "level_rx",
+     "group": "RXPWR",
+     "rx": {
+      "freq_mhz": 250,
+      "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> NRP40T on the 96270A).",
-      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded)."
      ],
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
@@ -523,16 +522,15 @@
      "low": 7.5,
      "high": 12.5,
      "unit": "dBm",
-     "meas": "level_pm",
-     "group": "PM",
-     "zero_key": "G@250",
-     "band_label": "250 MHz",
-     "pm": {
-      "freq_mhz": 250
+     "meas": "level_rx",
+     "group": "RXPWR",
+     "rx": {
+      "freq_mhz": 250,
+      "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> NRP40T on the 96270A).",
-      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded)."
      ],
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
@@ -549,16 +547,15 @@
      "low": -2.5,
      "high": 2.5,
      "unit": "dBm",
-     "meas": "level_pm",
-     "group": "PM",
-     "zero_key": "G@250",
-     "band_label": "250 MHz",
-     "pm": {
-      "freq_mhz": 250
+     "meas": "level_rx",
+     "group": "RXPWR",
+     "rx": {
+      "freq_mhz": 250,
+      "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> NRP40T on the 96270A).",
-      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode.",
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded).",
       "The document also asks to record the power-meter indication and the TI frequency at 0 dBm (the MMR Ext RF Atten value): the 8902A tuned level of Table 5 needs no such offset, so only the reading is kept."
      ],
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
@@ -576,16 +573,15 @@
      "low": 10.5,
      "high": 15.5,
      "unit": "dBm",
-     "meas": "level_pm",
-     "group": "PM",
-     "zero_key": "G@520",
-     "band_label": "520 MHz",
-     "pm": {
-      "freq_mhz": 520
+     "meas": "level_rx",
+     "group": "RXPWR",
+     "rx": {
+      "freq_mhz": 520,
+      "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> NRP40T on the 96270A).",
-      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded)."
      ],
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
@@ -602,16 +598,15 @@
      "low": 7.5,
      "high": 12.5,
      "unit": "dBm",
-     "meas": "level_pm",
-     "group": "PM",
-     "zero_key": "G@520",
-     "band_label": "520 MHz",
-     "pm": {
-      "freq_mhz": 520
+     "meas": "level_rx",
+     "group": "RXPWR",
+     "rx": {
+      "freq_mhz": 520,
+      "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> NRP40T on the 96270A).",
-      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded)."
      ],
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",
      "section": "G-4.2a",
@@ -628,16 +623,15 @@
      "low": -2.5,
      "high": 2.5,
      "unit": "dBm",
-     "meas": "level_pm",
-     "group": "PM",
-     "zero_key": "G@520",
-     "band_label": "520 MHz",
-     "pm": {
-      "freq_mhz": 520
+     "meas": "level_rx",
+     "group": "RXPWR",
+     "rx": {
+      "freq_mhz": 520,
+      "mode": "power"
      },
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> NRP40T on the 96270A).",
-      "UNVERIFIED: Rohde & Schwarz NRP40T on the 96270A power-meter mode.",
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (E4418B + 8482A -> 8902A RF power with the 11722A sensor module).",
+      "The 11722A calibration factor at this frequency must be in the 8902A cal-factor table (the HP 8902A Power Sensor Cal Factors procedure loads it; UNVERIFIED that it is loaded).",
       "The document also asks to record the power-meter indication and the TI frequency at 0 dBm (the MMR Ext RF Atten value): the 8902A tuned level of Table 5 needs no such offset, so only the reading is kept."
      ],
      "page": "T.O. 33K3-4-911-1 para 4.2 Table 4",

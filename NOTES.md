@@ -2246,6 +2246,12 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- Table 4 on the 8902A at every frequency (owner, 2026-11-04: "can we fix this to just use the 8902? or is there a reason we are using the NPT sensor?"). The NRP40T on
+  the 96270A was carried over from the Instruction Manual procedure (4A-5, the owner's choice there); nothing in the GIDEP document needs it. 250 and 520 MHz at +13 / +10 /
+  0 dBm are now `level_rx` power mode, group RXPWR, like the 150 kHz row (8902A RF power with the 11722A sensor module, 100 kHz to 2.6 GHz): one hook-up for the table,
+  no NRP40T zeroing. The 11722A cal factors at 250 / 520 MHz must be in the 8902A table (UNVERIFIED that they are loaded; flagged on the points). Uncertainty: the 8902A
+  RF power budget (NEEDS INPUT until the 11722A cal-factor uncertainty is given, as at 150 kHz; was N/A for the NRP40T). The GIDEP procedure no longer uses the 96270A
+  power meter (it still uses its FM output and its counter). The Instruction Manual procedure is unchanged.
 - 96270A counter resolution (owner bench 2026-11-04: "frequency is working but it isn't reading enough resolution and it is causing failures"). The readings came in
   10 Hz steps at 100 to 300 MHz (a 2 s gate shows 8 digits there): the RF points now use a 20 s gate (9 / 10 digits, 1 Hz; `FCO_GATE_RF_S`); the 10 MHz reference keeps
   2 s (1 Hz there). The table showed '122.222 MHz' (6 digits) and the report '122.2222' for both limits (report_pdf's shared 7-digit formatting): MHz frequency rows now

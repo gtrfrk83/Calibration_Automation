@@ -43,7 +43,7 @@ class SpecTests(unittest.TestCase):
         self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-2.5': 25, 'G-4.2b-250': 25, 'G-4.2b-520': 25, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
                                'G-4.4-520': 8, 'G-4.5': 8, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
         self.assertEqual(len(points()), 213)
-        self.assertEqual({p['group'] for p in points()}, {'POWERON', 'FCOREF', 'FCORF', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
+        self.assertEqual({p['group'] for p in points()}, {'POWERON', 'FCOREF', 'FCORF', 'RX', 'RXPWR', 'DEVM', 'SA'})
 
     def test_the_100_khz_carrier_is_moved_to_150_khz_and_2_5_mhz_for_table_5(self):
         """Owner 2026-11-03: Tables 4, 6, 7 at the document's 100 kHz run at 150 kHz (the 8902A RF input); Table 5 (tuned RF level) at 2.5 MHz, where the 8902A tuned level starts."""
@@ -84,8 +84,8 @@ class SpecTests(unittest.TestCase):
     def test_table_4_limits(self):
         got = {(p['gen']['freq_mhz'], p['gen']['level_dbm']): (p['low'], p['high'], p['meas']) for s in SPEC['sections'] if s['id'] == 'G-4.2a' for p in s['points']}
         self.assertEqual(got[(0.15, 13)], (10.5, 15.5, 'level_rx'))
-        self.assertEqual(got[(250, 10)], (7.5, 12.5, 'level_pm'))
-        self.assertEqual(got[(520, 0)], (-2.5, 2.5, 'level_pm'))
+        self.assertEqual(got[(250, 10)], (7.5, 12.5, 'level_rx'))           # owner 2026-11-04: the 8902A + 11722A at 250 / 520 MHz too (was the NRP40T)
+        self.assertEqual(got[(520, 0)], (-2.5, 2.5, 'level_rx'))
 
     def test_table_5_is_relative_to_the_0_dbm_reference_with_2_5_db(self):
         rel = [p for p in points() if p['func'] == 'LEVEL_REL']
@@ -601,10 +601,11 @@ class Counter96270A(GidepBench):
         self.assertFalse(rf_state(self.bench)['rf_on'], 'RF is off after the failed point')
         self.assertEqual(self.pm.state['INST'], 'SINE')
 
-    def test_a_power_level_point_after_the_counter_selects_the_power_meter_again(self):
-        lvl = next(p for p in E.POINTS if p['meas'] == 'level_pm')
+    def test_table_4_runs_on_the_8902a_after_the_counter(self):
+        """Owner 2026-11-04: "can we fix this to just use the 8902?" Table 4 at 250 / 520 MHz uses the 8902A + 11722A; the NRP40T (96270A power meter) is not used."""
+        self.assertFalse([p['ref'] for p in E.POINTS if p['meas'] == 'level_pm'])
+        lvl = next(p for p in E.POINTS if p['ref'] == '4.2 Table 4 250 MHz +13 dBm')
         self.run_points(refs=['4.1 Table 2 100.00000 MHz', lvl['ref']])
         self.assertEqual(self.errors(), [])
         self.assertEqual(self.non_pass(), [])
-        i = max(i for i, c in enumerate(self.pm.sent) if c == 'INST FCO')
-        self.assertTrue(any(c.startswith('INST PMET') for c in self.pm.sent[i:]))
+        self.assertFalse(any(c.startswith('INST PMET') for c in self.pm.sent))
