@@ -158,6 +158,7 @@ class Fluke5700A(Instrument):
             self.send('out.volts.dc', volts=volts)
 
     _amp = None                              # 'V' or 'I' while the 5725A is active (set by amplifier_on)
+    _locked = False                          # RANGELCK ON was sent (amplifier_lock)
     CURRENT_POST = 'NORMAL'                  # the DMM6500 manual's figures take current from the calibrator OUTPUT HI / LO (p. 2-30, 2-34, 2-37): UNVERIFIED for an original 5700A
 
     def _post(self, post):
@@ -167,9 +168,14 @@ class Fluke5700A(Instrument):
             raise InstrumentError(f'{self.label}: the current output post {post} was not accepted (CUR_POST? answered {reply!r})')
 
     def amplifier_on(self, kind):
-        """The 5725A in the circuit, with the output in STANDBY: BTYPE VB5725 (voltage) or IB5725 (current, and CUR_POST IB5725), BOOST ON, RANGELCK ON (read back later by amplifier_confirm). kind 'V' or 'I'."""
+        """The 5725A in the circuit, with the output in STANDBY: stale faults cleared, BTYPE VB5725 (voltage) or IB5725 (current, and CUR_POST IB5725), BOOST ON. kind 'V' or 'I'.
+        RANGELCK is NOT sent here: it locks the PRESENT range (guide), so it is sent by amplifier_lock() after the output is set (bench 2026-11-04: with the lock set first the 5700A refused the
+        outputs with fault 860, "Can't Use Amplifier For This Output")."""
         if self.isr(ISR_OPER):
             raise SafetyError(f'{self.label}: the 5725A is only switched in with the output in standby')
+        stale = self._drain_faults()
+        if stale:
+            self.log.add('##', 'faults cleared before the amplifier was switched in: ' + '; '.join(r for r, _ in stale), self.label)
         amp = 'VB5725' if kind == 'V' else 'IB5725'
         self.send('btype', amp=amp)
         if amp not in self.ask('btype.query').strip().upper():
@@ -177,16 +183,24 @@ class Fluke5700A(Instrument):
         if kind == 'I':
             self._post('IB5725')
         self.send('boost', state='ON')
+        self._amp, self._locked = kind, False
+
+    def amplifier_lock(self):
+        """After the amplifier output is set, still in STANDBY: RANGELCK ON for the 10 A current points only (DMM6500 Calibration Manual pp. 2-46, 2-48; voltage is not locked there). The
+        present range is then the amplifier's, which is what the lock pins."""
+        if self._amp != 'I':
+            return
         self.send('rangelck', state='ON')
-        self._amp = kind              # BOOST and RANGELCK are read back by amplifier_confirm() AFTER the output is set: on the bench ISR? bit 3 read 0 straight after BOOST ON (2026-11-04)
+        self._locked = True
 
     def amplifier_confirm(self):
-        """With the amplifier output set and the output still in STANDBY: ISR? must show BOOST (bit 3) and RLOCK (bit 5). On a failure the message gives the raw ISR? value and the fault queue
+        """With the amplifier output set (and locked, for the 10 A points) and the output still in STANDBY: ISR? must show BOOST (bit 3) and, when locked, RLOCK (bit 5). On a failure the message gives the raw ISR? value and the fault queue
         (the bit meaning is from the Series II guide, UNVERIFIED for an original 5700A)."""
         reply = str(self.query_retry('isr.query', attempts=2, delay=0.3)).strip()
         token = reply.replace(',', ' ').split()[0]
         value = int(float(token))
-        missing = [name for name, bit in (('BOOST (bit 3)', ISR_BOOST), ('range lock (bit 5)', ISR_RLOCK)) if not value >> bit & 1]
+        wanted = (('BOOST (bit 3)', ISR_BOOST), ('range lock (bit 5)', ISR_RLOCK)) if self._locked else (('BOOST (bit 3)', ISR_BOOST),)
+        missing = [name for name, bit in wanted if not value >> bit & 1]
         if not missing:
             return
         try:
@@ -201,8 +215,10 @@ class Fluke5700A(Instrument):
         ISR? bits 3 and 5 are NOT required to clear: on the bench (2026-11-04, 740 V at 50 kHz) bit 3 was still 1 after BOOST OFF, because the 5700A selects the amplifier by itself for an output
         above its own range (Operator Guide, 'B' key), so the bit follows the output setting, not the BOOST state. The raw ISR? value is written to the command log for the bench session."""
         kind, self._amp = self._amp, None
+        locked, self._locked = self._locked, False
         self.send('boost', state='OFF')
-        self.send('rangelck', state='OFF')
+        if locked:
+            self.send('rangelck', state='OFF')
         if kind == 'I':
             self._post(self.CURRENT_POST)
         value = int(float(str(self.query_retry('isr.query', attempts=2, delay=0.3)).replace(',', ' ').split()[0]))
@@ -233,17 +249,30 @@ class Fluke5700A(Instrument):
     def read_error(self) -> str:
         return self.ask('err.query').strip()
 
+    def _drain_faults(self, limit=8):
+        """Read FAULT? until it answers 0 (at most `limit` reads): [(reply, code), ...]. Read-only."""
+        found = []
+        for _ in range(limit):
+            reply = self.read_error()
+            code = self._error_code(reply)
+            if code in (0, None):
+                break
+            found.append((reply, int(code)))
+        return found
+
     def check_error(self, context=''):
-        """Raise if the fault queue holds a code (FAULT? answers 0 when empty: UNVERIFIED), with the EXPLAIN? text when the calibrator gives one."""
-        reply = self.read_error()
-        code = self._error_code(reply)
-        if code == 0:
+        """Raise if the fault queue holds a code (FAULT? answers 0 when empty: UNVERIFIED): every queued fault is read and reported, each with the EXPLAIN? text when the calibrator gives one."""
+        faults = self._drain_faults()
+        if not faults:
             return
-        try:
-            why = self.ask('explain.query', code=int(code)).strip() if code is not None else ''
-        except Exception:
-            why = ''
-        raise InstrumentError(f'{self.label} rejected the setting{" (" + context + ")" if context else ""}: fault {reply}{" - " + why if why else ""}')
+        parts = []
+        for reply, code in faults:
+            try:
+                why = self.ask('explain.query', code=code).strip()
+            except Exception:
+                why = ''
+            parts.append(f'fault {reply}{" - " + why if why else ""}')
+        raise InstrumentError(f'{self.label} rejected the setting{" (" + context + ")" if context else ""}: ' + '; '.join(parts))
 
     def clear_status(self):
         self.send('status.clear')

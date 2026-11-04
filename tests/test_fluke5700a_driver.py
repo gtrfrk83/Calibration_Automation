@@ -41,8 +41,11 @@ class Amplifier(unittest.TestCase):
     def test_current_boost_sequence_and_back(self):
         d, ct, bench = make()
         d.amplifier_on('I')
-        self.assertEqual([c for c in ct.sent if c.startswith(('BTYPE', 'CUR_POST', 'BOOST', 'RANGELCK')) and '?' not in c], ['BTYPE IB5725', 'CUR_POST IB5725', 'BOOST ON', 'RANGELCK ON'])
+        self.assertEqual([c for c in ct.sent if c.startswith(('BTYPE', 'CUR_POST', 'BOOST', 'RANGELCK')) and '?' not in c], ['BTYPE IB5725', 'CUR_POST IB5725', 'BOOST ON'])      # no lock yet
         d.set_output_amps(10.0, None, True)
+        d.amplifier_lock()                                                 # after the output: RANGELCK locks the PRESENT range
+        self.assertEqual([c for c in ct.sent if c.startswith('RANGELCK') and '?' not in c], ['RANGELCK ON'])
+        self.assertLess(ct.sent.index('OUT 10 A, 0 HZ'), ct.sent.index('RANGELCK ON'))
         self.assertNotIn('CUR_POST NORMAL', ct.sent)                       # the post is already the amplifier's
         d.amplifier_off()
         self.assertEqual([c for c in ct.sent if c.startswith(('BOOST', 'RANGELCK', 'CUR_POST')) and '?' not in c][-3:], ['BOOST OFF', 'RANGELCK OFF', 'CUR_POST NORMAL'])
@@ -58,6 +61,47 @@ class Amplifier(unittest.TestCase):
         self.assertTrue(d.isr(3))
         self.assertFalse(ct.boost or ct.rlock)                   # BOOST and RANGELCK were switched off
         self.assertTrue(any('ISR? after the amplifier was taken out' in e[3] for e in d.log.entries))   # the raw value is in the command log
+
+    def test_the_range_lock_set_before_the_output_is_refused_with_fault_860(self):
+        # bench 2026-11-04: fault 860 "Can't Use Amplifier For This Output" at 10 A DC and at 740 V / 50 kHz; RANGELCK locks the PRESENT range, so it must follow the output
+        d, ct, bench = make()
+        d.set_output_volts(1.0, None, True)                  # the present function is volts
+        d.send('rangelck', state='ON')                       # the old order: lock first
+        d.set_output_amps(10.0, None, True)
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.check_error('DC current: 10 A on the 10 A range')
+        self.assertIn('860', str(cm.exception))
+        self.assertIn("Can't Use Amplifier For This Output", str(cm.exception))
+
+    def test_amplifier_order_current_is_boost_then_output_then_lock_and_voltage_is_never_locked(self):
+        d, ct, bench = make()
+        d.set_output_volts(1.0, None, True)                  # the previous point was a voltage: the function is not current
+        d.amplifier_on('I')
+        d.set_output_amps(10.0, None, True)
+        d.amplifier_lock()
+        d.check_error('ok')                                  # accepted
+        d.amplifier_confirm()
+        d.amplifier_off()
+        d.amplifier_on('V')
+        d.set_output_volts(740.0, 50000.0)
+        d.amplifier_lock()
+        self.assertEqual([c for c in ct.sent if c.startswith('RANGELCK')], ['RANGELCK ON', 'RANGELCK OFF'])      # only the current boost was locked and unlocked
+        d.check_error('ok')
+        d.amplifier_confirm()
+        d.amplifier_off()
+
+    def test_every_queued_fault_is_reported_and_stale_ones_are_cleared_before_the_amplifier(self):
+        d, ct, bench = make()
+        ct.faults.extend([860, 540])
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.check_error('x')
+        self.assertIn('860', str(cm.exception))
+        self.assertIn('540', str(cm.exception))
+        ct.faults.extend([860])                              # left over from an earlier failed point
+        d.amplifier_on('V')
+        self.assertEqual(ct.faults, [])
+        self.assertTrue(any('faults cleared before the amplifier' in e[3] for e in d.log.entries))
+        d.amplifier_off()
 
     def test_voltage_boost_does_not_touch_the_current_post(self):
         d, ct, bench = make()
@@ -91,6 +135,7 @@ class Amplifier(unittest.TestCase):
         d.amplifier_on('I')                                  # must not raise
         self.assertFalse(d.isr(3))
         d.set_output_amps(10.0, None, True)
+        d.amplifier_lock()
         d.amplifier_confirm()                                # BOOST and RLOCK are set once the output is set
         self.assertTrue(d.isr(3) and d.isr(5))
         d.amplifier_off()

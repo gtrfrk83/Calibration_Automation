@@ -27,6 +27,7 @@ class SimFluke5700ATransport(_SimBase):
         self.boost, self.rlock, self.btype = False, False, {'V': 'VB5725', 'I': 'IB5725'}
         self.amp_connected = True                                # a 5725A is on the cable and powered (test hook)
         self.out_since_boost = False
+        self.rlock_unit = None
         self.settle_polls = 1
         self._polls = 0
 
@@ -63,7 +64,7 @@ class SimFluke5700ATransport(_SimBase):
             return str(self.faults.pop(0)) if self.faults else '0'
         m = re.match(r'^EXPLAIN\? (\d+)$', u)
         if m:
-            return f'simulated fault {m.group(1)}'
+            return {'860': "Can't Use Amplifier For This Output"}.get(m.group(1), f'simulated fault {m.group(1)}')
         if u == 'ISR?':
             return str(self._isr())
         if u == 'STBY':
@@ -75,7 +76,9 @@ class SimFluke5700ATransport(_SimBase):
             self.boost = m.group(1) == 'ON' and self.amp_connected; self.out_since_boost = False; return None
         m = re.match(r'^RANGELCK (ON|OFF)$', u)
         if m:
-            self.rlock = m.group(1) == 'ON'; return None
+            self.rlock = m.group(1) == 'ON'
+            self.rlock_unit = f.get('unit') if self.rlock else None          # RANGELCK locks the PRESENT range (guide): remembered as the present function
+            return None
         m = re.match(r'^BTYPE (VB5725|IB5725)$', u)
         if m:
             self.btype['V' if m.group(1).startswith('VB') else 'I'] = m.group(1); return None
@@ -97,6 +100,8 @@ class SimFluke5700ATransport(_SimBase):
             unit = m.group(2)
             if unit not in UNITS:
                 self.faults.append(536); return None
+            if self.rlock and UNITS[unit] != self.rlock_unit:
+                self.faults.append(860); return None             # BENCH FINDING 2026-11-04: fault 860 "Can't Use Amplifier For This Output" when the range lock was set in another function (the cause is UNVERIFIED)
             value = float(m.group(1)) * SCALE[unit]
             hz = float(m.group(3)) if m.group(3) else 0.0
             if (UNITS[unit] == 'A' and abs(value) > 2.2 and not self.boost) or (UNITS[unit] == 'V' and hz > 1000 and abs(value) > 220 and not self.boost):

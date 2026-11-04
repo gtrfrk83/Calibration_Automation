@@ -197,10 +197,10 @@ class Combo5700A5725A(Calibrator5700A):
         i = sent.index('BTYPE IB5725')
         self.assertLess(sent.index('STBY'), i)                                    # standby first
         self.assertLess(i, sent.index('BOOST ON'))
-        self.assertLess(sent.index('BOOST ON'), sent.index('RANGELCK ON'))
-        self.assertLess(sent.index('RANGELCK ON'), sent.index('OUT 10 A, 0 HZ'))
+        self.assertLess(sent.index('BOOST ON'), sent.index('OUT 10 A, 0 HZ'))
+        self.assertLess(sent.index('OUT 10 A, 0 HZ'), sent.index('RANGELCK ON'))     # the lock pins the PRESENT range: after the output (bench fault 860, 2026-11-04)
         self.assertIn('CUR_POST IB5725', sent)
-        self.assertLess(sent.index('OUT 10 A, 0 HZ'), sent.index('OPER'))
+        self.assertLess(sent.index('RANGELCK ON'), sent.index('OPER'))
         self.assertEqual([c for c in sent if '?' not in c][-1], 'CUR_POST NORMAL')
         self.assertIn('BOOST OFF', sent)
         self.assertFalse(ct.boost)
