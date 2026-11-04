@@ -279,7 +279,8 @@ class Menus(QtCase):
         self.assertIn('Your data folder:', self.boxes[-1][2])
 
     def test_window_title_follows_the_suite_pattern(self):
-        self.assertEqual(self.win.windowTitle(), 'Calibration Suite  |  Calibration Procedure Manager  |  ' + mm.VERSION)
+        import suite_info
+        self.assertEqual(self.win.windowTitle(), 'Calibration Suite  |  Calibration Procedure Manager  |  ' + suite_info.title_version())
 
     def test_header_db_chip_and_status_bar(self):
         self.assertEqual(self.win.title_label.text(), 'Calibration Procedure Manager')

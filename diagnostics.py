@@ -69,6 +69,7 @@ def write_log(exc_text: str, where: str = '') -> Path:
     stamp = datetime.now().strftime('%Y%m%d-%H%M%S')
     path = logs_dir() / f'diagnostic-{stamp}.txt'
     body = (f'{suite_info.NAME} {suite_info.full_version()} - diagnostic log\n'
+            f'Build: {suite_info.build_id() or "unknown"}\n'
             f'Time: {datetime.now().isoformat(timespec="seconds")}\n'
             f'Window: {where}\n'
             f'Python: {sys.version.split()[0]}   OS: {platform.platform()}\n'

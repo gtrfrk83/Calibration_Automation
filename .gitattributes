@@ -1,0 +1,2 @@
+# git archive (and GitHub "Download ZIP") write the commit and its date into BUILD.txt; suite_info.build_id() shows it in every window title.
+BUILD.txt export-subst

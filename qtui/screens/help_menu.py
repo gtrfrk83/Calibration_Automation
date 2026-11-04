@@ -25,7 +25,8 @@ ICON_ICO = HERE / 'assets' / 'app_icon.ico'
 
 def about_text():
     missing = diagnostics.missing_packages()
-    text = (f'{suite_info.NAME}  {suite_info.full_version()}\n\n'
+    text = (f'{suite_info.NAME}  {suite_info.full_version()}\n'
+            f'Build: {suite_info.build_id() or "unknown"}\n\n'
             "Performance-verification procedures for the laboratory's instruments.\n\n"
             f'Your data folder:\n{appdata.data_dir()}\n\n'
             f'Python {sys.version.split()[0]}\n')
