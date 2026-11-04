@@ -201,7 +201,7 @@ class Describe(unittest.TestCase):
 
     def test_counts(self):
         self.assertEqual(counts(ScpiDmm), dict(total=15, normal=11, output=0, locked=4, verified=9, unverified=6))   # Stage 7: +status.clear, err.query, reset, opc.query
-        self.assertEqual(counts(Fluke8846A), dict(total=21, normal=11, output=0, locked=10, verified=9, unverified=12))
+        self.assertEqual(counts(Fluke8846A), dict(total=31, normal=21, output=0, locked=10, verified=9, unverified=22))     # +10: the AC filter, frequency and null commands of the verification (UNVERIFIED)
         self.assertEqual(counts(Agilent34401A), dict(total=16, normal=12, output=0, locked=4, verified=10, unverified=6))
         self.assertEqual(counts(Keysight34470A), dict(total=26, normal=22, output=0, locked=4, verified=22, unverified=4))
         self.assertEqual(counts(Keysight34970A), dict(total=27, normal=23, output=0, locked=4, verified=18, unverified=9))   # +conf.temp, nplc.temp (type J thermocouple point, unverified)

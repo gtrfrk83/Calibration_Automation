@@ -5,7 +5,7 @@
  "manufacturer": "Fluke",
  "model": "8846A",
  "category": "Digital Multimeter",
- "version": "59",
+ "version": "60",
  "order": 3,
  "description": "Standalone calibration procedure",
  "launcher": "Procedures/Fluke_8846A_Verification.py",
