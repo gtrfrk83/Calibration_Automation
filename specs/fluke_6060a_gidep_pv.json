@@ -5,7 +5,7 @@
  "source": {
   "cite": "T.O. 33K3-4-911-1, Calibration Procedure for Synthesized Signal Generator 6060 A/AN (Fluke), 30 April 2017 (GIDEP)",
   "limits_text": "GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)",
-  "note": "Points and limits are the document's own tables. Its measuring instruments (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (5334B, 8902A, 96270A + NRP40T, 8563E); each replacement is flagged UNVERIFIED on the point. The Calibration Performance Table is \"Not Required\"; Appendix A (reference oscillator adjustment) is not built."
+  "note": "Points and limits are the document's own tables. Its measuring instruments (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (8902A, 96270A + NRP40T, 8563E); each replacement is flagged UNVERIFIED on the point. The Calibration Performance Table is \"Not Required\"; Appendix A (reference oscillator adjustment) is not built."
  },
  "options": {
   "count_resolution_hz": 10,
@@ -16,14 +16,14 @@
   "harm_count": 4
  },
  "discrepancies": [
-  "The document measures with instruments this bench does not have; the 5334B, 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) and the frequency points (Tables 2 and 3) are read by the HP 5334B (Option 030) on the lab GPS 10 MHz (owner, 2026-11-03). The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.",
+  "The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) needs a counter this program does not drive: that reading is typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.",
   "Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.",
   "Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.",
   "The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.",
   "Tables 4, 6 and 7: the document's 100 kHz carrier is moved to 150 kHz (owner, 2026-11-03), where the 8902A RF input range starts; the 6060A between 100 and 150 kHz is not verified.",
   "Table 5: the document's -127 dBm row is left out at every carrier (owner, 2026-11-03: \"delete the -127db test points...stop at -120dB\"); the levels end at -120 dBm.",
   "Table 5: the document's 100 kHz carrier is moved to 2.5 MHz (owner, 2026-11-03), where the 8902A tuned RF level starts (error 20 at 150 kHz); the 6060A level below 2.5 MHz is not verified by Table 5.",
-  "Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 5334B FREQ C reading covers the display range (+/-1 count of the 6060A 10 Hz resolution)."
+  "Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 8902A frequency counter covers the display range (+/-1 count)."
  ],
  "sections": [
   {
@@ -55,26 +55,22 @@
    "id": "G-4.1",
    "title": "Frequency accuracy",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "4.1.5: 6060A rear 10 MHz IN/OUT (REF INT) to the 5334B INPUT A; the 5334B time base is the lab GPS 10 MHz (rear TIME BASE on EXT).",
-   "group": "CTRA",
+   "setup": "4.1.5: 6060A rear 10 MHz IN/OUT to the counter, REF INT. Then the counter's 10 MHz reference is applied (REF EXT) and the 8902A (with the same reference) reads the RF output.",
+   "group": "REFOSC",
    "points": [
     {
      "func": "REFFREQ",
-     "meas": "ctr_freq",
-     "ctr": {
-      "channel": "A",
-      "gate_s": 1.0
-     },
+     "meas": "manual",
      "description": "Reference oscillator 10 MHz IN/OUT frequency (counter), 9 999 940 to 10 000 060 Hz",
      "nominal": 10000000.0,
      "low": 9999940.0,
      "high": 10000060.0,
      "unit": "Hz",
+     "manual_prompt": "Read the frequency counter on the 6060A rear 10 MHz IN/OUT (REF INT) and type the frequency in Hz (limits 9 999 940 to 10 000 060 Hz).",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ A, 1 s gate).",
-      "The limits are the printed 9,999,940 Hz to 10.000 060 MHz (+/-6 ppm, Table 1)."
+      "Typed reading: the document measures it with the Agilent 53132A counter; no counter is driven by this program. The limits are the printed 9,999,940 Hz to 10.000 060 MHz (+/-6 ppm, Table 1)."
      ],
-     "group": "CTRA",
+     "group": "REFOSC",
      "page": "T.O. 33K3-4-911-1 para 4.1.5",
      "section": "G-4.1",
      "ref": "4.1.5 10 MHz reference output"
@@ -85,330 +81,303 @@
    "id": "G-4.1b",
    "title": "Frequency accuracy (Tables 2 and 3)",
    "page": "T.O. 33K3-4-911-1",
-   "setup": "The 6060A RF OUTPUT to the 5334B INPUT C (Option 030); the 6060A rear 10 MHz IN/OUT to the lab GPS 10 MHz, REF EXT (the document applies the counter's reference, 4.1.6); the 5334B time base is the same GPS 10 MHz.",
-   "group": "CTRC",
+   "setup": "Connect the 6060A rear 10 MHz IN/OUT to the 8902A time base input (REF INT/EXT as the document's step 4.1.6 says: the counter reference), the RF OUTPUT to the 8902A RF INPUT. The 8902A replaces the counter; its resolution is 10 Hz.",
+   "group": "RX",
    "points": [
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 100.00000 MHz (Table 2)",
      "gen": {
       "freq_mhz": 100.0,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 100000000.0,
      "low": 99999990.0,
      "high": 100000010.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 100.00000 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 111.11111 MHz (Table 2)",
      "gen": {
       "freq_mhz": 111.11111,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 111111110.0,
      "low": 111111100.0,
      "high": 111111120.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 111.11111 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 122.22222 MHz (Table 2)",
      "gen": {
       "freq_mhz": 122.22222,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 122222220.0,
      "low": 122222210.0,
      "high": 122222230.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 122.22222 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 133.33333 MHz (Table 2)",
      "gen": {
       "freq_mhz": 133.33333,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 133333330.0,
      "low": 133333320.0,
      "high": 133333340.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 133.33333 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 144.44444 MHz (Table 2)",
      "gen": {
       "freq_mhz": 144.44444,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 144444440.0,
      "low": 144444430.0,
      "high": 144444450.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 144.44444 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 155.55555 MHz (Table 2)",
      "gen": {
       "freq_mhz": 155.55555,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 155555550.0,
      "low": 155555540.0,
      "high": 155555560.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 155.55555 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 166.66666 MHz (Table 2)",
      "gen": {
       "freq_mhz": 166.66666,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 166666660.0,
      "low": 166666650.0,
      "high": 166666670.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 166.66666 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 177.77777 MHz (Table 2)",
      "gen": {
       "freq_mhz": 177.77777,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 177777770.0,
      "low": 177777760.0,
      "high": 177777780.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 177.77777 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 188.88888 MHz (Table 2)",
      "gen": {
       "freq_mhz": 188.88888,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 188888880.0,
      "low": 188888870.0,
      "high": 188888890.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 188.88888 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 199.99999 MHz (Table 2)",
      "gen": {
       "freq_mhz": 199.99999,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 199999990.0,
      "low": 199999980.0,
      "high": 200000000.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
      "section": "G-4.1b",
      "ref": "4.1 Table 2 199.99999 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
+     "meas": "freq_count",
      "description": "Frequency 299.99999 MHz (Table 3)",
      "gen": {
       "freq_mhz": 299.99999,
       "level_dbm": null
      },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
+     "rx": {
+      "resolution_hz": 10
      },
      "nominal": 299999990.0,
      "low": 299999980.0,
      "high": 300000000.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> 8902A frequency counter).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 3",
      "section": "G-4.1b",
      "ref": "4.1 Table 3 299.99999 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
-     "description": "Frequency 399.99999 MHz (Table 3)",
-     "gen": {
-      "freq_mhz": 399.99999,
-      "level_dbm": null
-     },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
-     },
+     "meas": "manual",
+     "description": "Frequency 399.99999 MHz (Table 3, typed)",
      "nominal": 399999990.0,
      "low": 399999980.0,
      "high": 400000000.0,
      "unit": "Hz",
+     "manual_prompt": "Set the 6060A to 399.99999 MHz, RF ON, with REF EXT on the GPS 10 MHz. Read its RF OUTPUT on a frequency counter that is also on the GPS 10 MHz and type the frequency in Hz (limits 399 999 980 to 400 000 000 Hz). Switch RF OFF afterwards.",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "Typed reading (owner, 2026-11-04): above the 96270A frequency counter's specified range (0.9 to 310 MHz, 96000 Series Product Specifications), so the technician reads it on the lab's own counter. Printed limits +/-0.00001 MHz (10 Hz)."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 3",
      "section": "G-4.1b",
      "ref": "4.1 Table 3 399.99999 MHz"
     },
     {
      "func": "FREQ",
-     "meas": "ctr_freq",
-     "description": "Frequency 499.99999 MHz (Table 3)",
-     "gen": {
-      "freq_mhz": 499.99999,
-      "level_dbm": null
-     },
-     "ctr": {
-      "channel": "C",
-      "gate_s": 1.0
-     },
+     "meas": "manual",
+     "description": "Frequency 499.99999 MHz (Table 3, typed)",
      "nominal": 499999990.0,
      "low": 499999980.0,
      "high": 500000000.0,
      "unit": "Hz",
+     "manual_prompt": "Set the 6060A to 499.99999 MHz, RF ON, with REF EXT on the GPS 10 MHz. Read its RF OUTPUT on a frequency counter that is also on the GPS 10 MHz and type the frequency in Hz (limits 499 999 980 to 500 000 000 Hz). Switch RF OFF afterwards.",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> HP 5334B (Option 030 C channel) on the lab GPS 10 MHz (owner, 2026-11-03: \"automate the frequency portion to use the 5334\"), FREQ C, 1 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 1 s gate resolves 1 Hz or better. The document does not give a level: the preset level is left unchanged (the 5334B C channel needs 15 mV rms, -23.5 dBm)."
+      "Typed reading (owner, 2026-11-04): above the 96270A frequency counter's specified range (0.9 to 310 MHz, 96000 Series Product Specifications), so the technician reads it on the lab's own counter. Printed limits +/-0.00001 MHz (10 Hz)."
      ],
-     "group": "CTRC",
+     "group": "RX",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 3",
      "section": "G-4.1b",
      "ref": "4.1 Table 3 499.99999 MHz"

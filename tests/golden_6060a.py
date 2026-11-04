@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from drivers.fluke_6060a import Fluke6060A, PRESET_LEARN
 from drivers.hp_8563e import HP8563E
-from drivers.hp_5334b import HP5334B
 from drivers.hp_8902a import HP8902A
 from drivers.reference_instruments import Fluke96270A
 from drivers.simulated_6060a import make_rf_bench, preset_state, rf_state
@@ -33,9 +32,6 @@ COVERAGE = {
                  'set_vbw_hz', 'set_reference_level_dbm', 'set_attenuation_db', 'set_detector', 'set_marker_threshold', 'set_marker_excursion', 'single_sweep', 'sweep_time_s',
                  'take_sweep', 'marker_to_peak', 'delta_to_next_peak', 'configure', 'measure_fundamental', 'measure_harmonics', 'scan_spurs', 'reset_to_defaults'],
         no_command=['write', 'send', 'address', 'set_address']),
-    'HP5334B': dict(
-        covered=['connect', 'identify', 'status', 'error_number', 'check_status', 'parse_reading', 'measure_frequency_hz', 'go_local', 'cleanup', 'reset_to_defaults'],
-        no_command=['send', 'address', 'set_address', 'error_text']),
     'gpib_address': {},
 }
 COVERAGE.pop('gpib_address')                                             # a helper module with no Instrument class: it only appears in LINT_FILES
@@ -255,44 +251,8 @@ def cases_pmeter(c):
     c.run('Fluke96270A.read_dbm[below the floor]', watts_big.read_dbm)
 
 
-def cases_5334b(c):
-    from tests.golden_capture import Scripted
-    from drivers.simulated_5334b import Sim5334BTransport
-    bench, t6, _r, _s = make_rf_bench()
-    t = Sim5334BTransport(bench)
-    ctr = c.inst(HP5334B, t, opened=False, label='5334B')
-    c.run('HP5334B.connect', ctr.connect)
-    c.run('HP5334B.identify', ctr.identify)
-    c.run('HP5334B.status', ctr.status)
-    c.run('HP5334B.check_status', ctr.check_status, 'ctx')
-    c.run('HP5334B.error_number', ctr.error_number)
-    c.run('HP5334B.parse_reading', ctr.parse_reading, 'F   +4.58341265E+05')
-    c.run('HP5334B.parse_reading[overflow]', ctr.parse_reading, 'O+9.99999999999E+99')
-    c.run('HP5334B.parse_reading[not a frequency]', ctr.parse_reading, 'S  +1.000000000E-07')
-    _source(bench, mhz=111.11111, dbm=-10.0, on=True)
-    c.run('HP5334B.measure_frequency_hz[C]', ctr.measure_frequency_hz, 'C', 1.0, 111.11111e6)
-    c.run('HP5334B.measure_frequency_hz[A, 10 MHz reference]', ctr.measure_frequency_hz, 'A', 1.0)
-    c.run('HP5334B.measure_frequency_hz[C below 90 MHz]', ctr.measure_frequency_hz, 'C', 1.0, 50e6)
-    c.run('HP5334B.measure_frequency_hz[bad gate]', ctr.measure_frequency_hz, 'C', 200.0)
-    _source(bench, mhz=111.11111, dbm=-10.0, on=False)
-    c.run('HP5334B.measure_frequency_hz[no signal]', ctr.measure_frequency_hz, 'C', 1.0)
-    _source(bench, mhz=111.11111, dbm=-10.0, on=True)
-    t.no_oscillator = True
-    c.run('HP5334B.measure_frequency_hz[no oscillator]', ctr.measure_frequency_hz, 'C', 1.0)
-    t.no_oscillator = False
-    t.fail_with_error = '4.0'
-    c.run('HP5334B.measure_frequency_hz[error state]', ctr.measure_frequency_hz, 'C', 1.0)
-    c.quiet(t.clear)
-    c.run('HP5334B.reset_to_defaults', ctr.reset_to_defaults)
-    c.run('HP5334B.go_local', ctr.go_local)
-    c.run('HP5334B.cleanup', ctr.cleanup)
-    bad = c.inst(HP5334B, Scripted([(r'^ID', 'HP 5335A')]), opened=False, label='5334B')
-    c.run('HP5334B.connect[wrong model]', bad.connect)
-
-
 def driver_cases(c):
     cases_6060a(c)
     cases_8902a(c)
     cases_8563e(c)
     cases_pmeter(c)
-    cases_5334b(c)

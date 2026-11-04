@@ -2224,29 +2224,18 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
-- HP 5334B error 4.2 at Test connections (owner bench 2026-11-04: "getting error 4.2 on the 5334 when checking connections"). Table 3-3 (p. 3-48, now read):
-  4.2 = HP-IB 'alpha character expected'. The driver left the VISA GPIB default line end CR LF; the manual names only spaces, commas and semicolons as separators (3-307),
-  so the likely cause is the CR after each command (UNVERIFIED: the HP-85 examples also end in CR LF). Fix: `HP5334B._line_ends` sets write and read termination to LF
-  (as the 8902A driver does); `connect` now ends with `check_status(..., oscillator=False)`, so an error left after ID / IN / WA1 stops Test connections with its number
-  and meaning (`ERROR_TEXT`, `error_text`) instead of showing up as an ignored command at the first measurement; no oscillator is still judged per point. A Manager
-  'Find instruments...' scan sends *IDN? to every address, which also gives 4.2 on a 5334B; the device clear at connect clears that. Simulator: opt-in
-  `Sim5334BTransport.cr_is_error`. Tests: `tests/test_fluke6060a_gidep.py` CounterLineEnds. NOT run on the bench yet.
-- HP 5334B counter for the frequency points (owner, 2026-11-03: "can we automate the frequency portion to use the 5334?"; a 5334B with Options 010 and 030): NEW driver
-  `drivers/hp_5334b.py` from the owner's 5334A/B Operating and Programming Manual 05334-90047 (Dec 1993; the scanned PDF the owner pushed as '5334 Manual.pdf', read from the
-  RENDERED pages: Table 3-12 commands p. 3-82 / 3-83, output format p. 3-84 / 3-85, status byte Table 3-11 p. 3-77, error handling p. 3-87 / 3-88, IN / RE / TE / WA1
-  p. 3-80 / 3-81, address 03 p. 3-71, specifications Table 1-1 pp. 1-2 to 1-6). It sends IN, WA1 at connect; per reading FN1 / FN3, GA<s>, RE, reads the 19-character reply
-  ('F', 'O' = overflow) and serial-polls: error (bit 4, with the TE number), failure (bit 8) and no oscillator (bit 32: TIME BASE on EXT with no GPS) stop the point; a
-  timeout first checks the status byte (in an error state the counter ignores commands). UNVERIFIED: the TE reply text, the 5334B ID text (only '5334' required), the
-  read margin (gate + 5 s), line ends. Simulator `drivers/simulated_5334b.py` (FREQ C reads the simulated 6060A, FREQ A `input_a_hz`). GIDEP spec: the 10 MHz reference
-  (was typed) is `meas: ctr_freq` channel A, group CTRA (6060A REF INT, its rear 10 MHz to INPUT A); Tables 2 and 3 (were the 8902A) are channel C, group CTRC (6060A
-  on the GPS 10 MHz, REF EXT), gate 1 s each (LSD <= 1 Hz against +/-10 Hz). Engine: IO role `ctr` (address box '5334B GPIB address', settings key `addr_5334B`, default 3
-  for the GIDEP procedure, empty for the Instruction Manual one, which is unchanged). Uncertainty unchanged (the GPS Frequency - Measure CMC). Golden cases in
-  `tests/golden_6060a.py`; tests in `tests/test_fluke6060a_gidep.py`. NOT run on the bench yet: run one point of each first.
 - PLL lock wait (owner bench 2026-11-03: 'output is UNCAL (0.0 dBm): 000000,000010,000400: main or reference PLL unlocked' on a 244.99 MHz spur point, which already has the
   242-243-244 MHz approach): `Fluke6060A.check_uncal` reads IU again, at most `PLL_LOCK_TRIES` (5) x `PLL_LOCK_WAIT_S` (0.4 s), when the PLL unlock (field 2, 0o010) is the
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- HP 5334B REMOVED (owner, 2026-11-04: "still can't get the 5334 to run correctly....can we abandon it and use the frequency counter built into the 96270?"; asked:
+  "Remove it"). Commits be3b199 (driver, simulator, CTRA / CTRC groups, address box) and f9de457 (LF line ends after error 4.2 at Test connections) are reverted: the
+  10 MHz reference output is typed again and Tables 2 and 3 are read on the 8902A again, until the 96270A counter is wired in. The 5334B manual stays in the repo.
+  Table 3 399.99999 and 499.99999 MHz are now TYPED (owner: "Typed reading"): above the 96270A counter's specified 0.9 to 310 MHz (96000 Series Product
+  Specifications, Frequency Counter: rear 300 MHz Counter BNC, 50 ohm above 50.5 MHz, 0.5 V pk-pk minimum, gates 0.2 / 2 / 20 / 80 s, accuracy ext ref + 0.5 count).
+  NEXT: the 96270A counter for the 10 MHz reference and the 11 points to 299.99999 MHz; its remote commands need the 96000 Series Remote Programmers Manual (not in
+  the repo; the vendor sites are blocked from the build container).
 - FM deviation read-back (owner bench 2026-11-03): 'read-back refused: fm_dev_hz: asked 10000, learn string says 1000.0' on the first Table 8 point (10 kHz on 250 kHz) while
   the 6060A FRONT PANEL showed 10.0 kHz. The bench LM99 'BOABAAAAAAEGAAAKAAAAAAAAAAADNAJAAAAPECEAAAGEAAABJCEEBBBGBLKKHFAC' (one letter of the on-screen copy fixed by the
   checksum) has chars 41-44 'AAGE' = 100 and char 57 'B', the same resolution character as the preset's 5.00 kHz (500). So the FM field holds the three DISPLAYED digits

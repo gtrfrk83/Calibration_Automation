@@ -26,7 +26,6 @@ from .fluke_8808a_cal import Fluke8808ACal
 from .bk_5491b import BK5491B
 from .fluke_6060a import Fluke6060A
 from .hp_8902a import HP8902A, RecalRequired
-from .hp_5334b import HP5334B
 from .hp_8563e import HP8563E
 from .hp_8591a import HP8591A
 from .tektronix_mdo4000c import TektronixMDO4000C

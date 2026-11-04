@@ -47,17 +47,15 @@ POINTS: list[dict[str, Any]] = []
 UUT_ADDRESS = drivers.Fluke6060A.DEFAULT_ADDRESS          # the owner's lab addresses; each is an editable box and none is fixed in code
 RX_ADDRESS = drivers.HP8902A.DEFAULT_ADDRESS
 SA_ADDRESS = drivers.HP8563E.DEFAULT_ADDRESS
-CTR_ADDRESS = drivers.HP5334B.DEFAULT_ADDRESS                # 5334B counter (GIDEP frequency points, owner 2026-11-03); factory address 03
 DEFAULT_RF_ADDR = 'GPIB0::4::INSTR'                        # the 96270A: the same default as the 53220A / MDO engines (UNVERIFIED example; File > Settings > Instrument addresses overrides it)
 NO_LF = 'None (I set the generator by hand)'
 LF_CHOICES = {NO_LF: None, 'Keysight 33210A': drivers.Keysight33210A, 'Keysight 33220A': drivers.Keysight33220A, 'Keysight 33250A': drivers.Keysight33250A}
 LF_VRMS = 0.7071                                          # test 3 and 6: "0.7071 V rms as read by the DVM" (UNVERIFIED: the generator is set to this into High Z; check the DVM)
-MEAS = ('selftest', 'freq_count', 'ctr_freq', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'devmeter', 'derived')
+MEAS = ('selftest', 'freq_count', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'devmeter', 'derived')
 GROUP_TITLE = {'POWERON': 'Power-on self test', 'RX': '6060A RF OUTPUT to the 8902A RF INPUT', 'RXPWR': '6060A RF OUTPUT to the 11722A sensor module (8902A RF power)',
                'PM': '6060A RF OUTPUT to the NRP40T sensor on the 96270A', 'SA': '6060A RF OUTPUT to the 8563E', 'EXT1K': '8902A and LF generator at 1 kHz (external modulation)',
                'EXT10K': '8902A and LF generator at 10 kHz (external modulation)', 'EXT400': '8902A and LF generator at 400 Hz (external modulation)',
-               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'CTRA': '6060A rear 10 MHz IN/OUT to the 5334B INPUT A',
-               'CTRC': '6060A RF OUTPUT to the 5334B INPUT C (6060A on the GPS 10 MHz)', 'DEVM': '96270A FM output to the 6060A DEVIATION METER INPUT (typed readings)'}
+               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'DEVM': '96270A FM output to the 6060A DEVIATION METER INPUT (typed readings)'}
 WARM_UP = ('The 8902A needs 30 minutes of warm-up before its power, AM and FM calibrations (8902A manual), and the 8563E and the 6060A should be on long enough to be stable. '
            'The program does not wait for it.')
 TYPED_THD_TEXT = ('Test 6: THD at 10 kHz is typed from your own distortion analyzer (the 8902A measures distortion only at 1 kHz and 400 Hz). Untick to leave those 17 points out.')
@@ -87,11 +85,8 @@ def load_spec(path=None):
                 raise SpecError(f'{where}: low must not be above high')
             if not p['low'] <= p['nominal'] <= p['high']:
                 raise SpecError(f'{where}: limits do not contain the nominal')
-            ctr_a = p['meas'] == 'ctr_freq' and (p.get('ctr') or {}).get('channel') == 'A'     # the 6060A rear 10 MHz output on the counter: nothing is programmed
-            if p['meas'] not in ('selftest', 'derived', 'manual', 'devmeter') and 'gen' not in p and not ctr_a:
+            if p['meas'] not in ('selftest', 'derived', 'manual', 'devmeter') and 'gen' not in p:
                 raise SpecError(f'{where}: a measured point needs a generator setting')
-            if p['meas'] == 'ctr_freq' and not ((p.get('ctr') or {}).get('channel') in ('A', 'C') and (p.get('ctr') or {}).get('gate_s')):
-                raise SpecError(f'{where}: a counter point needs ctr (channel A or C, gate_s)')
             if p['meas'] == 'devmeter' and 'fmsrc' not in p:
                 raise SpecError(f'{where}: a deviation-meter point needs an fmsrc (the 96270A FM setting)')
     for s in spec['sections']:
@@ -300,7 +295,6 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.gen: drivers.Fluke6060A = cast(Any, None)
         self.rx: Any = None
         self.sa: Any = None
-        self.ctr: Any = None
         self.pm: Any = None
         self.lf: Any = None
         self.lf_model = lf_model
@@ -312,7 +306,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 tr['gen'] = drivers.open_visa(to_visa(addrs['uut']), timeout=20)   # the box keeps its GPIB board: 'GPIB1::2::INSTR' is not turned into GPIB0
             self.gen = drivers.Fluke6060A(tr['gen'], self.log, label='6060A', address=gpib_number(addrs['uut'], '6060A') if not transports else None)
             self.gen.connect()
-            for key, cls, label, what in (('rx', drivers.HP8902A, '8902A', '8902A'), ('sa', drivers.HP8563E, '8563E', '8563E'), ('ctr', drivers.HP5334B, '5334B', '5334B')):
+            for key, cls, label, what in (('rx', drivers.HP8902A, '8902A', '8902A'), ('sa', drivers.HP8563E, '8563E', '8563E')):
                 text = str(addrs.get(key, '')).strip()
                 if key not in tr and not text:
                     continue
@@ -351,7 +345,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self._devmeter = False              # deviation-meter points in progress: the 6060A RF output is never switched on (owner, 2026-11-03)
 
     def reset_roles(self):
-        return [x for x in (self.rx, self.sa, self.ctr, self.pm, self.lf) if x is not None], [self.gen]
+        return [x for x in (self.rx, self.sa, self.pm, self.lf) if x is not None], [self.gen]
 
     def reset_at_start(self, confirm=None):
         report = super().reset_at_start(confirm)
@@ -399,12 +393,12 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def close(self):
         try: self.standby()
         except Exception: pass
-        for obj in (self.lf, self.pm, self.ctr, self.sa, self.rx, self.gen):
+        for obj in (self.lf, self.pm, self.sa, self.rx, self.gen):
             if obj is None:
                 continue
             try: obj.cleanup()
             except Exception: pass
-        for obj in (self.lf, self.pm, self.ctr, self.sa, self.rx, self.gen):
+        for obj in (self.lf, self.pm, self.sa, self.rx, self.gen):
             if obj is None:
                 continue
             try: obj.close()
@@ -453,7 +447,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         if p['meas'] == 'level_pm': return self.pm_param('f6060a.settle.pm', PM_SETTLE_S)
         if p['meas'] in ('harmonic', 'spur'): return self.pm_param('f6060a.settle.sa', SA_SETTLE_S)
-        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count', 'ctr_freq', 'devmeter'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
+        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count', 'devmeter'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
         return self.pm_param('f6060a.settle.default', DEFAULT_SETTLE_S)
 
     def _need(self, name, what):
@@ -500,18 +494,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             pm.output(True)
             time.sleep(self.settle(p))
             return TypedPoint(p.get('manual_prompt') or 'Read the 6060A Modulation Display deviation and type it in kHz.')
-        if kind == 'ctr_freq' and not p.get('gen'):                # the 6060A rear 10 MHz output on the 5334B INPUT A: nothing is programmed, no RF is switched on
-            ctr, c = self._need('ctr', '5334B'), p['ctr']
-            try:
-                return ctr.measure_frequency_hz(c['channel'], c['gate_s'], expect_hz=p['nominal'])
-            except (SafetyError, ReadingUnavailable):
-                raise
-            except Exception as exc:                               # a timeout, an error state, no oscillator: a typed reading may replace it
-                raise ReadingUnavailable(str(exc)) from exc
         if kind == 'manual':                                       # the reading comes from the technician's own instrument (nothing is programmed, no RF is switched on)
             return TypedPoint(p.get('manual_prompt') or 'Read your instrument and type the value.')
         self._devmeter = False                                     # a point that uses the 6060A output: RF state is read back again
-        needs = {'freq_count': ('rx', '8902A'), 'ctr_freq': ('ctr', '5334B'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
+        needs = {'freq_count': ('rx', '8902A'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
                  'mod_rate': ('rx', '8902A'), 'am_depth': ('rx', '8902A'), 'fm_dev': ('rx', '8902A'), 'thd': ('rx', '8902A')}
         if kind in needs:
             self._need(*needs[kind])
@@ -573,9 +559,6 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             # No automatic 15.1SP time-base check: owner bench 2026-10-28, sending 15.1SP left the 8902A showing '1' (the special-function display) and locked until a preset.
             # The reference connection is the operator's hook-up step (see the group notice); the 8902A switches to the external 10 MHz by itself.
             return rx.measure_frequency_hz(f, resolution_hz=r['resolution_hz'])
-        if kind == 'ctr_freq':                                     # the 5334B on the GPS 10 MHz (Option 030 C channel for the RF output)
-            c = p['ctr']
-            return self.ctr.measure_frequency_hz(c['channel'], c['gate_s'], expect_hz=f * 1e6)
         if kind == 'level_pm':
             return self.pm.read_dbm()
         if kind == 'level_rx':
@@ -661,7 +644,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.uut_addr = port.var(s.get('uut_addr', str(UUT_ADDRESS)))                  # 6060A (unit under test)
         self.rx_addr = port.var(s.get('addr_8902A', str(RX_ADDRESS)))                  # 8902A (File > Settings > Instrument addresses can pre-fill it)
         self.sa_addr = port.var(s.get('addr_8563E', str(SA_ADDRESS)))                  # 8563E
-        self.ctr_addr = port.var(s.get('addr_5334B', str(CTR_ADDRESS) if STATE_KEY == '6060A-gidep' else ''))     # 5334B counter (GIDEP frequency points; empty = not used)
         self.rf_addr = port.var(s.get('rf_addr', DEFAULT_RF_ADDR))                     # 96270A
         self.lf_model = port.var(s.get('lf_model', NO_LF) if s.get('lf_model', NO_LF) in LF_CHOICES else NO_LF)
         self.lf_addr = port.var(s.get('lf_addr', ''))                                  # 33210A / 33220A / 33250A as the LF source (empty: set by hand)
@@ -673,7 +655,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.show_status = port.var('All points')
         self.warm_confirmed = False
         self._prep_done = set()
-        for var in (self.uut_addr, self.rx_addr, self.sa_addr, self.ctr_addr, self.rf_addr, self.lf_model, self.lf_addr):
+        for var in (self.uut_addr, self.rx_addr, self.sa_addr, self.rf_addr, self.lf_model, self.lf_addr):
             var.trace_add('write', self.reset_forget)       # an address changed in the settings: the next Run resets again
         self.rx_addr.trace_add('write', lambda *_a: self._prep_done.clear())     # another 8902A: its calibrations are asked for again
         self._build_ui()
@@ -733,7 +715,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def mo_point(self, iid): return POINTS[int(iid) - 1]
     def mo_total(self): return len(POINTS)
 
-    def pm_driver_classes(self): return (drivers.Fluke6060A, drivers.HP8902A, drivers.HP8563E, drivers.HP5334B, drivers.Fluke96270A, drivers.Keysight33220A)
+    def pm_driver_classes(self): return (drivers.Fluke6060A, drivers.HP8902A, drivers.HP8563E, drivers.Fluke96270A, drivers.Keysight33220A)
 
     def pm_plan_point(self, p):
         """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
@@ -793,12 +775,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return 'No connections. Switch the 6060A POWER off and on and watch the self test (every indicator on for about 5 seconds; the failure codes show in the four display fields if it fails).'
         if g == 'RX':
             return rx_in
-        if g == 'CTRA':
-            return ('6060A rear panel 10 MHz IN/OUT to the 5334B INPUT A (BNC), 6060A REF INT/EXT switch to INT (its own reference is measured). 5334B rear TIME BASE INT/EXT switch '
-                    'on EXT with the lab GPS 10 MHz at its TIME BASE IN/OUT. The program reads FREQ A with a 1 s gate. The 6060A RF output is not used.')
-        if g == 'CTRC':
-            return ('6060A RF OUTPUT to the 5334B INPUT C (Option 030, 50 ohm, 90 to 1300 MHz). 6060A rear panel 10 MHz IN/OUT to the lab GPS 10 MHz, REF INT/EXT switch to EXT '
-                    '(the document applies the counter\'s reference, 4.1.6). 5334B rear TIME BASE switch on EXT with the GPS 10 MHz. The program reads FREQ C with a 1 s gate.')
         if g == 'REFOSC':
             return ('6060A rear panel 10 MHz IN/OUT to the frequency counter input (50 ohm), REF INT/EXT switch to INT. Read the counter and type the frequency in Hz. The 6060A RF output is not used.')
         if g == 'DEVM':
@@ -820,7 +796,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     # ------------------------------------------------------------------ connection
     def _addrs(self):
-        return dict(uut=self.uut_addr.get(), rx=self.rx_addr.get(), sa=self.sa_addr.get(), ctr=self.ctr_addr.get(), pm=self.rf_addr.get(), lf=self.lf_addr.get())
+        return dict(uut=self.uut_addr.get(), rx=self.rx_addr.get(), sa=self.sa_addr.get(), pm=self.rf_addr.get(), lf=self.lf_addr.get())
 
     def find_instruments(self):
         found = []
@@ -830,7 +806,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         except Exception:
             pass
         gpib = [r for r in found if r.upper().startswith('GPIB')]
-        for which in ('uut', 'rx', 'sa', 'ctr', 'rf', 'lf'):
+        for which in ('uut', 'rx', 'sa', 'rf', 'lf'):
             self.ui_view.set_choices(self, which, gpib)
         self.status.set(f'{len(gpib)} GPIB instrument(s) found: ' + (', '.join(gpib) if gpib else 'none') + '. Pick the address of each instrument.' if gpib
                         else 'No GPIB instruments found (install pyvisa and a VISA library, or enter the addresses by hand).')
@@ -878,7 +854,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
-        for key, var in (('uut_addr', self.uut_addr), ('addr_8902A', self.rx_addr), ('addr_8563E', self.sa_addr), ('addr_5334B', self.ctr_addr), ('rf_addr', self.rf_addr), ('lf_model', self.lf_model),
+        for key, var in (('uut_addr', self.uut_addr), ('addr_8902A', self.rx_addr), ('addr_8563E', self.sa_addr), ('rf_addr', self.rf_addr), ('lf_model', self.lf_model),
                          ('lf_addr', self.lf_addr)):
             self.settings.set(key, var.get())
         self.settings.set('thd_typed', bool(self.thd_typed.get()))
