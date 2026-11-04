@@ -382,6 +382,51 @@ except ImportError:
     HAVE_QT = False
 
 
+class HighVoltage(unittest.TestCase):
+    """The HIGH VOLTAGE question is asked once per run (the DAQ procedure's rule), at the first high-voltage point, and names the highest voltage of the run."""
+    class Sync:                                           # a thread that runs its target at once
+        def __init__(self, target=None, daemon=None, **_k): self.target = target
+        def start(self): self.target()
+
+    def run_points(self, points, answer=True):
+        asked = []
+        fake = mock.MagicMock()
+        fake._is_hv = E.App._is_hv
+        fake.stop, fake.fast_demo, fake._hv_acked = False, False, False
+        fake.pm_step = lambda pts, i, prev: (pts[i], prev)
+        fake.is_manual = lambda p: False
+        fake.uses_amp = lambda p: False
+        fake._prompt_setup = lambda p: True
+        fake.ui_view.table_has.return_value = False
+        fake.connected_io.return_value.measure.side_effect = lambda p: p['nominal']
+        fake._done = lambda pts, i, p, r, key: E.App._next(fake, pts, i + 1, key)
+        with mock.patch.object(E.threading, 'Thread', self.Sync), mock.patch.object(E.port, 'post', lambda root, f: f()), \
+                mock.patch.object(E.port, 'ask_yes_no', lambda title, msg, **k: (asked.append((title, msg)), answer)[1]):
+            E.App._next(fake, points, 0, None)
+        return asked, fake.connected_io.return_value.measure.call_count
+
+    def test_asked_once_for_the_whole_run(self):
+        points = [p for p in E.POINTS if p['kind'] in ('DCV', 'ACV', 'DIGV')]
+        self.assertGreater(sum(E.App._is_hv(p, False) for p in points), 10)
+        asked, measured = self.run_points(points)
+        self.assertEqual(len(asked), 1)
+        self.assertEqual(asked[0][0], 'HIGH VOLTAGE')
+        self.assertIn('up to 1000 V', asked[0][1])
+        self.assertEqual(measured, len(points))
+
+    def test_not_asked_when_the_run_stays_below_the_threshold(self):
+        points = [p for p in E.POINTS if p['kind'] == 'DCV' and abs(p['nominal']) < E.HV_CONFIRM]
+        asked, measured = self.run_points(points)
+        self.assertEqual((asked, measured), ([], len(points)))
+
+    def test_answering_no_stops_before_the_high_voltage_point(self):
+        points = [p for p in E.POINTS if p['kind'] == 'DCV']
+        first_hv = next(i for i, p in enumerate(points) if E.App._is_hv(p, False))
+        asked, measured = self.run_points(points, answer=False)
+        self.assertEqual(len(asked), 1)
+        self.assertEqual(measured, first_hv)
+
+
 @unittest.skipUnless(HAVE_QT, 'PySide6 is not installed')
 class Window(unittest.TestCase):
     def test_demo_window_builds_with_every_point_and_the_new_fields(self):

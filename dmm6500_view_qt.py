@@ -34,7 +34,7 @@ def build_ui(self):
     sh.build_identity(self.asset, self.serial)
     self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
     self.summary = sh.build_progress()
-    B.notice(sh, self, 'The program asks you to confirm the warm-up and environment, the wiring before every new setup and before any high-voltage point. Stay at the bench '
+    B.notice(sh, self, 'The program asks you to confirm the warm-up and environment, the wiring before every new setup, and the high-voltage hazard once per run. Stay at the bench '
                        'while a run is in progress. No DMM6500 command has been verified on a real meter yet.')
 
     # settings and connections live in the slide-in drawer

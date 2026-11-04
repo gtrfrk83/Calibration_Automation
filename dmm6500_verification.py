@@ -793,8 +793,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.fast_demo and self.io is None: return
         if not self.fast_demo and not self._prompt_start(): self.status.set('Run not started: warm-up and conditions were not confirmed.'); return
         self.mo_reset_run()
+        self._hv_acked = False                                       # a new run asks the high-voltage question again
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
+
+    @staticmethod
+    def _is_hv(p, manual):
+        """A calibrator volts point of HV_CONFIRM or more (a point made with the technician's own standard has its own prompt)."""
+        return p['source'] == 'calibrator' and not manual and p['kind'] in ('DCV', 'ACV', 'DIGV') and abs(p['nominal']) >= HV_CONFIRM
 
     def _prompt_setup(self, p):
         """Confirm the physical hook-up when the wiring group changes (with the picture, if installed). False if the technician cancels."""
@@ -846,9 +852,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         key = f'MANUAL{p["id"]}' if manual else (p['source'], p['terminal'], p['group'], self.uses_amp(p))
         if not self.fast_demo and key != previous and not (self._prompt_manual(p) if manual else self._prompt_setup(p)):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
-        if not self.fast_demo and p['source'] == 'calibrator' and not manual and p['kind'] in ('DCV', 'ACV', 'DIGV') and abs(p['nominal']) >= HV_CONFIRM:
-            if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
+        if not self.fast_demo and self._is_hv(p, manual) and not getattr(self, '_hv_acked', False):
+            # asked once per run, at the first high-voltage point (the DAQ procedure's rule, owner 2026-11-02); the question names the highest voltage the run will output
+            top = max(abs(q['nominal']) for q in points[i:] if self._is_hv(q, self.is_manual(q)))
+            if not port.ask_yes_no('HIGH VOLTAGE', f'This run outputs up to {top:g} V from the calibrator. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
+            self._hv_acked = True
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         self.mo_begin(p)                               # the point being measured: 'Enter reading manually' applies to it
         if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
