@@ -81,11 +81,12 @@ class Budgets(Base):
         r = self.ev('4.5 Table 8 250 MHz 250 kHz')
         self.assertEqual(r.reported, 3300.0)
 
-    def test_fm_above_40_khz_below_10_mhz_has_no_row(self):
-        r = self.ev('4.5 Table 8 250 kHz 50 kHz')
-        self.assertEqual(r.status, fu.NO_SPEC)
-        self.assertEqual(r.scope, fu.OUT)
-        self.assertIsNone(r.reported)
+    def test_fm_above_40_khz_below_10_mhz_is_not_in_the_spec(self):
+        """Owner 2026-11-04: "remove all fm test points that can't be done on the 8902": 50 kHz on the 250 kHz carrier (above the 8902A's 40 kHz) is gone."""
+        spec = json.loads((ROOT / 'specs' / 'fluke_6060a_gidep_pv.json').read_text(encoding='utf-8'))
+        refs = [p['ref'] for s in spec['sections'] for p in s['points'] if p['meas'] == 'fm_dev']
+        self.assertNotIn('4.5 Table 8 250 kHz 50 kHz', refs)
+        self.assertIn('4.5 Table 8 250 kHz 25 kHz', refs)
 
     def test_am_depth_out_of_scope_between_10_mhz_and_1_3_ghz(self):
         r = self.ev('4.4 Table 6 250 MHz 30 % at 1000 Hz')

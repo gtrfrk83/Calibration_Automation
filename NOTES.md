@@ -2229,6 +2229,9 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- FM points the 8902A cannot measure REMOVED (owner, 2026-11-04: "remove all fm test points that can't be done on the 8902"). Against the 8902A FM accuracy rows (p. 1-20:
+  40 kHz peak for 250 kHz to 10 MHz carriers, 400 kHz for 10 to 1300 MHz) only Table 8 50 kHz on the 250 kHz carrier is out; it is left out of the spec
+  (`rx_fm_max_dev_hz` in the builder; 213 points) and named in the report discrepancies. The 250 / 520 MHz points (to 380 kHz) and residual FM stay.
 - FM read-back at 100 kHz (owner bench 2026-11-04, build d8bf042): 'read-back refused: fm_dev_hz: asked 100000, learn string says 10000.0' on Table 8 100 kHz at
   250 MHz. LM99 'BOABAAAAAAEGAAAKAAAAAAAAAOOGLCIAAAAPECEAAAGEAAABJCEEBBBGCLKKKCAC' (checksum good): chars 41-44 'AAGE' = 100 digits, char 57 'C' (the 10 kHz string had 'B').
   The 2026-11-03 display-digit decode was applied only for 'B'; it now applies for 'B' and 'C' (digits x the display resolution of the value asked: 100 x 1 kHz); 'A' keeps

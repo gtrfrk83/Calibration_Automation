@@ -41,8 +41,8 @@ class SpecTests(unittest.TestCase):
     def test_counts_and_groups(self):
         got = {s['id']: len(s['points']) for s in SPEC['sections']}
         self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-2.5': 25, 'G-4.2b-250': 25, 'G-4.2b-520': 25, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
-                               'G-4.4-520': 8, 'G-4.5': 9, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
-        self.assertEqual(len(points()), 214)
+                               'G-4.4-520': 8, 'G-4.5': 8, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
+        self.assertEqual(len(points()), 213)
         self.assertEqual({p['group'] for p in points()}, {'POWERON', 'FCOREF', 'FCORF', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
 
     def test_the_100_khz_carrier_is_moved_to_150_khz_and_2_5_mhz_for_table_5(self):
@@ -190,7 +190,7 @@ class GidepBench(T.Bench):
 class GidepEngine(GidepBench):
     def test_state_is_kept_apart_from_the_instruction_manual_procedure(self):
         self.assertEqual(E.STATE_KEY, '6060A-gidep')
-        self.assertEqual(len(E.POINTS), 214)
+        self.assertEqual(len(E.POINTS), 213)
         self.assertEqual(E.SPEC['source']['limits_text'], 'GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)')
 
     def test_points_the_instruments_cannot_program_are_listed_not_tested(self):
@@ -218,7 +218,7 @@ class GidepEngine(GidepBench):
     def test_every_point_passes_on_the_simulated_bench_and_rf_is_off_after_each(self):
         self.run_points('', seconds=3000)
         self.assertEqual(self.errors(), [])
-        self.assertEqual(len(self.app.found), 207)
+        self.assertEqual(len(self.app.found), 206)
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 

@@ -30,7 +30,13 @@ FCO = 'the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab 
 FCO_RANGE_LOW, FCO_RANGE_HIGH = 2, 3        # :FCOunter:RANGe 2 = 50 MHz @ 50 ohm, 3 = 300 MHz @ 50 ohm (Remote Programmers Manual p. 41)
 FCO_GATE_S = 2.0                            # :TRIG:GATE 2 (p. 42): 8 / 9 digits (Product Specifications); 20 s would show one more digit at ten times the time
 FCO_LEVEL_DBM = 7.0                         # the counter needs 0.5 V pk-pk minimum (about -2 dBm into 50 ohm); +7 dBm is 1.4 V pk-pk, under its +/-5 V pk maximum
-COUNTER_MAX_MHZ = D('310')                 # 96270A frequency counter, specified 0.9 to 310 MHz (96000 Series Product Specifications, Frequency Counter)
+COUNTER_MAX_MHZ = D('310')
+
+
+def rx_fm_max_dev_hz(carrier_mhz):
+    """The largest peak deviation the 8902A specifies FM accuracy for (p. 1-20, specs/standards/hp_8902a_standard.json): 40 kHz for 250 kHz to 10 MHz carriers, 400 kHz from 10 MHz
+    to 1300 MHz. Table 8's 50 kHz on the 250 kHz carrier is above it and is left out (owner, 2026-11-04)."""
+    return 40e3 if float(carrier_mhz) < 10 else 400e3                 # 96270A frequency counter, specified 0.9 to 310 MHz (96000 Series Product Specifications, Frequency Counter)
 COUNT_STEP_MHZ = D('0.00001')                                                 # the printed limits are the applied value +/-0.00001 MHz (10 Hz), 1 count of the counter's LSD
 REF_LOW_HZ, REF_HIGH_HZ = 9999940, 10000060                                   # 4.1.5
 DOC_LOW_MHZ = 0.1                                                              # the document's low carrier for Tables 4 to 7: 100 kHz
@@ -223,6 +229,8 @@ def build_spec():
     for fm, rows in TABLE8:
         nm = fname(fm)
         for dev, lo, hi in rows:
+            if dev * 1000 > rx_fm_max_dev_hz(fm):                       # owner 2026-11-04: "remove all fm test points that can't be done on the 8902"
+                continue
             add(s, '4.5 Table 8', tag=f'{nm} {dev} kHz', func='FMDEV', meas='fm_dev', description=f'FM deviation {dev} kHz at {nm} (INT FM 1 kHz, +{FM_LEVEL_DBM} dBm)',
                 gen=dict(freq_mhz=num(fm), level_dbm=FM_LEVEL_DBM, fm=dict(khz=float(dev), src='int', rate_hz=1000.0)), rx=dict(detector=1, hp=2, lp=1), nominal=float(dev * 1000), low=f(D(lo) * 1000), high=f(D(hi) * 1000), unit='Hz',
                 flags=[UNV + ' (MMR FM deviation, HP 300 Hz, LP 3 kHz -> 8902A detector D1 peak+, H2, L1).', 'UNVERIFIED: the detector is not printed; peak+ is used.'] + (['UNVERIFIED: the Instruction Manual limits FM deviation to 99.9 kHz (Table 2-5, p. 2-21); the document (Table 1) gives the 6060A/AN 1 to 500 kHz, and the owner asked for the larger deviations (2026-11-02). The command is sent as FM<kHz>KZ and read back; the unit\'s own range error stops the point if it refuses.'] if dev > 99.9 else []))
@@ -297,6 +305,7 @@ def build_spec():
         constants=dict(harm_count=HARM_COUNT),
         discrepancies=[
             'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) and the frequency points up to 300 MHz (Tables 2 and 3) are read on the 96270A frequency counter (on the GPS 10 MHz); 399.99999 and 499.99999 MHz are above its range and are typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.',
+            'Table 8: the 50 kHz deviation on the 250 kHz carrier is not tested: it is above the 8902A\'s specified 40 kHz peak deviation for 250 kHz to 10 MHz carriers (p. 1-20), and the owner removed the FM points the 8902A cannot measure (2026-11-04).',
             'Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.',
             'Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.',
             'The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.',
