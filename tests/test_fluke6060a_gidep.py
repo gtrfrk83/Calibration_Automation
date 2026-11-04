@@ -657,3 +657,24 @@ class TypedReadingDialog(GidepBench):
         self.assertEqual((a1[5], k1['instruction']), ('', 'Read the 6060A display.'))      # no failure reason with an instruction
         self.assertNotIn('calibrator', k1['standby_text'].lower())
         self.assertEqual((a2[5], k2), ('timeout', {}))                                       # other procedures: unchanged call
+
+
+class UncertaintyReviewWindow(GidepBench):
+    """Owner 2026-11-04: "why is the 5560 listed for the uncertainties in this procedure?" The 'Review uncertainties' window treated the 6060A like a multimeter (a calibrator
+    drop-down, every row 'No uncertainty required'). The engine now supplies the rows itself (review_point_specs): its own figures, no calibrator."""
+
+    def test_the_review_rows_carry_the_procedures_own_uncertainty(self):
+        import report_review_model as M
+        self.run_points(refs=['4.1 Table 2 100.00000 MHz', '4.4 Table 6 250 MHz 30 % at 1000 Hz'])
+        specs, default = M.specs_for(self.app)
+        self.assertIsNone(default)                                        # no default calibrator (was the Fluke 5560A)
+        model = M.ReviewModel(specs, default)
+        by = {r.spec.description.split(' (')[0]: r for r in model.rows}
+        f = by['Frequency 100.00000 MHz']
+        self.assertEqual((f.cur.status, f.cur.unc_text), (M.AS_BUDGETED, f.spec.printed['Uncertainty']))
+        self.assertTrue(f.spec.printed['Uncertainty'])
+        self.assertIn('96270A frequency counter', f.spec.std_label)
+        am = next(r for r in model.rows if r.spec.description.startswith('AM depth 30 % at 1000 Hz rate, 250 MHz'))
+        self.assertEqual(am.cur.status, M.NOT_IN_SCOPE)                   # a starred budget: the scope does not cover it
+        self.assertTrue(all(M.offered_standards(r.spec) == [] for r in model.rows))     # nothing to choose
+        self.assertEqual(model.record()['changes'] if 'changes' in model.record() else [], [])

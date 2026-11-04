@@ -696,7 +696,11 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
 def specs_for(app, kinds=None):
     """(specs, default_standard) for an engine App.  Multimeter engines (certificate_rows_and_points) are built here; the oscilloscope / generator
     engines (certificate_pairs: fgen, MDO4000C, TDS2000C; WaveSurfer: certificate_source_records) by report_review_adapters.
-    `kinds` (WaveSurfer only): the result kinds the report will print, when the caller knows them.  Raises TypeError for an engine not covered."""
+    `kinds` (WaveSurfer only): the result kinds the report will print, when the caller knows them.  Raises TypeError for an engine not covered.
+    An engine with its own uncertainty module (the Fluke 6060A GIDEP: fluke6060a_uncertainty) supplies the rows itself with `review_point_specs()` -> (specs, default):
+    its figures are shown as computed, with no calibrator to choose (owner 2026-11-04: the window offered the 5560A and printed no uncertainty)."""
+    if hasattr(app, 'review_point_specs'):
+        return app.review_point_specs()
     if not hasattr(app, 'certificate_rows_and_points'):
         import report_review_adapters as A
         return A.specs_for(app, kinds)

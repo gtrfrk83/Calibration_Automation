@@ -1233,6 +1233,39 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
         return self.certificate_rows_and_points()[0]
 
+    def review_point_specs(self):
+        """The rows of the 'Review uncertainties' window (report_review_model.specs_for): one per report row, with this procedure's own figures from fluke6060a_uncertainty
+        (budget, scope CMC, reported, TUR) and no calibrator to choose. Owner 2026-11-04: the window treated the 6060A like a multimeter, offered the Fluke 5560A and marked
+        every row 'No uncertainty required', so the PDF printed none. Returns (specs, None)."""
+        import report_review_model as M
+        rows, pts = self.certificate_rows_and_points()
+        specs = []
+        for i, (row, p) in enumerate(zip(rows, pts)):
+            printed = {k: row.get(k, '') for k in ('Uncertainty', 'TAR', 'TUR')}
+            reading = (self.results.get(str(p['id'])) or {}).get('reading')
+            try:
+                import fluke6060a_uncertainty as fu
+                res = fu.evaluate(p, reading=reading if isinstance(reading, (int, float)) else None)
+            except Exception as exc:                                   # noqa: BLE001 - the row still shows what the report prints
+                res = None
+                why = f'uncertainty not evaluated: {exc}'
+            scale = 1e3 if (res is not None and res.unit == 'kHz') else 1.0
+            unit = 'Hz' if scale != 1.0 else (res.unit if res is not None else p['unit'])
+            emu = res.emu * scale if res is not None and res.emu is not None and not res.cmc_only else None
+            cmc = res.cmc * scale if res is not None and res.cmc is not None and res.scope == fu.IN else None
+            rep = res.reported * scale if res is not None and res.reported is not None else None
+            expects = res is not None and res.status in (fu.OK, fu.NEEDS_INPUT, fu.NEEDS_DECISION)
+            hints = []
+            if res is not None and res.status != fu.OK and res.reason:
+                hints.append(f'{res.status}: {res.reason}')
+            elif res is None:
+                hints.append(why)
+            ev = M.make_evaluation(unit, None, printed['Uncertainty'], emu, cmc, rep, printed['TAR'], printed['TUR'], expects)
+            specs.append(M.PointSpec(i, str(p['id']), row.get('Section', ''), row.get('Description', ''), row.get('Nominal', ''), p, p, p.get('low'), p.get('high'), unit,
+                                     None, locked='Uncertainty from this procedure\'s own budget (fluke6060a_uncertainty)', printed=printed,
+                                     calc=lambda _std, ev=ev: ev, options=[], expects=expects, std_label=(res.standard if res is not None else '') or '', hints=hints))
+        return specs, None
+
     def certificate_rows_and_points(self):
         """(rows, points): the report rows and, parallel to them, the spec point each came from."""
         rows, pts = [], []

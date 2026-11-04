@@ -2246,6 +2246,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- Review-uncertainties window (owner, 2026-11-04: "why is the 5560 listed for the uncertainties in this procedure?"; the window showed '0 of 210 points carry an
+  uncertainty'). report_review_model.specs_for treated the 6060A like a multimeter engine (it has certificate_rows_and_points): a calibrator drop-down defaulting to the
+  first calibrator (5560A) and every row recomputed by the multimeter path = 'No uncertainty required'. New generic hook: an engine with `review_point_specs()` supplies
+  the rows itself. The 6060A returns one row per report row with fluke6060a_uncertainty's figures (budget, scope CMC, reported, TUR), the standard named by the budget,
+  no calibrator to choose, the NEEDS INPUT / NEEDS DECISION reason as a hint. Other engines are unchanged. Test: UncertaintyReviewWindow.
 - Spurs (owner bench 2026-11-04): the three typed spurs 60 / 120 / 180 Hz from the 244.99 MHz carrier are DELETED ("can we delete these three test points?"; 210 points, named
   in the report discrepancies). "still getting the uncal error at 244.999MHz. The procedure is stepping up but the steps need to be slower and the output needs to be on
   while stepping" / "make it like 3-5 seconds between steps": for a carrier with approach_mhz (244 and 244.99 MHz) `_configure` now sets 242 MHz and the level, switches
