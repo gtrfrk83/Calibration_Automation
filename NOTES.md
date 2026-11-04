@@ -2246,6 +2246,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- Typed-reading window (owner, 2026-11-04, deviation-meter point: "can we remove the red portion? it is know that this section can't use the automatic reading";
+  "we aren't using a calibrator, so the comment about the calibrator doesn't need to be there"). `manual_override.ask_manual_reading` / `mo_ask` take `instruction=` (a
+  reading typed by design: shown as a plain note, no 'The automatic reading failed' banner, no STANDBY line) and `standby_text=` (`ManualOverrideMixin.MO_STANDBY_TEXT`,
+  None = the calibrator line). The 6060A engine asks its typed points (deviation meter, typed spurs / frequencies / THD) with `instruction=` and sets its own safe-state
+  line for a failed automatic reading ('The 6060A RF output and the 96270A output are OFF ...'). Other procedures call the window exactly as before.
 - Table 4 on the 8902A at every frequency (owner, 2026-11-04: "can we fix this to just use the 8902? or is there a reason we are using the NPT sensor?"). The NRP40T on
   the 96270A was carried over from the Instruction Manual procedure (4A-5, the owner's choice there); nothing in the GIDEP document needs it. 250 and 520 MHz at +13 / +10 /
   0 dBm are now `level_rx` power mode, group RXPWR, like the 150 kHz row (8902A RF power with the 11722A sensor module, 100 kHz to 2.6 GHz): one hook-up for the table,

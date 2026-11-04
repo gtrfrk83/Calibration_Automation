@@ -134,7 +134,7 @@ def log_text(p, entered: Entered, auto=None, why='', mode='') -> str:
 
 
 # ============================================================================ the dialog
-def ask_manual_reading(parent, p, total, auto=None, reason='', cancel_text='Cancel', demo=False, stored=None):
+def ask_manual_reading(parent, p, total, auto=None, reason='', cancel_text='Cancel', demo=False, stored=None, instruction='', standby_text=None):
     """Modal entry window.  Returns Entered, or None when cancelled / stopped.  The short confirmation is asked here, after the typed value is valid,
     so a wrong click costs one answer; an invalid entry shows its message in the window and stays open.
     The window itself is the toolkit's (manual_override_view_tk.ask_reading_window); what the Use button does with the typed text is `done` below."""
@@ -151,7 +151,13 @@ def ask_manual_reading(parent, p, total, auto=None, reason='', cancel_text='Canc
         if not port.ask_yes_no('Use this reading?', f'Use {entered.shown} as the reading for point {p["id"]}?', parent=win):
             return 'again', None
         return 'use', entered
-    return port.view('manual_override_view').ask_reading_window(parent, p, total, vals, unit, reason, cancel_text, demo, stored, done)
+    view = port.view('manual_override_view')
+    extra = {}
+    if instruction:                    # a reading typed by design: shown as an instruction, not as a failed automatic reading (owner 2026-11-04)
+        extra['instruction'], reason = instruction, ''
+    if standby_text:                   # the procedure's own safe-state line instead of 'The calibrator is in STANDBY' (a procedure with no calibrator)
+        extra['standby_text'] = standby_text
+    return view.ask_reading_window(parent, p, total, vals, unit, reason, cancel_text, demo, stored, done, **extra)
 
 
 # ============================================================================ the App side
@@ -386,8 +392,11 @@ class ManualOverrideMixin:
         self.status.set(f'Point {p["id"]}: reading {entered.shown} entered by hand.')
 
     # ---- the dialog and the recording -------------------------------------------------------------------------------------------
-    def mo_ask(self, p, reason='', cancel_text='Cancel', stored=''):
-        return ask_manual_reading(self.root, p, self.mo_total(), reason=reason, cancel_text=cancel_text, demo=self.demo, stored=stored)
+    MO_STANDBY_TEXT = None             # an App with no calibrator sets its own line (e.g. 'The 6060A RF output is OFF ...'); None = the calibrator line
+
+    def mo_ask(self, p, reason='', cancel_text='Cancel', stored='', instruction=''):
+        return ask_manual_reading(self.root, p, self.mo_total(), reason=reason, cancel_text=cancel_text, demo=self.demo, stored=stored, instruction=instruction,
+                                  standby_text=self.MO_STANDBY_TEXT)
 
     def mo_log(self, text):
         """The command-log line.  Connected: the session's CommandLog, saved to disk now.  Not connected: a one-line log appended to the shared file.

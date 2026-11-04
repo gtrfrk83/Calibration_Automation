@@ -609,3 +609,36 @@ class Counter96270A(GidepBench):
         self.assertEqual(self.errors(), [])
         self.assertEqual(self.non_pass(), [])
         self.assertFalse(any(c.startswith('INST PMET') for c in self.pm.sent))
+
+
+class TypedReadingDialog(GidepBench):
+    """Owner 2026-11-04: on a deviation-meter point "can we remove the red portion? it is known that this section can't use the automatic reading" and "we aren't using a
+    calibrator, so the comment about the calibrator doesn't need to be there". A point typed by design opens the entry window with its instruction (no failure notice, no
+    STANDBY line); a failed automatic reading in this procedure names the 6060A / 96270A outputs instead of a calibrator."""
+
+    def test_a_typed_by_design_point_is_asked_with_an_instruction_not_a_failure(self):
+        asked = []
+        real = self.app.mo_ask
+        self.app.mo_ask = lambda p, **k: asked.append(k) or real(p, **k)
+        dm = next(p for p in E.POINTS if p['meas'] == 'devmeter' and not p['not_tested'])
+        self.run_points(refs=[dm['ref']])
+        self.assertEqual(len(asked), 1)
+        self.assertEqual(asked[0].get('reason', ''), '')
+        self.assertIn('96270A is sending', asked[0]['instruction'])
+
+    def test_the_dialog_gets_the_instruction_and_this_procedures_standby_line(self):
+        import manual_override
+        seen = []
+
+        class View:
+            def ask_reading_window(self, *a, **k):
+                seen.append((a, k))
+                return None
+        dm = next(p for p in E.POINTS if p['meas'] == 'devmeter' and not p['not_tested'])
+        with mock.patch.object(manual_override.port, 'view', lambda name: View()):
+            manual_override.ask_manual_reading(None, dm, 213, instruction='Read the 6060A display.', standby_text=E.App.MO_STANDBY_TEXT)
+            manual_override.ask_manual_reading(None, dm, 213, reason='timeout')
+        (a1, k1), (a2, k2) = seen
+        self.assertEqual((a1[5], k1['instruction']), ('', 'Read the 6060A display.'))      # no failure reason with an instruction
+        self.assertNotIn('calibrator', k1['standby_text'].lower())
+        self.assertEqual((a2[5], k2), ('timeout', {}))                                       # other procedures: unchanged call

@@ -659,6 +659,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
 
 class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
+    MO_STANDBY_TEXT = 'The 6060A RF output and the 96270A output are OFF. Read your instrument and type the reading here to carry on, or stop the run.'   # no calibrator here (owner 2026-11-04)
     MANUAL_OVERRIDE = True            # the owner requires typed readings on every procedure (manual_override.py); they are judged by judge() below
 
     def __init__(self, root, model=MODEL, demo=False):
@@ -1119,8 +1120,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     # ---- THD at 10 kHz typed from the technician's analyzer (the RF output is ON while the number is asked for)
     def _typed_point(self, points, i, p, key, typed):
-        self.status.set(f'Point {p["id"]}: read your distortion analyzer and type the value (RF output is ON).')
-        entered = self.mo_ask(p, reason=typed.reason, cancel_text='Stop run')
+        self.status.set(f'Point {p["id"]}: type the reading (see the window).')
+        entered = self.mo_ask(p, cancel_text='Stop run', instruction=typed.reason)      # typed by design: an instruction, not a failure notice (owner 2026-11-04)
         try: self.connected_io().standby()
         except Exception as exc: self._error(exc); return
         self._mo_current = None

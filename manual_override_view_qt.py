@@ -13,18 +13,25 @@ from PySide6.QtWidgets import QHBoxLayout, QLineEdit
 from qtui.widgets import Banner, label, ModalDialog
 
 
-def build(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit):
+STANDBY_TEXT = 'The calibrator is in STANDBY. Read the meter display and type it here to carry on, or stop the run.'
+
+
+def build(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit, instruction='', standby_text=None):
     """The dialog (not yet shown).  `.entry`, `.error`, `.ok`, `.cancel` are reachable for tests; `.value` is what `submit` returned as 'use' (None until then)."""
     dlg = ModalDialog(parent, f'Point {p["id"]} of {total} - enter the reading', width=560)
     dlg.title_label.hide()
     dlg.value = None
     dlg.add_text(f'Point {p["id"]} of {total}  -  {p.get("section_title", "")}', 'hint')
     dlg.add_text(p['description'], 'section')
-    if reason:
+    if instruction:                                                     # a reading that is typed by design (owner 2026-11-04): the instruction as a plain note, not a failure
+        dlg.instruction = Banner(instruction, 'info')
+        dlg.instruction.text_label.setTextFormat(Qt.TextFormat.PlainText)
+        dlg.body.addWidget(dlg.instruction)
+    elif reason:
         dlg.failure = Banner('The automatic reading failed: ' + reason, 'error')
         dlg.failure.text_label.setTextFormat(Qt.TextFormat.PlainText)
         dlg.body.addWidget(dlg.failure)
-        dlg.add_text('The calibrator is in STANDBY. Read the meter display and type it here to carry on, or stop the run.', 'hint')
+        dlg.add_text(standby_text or STANDBY_TEXT, 'hint')                   # a procedure with no calibrator names its own safe state (the 6060A, owner 2026-11-04)
     elif stored:
         dlg.add_text(f'Stored reading: {stored}. Typing a value replaces it.', 'hint')
     if demo:
@@ -61,15 +68,15 @@ def build(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submi
             return False
         dlg.value = got
         return True
-    dlg.cancel = dlg.add_button(cancel_text, role='danger' if reason else None, result='cancel', cancel=True)
+    dlg.cancel = dlg.add_button(cancel_text, role='danger' if (reason or instruction) else None, result='cancel', cancel=True)
     dlg.ok = dlg.add_button('Use this reading  (Enter)', role='primary', result='use', default=True, callback=use)
     dlg.initial_focus = dlg.entry
     return dlg
 
 
-def ask_reading_window(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit):
-    """Modal entry window.  Returns what `submit` returned as 'use' (the Entered), or None when cancelled / stopped."""
-    dlg = build(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit)
+def ask_reading_window(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit, instruction='', standby_text=None):
+    """Modal entry window.  Returns what `submit` returned as 'use' (the Entered), or None when cancelled / stopped.  `instruction`: a reading typed by design (no failure notice)."""
+    dlg = build(parent, p, total, vals, unit, reason, cancel_text, demo, stored, submit, instruction=instruction, standby_text=standby_text)
     dlg.run()
     return dlg.value if dlg.result_key == 'use' else None
 
