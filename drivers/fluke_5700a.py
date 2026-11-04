@@ -197,16 +197,16 @@ class Fluke5700A(Instrument):
                               'Is the 5725A cabled to the 5700A, powered on and not in standby?')
 
     def amplifier_off(self):
-        """BOOST OFF and RANGELCK OFF (each read back), and the current post back to NORMAL after a current boost. Call with the output in STANDBY."""
+        """BOOST OFF, RANGELCK OFF and the current post back to NORMAL after a current boost. Call with the output in STANDBY.
+        ISR? bits 3 and 5 are NOT required to clear: on the bench (2026-11-04, 740 V at 50 kHz) bit 3 was still 1 after BOOST OFF, because the 5700A selects the amplifier by itself for an output
+        above its own range (Operator Guide, 'B' key), so the bit follows the output setting, not the BOOST state. The raw ISR? value is written to the command log for the bench session."""
         kind, self._amp = self._amp, None
         self.send('boost', state='OFF')
-        if self.isr(ISR_BOOST):
-            raise InstrumentError(f'{self.label}: BOOST OFF was not accepted (ISR? bit 3)')
         self.send('rangelck', state='OFF')
-        if self.isr(ISR_RLOCK):
-            raise InstrumentError(f'{self.label}: RANGELCK OFF was not accepted (ISR? bit 5)')
         if kind == 'I':
             self._post(self.CURRENT_POST)
+        value = int(float(str(self.query_retry('isr.query', attempts=2, delay=0.3)).replace(',', ' ').split()[0]))
+        self.log.add('##', f'ISR? after the amplifier was taken out: {value} (binary {value:016b}); BOOST bit {value >> ISR_BOOST & 1}, RLOCK bit {value >> ISR_RLOCK & 1} (not required to be 0)', self.label)
 
     def set_output_amps(self, amps, frequency_hz=None, dc=False):
         if self._amp != 'I':                  # with the 5725A current boost active the post is already IB5725

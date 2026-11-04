@@ -34,7 +34,9 @@ class SimFluke5700ATransport(_SimBase):
         f = self.bench.fluke
         self._polls += 1
         settled = f['operate'] and self._polls > self.settle_polls
-        active = self.boost and self.out_since_boost       # BENCH FINDING 2026-11-04: ISR? bit 3 read 0 straight after BOOST ON; modelled as 'active once an output is set' (the reason is UNVERIFIED)
+        f_ = self.bench.fluke
+        needs = (f_.get('unit') == 'A' and abs(f_['volts']) > 2.2) or (f_.get('unit') == 'V' and f_['freq'] > 1000 and abs(f_['volts']) > 220)      # the amplifier is selected by itself above the 5700A's own range
+        active = (self.boost and self.out_since_boost) or needs    # BENCH FINDINGS 2026-11-04: bit 3 read 0 straight after BOOST ON and 1 after BOOST OFF at 740 V / 50 kHz: it follows the output setting (UNVERIFIED model)
         return (int(bool(f['operate'])) | (int(self.extsense) << 2) | (int(active) << 3) | (int(self.rcomp) << 4) | (int(self.rlock) << 5) | (int(settled) << 12))
 
     def handle(self, cmd):

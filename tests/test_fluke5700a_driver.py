@@ -48,6 +48,17 @@ class Amplifier(unittest.TestCase):
         self.assertEqual([c for c in ct.sent if c.startswith(('BOOST', 'RANGELCK', 'CUR_POST')) and '?' not in c][-3:], ['BOOST OFF', 'RANGELCK OFF', 'CUR_POST NORMAL'])
         self.assertFalse(ct.boost or ct.rlock)
 
+    def test_bit_3_staying_set_after_boost_off_does_not_stop_the_run(self):
+        # bench finding 2026-11-04 (740 V at 50 kHz): 'BOOST OFF was not accepted (ISR? bit 3)': the 5700A selects the amplifier by itself above its own range, so bit 3 follows the output setting
+        d, ct, bench = make()
+        d.amplifier_on('V')
+        d.set_output_volts(740.0, 50000.0)
+        d.amplifier_confirm()
+        d.amplifier_off()                                        # must not raise although bit 3 is still 1
+        self.assertTrue(d.isr(3))
+        self.assertFalse(ct.boost or ct.rlock)                   # BOOST and RANGELCK were switched off
+        self.assertTrue(any('ISR? after the amplifier was taken out' in e[3] for e in d.log.entries))   # the raw value is in the command log
+
     def test_voltage_boost_does_not_touch_the_current_post(self):
         d, ct, bench = make()
         d.amplifier_on('V')
