@@ -54,6 +54,7 @@ HV_CONFIRM = 100.0                         # volts: a high-voltage confirmation 
 # Settling times from OPER to the first reading (seconds). ENGINEERING ESTIMATES except where the manual states one (5 minutes after 0 V on the 100 mV DC range and for the
 # thermal offset of the thermocouple cable, p. 2-8 / 2-19; 5 minutes with the 4-wire short fitted, p. 2-42). Tunable through the procedure modifications ('dmm6500.settle.*').
 SETTLE = dict(default=3.0, ac=10.0, rel_zero=300.0, tc_offset=300.0, short_first=300.0, short=5.0, dci=5.0, ohm=3.0, ohm_high=5.0, cap=2.0)
+WAIT_VISUAL_MIN = 30.0     # a settling wait of this many seconds or more is shown as a countdown (the 5-minute ones); shorter waits just sleep
 GROUP_TITLE = {'DCV': 'DC volts', 'ACV': 'AC volts', 'ACV750': 'AC volts 750 V range', 'FREQ': 'Frequency', 'TC': 'Thermocouple', 'RTD4': '4-wire RTD', 'RTD3': '3-wire RTD',
                'SHORT4': '4-wire short zero checks', 'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'DCI_LOW': 'DC current 10 uA to 10 mA', 'DCI': 'DC current 100 mA to 3 A',
                'DIGI': 'Digitize current', 'ACI': 'AC current', 'REAR10A': 'Rear panel 10 A', 'CAP': 'Capacitance'}
@@ -276,6 +277,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         self.last_eval = {}
         self.is_manual = lambda p: False        # the App sets this: points measured with a standard the technician connects
         self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
+        self.on_wait = None                     # the App sets this: on_wait(what, total_s, left_s) about once a second during a long settling wait, and once with left_s = 0 at its end
         self._amp = None
         self._tc_offset = None
         self._short_settled = False
@@ -372,6 +374,29 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         four = p['kind'] == 'OHM4' or p['group'] in ('RTD4', 'RTD3')
         self.cal.set_compensation('WIRE4' if four else 'NONE')
 
+    def wait(self, seconds, what):
+        """Sleep `seconds` (shortened on the virtual bench). A wait of WAIT_VISUAL_MIN seconds or more is slept in one-second steps and reported to `on_wait(what, total, left)` after each
+        step, ending with left = 0, so the window can show a countdown. A display problem never stops the measurement."""
+        total = virtualbench.scaled(seconds, self.virtual)
+        if total < WAIT_VISUAL_MIN or self.on_wait is None:
+            time.sleep(total)
+            return
+        left = float(total)
+        while True:
+            try: self.on_wait(what, total, left)
+            except Exception: pass
+            if left <= 0: return
+            step = min(1.0, left)
+            time.sleep(step)
+            left = max(0.0, left - step)
+
+    @staticmethod
+    def wait_reason(p):
+        """What the long settling wait of this point is for (shown in the countdown)."""
+        if p.get('rel_zero'): return f'Point {p["id"]}: 100 mV zero. Letting the calibrator zero and the meter settle before the relative offset is taken'
+        if p['source'] == 'none': return f'Point {p["id"]}: 4-wire short. Allowing the short and the meter to settle (5 minutes)'
+        return f'Point {p["id"]}: {p["description"]}. Letting the reading settle'
+
     def measure_offset(self):
         """Thermocouple cable thermal offset (CM p. 2-19 steps 2-14): DC volts, 100 mV range, input impedance Auto, autozero on, 1 PLC, calibrator at 0 V in operate, settle
         5 minutes, record the offset to 1 uV. Returns volts."""
@@ -381,7 +406,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         self.cal.set_output_volts(0, None, dc=True)
         self.cal.check_error('TC offset')
         self.cal.operate_unverified()
-        time.sleep(virtualbench.scaled(self.pm_param('dmm6500.settle.tc_offset', SETTLE['tc_offset']), self.virtual))
+        self.wait(self.pm_param('dmm6500.settle.tc_offset', SETTLE['tc_offset']), 'Thermocouple cable offset. Letting the calibrator zero output and the meter settle')
         offset = round(self.dmm.read(), 6)
         self.standby()
         self.dmm.check_errors('reading the TC offset')
@@ -453,7 +478,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
                 if self._amp is not None and hasattr(self.cal, 'amplifier_confirm'): self.cal.amplifier_confirm()      # BOOST / range lock read back with the amplifier output set, still in standby
                 self.cal.operate_unverified()
                 if hasattr(self.cal, 'wait_settled'): self.cal.wait_settled(self.pm_param('dmm6500.settle.cal_report', 60.0))
-            time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
+            self.wait(self.settle(p), self.wait_reason(p))
             if p.get('rel_zero'): self.dmm.acquire_reference('DCV')
             ref = self.reference_reading(p)
             reading = self.read_point(p)
@@ -720,6 +745,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     cal_interface=self.cal_interface.get())
         io.is_manual = self.is_manual
         io.uses_amp = self.uses_amp
+        io.on_wait = self.on_wait
         return io
 
     def test_connections(self):
@@ -761,6 +787,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     # ------------------------------------------------------------------ running
     def request_stop(self): self.stop = True; self.status.set('Stopping after current test point.')
+
+    def on_wait(self, what, total, left):
+        """Worker thread: a long settling wait is under way (IO.wait). The countdown window and the status line are updated on the UI thread."""
+        port.post(self.root, lambda: self._show_wait(what, total, left))
+
+    def _show_wait(self, what, total, left):
+        mins, secs = divmod(int(math.ceil(left)), 60)
+        if left > 0: self.status.set(f'{what}: {mins}:{secs:02d} remaining')
+        else: self.status.set('Settling finished: reading the meter')
+        self.ui_view.countdown(self, what, total, left)
     def run_all(self): self.execute([p for p in self.active_points() if str(p['id']) not in self.results])
     def run_section(self): self.run_shown_section()
 
@@ -790,6 +826,61 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def mo_point(self, iid): return POINTS[int(iid) - 1]
     def mo_total(self): return len(POINTS)
+
+    # ---- typing a capacitance reading straight into the table (owner request 2026-11-04) -------------------------------------------
+    def grid_entry_state(self, iid, key):
+        """(allowed, why) for typing into the `key` cell ('found' | 'left') of point `iid` of the table: capacitance points only, with no run in progress, in the column of the
+        collecting mode (As Found or As Left) the window is in. `why` is empty when the cell simply is not one that takes typing."""
+        try:
+            p = self.mo_point(iid)
+        except (ValueError, IndexError):
+            return False, ''
+        if p['kind'] != 'CAP' or key != ('left' if self.is_left else 'found'):
+            return False, ''
+        if self.busy:
+            return False, 'A run is in progress.'
+        return True, ''
+
+    @staticmethod
+    def grid_text(p, text):
+        """The typed text without the unit label the cell shows ('1.0003 nF' -> '1.0003'); only the unit of that point is accepted."""
+        raw = str(text).strip()
+        unit = manual_override.entry_scale(p)[1]
+        for u in {unit, unit.replace('\u00b5', 'u'), unit.replace('u', '\u00b5')}:
+            if u and raw.lower().endswith(u.lower()):
+                return raw[:-len(u)].strip()
+        return raw
+
+    def grid_enter(self, iid, key, text):
+        """A capacitance reading typed into the table cell. The same path as 'Enter reading manually...' for a stored or unmeasured point: instrument ID required, the overwrite of a stored
+        As Found asked, the reading padded to the point's resolution, logged as a manual entry and recorded through _record (which judges it). Returns 'recorded' (the window moves on to the
+        next capacitance row), 'retry' (the text was not a usable reading: the reason was shown and the same cell is opened again) or 'cancel' (nothing recorded, nothing to retry)."""
+        import app_settings
+        ok, why = self.grid_entry_state(iid, key)
+        if not ok:
+            if why: port.message('info', 'Enter reading', why, parent=self.root)
+            return 'cancel'
+        if not app_settings.manual_override_on():                                     # File > Settings
+            port.message('info', 'Enter reading', app_settings.OFF_TEXT, parent=self.root)
+            return 'cancel'
+        p = self.mo_point(iid)
+        if not str(text).strip():
+            return 'cancel'                                                            # an emptied cell changes nothing
+        if not self.asset.get().strip():
+            port.message('warning', 'Instrument ID', 'Enter an instrument ID.', parent=self.root)
+            return 'cancel'
+        try:
+            entered = manual_override.parse_reading(p, self.grid_text(p, text))
+        except ValueError as exc:
+            port.message('warning', 'Enter reading', str(exc), parent=self.root)
+            return 'retry'
+        if not self.confirm_found_overwrite([p]):
+            return 'cancel'
+        old = self.results.get(str(p['id'])) or {}
+        auto = old.get('auto_reading') if old.get('overridden') else old.get('reading')       # the reading the instrument gave, not an earlier typed one
+        self.mo_commit(p, entered, auto, why='' if old else 'point not measured', idle=True)
+        self.status.set(f'Point {p["id"]}: reading {entered.shown} typed into the table.')
+        return 'recorded'
 
     def execute(self, points):
         if self.busy or not points: return
