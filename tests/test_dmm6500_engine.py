@@ -485,6 +485,70 @@ class HighVoltage(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_QT, 'PySide6 is not installed')
+class Countdown(Fast):
+    """The settling countdown: IO.wait reports the time left once a second for the long (5-minute) waits only."""
+
+    def test_a_long_wait_is_reported_second_by_second_and_ends_at_zero(self):
+        io, bench, ct, dt, rt = build()
+        io.virtual = False                                   # a real wait (the sleeps are patched out by Fast)
+        calls = []
+        io.on_wait = lambda what, total, left: calls.append((what, total, left))
+        io.wait(300, 'Point 79: 4-wire short')
+        self.assertEqual(len(calls), 301)
+        self.assertEqual(calls[0], ('Point 79: 4-wire short', 300, 300.0))
+        self.assertEqual(calls[-1][2], 0.0)
+        self.assertEqual([c[2] for c in calls], sorted((c[2] for c in calls), reverse=True))
+        io.close()
+
+    def test_short_waits_and_the_virtual_bench_do_not_show_a_countdown(self):
+        io, bench, ct, dt, rt = build()
+        calls = []
+        io.on_wait = lambda *a: calls.append(a)
+        io.virtual = False
+        io.wait(10, 'AC settle')                             # below the threshold
+        io.virtual = True
+        io.wait(300, 'demo')                                 # shortened on the virtual bench
+        self.assertEqual(calls, [])
+        io.close()
+
+    def test_a_display_problem_never_stops_the_measurement(self):
+        io, bench, ct, dt, rt = build()
+        io.virtual = False
+
+        def broken(*a):
+            raise RuntimeError('window gone')
+        io.on_wait = broken
+        io.wait(40, 'x')                                     # must finish
+        io.close()
+
+    def test_the_4_wire_short_and_the_tc_offset_waits_are_counted_down(self):
+        io, bench, ct, dt, rt = build()
+        calls = []
+        io.on_wait = lambda what, total, left: calls.append((what, total, left))
+        with mock.patch.object(E.virtualbench, 'scaled', lambda seconds, virtual: seconds):
+            io.measure(BY_REF['ZR.1'])                       # the first 4-wire short zero waits 5 minutes
+            short = [c for c in calls if c[1] == 300]
+            self.assertTrue(short)
+            self.assertIn('4-wire short', short[0][0])
+            self.assertEqual(short[-1][2], 0.0)
+            calls.clear()
+            io.measure(BY_REF['TC.1'])                       # the thermocouple offset waits 5 minutes
+        self.assertTrue(any('Thermocouple cable offset' in c[0] for c in calls))
+        self.assertEqual(max(c[1] for c in calls), 300)
+        io.close()
+
+    def test_the_second_short_zero_does_not_wait_again(self):
+        io, bench, ct, dt, rt = build()
+        calls = []
+        io.on_wait = lambda what, total, left: calls.append((what, total, left))
+        with mock.patch.object(E.virtualbench, 'scaled', lambda seconds, virtual: seconds):
+            io.measure(BY_REF['ZR.1'])
+            n = len(calls)
+            io.measure(BY_REF['ZR.10'])
+        self.assertEqual(len(calls), n)                      # 5 s: no countdown
+        io.close()
+
+
 class Window(unittest.TestCase):
     def test_demo_window_builds_with_every_point_and_the_new_fields(self):
         import qt_bench_harness as QH
@@ -514,6 +578,188 @@ class Window(unittest.TestCase):
             root.close()
         finally:
             hn.stop()
+
+    def test_the_countdown_window_shows_the_time_left_and_closes_at_zero(self):
+        import qt_bench_harness as QH
+        from PySide6.QtWidgets import QMainWindow
+        hn = QH.QtHarness().start()
+        try:
+            root = QMainWindow()
+            app = E.App(root, True)
+            QH.show(root)
+            app._show_wait('Point 79: 4-wire short', 300, 300.0)
+            dlg = app._countdown
+            self.assertTrue(dlg.isVisible())
+            self.assertEqual(dlg.time_label.text(), '5:00')
+            self.assertEqual(dlg.bar.value(), 0)
+            app._show_wait('Point 79: 4-wire short', 300, 125.4)
+            self.assertIs(app._countdown, dlg)               # one window, updated
+            self.assertEqual(dlg.time_label.text(), '2:06')
+            self.assertEqual(dlg.bar.value(), 174)
+            self.assertIn('2:06 remaining', app.status.get())
+            app._show_wait('Point 79: 4-wire short', 300, 0.0)
+            self.assertIsNone(app._countdown)
+            self.assertIn('Settling finished', app.status.get())
+            root.close()
+        finally:
+            hn.stop()
+
+
+class GridEntry(unittest.TestCase):
+    """Capacitance readings typed straight into the table: select the cell and type (or double-click), Enter records the reading and opens the next capacitance row."""
+
+    def setUp(self):
+        import qt_bench_harness as QH
+        from PySide6.QtWidgets import QMainWindow
+        self.QH = QH
+        self.hn = QH.QtHarness().start()
+        self.root = QMainWindow()
+        self.app = E.App(self.root, True)
+        self.app.save = lambda *a, **k: None                       # no checkpoint file from a test
+        self.app.asset.set('GRID-1')
+        QH.show(self.root)
+        self.tree = self.app.tree
+        self.cap = [q for q in E.POINTS if q['kind'] == 'CAP']
+
+    def tearDown(self):
+        self.root.close()
+        self.hn.stop()
+
+    def index(self, p, key='found'):
+        rows = self.tree.rows()
+        i = [r.iid for r in rows].index(str(p['id']))
+        return self.tree.proxy.index(i, self.tree._keys.index(key))
+
+    def type_into(self, index, text, enter=True):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        self.tree.setFocus()
+        self.tree.setCurrentIndex(index)
+        QTest.keyClick(self.tree, Qt.Key.Key_F2)                     # start the edit (typing a character does the same: AnyKeyPressed)
+        QApplication.processEvents()
+        editor = QApplication.focusWidget()
+        editor.selectAll()
+        QTest.keyClicks(editor, text)
+        if enter:
+            QTest.keyClick(editor, Qt.Key.Key_Return)
+        for _ in range(3):
+            QApplication.processEvents()                              # the hook schedules the next cell with a 0 ms timer
+
+    def editing_row(self):
+        from PySide6.QtWidgets import QAbstractItemView
+        if self.tree.state() != QAbstractItemView.State.EditingState:
+            return None
+        return self.tree.rows()[self.tree.currentIndex().row()].iid
+
+    def test_only_the_collecting_column_of_the_capacitance_rows_takes_typing(self):
+        from PySide6.QtCore import Qt
+        flags = lambda p, key: bool(self.tree.proxy.flags(self.index(p, key)) & Qt.ItemFlag.ItemIsEditable)       # noqa: E731
+        self.assertTrue(all(flags(p, 'found') for p in self.cap))
+        self.assertFalse(any(flags(p, 'left') for p in self.cap))                  # As Found is the collecting mode
+        dcv = next(q for q in E.POINTS if q['kind'] == 'DCV')
+        self.assertFalse(flags(dcv, 'found'))
+        self.assertFalse(flags(dcv, 'left'))
+        for key in ('n', 'description', 'nominal', 'low', 'high', 'limits', 'error', 'result'):
+            self.assertFalse(flags(self.cap[1], key), key)
+        self.app.busy = True                                                        # no typing while a run is in progress
+        self.assertFalse(flags(self.cap[1], 'found'))
+        self.app.busy = False
+
+    def test_typing_a_reading_and_pressing_enter_records_it_and_opens_the_next_capacitance_row(self):
+        first, second, third = self.cap[1], self.cap[2], self.cap[3]                # CAP.2 (100 pF), CAP.3, CAP.4
+        self.type_into(self.index(first), '100.03')
+        rec = self.app.results[str(first['id'])]
+        self.assertAlmostEqual(rec['reading'], 100.03e-12, places=18)
+        self.assertEqual(rec['result'], 'PASS')
+        self.assertTrue(rec['overridden'])                                         # recorded as a typed reading, like 'Enter reading manually'
+        self.assertEqual(self.editing_row(), str(second['id']))                    # Enter moved on to the next line and opened it
+        self.assertIn('typed into the table', self.app.status.get())
+        self.assertIn('100.03', self.tree.item(str(first['id']))['values'][6])     # the cell shows the recorded (padded) reading, not the raw text
+        self.assertTrue(any('MANUAL OVERRIDE point' in e for e in self.app.mo_events))      # logged as a manual entry
+        self.type_into(self.index(second), '0.5', enter=False)
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        QTest.keyClick(QApplication.focusWidget(), Qt.Key.Key_Escape)              # Escape leaves the cell alone
+        QApplication.processEvents()
+        self.assertNotIn(str(second['id']), self.app.results)
+        self.assertIsNone(self.editing_row())
+
+    def test_just_typing_on_the_selected_cell_starts_the_entry_without_losing_the_first_character(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        first, second = self.cap[1], self.cap[2]
+        self.tree.setFocus()
+        self.tree.setCurrentIndex(self.index(first))
+        QTest.keyClicks(self.tree, '1')                                            # no F2, no double-click
+        QApplication.processEvents()
+        editor = QApplication.focusWidget()
+        self.assertEqual(editor.text(), '1')
+        QTest.keyClicks(editor, '00.03')
+        QTest.keyClick(editor, Qt.Key.Key_Return)
+        for _ in range(3):
+            QApplication.processEvents()
+        self.assertAlmostEqual(self.app.results[str(first['id'])]['reading'], 100.03e-12, places=18)
+        self.assertEqual(self.editing_row(), str(second['id']))
+        # a second pass over a stored reading: typing replaces the old text, it is not appended to it
+        QTest.keyClick(QApplication.focusWidget(), Qt.Key.Key_Escape)
+        QApplication.processEvents()
+        self.tree.setCurrentIndex(self.index(first))
+        QTest.keyClicks(self.tree, '9')
+        QApplication.processEvents()
+        self.assertEqual(QApplication.focusWidget().text(), '9')
+        QTest.keyClick(QApplication.focusWidget(), Qt.Key.Key_Escape)
+
+    def test_a_reading_outside_the_limits_is_recorded_as_a_fail(self):
+        p = self.cap[1]
+        self.type_into(self.index(p), '120')                                       # limits 94.2 to 105.8 pF
+        self.assertEqual(self.app.results[str(p['id'])]['result'], 'FAIL')
+
+    def test_a_typed_unit_label_is_accepted(self):
+        p = self.cap[1]
+        self.type_into(self.index(p), '100.03 pF')
+        self.assertAlmostEqual(self.app.results[str(p['id'])]['reading'], 100.03e-12, places=18)
+
+    def test_text_that_is_not_a_number_shows_the_reason_and_reopens_the_same_cell(self):
+        p = self.cap[1]
+        shown = []
+        with mock.patch.object(E.port, 'message', lambda kind, title, text, **kw: shown.append(text)):
+            self.type_into(self.index(p), 'abc')
+        self.assertTrue(shown)
+        self.assertNotIn(str(p['id']), self.app.results)                          # nothing recorded
+        self.assertEqual(self.editing_row(), str(p['id']))                         # the same cell is open again
+
+    def test_the_instrument_id_is_required_and_nothing_is_recorded_without_it(self):
+        self.app.asset.set('')
+        p = self.cap[1]
+        shown = []
+        with mock.patch.object(E.port, 'message', lambda kind, title, text, **kw: shown.append(text)):
+            self.type_into(self.index(p), '100.03')
+        self.assertIn('Enter an instrument ID.', shown)
+        self.assertNotIn(str(p['id']), self.app.results)
+
+    def test_the_last_capacitance_row_ends_the_run_of_entries(self):
+        last = self.cap[-1]
+        self.type_into(self.index(last), '100.02')
+        self.assertIn(str(last['id']), self.app.results)
+        self.assertIsNone(self.editing_row())
+
+    def test_the_settings_switch_for_typed_readings_is_respected(self):
+        import app_settings
+        p = self.cap[1]
+        shown = []
+        with mock.patch.object(app_settings, 'manual_override_on', lambda: False), mock.patch.object(E.port, 'message', lambda kind, title, text, **kw: shown.append(text)):
+            self.type_into(self.index(p), '100.03')
+        self.assertTrue(shown)
+        self.assertNotIn(str(p['id']), self.app.results)
+
+    def test_the_text_helper_strips_only_the_points_own_unit(self):
+        p = self.cap[1]
+        self.assertEqual(E.App.grid_text(p, '100.03 pF'), '100.03')
+        self.assertEqual(E.App.grid_text(p, '100.03pf'), '100.03')
+        self.assertEqual(E.App.grid_text(p, '100.03 nF'), '100.03 nF')            # another unit is left in, so the number check rejects it
 
 
 if __name__ == '__main__':

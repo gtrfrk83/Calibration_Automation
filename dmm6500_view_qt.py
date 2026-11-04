@@ -3,8 +3,14 @@
 The engine reaches this module through `ui_port.get_ui().view('dmm6500_view')`, which resolves to `dmm6500_view_qt` under the Qt port.  Every function takes the engine's App as
 `self`.  The parts the bench windows share are qtui/bench_view.py.  Nothing here decides anything about a calibration.
 """
+import math
+
+from PySide6.QtWidgets import QProgressBar
+
 from qtui import bench_view as B
 from qtui import shell as S
+from qtui.screens import common
+from qtui.widgets import ModalDialog, label
 from qtui.bench_view import Form, table_has, table_select, table_selection, table_set_rows, table_update_row  # noqa: F401  (the table_* contract of the views)
 
 
@@ -58,9 +64,92 @@ def build_ui(self):
 
     B.action_bar(self, sh, manual=True)
     B.build_results(self, sh, SPEC['source']['note'])
+    enable_grid_entry(self)
     self.update_shell_sections(POINTS, lambda p: p['section_title'])
 
 
 def set_choices(self, which, values):
     """The drop-down values of the DMM address ('dmm'), reference meter ('ref') or calibrator port ('cal') box."""
     {'dmm': self.dmm_entry, 'ref': self.ref_entry, 'cal': self.cal_entry}[which].configure(values=values)
+
+
+class Countdown(ModalDialog):
+    """The settling countdown: the time left in large type, a progress bar and what the program is waiting for. Not modal (the table stays visible), no close button: it closes itself when the wait ends."""
+
+    def __init__(self, parent, what):
+        super().__init__(parent, 'Settling', width=520, modal=False, close_button=False)
+        self.title_label.hide()
+        self.what_label = label(what, 'h2', wrap=True)
+        self.time_label = label('', 'title')
+        self.time_label.setStyleSheet('font-size: 64px; font-weight: 700;')      # large enough to read from across the bench (the theme's role stylesheet beats a QFont)
+        self.bar = QProgressBar()
+        self.bar.setTextVisible(False)
+        self.hint_label = label('Do not touch the leads, the calibrator or the meter. The reading is taken automatically when the timer reaches 0:00.', 'hint', wrap=True)
+        for w in (self.what_label, self.time_label, self.bar, self.hint_label):
+            self.body.addWidget(w)
+
+    def update_time(self, what, total, left):
+        self.what_label.setText(what)
+        mins, secs = divmod(int(math.ceil(left)), 60)
+        self.time_label.setText(f'{mins}:{secs:02d}')
+        self.bar.setRange(0, max(int(total), 1))
+        self.bar.setValue(int(max(0, total - left)))
+
+
+def countdown(self, what, total, left):
+    """The settling countdown (IO.wait: waits of 30 s or more, the 5-minute ones). UI thread. left <= 0 closes it."""
+    dlg = getattr(self, '_countdown', None)
+    if left <= 0:
+        if dlg is not None and common.alive(dlg):
+            dlg.close()
+            dlg.deleteLater()
+        self._countdown = None
+        return
+    if dlg is None or not common.alive(dlg):
+        dlg = self._countdown = Countdown(common.qparent(self.root), what)
+        dlg.show()
+    dlg.update_time(what, total, left)
+
+
+def enable_grid_entry(self):
+    """Capacitance readings can be typed straight into the As Found / As Left cell of the table (the cell of the collecting mode): select it and type, or double-click / F2. The engine decides
+    (grid_entry_state) and records (grid_enter); every other cell stays read-only."""
+    from PySide6.QtWidgets import QAbstractItemView
+    tree = self.tree
+    model = tree.source_model
+    keys = tree._keys
+    for key in ('found', 'left'):
+        col = model.columns[keys.index(key)]
+        col.editable = lambda row, _k=key: self.grid_entry_state(row.iid, _k)[0]
+        col.tooltip = lambda row, _k=key: 'Type the capacitance reading here (select the cell and type, or double-click)' if self.grid_entry_state(row.iid, _k)[0] else ''
+    tree.set_edit_hook(lambda row, key, old, new: _grid_hook(self, row.iid, key, new))
+    tree.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked | QAbstractItemView.EditTrigger.EditKeyPressed | QAbstractItemView.EditTrigger.AnyKeyPressed)
+
+
+def _grid_hook(self, iid, key, text):
+    """The edit hook of the table: the engine records the reading; this then opens the next capacitance row's cell (Enter = next line) or, for an unusable text, the same cell again.
+    Always returns False so the table never keeps the raw typed text: the row is redrawn from the recorded result."""
+    from PySide6.QtCore import QTimer
+    outcome = self.grid_enter(iid, key, str(text))
+    if outcome == 'recorded':
+        QTimer.singleShot(0, lambda: open_grid_cell(self, iid, key, after=True))
+    elif outcome == 'retry':
+        QTimer.singleShot(0, lambda: open_grid_cell(self, iid, key, after=False))
+    return False
+
+
+def open_grid_cell(self, iid, key, after):
+    """Select the `key` cell of the next (after=True) or the same point and open it for typing. The next one is the next row in the table's own order (sorted / filtered as shown) that takes typing."""
+    tree = self.tree
+    rows = tree.rows()
+    iids = [r.iid for r in rows]
+    if iid not in iids:
+        return
+    at = iids.index(iid)
+    for i in (range(at + 1, len(rows)) if after else (at,)):
+        if self.grid_entry_state(rows[i].iid, key)[0]:
+            index = tree.proxy.index(i, tree._keys.index(key))
+            tree.setCurrentIndex(index)
+            tree.scrollTo(index)
+            tree.edit(index)
+            return
