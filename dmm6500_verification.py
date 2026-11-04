@@ -439,9 +439,8 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
                 if p.get('rel_zero'): self.cal.set_output_volts(0, None, dc=True)
                 else: self.source(p)
                 self.cal.check_error(p['description'])        # the calibrator refuses outputs it cannot make; never operate then
-                if self._amp is not None and hasattr(self.cal, 'amplifier_lock'):
-                    self.cal.amplifier_lock()                                              # RANGELCK ON for the 10 A points, AFTER the output is set (it locks the present range)
-                    self.cal.check_error(p['description'] + ' (range lock)')
+                if self._amp is not None and hasattr(self.cal, 'amplifier_activate'):
+                    self.cal.amplifier_activate()                                          # BOOST ON (when the amplifier is not already active) and the 10 A range lock, AFTER the target output is set
                 if self._amp is not None and hasattr(self.cal, 'amplifier_confirm'): self.cal.amplifier_confirm()      # BOOST / range lock read back with the amplifier output set, still in standby
                 self.cal.operate_unverified()
                 if hasattr(self.cal, 'wait_settled'): self.cal.wait_settled(self.pm_param('dmm6500.settle.cal_report', 60.0))

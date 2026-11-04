@@ -196,9 +196,9 @@ class Combo5700A5725A(Calibrator5700A):
         sent = ct.sent
         i = sent.index('BTYPE IB5725')
         self.assertLess(sent.index('STBY'), i)                                    # standby first
-        self.assertLess(i, sent.index('BOOST ON'))
-        self.assertLess(sent.index('BOOST ON'), sent.index('OUT 10 A, 0 HZ'))
-        self.assertLess(sent.index('OUT 10 A, 0 HZ'), sent.index('RANGELCK ON'))     # the lock pins the PRESENT range: after the output (bench fault 860, 2026-11-04)
+        self.assertLess(i, sent.index('OUT 10 A, 0 HZ'))                            # BTYPE / the current post come BEFORE the output
+        self.assertNotIn('BOOST ON', sent)                                          # 10 A is above the 5700A's own range: it chooses the amplifier itself (bench fault 860, 2026-11-04)
+        self.assertLess(sent.index('OUT 10 A, 0 HZ'), sent.index('RANGELCK ON'))     # the lock pins the PRESENT range: after the output
         self.assertIn('CUR_POST IB5725', sent)
         self.assertLess(sent.index('RANGELCK ON'), sent.index('OPER'))
         self.assertEqual([c for c in sent if '?' not in c][-1], 'CUR_POST NORMAL')

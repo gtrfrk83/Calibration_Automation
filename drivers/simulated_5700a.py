@@ -26,7 +26,6 @@ class SimFluke5700ATransport(_SimBase):
         self.extsense, self.rcomp, self.post = False, False, 'NORMAL'
         self.boost, self.rlock, self.btype = False, False, {'V': 'VB5725', 'I': 'IB5725'}
         self.amp_connected = True                                # a 5725A is on the cable and powered (test hook)
-        self.out_since_boost = False
         self.rlock_unit = None
         self.settle_polls = 1
         self._polls = 0
@@ -36,9 +35,16 @@ class SimFluke5700ATransport(_SimBase):
         self._polls += 1
         settled = f['operate'] and self._polls > self.settle_polls
         f_ = self.bench.fluke
-        needs = (f_.get('unit') == 'A' and abs(f_['volts']) > 2.2) or (f_.get('unit') == 'V' and f_['freq'] > 1000 and abs(f_['volts']) > 220)      # the amplifier is selected by itself above the 5700A's own range
-        active = (self.boost and self.out_since_boost) or needs    # BENCH FINDINGS 2026-11-04: bit 3 read 0 straight after BOOST ON and 1 after BOOST OFF at 740 V / 50 kHz: it follows the output setting (UNVERIFIED model)
+        needs = self._needs_amp(f_.get('unit'), f_['volts'], f_['freq'])
+        active = self.boost or (needs and self.amp_connected and self._designated(f_.get('unit')))   # BENCH 2026-11-04: bit 3 follows the output: set while an amplifier output is active, whether chosen by BOOST or by the 5700A itself (UNVERIFIED model)
         return (int(bool(f['operate'])) | (int(self.extsense) << 2) | (int(active) << 3) | (int(self.rcomp) << 4) | (int(self.rlock) << 5) | (int(settled) << 12))
+
+    @staticmethod
+    def _needs_amp(unit, value, hz):
+        return (unit == 'A' and abs(value) > 2.2) or (unit == 'V' and hz > 1000 and abs(value) > 220)      # above the 5700A's own range (the sheet's ranges; UNVERIFIED)
+
+    def _designated(self, unit):
+        return unit != 'A' or self.post == 'IB5725'           # a current boost needs the 5725A current post (UNVERIFIED model)
 
     def handle(self, cmd):
         u = cmd.strip().upper()
@@ -73,7 +79,15 @@ class SimFluke5700ATransport(_SimBase):
             f['operate'] = True; self._polls = 0; return None
         m = re.match(r'^BOOST (ON|OFF)$', u)
         if m:
-            self.boost = m.group(1) == 'ON' and self.amp_connected; self.out_since_boost = False; return None
+            if m.group(1) == 'ON':
+                f_ = self.bench.fluke
+                unit, value = f_.get('unit'), f_['volts']
+                if unit not in ('V', 'A') or (unit == 'V' and abs(value) < 100) or not self._designated(unit):
+                    self.faults.append(860); return None      # BENCH-FITTED 2026-11-04: BOOST ON is a request about the PRESENT output; at 0 V (or another function) the amplifier cannot be used: fault 860 (UNVERIFIED model)
+                self.boost = self.amp_connected
+            else:
+                self.boost = False
+            return None
         m = re.match(r'^RANGELCK (ON|OFF)$', u)
         if m:
             self.rlock = m.group(1) == 'ON'
@@ -104,10 +118,9 @@ class SimFluke5700ATransport(_SimBase):
                 self.faults.append(860); return None             # BENCH FINDING 2026-11-04: fault 860 "Can't Use Amplifier For This Output" when the range lock was set in another function (the cause is UNVERIFIED)
             value = float(m.group(1)) * SCALE[unit]
             hz = float(m.group(3)) if m.group(3) else 0.0
-            if (UNITS[unit] == 'A' and abs(value) > 2.2 and not self.boost) or (UNITS[unit] == 'V' and hz > 1000 and abs(value) > 220 and not self.boost):
+            if self._needs_amp(UNITS[unit], value, hz) and not (self.boost or (self.amp_connected and self._designated(UNITS[unit]))):
                 self.faults.append(540); return None             # above the 5700A's own range: the 5725A (BOOST) is needed (the sheet's ranges; UNVERIFIED)
             f['volts'] = value
-            self.out_since_boost = True
             f['unit'] = UNITS[unit]
             f['freq'] = float(m.group(3)) if m.group(3) else 0.0
             return None

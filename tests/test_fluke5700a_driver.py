@@ -38,57 +38,124 @@ class Declarations(unittest.TestCase):
 
 
 class Amplifier(unittest.TestCase):
+    """The 5725A order (bench 2026-11-04, fault 860 "Can't Use Amplifier For This Output" at 10 A DC and 740 V / 50 kHz): PREPARE (clean slate, BTYPE, current post), set the TARGET output,
+    then BOOST ON only if no amplifier is active yet, then (10 A points only) RANGELCK ON. The simulator is fitted to the bench findings; the cause on the real 5700A is UNVERIFIED."""
+
+    def sent(self, ct, *heads):
+        return [c for c in ct.sent if c.startswith(heads) and '?' not in c]
+
     def test_current_boost_sequence_and_back(self):
         d, ct, bench = make()
         d.amplifier_on('I')
-        self.assertEqual([c for c in ct.sent if c.startswith(('BTYPE', 'CUR_POST', 'BOOST', 'RANGELCK')) and '?' not in c], ['BTYPE IB5725', 'CUR_POST IB5725', 'BOOST ON'])      # no lock yet
+        self.assertEqual(self.sent(ct, 'BTYPE', 'CUR_POST', 'BOOST', 'RANGELCK'), ['BOOST OFF', 'RANGELCK OFF', 'BTYPE IB5725', 'CUR_POST IB5725'])     # a clean slate, then the setup: no BOOST ON yet
         d.set_output_amps(10.0, None, True)
-        d.amplifier_lock()                                                 # after the output: RANGELCK locks the PRESENT range
-        self.assertEqual([c for c in ct.sent if c.startswith('RANGELCK') and '?' not in c], ['RANGELCK ON'])
-        self.assertLess(ct.sent.index('OUT 10 A, 0 HZ'), ct.sent.index('RANGELCK ON'))
+        d.amplifier_activate()
+        d.check_error('ok')
+        self.assertNotIn('BOOST ON', ct.sent)                              # 10 A is above the 5700A's range: the amplifier is already active (ISR bit 3), no BOOST needed
+        self.assertEqual(self.sent(ct, 'RANGELCK'), ['RANGELCK OFF', 'RANGELCK ON'])
+        self.assertLess(ct.sent.index('OUT 10 A, 0 HZ'), ct.sent.index('RANGELCK ON'))          # the lock pins the PRESENT range: after the output
         self.assertNotIn('CUR_POST NORMAL', ct.sent)                       # the post is already the amplifier's
+        d.amplifier_confirm()
         d.amplifier_off()
-        self.assertEqual([c for c in ct.sent if c.startswith(('BOOST', 'RANGELCK', 'CUR_POST')) and '?' not in c][-3:], ['BOOST OFF', 'RANGELCK OFF', 'CUR_POST NORMAL'])
+        self.assertEqual(self.sent(ct, 'BOOST', 'RANGELCK', 'CUR_POST')[-3:], ['BOOST OFF', 'RANGELCK OFF', 'CUR_POST NORMAL'])
         self.assertFalse(ct.boost or ct.rlock)
 
+    def test_a_zero_current_needs_boost_on_after_the_output(self):
+        d, ct, bench = make()
+        d.amplifier_on('I')
+        d.set_output_amps(0.0, None, True)                                 # the UUT-zero point: not above the 5700A's range, so BOOST is needed
+        d.amplifier_activate()
+        d.check_error('ok')
+        self.assertLess(ct.sent.index('OUT 0 A, 0 HZ'), ct.sent.index('BOOST ON'))
+        d.amplifier_confirm()
+        d.amplifier_off()
+
+    def test_boost_on_with_a_zero_volt_output_is_refused_with_fault_860(self):
+        # the old order: BOOST ON while the present output was 0 V (or another function): "Can't Use Amplifier For This Output"
+        d, ct, bench = make()
+        d.set_output_volts(0.0, None, True)
+        d.send('boost', state='ON')
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.check_error('x')
+        self.assertIn('860', str(cm.exception))
+        self.assertIn("Can't Use Amplifier For This Output", str(cm.exception))
+
+    def test_voltage_boost_sets_the_output_first_is_never_locked_and_needs_no_boost_command_when_chosen_by_the_5700a(self):
+        d, ct, bench = make()
+        d.set_output_volts(1.0, None, True)                                # the previous point was something else
+        d.amplifier_on('V')
+        d.set_output_volts(740.0, 50000.0)
+        d.amplifier_activate()
+        d.check_error('ok')
+        self.assertNotIn('BOOST ON', ct.sent)
+        self.assertEqual(self.sent(ct, 'RANGELCK'), ['RANGELCK OFF'])      # voltage is not locked
+        d.amplifier_confirm()
+        d.amplifier_off()
+
     def test_bit_3_staying_set_after_boost_off_does_not_stop_the_run(self):
-        # bench finding 2026-11-04 (740 V at 50 kHz): 'BOOST OFF was not accepted (ISR? bit 3)': the 5700A selects the amplifier by itself above its own range, so bit 3 follows the output setting
+        # bench 2026-11-04 (740 V at 50 kHz): 'BOOST OFF was not accepted (ISR? bit 3)': the 5700A selects the amplifier by itself above its own range, so bit 3 follows the output setting
         d, ct, bench = make()
         d.amplifier_on('V')
         d.set_output_volts(740.0, 50000.0)
+        d.amplifier_activate()
         d.amplifier_confirm()
         d.amplifier_off()                                        # must not raise although bit 3 is still 1
         self.assertTrue(d.isr(3))
-        self.assertFalse(ct.boost or ct.rlock)                   # BOOST and RANGELCK were switched off
-        self.assertTrue(any('ISR? after the amplifier was taken out' in e[3] for e in d.log.entries))   # the raw value is in the command log
+        self.assertFalse(ct.boost or ct.rlock)
+        self.assertTrue(any('ISR? after the amplifier was taken out' in e[3] for e in d.log.entries))
 
     def test_the_range_lock_set_before_the_output_is_refused_with_fault_860(self):
-        # bench 2026-11-04: fault 860 "Can't Use Amplifier For This Output" at 10 A DC and at 740 V / 50 kHz; RANGELCK locks the PRESENT range, so it must follow the output
         d, ct, bench = make()
         d.set_output_volts(1.0, None, True)                  # the present function is volts
-        d.send('rangelck', state='ON')                       # the old order: lock first
+        d.send('rangelck', state='ON')                       # a lock first pins the present range
         d.set_output_amps(10.0, None, True)
         with self.assertRaises(drivers.InstrumentError) as cm:
             d.check_error('DC current: 10 A on the 10 A range')
         self.assertIn('860', str(cm.exception))
-        self.assertIn("Can't Use Amplifier For This Output", str(cm.exception))
 
-    def test_amplifier_order_current_is_boost_then_output_then_lock_and_voltage_is_never_locked(self):
+    def test_a_stale_range_lock_from_a_failed_step_is_cleared_before_the_next_amplifier_point(self):
         d, ct, bench = make()
-        d.set_output_volts(1.0, None, True)                  # the previous point was a voltage: the function is not current
-        d.amplifier_on('I')
+        d.set_output_volts(740.0, 1000.0)
+        d.send('rangelck', state='ON')                       # left locked by a failed step
+        self.assertTrue(ct.rlock)
+        d.amplifier_on('I')                                  # starts from a clean slate
+        self.assertFalse(ct.rlock)
         d.set_output_amps(10.0, None, True)
-        d.amplifier_lock()
-        d.check_error('ok')                                  # accepted
-        d.amplifier_confirm()
+        d.amplifier_activate()
+        d.check_error('10 A')                                # accepted
         d.amplifier_off()
-        d.amplifier_on('V')
-        d.set_output_volts(740.0, 50000.0)
-        d.amplifier_lock()
-        self.assertEqual([c for c in ct.sent if c.startswith('RANGELCK')], ['RANGELCK ON', 'RANGELCK OFF'])      # only the current boost was locked and unlocked
-        d.check_error('ok')
-        d.amplifier_confirm()
-        d.amplifier_off()
+        d.send('rangelck', state='ON')                       # a lock left behind
+        d.amplifier_off()                                    # always sends RANGELCK OFF
+        self.assertFalse(ct.rlock)
+
+    def test_each_amplifier_fault_names_the_command_that_was_refused(self):
+        d, ct, bench = make()
+        d.amplifier_on('I')
+        d.set_output_amps(0.0, None, True)
+        ct.faults.append(860)                                # what the calibrator answers when BOOST ON is refused
+        orig = ct.handle
+
+        def boost_refused(cmd):
+            if cmd.strip().upper() == 'BOOST ON':
+                ct.sent.append(cmd.strip())
+                return None                                  # accepted silently; the fault is already queued
+            return orig(cmd)
+        ct.handle = boost_refused
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.amplifier_activate()
+        self.assertIn('(BOOST ON)', str(cm.exception))
+
+    def test_the_fault_message_ends_with_the_last_commands_sent(self):
+        d, ct, bench = make()
+        d.set_output_volts(1.0, None, True)
+        d.send('rangelck', state='ON')
+        d.set_output_amps(10.0, None, True)
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.check_error('x')
+        msg = str(cm.exception)
+        self.assertIn('Last commands:', msg)
+        self.assertIn('>> RANGELCK ON', msg)
+        self.assertIn('>> OUT 10 A, 0 HZ', msg)
 
     def test_every_queued_fault_is_reported_and_stale_ones_are_cleared_before_the_amplifier(self):
         d, ct, bench = make()
@@ -110,18 +177,19 @@ class Amplifier(unittest.TestCase):
         self.assertFalse([c for c in ct.sent if c.startswith('CUR_POST') and '?' not in c])
         d.amplifier_off()
 
-    def test_the_amplifier_is_only_switched_in_with_the_output_in_standby(self):
+    def test_the_amplifier_is_only_prepared_with_the_output_in_standby(self):
         d, ct, bench = make()
         d.operate()
         with self.assertRaises(drivers.SafetyError):
             d.amplifier_on('V')
-        self.assertNotIn('BOOST ON', ct.sent)
+        self.assertNotIn('BTYPE VB5725', ct.sent)
 
     def test_no_amplifier_on_the_cable_is_reported_with_the_isr_value_and_the_fault_text(self):
         d, ct, bench = make()
         ct.amp_connected = False
-        d.amplifier_on('I')                                  # the commands are accepted; the amplifier is confirmed once the output is set
+        d.amplifier_on('I')
         d.set_output_amps(1.0, None, True)
+        d.amplifier_activate()                               # BOOST ON is sent; with no amplifier on the cable it does not take
         with self.assertRaises(drivers.InstrumentError) as cm:
             d.amplifier_confirm()
         msg = str(cm.exception)
@@ -129,23 +197,13 @@ class Amplifier(unittest.TestCase):
         self.assertIn("answered '", msg)
         self.assertIn('FAULT? answered', msg)
 
-    def test_isr_bit_3_is_not_required_straight_after_boost_on(self):
-        # bench finding 2026-11-04: ISR? bit 3 read 0 right after BOOST ON (before any output was set) and the old check stopped the run
-        d, ct, bench = make()
-        d.amplifier_on('I')                                  # must not raise
-        self.assertFalse(d.isr(3))
-        d.set_output_amps(10.0, None, True)
-        d.amplifier_lock()
-        d.amplifier_confirm()                                # BOOST and RLOCK are set once the output is set
-        self.assertTrue(d.isr(3) and d.isr(5))
-        d.amplifier_off()
-
     def test_the_simulated_5700a_refuses_what_needs_the_amplifier(self):
         d, ct, bench = make()
-        d.set_output_amps(10.0, None, True)
+        d.set_output_amps(10.0, None, True)                  # the current post is NORMAL: the 5725A is not designated
         self.assertEqual(ct.faults, [540])
         ct.faults.clear()
-        d.set_output_volts(740.0, 100000.0)
+        ct.amp_connected = False
+        d.set_output_volts(740.0, 100000.0)                  # no 5725A on the cable
         self.assertEqual(ct.faults, [540])
 
 

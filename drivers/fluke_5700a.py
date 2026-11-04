@@ -168,30 +168,38 @@ class Fluke5700A(Instrument):
             raise InstrumentError(f'{self.label}: the current output post {post} was not accepted (CUR_POST? answered {reply!r})')
 
     def amplifier_on(self, kind):
-        """The 5725A in the circuit, with the output in STANDBY: stale faults cleared, BTYPE VB5725 (voltage) or IB5725 (current, and CUR_POST IB5725), BOOST ON. kind 'V' or 'I'.
-        RANGELCK is NOT sent here: it locks the PRESENT range (guide), so it is sent by amplifier_lock() after the output is set (bench 2026-11-04: with the lock set first the 5700A refused the
-        outputs with fault 860, "Can't Use Amplifier For This Output")."""
+        """PREPARE the 5725A, with the output in STANDBY and BEFORE the target output is set: stale faults cleared, BOOST OFF and RANGELCK OFF (a clean slate), BTYPE VB5725 (voltage) or IB5725
+        (current, and CUR_POST IB5725). kind 'V' or 'I'. BOOST and the range lock are NOT sent here: both act on the PRESENT output (guide: RANGELCK 'locks the present range'; Operator Guide: an
+        amplifier is selected for settings above the calibrator's range, and BOOST is for the others), so amplifier_activate() sends them after the target output is set (bench 2026-11-04:
+        fault 860, "Can't Use Amplifier For This Output", at 10 A DC and 740 V / 50 kHz when BOOST ON / the lock came first)."""
         if self.isr(ISR_OPER):
             raise SafetyError(f'{self.label}: the 5725A is only switched in with the output in standby')
         stale = self._drain_faults()
         if stale:
             self.log.add('##', 'faults cleared before the amplifier was switched in: ' + '; '.join(r for r, _ in stale), self.label)
+        self.send('boost', state='OFF')              # a clean slate: an earlier failed run can leave BOOST or the range lock ON, and a stale lock pins the wrong range
+        self.send('rangelck', state='OFF')
         amp = 'VB5725' if kind == 'V' else 'IB5725'
         self.send('btype', amp=amp)
         if amp not in self.ask('btype.query').strip().upper():
             raise InstrumentError(f'{self.label}: the amplifier type {amp} was not accepted (BTYPE? did not list it)')
         if kind == 'I':
             self._post('IB5725')
-        self.send('boost', state='ON')
         self._amp, self._locked = kind, False
 
-    def amplifier_lock(self):
-        """After the amplifier output is set, still in STANDBY: RANGELCK ON for the 10 A current points only (DMM6500 Calibration Manual pp. 2-46, 2-48; voltage is not locked there). The
-        present range is then the amplifier's, which is what the lock pins."""
-        if self._amp != 'I':
+    def amplifier_activate(self):
+        """After the TARGET output is set, still in STANDBY: if ISR? bit 3 shows no amplifier active (it is selected by itself for settings above the 5700A's own range, so often it already is),
+        BOOST ON; then a fault check. For the 10 A current points RANGELCK ON as well (DMM6500 Calibration Manual pp. 2-46, 2-48; voltage is not locked there), with its own fault check.
+        Each fault check names the command that was refused."""
+        if self._amp is None:
             return
-        self.send('rangelck', state='ON')
-        self._locked = True
+        if not self.isr(ISR_BOOST):
+            self.send('boost', state='ON')
+            self.check_error('BOOST ON')
+        if self._amp == 'I':
+            self.send('rangelck', state='ON')
+            self._locked = True
+            self.check_error('RANGELCK ON')
 
     def amplifier_confirm(self):
         """With the amplifier output set (and locked, for the 10 A points) and the output still in STANDBY: ISR? must show BOOST (bit 3) and, when locked, RLOCK (bit 5). On a failure the message gives the raw ISR? value and the fault queue
@@ -215,10 +223,9 @@ class Fluke5700A(Instrument):
         ISR? bits 3 and 5 are NOT required to clear: on the bench (2026-11-04, 740 V at 50 kHz) bit 3 was still 1 after BOOST OFF, because the 5700A selects the amplifier by itself for an output
         above its own range (Operator Guide, 'B' key), so the bit follows the output setting, not the BOOST state. The raw ISR? value is written to the command log for the bench session."""
         kind, self._amp = self._amp, None
-        locked, self._locked = self._locked, False
+        self._locked = False
         self.send('boost', state='OFF')
-        if locked:
-            self.send('rangelck', state='OFF')
+        self.send('rangelck', state='OFF')           # always: harmless when not locked, and it clears a lock left by a failed step
         if kind == 'I':
             self._post(self.CURRENT_POST)
         value = int(float(str(self.query_retry('isr.query', attempts=2, delay=0.3)).replace(',', ' ').split()[0]))
@@ -272,7 +279,12 @@ class Fluke5700A(Instrument):
             except Exception:
                 why = ''
             parts.append(f'fault {reply}{" - " + why if why else ""}')
-        raise InstrumentError(f'{self.label} rejected the setting{" (" + context + ")" if context else ""}: ' + '; '.join(parts))
+        raise InstrumentError(f'{self.label} rejected the setting{" (" + context + ")" if context else ""}: ' + '; '.join(parts) + f'. Last commands: {self._recent()}')
+
+    def _recent(self, n=18):
+        """The last n wire lines of this instrument ('>>' sent, '<<' answered), for a fault message: what was sent, in order, when the 5700A refused."""
+        lines = [f'{d} {t}' for _, inst, d, t in self.log.entries if inst == self.label and d in ('>>', '<<')]
+        return ' | '.join(lines[-n:])
 
     def clear_status(self):
         self.send('status.clear')
