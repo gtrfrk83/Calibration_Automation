@@ -326,7 +326,7 @@ class Options(Bench):
         for ref in ('4A-12 test 6 deviation 9.99 kHz', '4A-12 test 6 deviation 0.999 kHz', '4A-12 test 7'):
             self.assertEqual(by_ref(ref)['ref'], ref)
         self.assertTrue(all(p['gen']['fm']['khz'] == 99.9 for p in E.POINTS if p['ref'].startswith('4A-12 test 6 ') and p['meas'] == 'fm_dev' and 'deviation' not in p['ref']))
-        src = (ROOT / 'fluke6060a_verification.py').read_text(encoding='utf-8') + (ROOT / 'specs' / 'build_fluke_6060a_spec.py').read_text(encoding='utf-8')
+        src = (ROOT / 'Procedures/fluke6060a_verification.py').read_text(encoding='utf-8') + (ROOT / 'specs' / 'build_fluke_6060a_spec.py').read_text(encoding='utf-8')
         self.assertNotRegex(src, r'651|low_rate')
 
     def test_thd_at_10_khz_is_typed_with_rf_on_then_off(self):
@@ -384,7 +384,7 @@ class DemoAndReport(Bench):
 
 
 class SourceGuards(unittest.TestCase):
-    ENGINE = (ROOT / 'fluke6060a_verification.py').read_text(encoding='utf-8')
+    ENGINE = (ROOT / 'Procedures/fluke6060a_verification.py').read_text(encoding='utf-8')
 
     def test_manual_override_is_on_for_this_engine_only_by_its_own_flag(self):
         self.assertIs(E.App.MANUAL_OVERRIDE, True)
@@ -408,12 +408,12 @@ class SourceGuards(unittest.TestCase):
         side = json.loads((ROOT / 'Procedures' / 'Fluke_6060A_Verification.procedure.json').read_text(encoding='utf-8'))
         self.assertEqual((side['id'], side['model'], side['launcher']), ('Fluke_6060A_Verification', '6060A', 'Procedures/Fluke_6060A_Verification.py'))
         self.assertIn('specs/fluke_6060a_pv.json', side['specs'])
-        self.assertIn('fluke6060a_verification.py', side['engine'])
+        self.assertIn('Procedures/fluke6060a_verification.py', side['engine'])
         self.assertTrue((ROOT / 'Procedures' / 'Fluke_6060A_Verification.py').is_file())
         self.assertTrue((ROOT / 'diagrams' / 'README_6060a.txt').is_file())
 
     def test_the_qt_view_has_the_five_address_boxes(self):
-        src = (ROOT / 'fluke6060a_view_qt.py').read_text(encoding='utf-8')
+        src = (ROOT / 'Procedures/fluke6060a_view_qt.py').read_text(encoding='utf-8')
         for name in ('uut_addr', 'rx_addr', 'sa_addr', 'rf_addr', 'lf_addr'):
             self.assertIn(f'self.{name}', src)
 

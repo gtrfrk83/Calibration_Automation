@@ -109,9 +109,9 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'Procedures/Agilent_34401A.py': ('execute', 'reset_then', '_next'),
     'Procedures/Fluke_8846A_Verification.py': ('execute', 'reset_then', '_next'),
     'fluke8808a_verification.py': ('execute', 'reset_then', '_next'),
-    'fluke6060a_verification.py': ('execute', 'reset_then', '_next'),
+    'Procedures/fluke6060a_verification.py': ('execute', 'reset_then', '_next'),
     'bk5491b_verification.py': ('execute', 'reset_then', '_next'),
-    'hp8591a_verification.py': ('execute', 'reset_then', '_next'),
+    'Procedures/hp8591a_verification.py': ('execute', 'reset_then', '_next'),
 }
 
 
