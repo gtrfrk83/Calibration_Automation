@@ -9,6 +9,12 @@ Search order: hook_dmm6500_<cal>_<G>  ->  hook_dmm6500_<G>        <calibrator> =
 
 Front panel photo supplied by the owner: diagrams/dmm6500_panel.png (INPUT HI / LO, SENSE Omega 4 WIRE HI / LO, AMPS 3A jack, TERMINALS FRONT / REAR button; the 10 A jack is on the rear).
 
+The 32 pictures hook_dmm6500_<5560A|5522A>_<GROUP>.png are drawn by specs/build_hookups_ext.py (python specs/build_hookups_ext.py dmm6500; needs Pillow).
+The DMM6500 jacks come from the photo above; the 5560A is drawn from its front-panel photo, the 5522A as the schematic of its output terminals.
+UNVERIFIED (also written in each picture's note): the REAR panel inset of REAR10A (the rear jacks are not in the photo, positions are schematic); the 3458A reference meter
+(OHM4, DCI_LOW: a note only, its lead is not drawn); the 5725A amplifier (ACV750, REAR10A: not drawn); the 8610 / 8620 short (SHORT4: copper bars, orientation per Figure 17 not drawn);
+the 5560A / 5520A sense terminals for RTD4 / OHM4 (SENSE HI / LO drawn); which calibrator terminal feeds SENSE LO in RTD3; the 5560A capacitance terminals (CAP).
+
 GROUP (one picture per separate hook-up; the numbers are the Calibration Manual figures)
   DCV      calibrator voltage to INPUT HI / LO, low-thermal, shield to the calibrator LO (Figure 1); also the digitize voltage points (Figure 4)
   ACV      calibrator AC voltage to INPUT HI / LO, low-capacitance cable (Figure 2)
