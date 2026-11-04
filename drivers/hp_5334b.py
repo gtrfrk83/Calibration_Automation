@@ -43,6 +43,16 @@ STATUS_BITS = {1: 'data_ready', 4: 'error', 8: 'failure', 16: 'local', 32: 'no_o
 CHANNELS = {'A': 'fn.freq_a', 'C': 'fn.freq_c'}
 CHANNEL_RANGE_HZ = {'A': (0.001, 100e6), 'C': (90e6, 1300e6)}                                              # Table 1-1 (pp. 1-2, 1-5, 1-6)
 GATE_RANGE_S = (0.001, 99.999)                                                                               # Table 3-12 (p. 3-83)
+# Table 3-3 error messages (p. 3-48, read from the rendered page 2026-11-04). Failures (Table 3-4) are hardware faults and are not listed here.
+ERROR_TEXT = {
+    '0.0': 'no error', '1.0': 'parameter disallowed in present mode', '1.1': 'attenuators controlled by AUTO TRIG', '1.2': '50-ohm B, AC B settings preset by COM A',
+    '1.3': 'slope B set by slope A in Rise/Fall mode', '1.4': 'parameter disallowed in High Speed mode', '1.5': 'calibration data unaccessible in present mode',
+    '2.0': 'invalid key entry', '2.1': 'data outside valid range', '2.2': 'data exceeds maximum resolution', '2.3': 'mantissa digit buffer full',
+    '2.4': 'decimal point previously entered', '3.0': 'multiple key closures', '4.0': 'HP-IB mnemonic not recognizable', '4.1': 'HP-IB numeric syntax error',
+    '4.2': 'HP-IB alpha character expected', '4.3': 'HP-IB data exceeds valid range', '4.4': 'attention (ATN) asserted in Talk-Only mode',
+}
+WRITE_TERMINATION = '\n'   # commands end with LF (and EOI) only: the manual names only spaces, commas and semicolons as separators (3-307), and the VISA default CR LF
+                            # was followed by error 4.2 'alpha character expected' at Test connections on the owner's bench (2026-11-04)
 READING = re.compile(r'^\s*([A-Za-z])\s*([+-]\d(?:\.\d*)?E[+-]\d{2})\s*$')                                  # p. 3-84
 
 COMMANDS = {
@@ -110,7 +120,25 @@ class HP5334B(Instrument):
         """TE: the counter's error / failure number, as sent (format UNVERIFIED). Read-only; it does not clear the error state (p. 3-88)."""
         return self.ask('error.query').strip()
 
-    def check_status(self, context=''):
+    @staticmethod
+    def error_text(number) -> str:
+        """'4.2' -> '4.2 (HP-IB alpha character expected)'; the TE reply is kept as sent when it holds no known number."""
+        m = re.search(r'\d\.\d', str(number))
+        meaning = ERROR_TEXT.get(m.group(0)) if m else None
+        return f'{number} ({meaning})' if meaning else str(number)
+
+    def _line_ends(self):
+        """Commands end with LF only, replies are read to the LF of their CR LF (as the 8902A driver does). A VISA resource has these attributes; a simulator may.
+        UNVERIFIED on the bench until the owner confirms the 4.2 is gone."""
+        target = getattr(self.t, '_res', None) or self.t
+        for attr, value in (('write_termination', WRITE_TERMINATION), ('read_termination', '\n')):
+            if hasattr(target, attr):
+                try:
+                    setattr(target, attr, value)
+                except Exception:                                          # noqa: BLE001 - the defaults then stay
+                    pass
+
+    def check_status(self, context='', oscillator=True):
         """Serial poll once: raise on an error (bit 4, with the TE number), a failure (bit 8) or no oscillator (bit 32: with TIME BASE on EXT, no 10 MHz at the rear
         TIME BASE IN/OUT). Returns the status dict."""
         st = self.status()
@@ -121,9 +149,9 @@ class HP5334B(Instrument):
             except (InstrumentError, TransportError) as exc:
                 number = f'unreadable ({exc})'
             what = 'a failure' if st['failure'] else 'an error'
-            raise InstrumentError(f'{self.MODEL} reports {what}{where}: TE {number!r} (status byte {st["value"]}; Tables 3-3 / 3-4, p. 3-48 / 3-49). '
+            raise InstrumentError(f'{self.MODEL} reports {what}{where}: TE {self.error_text(number)} (status byte {st["value"]}; Tables 3-3 / 3-4, p. 3-48 / 3-49). '
                                   'In remote the counter then ignores commands until it is cleared.')
-        if st['no_oscillator']:
+        if oscillator and st['no_oscillator']:
             raise InstrumentError(f'{self.MODEL}: no time base oscillator{where} (status byte {st["value"]}). With the rear TIME BASE switch on EXT the 10 MHz reference '
                                   '(the lab GPS) must be connected to TIME BASE IN/OUT.')
         return st
@@ -136,13 +164,15 @@ class HP5334B(Instrument):
         retarget(self.t, self.address)
         self.open(verify_model=False)
         try:
-            self.t.clear()
+            self._line_ends()
+            self.t.clear()                                                    # also clears errors 1.0 to 4.4 left by anything else (a *IDN? scan gives 4.2)
             self.idn = self.id_reply = self.identify()
             if not any(w in self.idn for w in self.ID_WORDS):
                 raise InstrumentError(f'Expected {self.MODEL} at HP-IB address {self.address} but the ID reply is {self.idn!r}')
             self.send('reset')
             self.send('wait.on')
-            self.status()                                                     # clear anything pending
+            self.check_status('connect (device clear, ID, IN, WA1)', oscillator=False)   # an error stops the connection with its number (bench 2026-11-04: 4.2 went
+                                                                              # unseen); no oscillator is judged per point (the GPS may be connected at the hook-up prompt)
         except Exception:
             self.close()
             raise

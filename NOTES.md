@@ -2224,6 +2224,13 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.
 - Every substituted instrument (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV -> 8902A, 96270A + NRP40T, 8563E) is flagged UNVERIFIED on the point. Appendix A (adjustment) is not built.
+- HP 5334B error 4.2 at Test connections (owner bench 2026-11-04: "getting error 4.2 on the 5334 when checking connections"). Table 3-3 (p. 3-48, now read):
+  4.2 = HP-IB 'alpha character expected'. The driver left the VISA GPIB default line end CR LF; the manual names only spaces, commas and semicolons as separators (3-307),
+  so the likely cause is the CR after each command (UNVERIFIED: the HP-85 examples also end in CR LF). Fix: `HP5334B._line_ends` sets write and read termination to LF
+  (as the 8902A driver does); `connect` now ends with `check_status(..., oscillator=False)`, so an error left after ID / IN / WA1 stops Test connections with its number
+  and meaning (`ERROR_TEXT`, `error_text`) instead of showing up as an ignored command at the first measurement; no oscillator is still judged per point. A Manager
+  'Find instruments...' scan sends *IDN? to every address, which also gives 4.2 on a 5334B; the device clear at connect clears that. Simulator: opt-in
+  `Sim5334BTransport.cr_is_error`. Tests: `tests/test_fluke6060a_gidep.py` CounterLineEnds. NOT run on the bench yet.
 - HP 5334B counter for the frequency points (owner, 2026-11-03: "can we automate the frequency portion to use the 5334?"; a 5334B with Options 010 and 030): NEW driver
   `drivers/hp_5334b.py` from the owner's 5334A/B Operating and Programming Manual 05334-90047 (Dec 1993; the scanned PDF the owner pushed as '5334 Manual.pdf', read from the
   RENDERED pages: Table 3-12 commands p. 3-82 / 3-83, output format p. 3-84 / 3-85, status byte Table 3-11 p. 3-77, error handling p. 3-87 / 3-88, IN / RE / TE / WA1

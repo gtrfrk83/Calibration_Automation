@@ -28,6 +28,9 @@ class Sim5334BTransport(_SimBase):
         self.cleared = 0
         self.no_oscillator = False          # True: TIME BASE on EXT with nothing connected (status bit 32)
         self.fail_with_error = None         # e.g. '4.0': the next command puts the counter in that error state
+        self.write_termination = '\r\n'      # the VISA GPIB default; the driver sets '\n' at connect
+        self.read_termination = '\r\n'
+        self.cr_is_error = False            # opt-in (owner bench 2026-11-04): a CR after a command gives error 4.2 'alpha character expected' (NOT confirmed as the cause)
         self._reset_state()
 
     def _reset_state(self):
@@ -64,6 +67,8 @@ class Sim5334BTransport(_SimBase):
             raise TransportError(f'simulated timeout on {text!r}')
         self.sent.append(text.strip())
         self._reply = self.handle(text.strip())
+        if self.cr_is_error and '\r' in self.write_termination and self.error is None:
+            self.error = '4.2'
 
     def read(self):
         if self._reply is not None:

@@ -35,7 +35,7 @@ COVERAGE = {
         no_command=['write', 'send', 'address', 'set_address']),
     'HP5334B': dict(
         covered=['connect', 'identify', 'status', 'error_number', 'check_status', 'parse_reading', 'measure_frequency_hz', 'go_local', 'cleanup', 'reset_to_defaults'],
-        no_command=['send', 'address', 'set_address']),
+        no_command=['send', 'address', 'set_address', 'error_text']),
     'gpib_address': {},
 }
 COVERAGE.pop('gpib_address')                                             # a helper module with no Instrument class: it only appears in LINT_FILES

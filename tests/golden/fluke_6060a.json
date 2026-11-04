@@ -7708,7 +7708,7 @@
     "5334B|<<|4.0"
    ],
    "method": "HP5334B.measure_frequency_hz",
-   "result": "raised InstrumentError: HP 5334B reports an error after FREQ C (no reading): TE '4.0' (status byte 4; Tables 3-3 / 3-4, p. 3-48 / 3-49). In remote the counter then ignores commands until it is cleared.",
+   "result": "raised InstrumentError: HP 5334B reports an error after FREQ C (no reading): TE 4.0 (HP-IB mnemonic not recognizable) (status byte 4; Tables 3-3 / 3-4, p. 3-48 / 3-49). In remote the counter then ignores commands until it is cleared.",
    "wire": [
     [
      "W",

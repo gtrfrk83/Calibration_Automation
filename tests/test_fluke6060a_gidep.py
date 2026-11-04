@@ -586,3 +586,42 @@ class PllLockWait(GidepBench):
         self.assertFalse(Fluke6060A._pll_only((0, 0o010, 0o001)))
         self.assertFalse(Fluke6060A._pll_only((0o002, 0o010, 0)))
         self.assertTrue(Fluke6060A._pll_only((0, 0o010, 0)))
+
+
+class CounterLineEnds(unittest.TestCase):
+    """Owner bench 2026-11-04: 'getting error 4.2 on the 5334 when checking connections' (Table 3-3, p. 3-48: alpha character expected). The VISA default ends a GPIB write
+    with CR LF; the manual names only spaces, commas and semicolons as separators. The driver now ends commands with LF only, and an error after connect stops the
+    connection with its number instead of surfacing at the first measurement."""
+
+    def make(self, keep_cr=False):
+        from tests.golden_6060a import make_rf_bench
+        from drivers.simulated_5334b import Sim5334BTransport
+        from drivers import HP5334B, CommandLog
+        bench = make_rf_bench()[0]
+        t = Sim5334BTransport(bench)
+        t.cr_is_error = True
+        ctr = HP5334B(t, CommandLog(), label='5334B')
+        if keep_cr:
+            ctr._line_ends = lambda: None
+        return t, ctr
+
+    def test_connect_ends_commands_with_lf_and_the_counter_shows_no_error(self):
+        t, ctr = self.make()
+        ctr.connect()
+        self.assertEqual(t.write_termination, '\n')
+        self.assertEqual(t.read_termination, '\n')
+        self.assertFalse(ctr.status()['error'])
+
+    def test_an_error_at_connect_stops_the_connection_with_its_meaning(self):
+        from drivers.base import InstrumentError
+        _t, ctr = self.make(keep_cr=True)
+        with self.assertRaises(InstrumentError) as cm:
+            ctr.connect()
+        self.assertIn('TE 4.2 (HP-IB alpha character expected)', str(cm.exception))
+        self.assertIn('after connect', str(cm.exception))
+
+    def test_error_text_keeps_an_unknown_reply_as_sent(self):
+        from drivers import HP5334B
+        self.assertEqual(HP5334B.error_text('4.2'), '4.2 (HP-IB alpha character expected)')
+        self.assertEqual(HP5334B.error_text('Error 4.0'), 'Error 4.0 (HP-IB mnemonic not recognizable)')
+        self.assertEqual(HP5334B.error_text('FAIL 7.0'), 'FAIL 7.0')
