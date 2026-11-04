@@ -250,6 +250,14 @@ class ReviewWindow(QDialog):
         self.btn_assign.setEnabled(False)
         self.btn_assign.clicked.connect(lambda: self.assign())
         tools.addWidget(self.btn_assign)
+        self.btn_list = SecondaryButton('Standards from the run\u2026')
+        self.btn_list.setToolTip('The standards on the bench (model, optional asset, role): the run decides which one touched each point')
+        self.btn_list.clicked.connect(lambda: self.choose_list())
+        tools.addWidget(self.btn_list)
+        self.btn_use = SecondaryButton('Why this standard?')
+        self.btn_use.setToolTip('Observed or assumed, the specification row, the tie-break and the points no listed standard covers')
+        self.btn_use.clicked.connect(lambda: self.why_standard())
+        tools.addWidget(self.btn_use)
         root.addLayout(tools)
         cta = QHBoxLayout()                                         # 'No uncertainty for this point: Assign' (only while a point should carry one and has none)
         cta.setContentsMargins(SP.page_margin, 0, SP.page_margin, SP.sm)
@@ -362,7 +370,13 @@ class ReviewWindow(QDialog):
             return M.LOCKED_FREQUENCY
         if s.locked:
             return s.std_label or '—'
-        return M.label(r.standard)
+        txt = M.label(r.standard)
+        u = r.use
+        if u is not None and u.primary is not None and not s.locked:        # a standards list is set: the second standard (RSS) and observed / assumed
+            txt += (f' + {M.label(r.cur.second)}' if r.cur.second else '') + f' · {u.basis}'
+        elif u is not None and u.gap:
+            txt += ' · not covered'
+        return txt
 
     def field_gap(self, r) -> bool:
         """The point should carry an uncertainty, prints none and has no assignment yet."""
@@ -603,6 +617,23 @@ class ReviewWindow(QDialog):
     def reset(self):
         self.model.reset()
         self.refresh()
+
+    def choose_list(self, standards=None):
+        """Set the candidate standards (the dialog, or `standards` from a test): applied to this review at once; an empty list turns the feature off."""
+        import standards_used as su
+        from .standards_used_dialog import StandardsListDialog
+        new = standards if standards is not None else StandardsListDialog(self, su.session_list()).run()
+        if new is None:
+            return
+        su.set_session_list(new)
+        info = getattr(self.model, 'run_info', None) or (None, self.demo, ())
+        self.model.apply_standards(new, *info)
+        self.refresh()
+
+    def why_standard(self, idx=None):
+        from .standards_used_dialog import WhyStandardDialog
+        sel = self.selected_indexes()
+        WhyStandardDialog(self, self.model, idx if idx is not None else (sel[0] if len(sel) == 1 else None)).run()
 
     def edit_standards(self):
         dlg = ModalDialog(self, 'Standards used', width=620)

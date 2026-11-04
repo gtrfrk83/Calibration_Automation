@@ -93,6 +93,11 @@ def _apply_icon() -> None:
 def create_app(argv: list[str] | None = None, *, name: str = APP_NAME) -> QApplication:
     """The one QApplication (created once; later calls return it).  Theme applied (dark only for now, see qtui.theme), UI font set, exception hook installed."""
     global _app, _invoker
+    try:
+        import standards_used
+        standards_used.install()                   # which standards touched each point (capture only; wraps at run time, no engine / driver file is edited)
+    except Exception:
+        pass
     inst = QApplication.instance()
     if inst is not None and _app is None:
         _app = inst                                # created by someone else (tests): adopt it

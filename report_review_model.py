@@ -85,6 +85,7 @@ class Evaluation:
     tur: str
     status: str
     unit: str
+    second: str | None = None      # the second standard combined in RSS (standards_used), or None
 
 
 def scope():
@@ -96,8 +97,32 @@ def _unit_of(q):
     return 'ohm' if str(q.get('kind', '')).startswith('OHM') else q.get('unit', '')
 
 
-def evaluate(spec: PointSpec, standard) -> Evaluation:
-    """Recalculate one row for `standard` (a model key or None).  Never raises."""
+def second_components(q, second, direction='input') -> tuple:
+    """The second standard's components for the same point as uncertainty_budget builds them (u = published limit / divisor, + resolution / sqrt(12)), as the
+    (name, u_k1, sensitivity) tuples `uncertainty_budget.build(extra=)` takes, so they are combined in RSS with the first.  () when the sheet has no row for the point."""
+    import uncertainty_budget as ub
+    b2 = ub.build(q['kind'], q['nominal'], _unit_of(q), standard=second, frequency=q.get('frequency'), scope=scope(), range_value=q.get('range'), direction=direction)
+    if b2.hit is None:
+        return ()
+    return tuple((c.name, c.u, c.sensitivity) for c in b2.components)       # the main build multiplies every component by q['scale'] itself
+
+
+def evaluate(spec: PointSpec, standard, second=None, second_direction='input') -> Evaluation:
+    """Recalculate one row for `standard` (a model key or None).  Never raises.
+    `second` (a model key): a second standard that also touched the point - its u is added as extra RSS components (divisor and resolution as the budget does);
+    the scope CMC floor stays the first standard's.  Not for rows with a `calc` (oscilloscope / generator adapters): they ignore it."""
+    if second and spec.calc is None and standard:
+        try:
+            comps = second_components(spec.q, second, second_direction)
+        except Exception:
+            comps = ()
+        if comps:
+            import dataclasses
+            s2 = dataclasses.replace(spec, q=dict(spec.q, extra=tuple(spec.q.get('extra') or ()) + comps),
+                                     q_tar=dict(spec.q_tar, extra=tuple(spec.q_tar.get('extra') or ()) + comps))
+            ev = evaluate(s2, standard)
+            ev.second = second
+            return ev
     if spec.calc is not None:
         try:
             return spec.calc(standard)
@@ -296,6 +321,8 @@ class Row:
         self.manual = None                     # standard chosen for this row by the person (model key), or None
         self.typed = None                      # a typed uncertainty (dict) for a row the lab scope does not cover, or None
         self.field_gap = False                 # field_uncertainty.annotate: should carry an uncertainty and prints none
+        self.second = None                     # standards_used: a second standard (observed on the wire) combined in RSS with the first, or None
+        self.use = None                        # standards_used.Assignment for this row (observed / assumed, why, tie-break), or None without a list
         self.assigned = None                   # an uncertainty assigned in the field (a field_uncertainty row dict) that will print for this point, or None
         self.base = evaluate(spec, spec.default_std)
         self.cur = self.base
@@ -307,7 +334,12 @@ class Row:
         opts = self.spec.options
         if self.manual is None and opts is not None and not self.spec.locked and std not in opts:
             std = self.spec.default_std                      # a row with a fixed list of standards (the 50-turn-coil points: the 5500A/COIL sheet) is not moved by the run default
-        self.cur = self.base if std == self.spec.default_std else evaluate(self.spec, std)
+        self.cur = self.base if (std == self.spec.default_std and not self.second) else evaluate(self.spec, std, self.second if self.manual_ok() else None, self.second_direction)
+
+    second_direction = 'input'
+
+    def manual_ok(self) -> bool:
+        return self.second is not None and not self.spec.locked
 
     @property
     def standard(self):
@@ -338,7 +370,7 @@ class Row:
 
     @property
     def std_changed(self) -> bool:
-        return (not self.spec.locked) and self.standard != self.spec.default_std
+        return (not self.spec.locked) and (self.standard != self.spec.default_std or self.cur.second is not None)
 
     @property
     def status(self) -> str:
@@ -424,6 +456,8 @@ class ReviewModel:
         self.default_std = default_standard
         self.rows = [Row(s, default_standard) for s in specs]
         self.choices = {}
+        self.standards = None                  # standards_used.StandardsUsed attached by apply_standards, or None
+        self._applied = None
 
     # ---- queries
     def counts(self) -> dict:
@@ -465,6 +499,7 @@ class ReviewModel:
         if row.spec.locked or key not in self.options(idx):
             return False
         row.manual = key
+        row.second = None                                    # the person's pick is a single standard
         row.follow(self.default_std)
         return True
 
@@ -492,7 +527,61 @@ class ReviewModel:
         for r in self.rows:
             r.manual = None
             r.typed = None
+            r.second = None
+            r.auto = False
             r.follow(self.default_std)
+        if self._applied is not None:
+            self.apply_standards(*self._applied)
+
+    # ---- standards from the run (standards_used)
+    def apply_standards(self, listed, observed=None, demo=False, exclude=()):
+        """Attach the owner's list and the run's observed use: every row gets an Assignment (observed / assumed, why, tie-break).  Numbers change only where the run
+        shows something the engine's own default does not already say: a different observed standard (row standard follows it) or a SECOND observed standard (its u
+        joins the budget in RSS).  A row whose observed standard is the engine's default prints exactly what it always printed.  An empty list does nothing.
+        `observed` {point id: [model]} or None (no capture); rows the person set themselves are left alone."""
+        import standards_used as su
+        self._applied = (listed, observed, demo, exclude)
+        for r in self.rows:                                 # undo what an earlier application set (never a person's own pick)
+            r.use = None
+            if getattr(r, 'auto', False):
+                r.manual, r.second, r.auto = None, None, False
+                r.follow(self.default_std)
+        if not listed:
+            self.standards = None
+            return
+        self.standards = listed
+        for i, r in enumerate(self.rows):
+            sp = r.spec
+            seen = None if observed is None else observed.get(str(sp.step), [])
+            if sp.calc is not None or sp.locked or not sp.q or sp.q.get('source') == 'none':
+                r.use = _fixed_use(sp, listed, seen, exclude, locked=bool(sp.locked))
+                continue
+            def covers(s, q=sp.q):
+                return coverage_text(q, s)
+            a = su.assign(listed, seen, covers, exclude, engine_default=sp.default_std)
+            a.demo = bool(demo)
+            r.use = a
+            if r.manual is not None or r.typed is not None or a.primary is None:
+                continue
+            key = a.primary.model
+            if key != sp.default_std and key in self.options(i):
+                r.manual, r.auto = key, True
+            if a.second is not None and a.basis == su.OBSERVED:
+                r.second, r.auto = a.second.model, True
+                r.second_direction = a.second.direction
+            r.follow(self.default_std)
+            if r.second is not None and r.cur.second is None:        # the sheet gave no row for the second: nothing is added, and the row says so
+                a.second = None
+                a.why += f'; {r.second} has no specification row here, so its uncertainty is not included'
+                r.second = None
+
+    def coverage_gaps(self) -> list:
+        """Points no listed standard covers (rows that should carry an uncertainty): [{idx, step, description, nominal}]."""
+        return [dict(idx=r.spec.idx, step=r.spec.step, description=r.spec.description, nominal=r.spec.nominal_text) for r in self.rows if r.use is not None and r.use.gap]
+
+    def unlisted(self) -> list:
+        """Rows where the engine used a standard that is not in the list."""
+        return [dict(idx=r.spec.idx, step=r.spec.step, standard=r.spec.default_std) for r in self.rows if r.use is not None and getattr(r.use, 'unlisted', False)]
 
     # ---- the record stored with the report
     def changes(self, by='', when='') -> list:
@@ -504,6 +593,8 @@ class ReviewModel:
             ch = dict(idx=s.idx, step=s.step, section=s.section, description=s.description, nominal=s.nominal_text,
                       original_standard=(None if (r.applied and not r.changed) else s.default_std), standard=r.standard, uncertainty=r.reported_text, tar=r.tar_text, tur=r.tur_text,
                       budget=e.budget, scope_minimum=e.cmc, reported=e.reported, unit=e.unit, status=r.status, manual=r.typed is not None)
+            if e.second:
+                ch.update(second_standard=e.second, combined='RSS')
             if r.typed is not None:                                  # a typed uncertainty: the value as entered, who entered it and when
                 ch.update(manual_value=r.typed['value'], manual_text=r.typed['text'], entered_by=by, entered_at=when)
                 if r.typed.get('source'):
@@ -522,9 +613,14 @@ class ReviewModel:
         return out
 
     def record(self, by='', when='') -> dict:
-        return dict(asset=self.asset, procedure=self.procedure, default_standard=self.default_std, engine_default=self.engine_default,
-                    changed=sum(1 for r in self.rows if r.changed), manual=sum(1 for r in self.rows if r.typed is not None),
-                    changes=self.changes(by, when), table=self.table())
+        rec = dict(asset=self.asset, procedure=self.procedure, default_standard=self.default_std, engine_default=self.engine_default,
+                   changed=sum(1 for r in self.rows if r.changed), manual=sum(1 for r in self.rows if r.typed is not None),
+                   changes=self.changes(by, when), table=self.table())
+        if self.standards:                                   # only with a list: a review without one is stored exactly as before
+            rec['standards_used'] = self.standards.record()
+            rec['assignments'] = [dict(idx=r.spec.idx, step=r.spec.step, **r.use.as_dict()) for r in self.rows if r.use is not None]
+            rec['coverage_gaps'] = self.coverage_gaps()
+        return rec
 
 
 def review_block(models, by='', when='') -> dict:
@@ -533,6 +629,87 @@ def review_block(models, by='', when='') -> dict:
         from datetime import datetime
         when = datetime.now().isoformat(timespec='seconds')
     return {'version': FORMAT_VERSION, 'reviews': [m.record(by, when) for m in models]}
+
+
+def why_text(model, idx=None) -> str:
+    """Plain text of the selected row's assignment, then the coverage gaps of the whole review."""
+    lines = []
+    row = model.rows[idx] if idx is not None and 0 <= idx < len(model.rows) else None
+    if row is not None:
+        u = row.use
+        lines.append(f'Point {row.spec.step}: {row.spec.nominal_text}  {row.spec.description}')
+        if u is None:
+            lines.append('No standards list is set for this review.')
+        elif u.primary is None:
+            lines.append('Standard: none. ' + u.why)
+        else:
+            names = u.primary.model + (f' (asset {u.primary.asset})' if u.primary.asset else '')
+            if row.cur.second:
+                names += f' + {row.cur.second} (second standard, combined in RSS)'
+            lines.append(f'Standard: {names}  -  {u.basis.upper()}')
+            lines.append(u.why)
+            if u.tie_break:
+                lines.append('Tie-break: ' + u.tie_break)
+    gaps = model.coverage_gaps()
+    unl = model.unlisted()
+    lines.append('')
+    lines.append(f'Coverage gaps: {len(gaps)} point(s) that no listed standard covers' + (':' if gaps else '.'))
+    lines += [f'  {g["step"]}  {g["nominal"]}  {g["description"]}' for g in gaps[:40]]
+    if unl:
+        lines.append(f'The engine used a standard that is not in your list on {len(unl)} point(s): ' + ', '.join(sorted({u["standard"] for u in unl})))
+    return '\n'.join(lines)
+
+
+def coverage_text(q, use) -> str:
+    """The sheet row of `use` (a standards_used.StandardUse) that covers point q - its label, range or frequency band - or '' when none does."""
+    try:
+        import uncertainty_budget as ub
+        b = ub.build(q['kind'], q['nominal'], _unit_of(q), standard=use.model, frequency=q.get('frequency'), scope=scope(), range_value=q.get('range'), direction=use.direction)
+        if b.hit is None:
+            return ''
+        r = b.hit.row
+        band = ''
+        if r.get('freq_lo') is not None or r.get('freq_hi') is not None:
+            band = f", {fmt_band(r.get('freq_lo'))} to {fmt_band(r.get('freq_hi'))} Hz"
+        rng = ''
+        if r.get('amp_lo') is not None or r.get('amp_hi') is not None:
+            rng = f", {fmt_band(r.get('amp_lo'))} to {fmt_band(r.get('amp_hi'))} {r.get('unit', '')}"
+        div = use_divisor(use.model)
+        return f"{use.model} '{r.get('function', '')} / {r.get('label', '')}'{rng}{band}; confidence {div}"
+    except Exception:
+        return ''
+
+
+def fmt_band(v):
+    return '-' if v is None else f'{v:.6g}'
+
+
+def use_divisor(model) -> str:
+    try:
+        import specmanager as sm
+        std = sm.standard(model)
+        div, why = std.divisor()
+        return f'{why} (divisor {div:g})'
+    except Exception:
+        return 'unknown'
+
+
+def _fixed_use(sp, listed, seen, exclude, locked=False):
+    """The Assignment of a row the review cannot re-evaluate (oscilloscope / generator adapters, locked rows): the engine's own standard, listed or not.  No number changes."""
+    import standards_used as su
+    a = su.Assignment()
+    if not sp.default_std:
+        a.why = 'no standard applies to this point' if locked else 'the engine prints this point from the lab scope or a fixed source'
+        return a
+    ent = next(iter(listed.find(sp.default_std)), None)
+    if ent is None:
+        a.unlisted = True
+        a.why = f'the engine used {sp.default_std}, which is not in the list'
+        return a
+    a.primary = ent
+    a.basis = su.OBSERVED if (seen and sp.default_std in seen) else su.ASSUMED
+    a.why = f'{sp.default_std} ' + ('was written to while this point ran (observed)' if a.basis == su.OBSERVED else 'is the engine\'s standard (assumed: no capture for this point)') + '; the row\'s number is the engine\'s own'
+    return a
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------- engines

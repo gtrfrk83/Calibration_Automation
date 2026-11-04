@@ -91,6 +91,7 @@ def build_models(parent, procedure='', app=None):
                     return UNAVAILABLE
                 models.append(M.ReviewModel(specs, default, asset=asset_of(app), procedure=procedure))
                 _field_annotate(models[-1], app)
+                _standards_annotate(models[-1], app)
         finally:
             if meters != [None] and keep is not None:
                 app._queue_activate(keep)
@@ -109,6 +110,20 @@ def _field_annotate(model, app):
         field_uncertainty.annotate(model, app, is_demo(app))
     except Exception:
         pass
+
+
+def _standards_annotate(model, app):
+    """Attach the session's standards list (standards_used) and what the run observed to the model.  An empty list does nothing; never raises."""
+    try:
+        import standards_used as su
+        su.install()
+        uut = su.model_of_label(getattr(sys.modules.get(type(app).__module__), 'MODEL', '') or '')
+        model.run_info = (su.observed_for(app), is_demo(app), (uut,) if uut else ())          # what the window needs to apply a list chosen later
+        listed = su.session_list()
+        if listed:
+            model.apply_standards(listed, *model.run_info)
+    except Exception as exc:
+        print(f'report_review: standards list not applied ({type(exc).__name__}: {exc})', file=sys.stderr)
 
 
 def finish(models, details):
