@@ -59,6 +59,7 @@ class Sim6060ATransport(_SimBase):
         # Owner bench 2026-11-03: 244 MHz set directly gave UNCAL; from 242 MHz upward in 1 MHz steps it did not. Opt-in (None = always locked, the old behaviour): a band
         # (lo, hi) MHz entered other than at lo, or by a step that is not upward by at most 1 MHz, reports 'main or reference PLL unlocked' (UNCAL field 2, 0o010).
         self.approach_band = None
+        self.approach_needs_rf = False      # opt-in (owner bench 2026-11-04): a step counts only with the RF output ON (stepped with RF off, 244.99 MHz still showed UNCAL)
         self.pll_unlocked = False
         self.pll_settle_reads = 0           # opt-in: after a frequency change the PLL reads 'unlocked' for this many IU queries, then locks (a loop still settling)
         self._pll_settling = 0
@@ -234,7 +235,7 @@ class Sim6060ATransport(_SimBase):
                     lo, hi = (x * 1e6 for x in self.approach_band)
                     new = s['frequency_hz']
                     if lo <= new < hi:
-                        stepped = lo <= prev < hi and 0 < new - prev <= 1e6 + 1 and not self.pll_unlocked
+                        stepped = lo <= prev < hi and 0 < new - prev <= 1e6 + 1 and not self.pll_unlocked and (s['rf_on'] or not self.approach_needs_rf)
                         self.pll_unlocked = not (abs(new - lo) < 1 or stepped)
                     else:
                         self.pll_unlocked = False

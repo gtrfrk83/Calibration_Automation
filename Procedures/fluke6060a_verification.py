@@ -285,6 +285,7 @@ DEFAULT_SETTLE_S = 0.5
 PM_SETTLE_S = 1.0
 MOD_SETTLE_S = 2.0
 SA_SETTLE_S = 1.0
+APPROACH_STEP_S = 4.0                # owner bench 2026-11-04: the 242 -> 244.99 MHz steps 'need to be slower and the output needs to be on while stepping', 'like 3-5 seconds between steps'
 SPUR_WINDOW_SPAN_HZ = 1e6
 
 
@@ -526,7 +527,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             raise ReadingUnavailable(str(exc)) from exc
 
     def _configure(self, p):
-        """Everything before RF ON: the LF generator, the generator frequency, level / section and modulation, each read back. The output is OFF here."""
+        """Everything before RF ON: the LF generator, the generator frequency, level / section and modulation, each read back. The output is OFF here, except for a carrier
+        reached through approach_mhz: the level is set at the first step, RF goes ON there and the frequency is stepped up with APPROACH_STEP_S between steps (owner bench 2026-11-04)."""
         g, gen = p['gen'], self.gen
         lf = p.get('lf')
         if lf and self.lf is not None:
@@ -541,10 +543,21 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self._mod_on = False
         if p['meas'] == 'level_pm':
             self._pm_ready(p)
-        for mhz in g.get('approach_mhz') or ():                # owner bench 2026-11-03: 244 / 244.99 MHz set directly gives UNCAL; reached from 242 MHz in 1 MHz steps it does not
-            gen.set_frequency(mhz)                             # each step read back; the UNCAL check is made once the point is configured
-        gen.set_frequency(g['freq_mhz'])
-        if 'section_no' in p:
+        steps = list(g.get('approach_mhz') or ())
+        if steps:                                              # owner bench 2026-11-03: 244 / 244.99 MHz set directly gives UNCAL; reached from 242 MHz in 1 MHz steps it does not.
+            gen.set_frequency(steps[0])                        # 2026-11-04: still UNCAL at 244.99 MHz: the steps are made with the output ON and APPROACH_STEP_S apart
+            if g.get('level_dbm') is not None:
+                gen.set_level(g['level_dbm'])
+            gen.rf(True)
+            for mhz in steps[1:] + [g['freq_mhz']]:
+                time.sleep(APPROACH_STEP_S)
+                gen.set_frequency(mhz)                         # each step read back; the UNCAL check is made once the point is configured
+            self.log.add('--', f'carrier reached from {steps[0]:g} MHz in {len(steps)} steps, RF ON, {APPROACH_STEP_S:g} s apart', MODEL)
+        else:
+            gen.set_frequency(g['freq_mhz'])
+        if steps:
+            pass                                               # the level was set at the first step
+        elif 'section_no' in p:
             gen.select_section(p['section_no'], rf_on=True)
         elif g.get('level_dbm') is not None:
             gen.set_level(g['level_dbm'])

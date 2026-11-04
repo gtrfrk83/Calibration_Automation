@@ -270,11 +270,7 @@ def build_spec():
         off_hz = abs(smhz - D(str(carrier))) * D(10) ** 6
         base = dict(tag=f'spur {spur} MHz carrier {carrier:g} MHz {dbm:+d} dBm', func='SPUR', description=f'Spur at {spur} MHz, carrier {carrier:g} MHz {dbm:+d} dBm (limit < {SPUR_LIMIT_DBC} dBc)', nominal=float(SPUR_LIMIT_DBC),
                     low=-200.0, high=float(SPUR_LIMIT_DBC), strict_high=True, unit='dBc')
-        if off_hz < 1000:
-            add(s, '4.7 Table 12', meas='manual', group='SA', nominal=base['nominal'], low=-200.0, high=base['high'], strict_high=True, unit='dBc', tag=base['tag'], func='SPUR', description=base['description'] + ' (typed)',
-                manual_prompt=(f'Carrier {carrier:g} MHz at {dbm:+d} dBm' + (' (reach it from 242 MHz upward in 1 MHz steps: set directly it can show UNCAL)' if approach(carrier) else '')
-                               + '. Narrow the analyzer (RBW 10 to 30 Hz) and read the spur at {spur} MHz ({float(off_hz):g} Hz from the carrier); type its level relative to the carrier in dBc (limit < {SPUR_LIMIT_DBC} dBc).'),
-                flags=['Typed reading: a spur this close to the carrier cannot be separated from it with the 8563E settings the program uses (UNVERIFIED that the analyzer can resolve it at all).'])
+        if off_hz < 1000:                                               # owner 2026-11-04: the three spurs 60 / 120 / 180 Hz from the 244.99 MHz carrier are deleted (were typed)
             continue
         near = off_hz <= 1000000
         sa = dict(kind='off', target_hz=float(off_hz)) if near else dict(kind='abs', target_hz=float(smhz * D(10) ** 6))
@@ -306,6 +302,7 @@ def build_spec():
         constants=dict(harm_count=HARM_COUNT),
         discrepancies=[
             'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) and the frequency points up to 300 MHz (Tables 2 and 3) are read on the 96270A frequency counter (on the GPS 10 MHz); 399.99999 and 499.99999 MHz are above its range and are typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.',
+            'Table 12: the spurs at 244.99006, 244.99012 and 244.99018 MHz (60, 120 and 180 Hz from the 244.99 MHz carrier) are not tested: the 8563E settings this program uses cannot separate them from the carrier, and the owner deleted them (2026-11-04).',
             'Table 8: the 50 kHz deviation on the 250 kHz carrier is not tested: it is above the 8902A\'s specified 40 kHz peak deviation for 250 kHz to 10 MHz carriers (p. 1-20), and the owner removed the FM points the 8902A cannot measure (2026-11-04).',
             'Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.',
             'Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.',

@@ -41,8 +41,8 @@ class SpecTests(unittest.TestCase):
     def test_counts_and_groups(self):
         got = {s['id']: len(s['points']) for s in SPEC['sections']}
         self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-2.5': 25, 'G-4.2b-250': 25, 'G-4.2b-520': 25, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
-                               'G-4.4-520': 8, 'G-4.5': 8, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
-        self.assertEqual(len(points()), 213)
+                               'G-4.4-520': 8, 'G-4.5': 8, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 15, 'G-4.8': 1, 'G-4.9': 1})
+        self.assertEqual(len(points()), 210)
         self.assertEqual({p['group'] for p in points()}, {'POWERON', 'FCOREF', 'FCORF', 'RX', 'RXPWR', 'DEVM', 'SA'})
 
     def test_the_100_khz_carrier_is_moved_to_150_khz_and_2_5_mhz_for_table_5(self):
@@ -136,10 +136,10 @@ class SpecTests(unittest.TestCase):
         harm = {p['gen']['freq_mhz']: p['high'] for p in points() if p['func'] == 'HARMONIC'}
         self.assertEqual(harm, {0.01: -26.0, 5: -26.0, 9.9: -26.0, 10.1: -30.0, 250: -30.0, 520: -30.0})
         spurs = [p for p in points() if p['func'] == 'SPUR']
-        self.assertEqual(len(spurs), 18)
+        self.assertEqual(len(spurs), 15)
         for p in spurs:
             self.assertEqual((p['high'], p['strict_high']), (-35.0, True))
-        self.assertEqual(sum(p['meas'] == 'manual' for p in spurs), 3)             # 60, 120 and 180 Hz from the carrier
+        self.assertEqual(sum(p['meas'] == 'manual' for p in spurs), 0)             # owner 2026-11-04: the 60, 120 and 180 Hz spurs (were typed) are deleted
         levels = [(p['gen']['level_dbm'] if 'gen' in p else None) for p in spurs]
         self.assertEqual(levels[:2], [13, 13])
         self.assertEqual(levels[-1], 1)
@@ -190,7 +190,7 @@ class GidepBench(T.Bench):
 class GidepEngine(GidepBench):
     def test_state_is_kept_apart_from_the_instruction_manual_procedure(self):
         self.assertEqual(E.STATE_KEY, '6060A-gidep')
-        self.assertEqual(len(E.POINTS), 213)
+        self.assertEqual(len(E.POINTS), 210)
         self.assertEqual(E.SPEC['source']['limits_text'], 'GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)')
 
     def test_points_the_instruments_cannot_program_are_listed_not_tested(self):
@@ -218,7 +218,7 @@ class GidepEngine(GidepBench):
     def test_every_point_passes_on_the_simulated_bench_and_rf_is_off_after_each(self):
         self.run_points('', seconds=3000)
         self.assertEqual(self.errors(), [])
-        self.assertEqual(len(self.app.found), 206)
+        self.assertEqual(len(self.app.found), 203)
         self.assertEqual(self.non_pass(), [])
         self.assertTrue(self.rf_at_record and all(not rf for _ref, rf, _lf in self.rf_at_record if not _ref.startswith(('4.1.5', '4.6', '4.7 Table 12 spur 244.99006', '4.7 Table 12 spur 244.99012', '4.7 Table 12 spur 244.99018'))))
 
@@ -483,8 +483,7 @@ class SpurCarrierApproach(GidepBench):
         self.assertEqual({tuple(p['gen']['approach_mhz']) for p in self.spurs(244.0)}, {(242.0, 243.0)})
         self.assertEqual({tuple(p['gen']['approach_mhz']) for p in self.spurs(244.99)}, {(242.0, 243.0, 244.0)})
         self.assertTrue(all('approach_mhz' not in p['gen'] for p in self.spurs(185.0)))
-        typed = [p for p in E.POINTS if p['func'] == 'SPUR' and p['meas'] == 'manual']
-        self.assertTrue(typed and all('from 242 MHz upward' in p['manual_prompt'] for p in typed))
+        self.assertFalse([p['ref'] for p in E.POINTS if p['func'] == 'SPUR' and p['meas'] == 'manual'])     # owner 2026-11-04: the three close-in typed spurs are deleted
 
     def test_244_mhz_carriers_run_without_uncal(self):
         refs = [p['ref'] for p in self.spurs(244.0) + self.spurs(244.99)]
@@ -496,6 +495,22 @@ class SpurCarrierApproach(GidepBench):
         i242, i243 = sent.index('FR242.00000MZ'), sent.index('FR243.00000MZ')
         self.assertLess(i242, i243)
         self.assertLess(i243, sent.index('FR244.00000MZ'))
+
+    def test_the_steps_are_made_with_rf_on_and_seconds_apart(self):
+        """Owner bench 2026-11-04: 'still getting the uncal error at 244.99 MHz ... the steps need to be slower and the output needs to be on while stepping' ('3-5 seconds')."""
+        self.t6.approach_needs_rf = True                                  # the simulated PLL only follows steps made with RF on
+        slept = []
+        with mock.patch.object(E.time, 'sleep', side_effect=lambda s: slept.append(s)):
+            p = self.spurs(244.99)[0]
+            n = len(self.t6.sent)
+            self.run_points(refs=[p['ref']])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])
+        sent = self.t6.sent[n:]
+        self.assertLess(sent.index('FR242.00000MZ'), sent.index('RO1'))                 # RF ON at 242 MHz, before the steps
+        self.assertLess(sent.index('RO1'), sent.index('FR243.00000MZ'))
+        self.assertGreaterEqual(slept.count(E.APPROACH_STEP_S), 3)                     # 243, 244, 244.99
+        self.assertTrue(3.0 <= E.APPROACH_STEP_S <= 5.0)
 
     def test_set_directly_the_simulated_6060a_reports_uncal(self):
         p = self.spurs(244.99)[0]

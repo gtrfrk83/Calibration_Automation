@@ -2246,6 +2246,12 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- Spurs (owner bench 2026-11-04): the three typed spurs 60 / 120 / 180 Hz from the 244.99 MHz carrier are DELETED ("can we delete these three test points?"; 210 points, named
+  in the report discrepancies). "still getting the uncal error at 244.999MHz. The procedure is stepping up but the steps need to be slower and the output needs to be on
+  while stepping" / "make it like 3-5 seconds between steps": for a carrier with approach_mhz (244 and 244.99 MHz) `_configure` now sets 242 MHz and the level, switches
+  RF ON (read back), then steps 1 MHz at a time to the carrier with APPROACH_STEP_S = 4 s before each step (12 s for 244.99 MHz). Simulator: opt-in
+  `Sim6060ATransport.approach_needs_rf` (a step counts only with RF on). Test: SpurCarrierApproach.test_the_steps_are_made_with_rf_on_and_seconds_apart. NOT run on the
+  bench yet (whether 4 s and RF on are enough for the real PLL is the owner's bench check).
 - Typed-reading window (owner, 2026-11-04, deviation-meter point: "can we remove the red portion? it is know that this section can't use the automatic reading";
   "we aren't using a calibrator, so the comment about the calibrator doesn't need to be there"). `manual_override.ask_manual_reading` / `mo_ask` take `instruction=` (a
   reading typed by design: shown as a plain note, no 'The automatic reading failed' banner, no STANDBY line) and `standby_text=` (`ManualOverrideMixin.MO_STANDBY_TEXT`,
