@@ -28,7 +28,8 @@ def hz_text(hz):
 
 FCO = 'the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: "use the frequency counter built into the 96270")'
 FCO_RANGE_LOW, FCO_RANGE_HIGH = 2, 3        # :FCOunter:RANGe 2 = 50 MHz @ 50 ohm, 3 = 300 MHz @ 50 ohm (Remote Programmers Manual p. 41)
-FCO_GATE_S = 2.0                            # :TRIG:GATE 2 (p. 42): 8 / 9 digits (Product Specifications); 20 s would show one more digit at ten times the time
+FCO_GATE_S = 2.0                            # :TRIG:GATE 2 (p. 42): 8 / 9 digits (Product Specifications): 1 Hz at 10 MHz (the reference output)
+FCO_GATE_RF_S = 20.0                        # owner bench 2026-11-04: at 2 s the 100 to 300 MHz readings came in 10 Hz steps (8 digits) against +/-10 Hz limits; 20 s gives 9 / 10 digits, 1 Hz
 FCO_LEVEL_DBM = 7.0                         # the counter needs 0.5 V pk-pk minimum (about -2 dBm into 50 ohm); +7 dBm is 1.4 V pk-pk, under its +/-5 V pk maximum
 COUNTER_MAX_MHZ = D('310')
 
@@ -155,10 +156,10 @@ def build_spec():
                            'technician reads it on the lab\'s own counter. Printed limits +/-0.00001 MHz (10 Hz).'])
                 continue
             add(s, f'4.1 {tbl}', tag=f'{mhz} MHz', func='FREQ', meas='fco_freq', description=f'Frequency {mhz} MHz ({tbl})', gen=dict(freq_mhz=num(mhz), level_dbm=FCO_LEVEL_DBM),
-                fco=dict(range=FCO_RANGE_HIGH, gate_s=FCO_GATE_S),
+                fco=dict(range=FCO_RANGE_HIGH, gate_s=FCO_GATE_RF_S),
                 nominal=num(mhz * D(10) ** 6), low=f((mhz - COUNT_STEP_MHZ) * D(10) ** 6), high=f((mhz + COUNT_STEP_MHZ) * D(10) ** 6), unit='Hz',
-                flags=[UNV + ' (53132A counter -> ' + FCO + ', range 300 MHz @ 50 ohm, 2 s gate).', 'The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at '
-                       '100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs '
+                flags=[UNV + ' (53132A counter -> ' + FCO + ', range 300 MHz @ 50 ohm, 20 s gate).', 'The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at '
+                       '100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs '
                        '0.5 V pk-pk, about -2 dBm into 50 ohm).'])
 
     # 4.2 amplitude

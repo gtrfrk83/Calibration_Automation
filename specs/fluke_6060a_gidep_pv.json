@@ -99,15 +99,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 100000000.0,
      "low": 99999990.0,
      "high": 100000010.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -124,15 +124,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 111111110.0,
      "low": 111111100.0,
      "high": 111111120.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -149,15 +149,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 122222220.0,
      "low": 122222210.0,
      "high": 122222230.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -174,15 +174,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 133333330.0,
      "low": 133333320.0,
      "high": 133333340.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -199,15 +199,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 144444440.0,
      "low": 144444430.0,
      "high": 144444450.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -224,15 +224,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 155555550.0,
      "low": 155555540.0,
      "high": 155555560.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -249,15 +249,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 166666660.0,
      "low": 166666650.0,
      "high": 166666670.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -274,15 +274,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 177777770.0,
      "low": 177777760.0,
      "high": 177777780.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -299,15 +299,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 188888880.0,
      "low": 188888870.0,
      "high": 188888890.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -324,15 +324,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 199999990.0,
      "low": 199999980.0,
      "high": 200000000.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 2",
@@ -349,15 +349,15 @@
      },
      "fco": {
       "range": 3,
-      "gate_s": 2.0
+      "gate_s": 20.0
      },
      "nominal": 299999990.0,
      "low": 299999980.0,
      "high": 300000000.0,
      "unit": "Hz",
      "flags": [
-      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 2 s gate).",
-      "The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at 100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
+      "UNVERIFIED: the document names a different instrument; the choice of the lab's bench instrument for this step is this procedure's. (53132A counter -> the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: \"use the frequency counter built into the 96270\"), range 300 MHz @ 50 ohm, 20 s gate).",
+      "The printed limits are +/-0.00001 MHz (10 Hz); a 20 s gate shows 9 / 10 digits (1 Hz at 100 to 300 MHz; the 2 s gate showed 10 Hz steps on the bench, 2026-11-04) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs 0.5 V pk-pk, about -2 dBm into 50 ohm)."
      ],
      "group": "FCORF",
      "page": "T.O. 33K3-4-911-1 para 4.1 Table 3",

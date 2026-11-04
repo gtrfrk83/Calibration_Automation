@@ -289,7 +289,7 @@ def _gps(r, p, reading, standard, value, what):
 
 
 FCO_NOTE = ('The 96270A counter runs on the lab GPS 10 MHz (external reference; the program checks ROSC:SOURce? and ROSC:LOCKed?). Its own specification (reference accuracy + 0.5 count, '
-            '96000 Series Product Specifications) and the 1 Hz resolution of a 2 s gate are not part of the reported figure under this rule.')
+            '96000 Series Product Specifications) and the 1 Hz resolution (2 s gate at 10 MHz, 20 s at 100 to 300 MHz) are not part of the reported figure under this rule.')
 
 
 def _freq(r, p, reading, path):

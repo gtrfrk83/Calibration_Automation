@@ -2246,6 +2246,12 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- 96270A counter resolution (owner bench 2026-11-04: "frequency is working but it isn't reading enough resolution and it is causing failures"). The readings came in
+  10 Hz steps at 100 to 300 MHz (a 2 s gate shows 8 digits there): the RF points now use a 20 s gate (9 / 10 digits, 1 Hz; `FCO_GATE_RF_S`); the 10 MHz reference keeps
+  2 s (1 Hz there). The table showed '122.222 MHz' (6 digits) and the report '122.2222' for both limits (report_pdf's shared 7-digit formatting): MHz frequency rows now
+  show 6 decimals (1 Hz) on screen (`App._hz_text`) and on the report (`point_row`); other procedures are unchanged. The failures themselves were NOT resolution: the
+  errors grew with frequency (-100 Hz at 122 MHz to -240 Hz at 300 MHz, about -0.8 ppm), i.e. the 6060A and the 96270A were not on the same 10 MHz (check the 6060A
+  REF INT/EXT switch on EXT with the GPS 10 MHz, as the hook-up says). NOT run on the bench yet.
 - FM points the 8902A cannot measure REMOVED (owner, 2026-11-04: "remove all fm test points that can't be done on the 8902"). Against the 8902A FM accuracy rows (p. 1-20:
   40 kHz peak for 250 kHz to 10 MHz carriers, 400 kHz for 10 to 1300 MHz) only Table 8 50 kHz on the 250 kHz carrier is out; it is left out of the spec
   (`rx_fm_max_dev_hz` in the builder; 213 points) and named in the report discrepancies. The 250 / 520 MHz points (to 380 kHz) and residual FM stay.

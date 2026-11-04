@@ -737,8 +737,14 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if not self.status_visible(str(p['id']), st): return False
         return True
 
+    @staticmethod
+    def _hz_text(v):
+        """Frequencies from 1 MHz up to the hertz ('122.222220 MHz'; owner bench 2026-11-04: '122.222 MHz' hid the readings against +/-10 Hz limits); smaller values (an error) as usual."""
+        return f'{v / 1e6:.6f} MHz' if abs(v) >= 1e6 else ui.si(v, 'Hz')
+
     def _row(self, p):
-        cells, tags = self.shell_cells(p['id'], p['nominal'], p['low'], p['high'], p['unit'])
+        fmt = self._hz_text if p['unit'] == 'Hz' and abs(p['nominal']) >= 1e6 else None
+        cells, tags = self.shell_cells(p['id'], p['nominal'], p['low'], p['high'], p['unit'], fmt=fmt)
         return (p['id'], p['description'] + ('  [typed]' if self.is_manual(p) else ''), *cells), tags
 
     def mo_point(self, iid): return POINTS[int(iid) - 1]
@@ -812,7 +818,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if g == 'FCORF':
             return ('6060A RF OUTPUT to the 96270A rear 300 MHz Counter BNC (50 ohm; it needs at least 0.5 V pk-pk, the program sets the 6060A to +7 dBm). 6060A rear panel 10 MHz IN/OUT to the lab '
                     'GPS 10 MHz, REF INT/EXT switch to EXT (the document applies the counter\'s reference, 4.1.6). The 96270A must be on the same GPS 10 MHz (external reference; the program checks '
-                    'this). The program reads the 96270A counter (range 300 MHz @ 50 ohm, 2 s gate).')
+                    'this). The program reads the 96270A counter (range 300 MHz @ 50 ohm, 20 s gate).')
         if g == 'DEVM':
             return ('96270A leveling-head RF OUTPUT to the 6060A DEVIATION METER INPUT (the 6060A RF OUTPUT is not used). On the 6060A press SPCL 6, 1 and set the 400/1000 switch to the deviation range the '
                     'point says (50 kHz or 500 kHz). The program sets the 96270A carrier, level (+7 dBm), FM rate and deviation (each read back), switches its output ON for the point, and asks you to type the 6060A '
@@ -1241,6 +1247,11 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         row = report_pdf.cert_row(p['description'] + note, p['nominal'], p['low'], p['high'], p['unit'], r['reading'], r['result'] == 'FAIL', section=self.report_section(p),
                                   uncertainty=unc)
         row['TAR'], row['TUR'] = '', tur
+        if p['unit'] == 'Hz' and abs(p['nominal']) >= 1e6:              # owner bench 2026-11-04: the shared 7-digit formatting printed 122.2222 for both limits of a +/-10 Hz point
+            mhz = lambda v: f'{v / 1e6:.6f}'
+            row.update({'Nominal': f"{mhz(p['nominal'])} MHz", 'Tolerance -': mhz(p['low']), 'Tolerance +': mhz(p['high']), 'UOM': 'MHz'})
+            if r.get('reading') not in (None, ''):
+                row['As Found'] = mhz(float(r['reading']))
         return row
 
     def export_pdf(self):

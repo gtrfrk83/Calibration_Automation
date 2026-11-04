@@ -559,6 +559,11 @@ class PllLockWait(GidepBench):
         self.assertTrue(Fluke6060A._pll_only((0, 0o010, 0)))
 
 
+def ui_si(v):
+    import ui_theme_core
+    return ui_theme_core.si(v, 'Hz')
+
+
 class Counter96270A(GidepBench):
     """Owner 2026-11-04: "can we abandon it and use the frequency counter built into the 96270?" The 10 MHz reference output (range 2) and Tables 2 / 3 to 299.99999 MHz (range 3, 6060A at
     +7 dBm) are read on the 96270A counter (rear 300 MHz Counter BNC, Remote Programmers Manual pp. 32, 41 to 43, 49); the 96270A must be on its external (GPS) reference."""
@@ -575,9 +580,13 @@ class Counter96270A(GidepBench):
         self.assertIn(':FCO:RANG 2', sent)
         self.assertIn(':FCO:RANG 3', sent)
         self.assertIn(':TRIG:GATE 2', sent)
+        self.assertIn(':TRIG:GATE 20', sent)                             # owner bench 2026-11-04: 2 s gave 10 Hz steps at 100 to 300 MHz
         self.assertEqual(self.pm.state['INST'], 'SINE')                 # back to the leveled sine after each reading
         self.assertEqual(self.pm.state['OUTP'], '0')
         self.assertFalse(rf_state(self.bench)['rf_on'])
+        rf = next(p for p in E.POINTS if p['ref'] == '4.1 Table 2 122.22222 MHz')
+        self.assertEqual(self.app._hz_text(rf['nominal']), '122.222220 MHz')    # owner bench 2026-11-04: the table showed '122.222 MHz'
+        self.assertEqual(self.app._hz_text(-100.0), ui_si(-100.0))
 
     def test_a_10_mhz_reading_outside_6_ppm_fails(self):
         self.pm.ref_out_hz = 10e6 * (1 + 8e-6)
