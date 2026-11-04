@@ -843,9 +843,6 @@
     "DMM6500|>>|:SENS:DIG:VOLT:RANG 0.1",
     "DMM6500|>>|:SENS:DIG:VOLT:RANG?",
     "DMM6500|<<|0.1",
-    "DMM6500|>>|:SENS:DIG:VOLT:RANG:AUTO OFF",
-    "DMM6500|>>|:SENS:DIG:VOLT:RANG:AUTO?",
-    "DMM6500|<<|0",
     "DMM6500|>>|:SENS:DIG:VOLT:SRAT 1000",
     "DMM6500|>>|:SENS:DIG:VOLT:SRAT?",
     "DMM6500|<<|1000",
@@ -879,15 +876,6 @@
      "Q",
      ":SENS:DIG:VOLT:RANG?",
      "0.1"
-    ],
-    [
-     "W",
-     ":SENS:DIG:VOLT:RANG:AUTO OFF"
-    ],
-    [
-     "Q",
-     ":SENS:DIG:VOLT:RANG:AUTO?",
-     "0"
     ],
     [
      "W",
@@ -937,9 +925,6 @@
     "DMM6500|>>|:SENS:DIG:CURR:RANG 1",
     "DMM6500|>>|:SENS:DIG:CURR:RANG?",
     "DMM6500|<<|1",
-    "DMM6500|>>|:SENS:DIG:CURR:RANG:AUTO OFF",
-    "DMM6500|>>|:SENS:DIG:CURR:RANG:AUTO?",
-    "DMM6500|<<|0",
     "DMM6500|>>|:SENS:DIG:CURR:SRAT 1000",
     "DMM6500|>>|:SENS:DIG:CURR:SRAT?",
     "DMM6500|<<|1000",
@@ -973,15 +958,6 @@
      "Q",
      ":SENS:DIG:CURR:RANG?",
      "1"
-    ],
-    [
-     "W",
-     ":SENS:DIG:CURR:RANG:AUTO OFF"
-    ],
-    [
-     "Q",
-     ":SENS:DIG:CURR:RANG:AUTO?",
-     "0"
     ],
     [
      "W",

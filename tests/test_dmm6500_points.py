@@ -149,7 +149,11 @@ class DriverDeclarations(unittest.TestCase):
         for kind in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'DIGV', 'DIGI'):
             tpl = COMMANDS[f'range.{kind.lower()}'].template
             self.assertIn(NODE[kind] + ':RANG', tpl)
-            self.assertIn('RANG:AUTO OFF', COMMANDS[f'autooff.{kind.lower()}'].template)
+            if kind in ('DIGV', 'DIGI'):                # digitize has no autorange (bench: the query timed out)
+                self.assertNotIn(f'autooff.{kind.lower()}', COMMANDS)
+                self.assertNotIn(f'auto.query.{kind.lower()}', COMMANDS)
+            else:
+                self.assertIn('RANG:AUTO OFF', COMMANDS[f'autooff.{kind.lower()}'].template)
 
     def test_digitize_commands_match_the_manual_examples(self):
         self.assertEqual(COMMANDS['func.digv'].template, ':SENS:DIG:FUNC "VOLT"')

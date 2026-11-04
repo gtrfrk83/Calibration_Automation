@@ -48,7 +48,7 @@ HAS_BAND = ('ACV', 'ACI')                                             # detector
 HAS_AZERO = ('DCV', 'DCI', 'OHM2', 'OHM4', 'TEMP')                    # autozero (p. 12-96)
 HAS_REL = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'FREQ', 'CAP', 'TEMP', 'DIGV', 'DIGI')
 FUNC_ACCEPT = {'DCV': ('VOLT:DC', 'VOLT'), 'ACV': ('VOLT:AC',), 'DCI': ('CURR:DC', 'CURR'), 'ACI': ('CURR:AC',), 'OHM2': ('RES',), 'OHM4': ('FRES',),
-               'FREQ': ('FREQ',), 'CAP': ('CAP',), 'TEMP': ('TEMP',)}
+               'FREQ': ('FREQ', 'FREQ:VOLT'), 'CAP': ('CAP',), 'TEMP': ('TEMP',)}      # FREQuency[:VOLTage]: the bench meter answered FREQ:VOLT (2026-11-04)
 RANGE_WINDOW = (0.5, 1.25)       # a range query is accepted between 0.5 x and 1.25 x the range asked for (the reply format is UNVERIFIED, see range_ok)
 OVERFLOW = 9.0e37                # the DMM6500 reports overflow as +9.9E37 (UNVERIFIED for this model; the 2000 and the Truevolt use the same value)
 
@@ -82,10 +82,11 @@ def _per_kind():
                                     readback=f'range.query.{k}', verified=False, ref=_p('range', 'RANGe[:UPPer] <n>'))
             out[f'range.query.{k}'] = Cmd(f':SENS:{n}:RANG?', f'{kind} range query', 'Reads back the range; the reply format is UNVERIFIED (a number in exponent form expected)',
                                           kind='query', verified=False, ref=_p('range', 'query'))
-            out[f'autooff.{k}'] = Cmd(f':SENS:{n}:RANG:AUTO OFF', f'{kind} autorange off', 'Every verification point uses a manual range (no autorange)', kind='set',
-                                      readback=f'auto.query.{k}', verified=False, ref=_p('auto', 'RANGe:AUTO <state>'))
-            out[f'auto.query.{k}'] = Cmd(f':SENS:{n}:RANG:AUTO?', f'{kind} autorange query', 'Reply format UNVERIFIED (0 / 1 expected)', kind='query', verified=False,
-                                         ref=_p('auto', 'query'))
+            if not dig:                                  # digitize functions have no autorange (Reference Manual: 'Digitize functions do not support autorange'); on the bench the query timed out
+                out[f'autooff.{k}'] = Cmd(f':SENS:{n}:RANG:AUTO OFF', f'{kind} autorange off', 'Every verification point uses a manual range (no autorange)', kind='set',
+                                          readback=f'auto.query.{k}', verified=False, ref=_p('auto', 'RANGe:AUTO <state>'))
+                out[f'auto.query.{k}'] = Cmd(f':SENS:{n}:RANG:AUTO?', f'{kind} autorange query', 'Reply format UNVERIFIED (0 / 1 expected)', kind='query', verified=False,
+                                             ref=_p('auto', 'query'))
         if kind in HAS_NPLC:
             out[f'nplc.{k}'] = Cmd(f':SENS:{n}:NPLC {{nplc:g}}', f'{kind} integration time (PLC)', 'Power-line cycles; the verification tables are calculated for 1 PLC '
                                    '(Calibration Manual: thermocouple / RTD steps state 1 PLC)', placeholders={'nplc': Placeholder('float', 'g', 1.0)}, kind='set',
@@ -313,7 +314,8 @@ class KeithleyDMM6500(Instrument):
             self.send(f'range.{k}', range=rng)
             reply = self.ask(f'range.query.{k}')
             self._confirm(f'the {rng:g} range', self.range_ok(reply, rng), reply)
-            self._apply_flag(f'autooff.{k}', f'auto.query.{k}', False, 'autorange off')
+            if kind not in DIGITIZE:                    # digitize has no autorange to switch off (the bench query timed out)
+                self._apply_flag(f'autooff.{k}', f'auto.query.{k}', False, 'autorange off')
         if kind in HAS_NPLC:
             self._apply_number(f'nplc.{k}', f'nplc.query.{k}', float(point.get('plc') or 1), 'the PLC setting', nplc=float(point.get('plc') or 1))
         if kind in HAS_AZERO:

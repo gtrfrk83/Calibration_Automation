@@ -185,7 +185,7 @@ class SimDMM6500Transport(_SimBase):
                 self._push('-224,"Illegal parameter value"'); return None
             self.func, self.dig, self.last = FUNC_NODE[m.group(1)], None, None; return None
         if u == ':SENS:FUNC?':
-            return 'NONE' if self.dig else f'"{self.func}"'
+            return 'NONE' if self.dig else {'FREQ': 'FREQ:VOLT'}.get(self.func, self.func)      # BENCH FINDING 2026-11-04: the real meter answers the long form, unquoted: FREQ:VOLT
         m = re.match(r'^:SENS:DIG:FUNC "(VOLT|CURR)"$', u)
         if m:
             self.dig, self.last = f'DIG:{m.group(1)}', None; return None
@@ -213,6 +213,8 @@ class SimDMM6500Transport(_SimBase):
             c['range'] = self._select_range(node, abs(float(arg))); return None
         if head == 'RANG?':
             return f'{c["range"]:+.6E}'
+        if head.startswith('RANG:AUTO') and node.startswith('DIG:'):   # BENCH FINDING 2026-11-04: a real DMM6500 gives no answer to :SENS:DIG:VOLT:RANG:AUTO? (VI_ERROR_TMO); digitize has no autorange
+            self._push('-113,"Undefined header"'); return None
         if head == 'RANG:AUTO':
             c['auto'] = arg == 'ON'; return None
         if head == 'RANG:AUTO?':

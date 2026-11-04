@@ -291,6 +291,37 @@ class Failures(Fast):
         io.close()
 
 
+class BenchFindings(Fast):
+    """What the first real DMM6500 run showed (2026-11-04); the simulator now behaves the same way, so these stay caught."""
+
+    def test_digitize_never_sends_an_autorange_command(self):
+        # digitize functions have no autorange: ':SENS:DIG:VOLT:RANG:AUTO?' timed out on the real meter (VI_ERROR_TMO)
+        io, bench, ct, dt, rt = build()
+        for ref in ('DIGV.10.1', 'DIGI.100mA.1'):
+            with self.subTest(point=ref):
+                dt.sent.clear()
+                io.measure(BY_REF[ref])
+                self.assertEqual([c for c in dt.sent if 'RANG:AUTO' in c], [])
+                self.assertEqual(dt.errors, [])
+        io.close()
+
+    def test_the_simulated_meter_refuses_autorange_on_digitize(self):
+        io, bench, ct, dt, rt = build()
+        dt.write(':SENS:DIG:VOLT:RANG:AUTO?')
+        self.assertEqual(dt.errors, ['-113,"Undefined header"'])
+        io.close()
+
+    def test_frequency_function_is_accepted_when_the_meter_answers_the_long_name(self):
+        # FREQuency[:VOLTage]: the real meter answered FREQ:VOLT to :SENS:FUNC? and the point was refused
+        io, bench, ct, dt, rt = build()
+        dt.write(':SENS:FUNC "FREQ"')
+        self.assertEqual(dt.query(':SENS:FUNC?').strip(), 'FREQ:VOLT')
+        p = next(q for q in E.POINTS if q['kind'] == 'FREQ')
+        reading = io.measure(p)
+        self.assertTrue(E.judge(p, reading, io.last_eval.get('center')))
+        io.close()
+
+
 class Reset(Fast):
     def test_the_meter_is_reset_with_rst_and_left_in_a_known_state(self):
         io, bench, ct, dt, rt = build()
