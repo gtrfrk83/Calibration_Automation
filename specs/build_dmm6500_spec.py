@@ -29,6 +29,8 @@ PRINT PROBLEMS FOUND (each is listed again in the final report):
     half-widths are constant per range and are used about the reference reading (or the calibrator setting).
   * AC volts and AC current at 20 Hz are below the 30 Hz-300 kHz range the manual quotes for the 30 Hz detector bandwidth: those points use bandwidth 3 (the specified
     one) and the rest 30 (the 40 Hz current points are inside the range).  Owner to confirm.
+  * 4-wire short zero, 100 kohm range (ZR.100k, p. 2-42): the manual asks for offset compensation ON, which is limited to 1 ohm to 10 kohm (p. 2-25, Reference Manual p. 12-106).
+    The meter refused 100 kohm with compensation ON on the bench (2026-11-04), so that point is measured with it OFF, limit as printed (+/- 1 ohm).
   * Figure 13 (p. 2-34) labels the meter 'Model DMM7510': a print leftover, the connections are the DMM6500's.
 """
 import json
@@ -349,7 +351,10 @@ def build():
     pts = []
     for ref, rng, lim in (('ZR.1', 1, '0.0002'), ('ZR.10', 10, '0.0002'), ('ZR.100', 100, '0.002'), ('ZR.1k', 1000, '0.006'), ('ZR.10k', 10000, '0.06'), ('ZR.100k', 100000, '1')):
         q = dict(id=ref, kind='OHM4', desc=f'4-wire short, {rng} ohm range', nominal=0.0, unit='ohm', range=float(rng), group='SHORT4', page='2-42', quick=False, limits={PERIOD: float(D(lim))},
-                 printed_limits=f'-{lim} to {lim} ohm', source='none', input='short', ocomp=True)
+                 printed_limits=f'-{lim} to {lim} ohm', source='none', input='short', ocomp=rng <= 10000)
+        if rng > 10000:
+            q['flags'] = ['the manual (p. 2-42 step 5 and 9) asks for offset compensation ON on the 100 kohm range, but offset compensation is limited to 1 ohm to 10 kohm (p. 2-25; the meter refused '
+                          'it on the bench 2026-11-04): measured with offset compensation OFF; the printed limit +/- 1 ohm is kept']
         points_seen.append(q)
         pts.append(q)
     for ref, rng, lim in (('ZV.1000', 1000, '6000'), ('ZV.100', 100, '600'), ('ZV.10', 10, '50'), ('ZV.1', 1, '6'), ('ZV.0.1', 0.1, '3.5')):

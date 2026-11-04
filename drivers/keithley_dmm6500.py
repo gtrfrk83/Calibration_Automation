@@ -49,6 +49,7 @@ HAS_AZERO = ('DCV', 'DCI', 'OHM2', 'OHM4', 'TEMP')                    # autozero
 HAS_REL = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'FREQ', 'CAP', 'TEMP', 'DIGV', 'DIGI')
 FUNC_ACCEPT = {'DCV': ('VOLT:DC', 'VOLT'), 'ACV': ('VOLT:AC',), 'DCI': ('CURR:DC', 'CURR'), 'ACI': ('CURR:AC',), 'OHM2': ('RES',), 'OHM4': ('FRES',),
                'FREQ': ('FREQ', 'FREQ:VOLT'), 'CAP': ('CAP',), 'TEMP': ('TEMP',)}      # FREQuency[:VOLTage]: the bench meter answered FREQ:VOLT (2026-11-04)
+OCOMP_MAX_RANGE = 10000.0      # 4-wire offset compensation is limited to ranges up to 10 kohm (Reference Manual p. 12-106; BENCH 2026-11-04: 100 kohm with compensation ON was refused, the meter kept 10 kohm)
 RANGE_WINDOW = (0.5, 1.25)       # a range query is accepted between 0.5 x and 1.25 x the range asked for (the reply format is UNVERIFIED, see range_ok)
 OVERFLOW = 9.0e37                # the DMM6500 reports overflow as +9.9E37 (UNVERIFIED for this model; the 2000 and the Truevolt use the same value)
 
@@ -156,8 +157,8 @@ COMMANDS = {
                       'digitize functions fill is UNVERIFIED (defbuffer1 assumed)', placeholders={'count': Placeholder('int', 'd', 100)}, kind='query', verified=False,
                       ref=_p('trace', ':TRACe:DATA? <start>,<end>,"<buffer>",<elements>')),
     # open-lead detector and offset compensation (4-wire resistance, Calibration Manual p. 2-25: offset compensation ON for 1 ohm to 10 kohm, OFF above; open lead detector OFF)
-    'ocomp.fres': Cmd(':SENS:FRES:OCOM {state}', '4-wire offset compensation', 'ON for the 1 ohm to 100 kohm ranges where the Calibration Manual uses it (zero checks, p. 2-25, 2-42), OFF above. The Reference Manual (p. 12-106) says offset-compensated '
-                      'ranges stop at 10 kohm, the Calibration Manual warning text says "expected value from 1 to 100000": DISCREPANCY, to be settled on the bench', placeholders={'state': Placeholder('enum', '', 'ON', enum=('ON', 'OFF', 'AUTO'))}, kind='set', readback='ocomp.query.fres',
+    'ocomp.fres': Cmd(':SENS:FRES:OCOM {state}', '4-wire offset compensation', 'ON for the 1 ohm to 10 kohm ranges, OFF above. The Reference Manual (p. 12-106) says offset-compensated ranges stop at 10 kohm; the bench confirmed it (2026-11-04: the 100 kohm '
+                      'range was refused with compensation ON). The Calibration Manual steps for the 100 kohm zero (pp. 2-25, 2-42) ask for ON there: not possible', placeholders={'state': Placeholder('enum', '', 'ON', enum=('ON', 'OFF', 'AUTO'))}, kind='set', readback='ocomp.query.fres',
                       verified=False, ref=_p('ocomp', 'OCOMpensated') + f'; {CM} p. 2-25'),
     'ocomp.query.fres': Cmd(':SENS:FRES:OCOM?', '4-wire offset compensation query', 'Reply format UNVERIFIED', kind='query', verified=False, ref=_p('ocomp', 'query')),
     'odet.fres': Cmd(':SENS:FRES:ODET {state}', '4-wire open-lead detector', 'OFF for the verification (Calibration Manual p. 2-25 step 7)', placeholders={'state': Placeholder('enum', '', 'OFF', enum=('ON', 'OFF'))},
@@ -301,6 +302,16 @@ class KeithleyDMM6500(Instrument):
         reply = self.ask(query)
         self._confirm(what, math.isclose(_number(reply), want, rel_tol=rel_tol, abs_tol=1e-12), reply)
 
+    def _offset_comp(self, on: bool):
+        """4-wire resistance: open-lead detector off, then offset compensation ON or OFF, each read back."""
+        ocomp = 'ON' if on else 'OFF'
+        self.send('odet.fres', state='OFF')
+        reply = self.ask('odet.query.fres')
+        self._confirm('open-lead detector off', not _flag(reply), reply)
+        self.send('ocomp.fres', state=ocomp)
+        reply = self.ask('ocomp.query.fres')
+        self._confirm(f'offset compensation {ocomp}', _text(reply) in ((('ON', '1', '+1') if on else ('OFF', '0', '+0'))), reply)   # reply text UNVERIFIED: ON / 1 or OFF / 0
+
     def configure_point(self, point: dict):
         """Function, manual range, speed, filter-free set-up for one verification point. point: kind, range, optional plc (default 1), ac_bandwidth (default 30), srate / count /
         aperture (digitize), ocomp (4-wire), transducer / tc_type / rtd (temperature). Never autorange (the verification tables are per range). DC volts input impedance Auto."""
@@ -309,6 +320,12 @@ class KeithleyDMM6500(Instrument):
             raise InstrumentError(f'{self.label}: no function for kind {kind!r}')
         k = kind.lower()
         self._select(kind)
+        if kind == 'OHM4':
+            ocomp_on = bool(point.get('ocomp', True))
+            if ocomp_on and float(point['range']) > OCOMP_MAX_RANGE:
+                raise InstrumentError(f'{self.label}: offset compensation cannot be on above the {OCOMP_MAX_RANGE:g} ohm range (the meter limits it; the {float(point["range"]):g} ohm range was asked for)')
+            if not ocomp_on:
+                self._offset_comp(False)             # OFF first: with compensation ON the meter refuses (and keeps the old range for) any range above 10 kohm
         if kind in HAS_RANGE:
             rng = float(point['range'])
             self.send(f'range.{k}', range=rng)
@@ -327,14 +344,8 @@ class KeithleyDMM6500(Instrument):
             self.send('zimp.dcv', imp='AUTO')
             reply = self.ask('zimp.query.dcv')
             self._confirm('input impedance Auto', _text(reply).startswith('AUTO'), reply)
-        if kind == 'OHM4':
-            ocomp = 'ON' if point.get('ocomp', True) else 'OFF'
-            self.send('odet.fres', state='OFF')
-            reply = self.ask('odet.query.fres')
-            self._confirm('open-lead detector off', not _flag(reply), reply)
-            self.send('ocomp.fres', state=ocomp)
-            reply = self.ask('ocomp.query.fres')
-            self._confirm(f'offset compensation {ocomp}', _text(reply) in ((('ON', '1', '+1') if ocomp == 'ON' else ('OFF', '0', '+0'))), reply)   # reply text UNVERIFIED: ON / 1 or OFF / 0
+        if kind == 'OHM4' and ocomp_on:
+            self._offset_comp(True)                  # ON only after the range is set (a range up to 10 kohm)
         if kind in DIGITIZE:
             self._apply_number(f'srate.{k}', f'srate.query.{k}', float(point.get('srate') or 1000), 'the sample rate', srate=float(point.get('srate') or 1000))
             aper = float(point.get('aperture') or 0.001)

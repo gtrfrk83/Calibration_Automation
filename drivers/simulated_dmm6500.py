@@ -209,6 +209,8 @@ class SimDMM6500Transport(_SimBase):
         key = f':SENS:{node}:{head.rstrip("?")}'
         if head == 'RANG' and node in ('FREQ', 'TEMP'):
             self._push('-113,"Undefined header"'); return None
+        if head == 'RANG' and node == 'FRES' and self.store.get(':SENS:FRES:OCOM') == 'ON' and abs(float(arg)) > 1e4:
+            self._push('-221,"Settings conflict"'); return None     # BENCH FINDING 2026-11-04: with offset compensation ON a range above 10 kohm is refused and the old range stays (the error text is UNVERIFIED)
         if head == 'RANG':
             c['range'] = self._select_range(node, abs(float(arg))); return None
         if head == 'RANG?':
@@ -225,8 +227,8 @@ class SimDMM6500Transport(_SimBase):
             self._reading()                                     # the command triggers a new measurement and stores it as the offset (Reference Manual p. 12-113)
             self.rel[node] = self.last if self.last is not None else 0.0; return None
         if head == 'OCOM' and node == 'FRES':
-            if arg == 'ON' and c['range'] > 1e5:                # the Calibration Manual's warning text: 'expected value from 1 to 100000' (the Reference Manual p. 12-106 says 10 kohm)
-                self._push('1131,"Parameter, measure range, expected value from 1 to 100000"'); return None
+            if arg == 'ON' and c['range'] > 1e4:                # offset compensation is limited to ranges up to 10 kohm (Reference Manual p. 12-106; the bench confirmed it 2026-11-04)
+                self._push('1131,"Parameter, measure range, expected value from 1 to 10000"'); return None
         if head.endswith('?'):
             v = self.store.get(key.rstrip('?') if False else key)
             if v is None:

@@ -321,6 +321,38 @@ class BenchFindings(Fast):
         self.assertTrue(E.judge(p, reading, io.last_eval.get('center')))
         io.close()
 
+    def test_4_wire_100_kohm_is_measured_with_offset_compensation_off_after_a_compensated_range(self):
+        # bench: point 81 (ZR.100k) 'the 100000 range was not accepted: the DMM6500 answered 10000' (offset compensation is limited to 10 kohm; ON carried over from the 10 kohm point)
+        for first, second in (('OHM4.10000', 'OHM4.100000'), ('ZR.10k', 'ZR.100k')):
+            with self.subTest(second=second):
+                io, bench, ct, dt, rt = build()
+                io.measure(BY_REF[first])
+                dt.sent.clear()
+                io.measure(BY_REF[second])
+                self.assertEqual(dt.errors, [])
+                rng = [i for i, c in enumerate(dt.sent) if c.startswith(':SENS:FRES:RANG ')][0]
+                off = [i for i, c in enumerate(dt.sent) if c == ':SENS:FRES:OCOM OFF'][0]
+                self.assertLess(off, rng)                                   # compensation is switched off BEFORE the range above 10 kohm is selected
+                self.assertNotIn(':SENS:FRES:OCOM ON', dt.sent)
+                io.close()
+
+    def test_the_100_kohm_zero_is_flagged_as_measured_with_compensation_off(self):
+        self.assertFalse(BY_REF['ZR.100k']['ocomp'])
+        self.assertTrue(BY_REF['ZR.100k']['flags'])
+        self.assertTrue(all(BY_REF[r]['ocomp'] for r in ('ZR.1', 'ZR.10', 'ZR.100', 'ZR.1k', 'ZR.10k')))
+
+    def test_compensation_on_above_10_kohm_is_refused_by_the_driver_and_by_the_simulated_meter(self):
+        io, bench, ct, dt, rt = build()
+        with self.assertRaises(drivers.InstrumentError):
+            io.dmm.configure_point(dict(kind='OHM4', range=100000.0, ocomp=True))
+        dt.write(':SENS:FRES:RANG 1000')
+        dt.write(':SENS:FRES:OCOM ON')
+        self.assertEqual(dt.errors, [])
+        dt.write(':SENS:FRES:RANG 100000')
+        self.assertIn('-221,"Settings conflict"', dt.errors)
+        self.assertEqual(dt.query(':SENS:FRES:RANG?').strip(), '+1.000000E+03')                 # the old range stays
+        io.close()
+
 
 class Reset(Fast):
     def test_the_meter_is_reset_with_rst_and_left_in_a_known_state(self):

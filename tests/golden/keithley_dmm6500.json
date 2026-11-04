@@ -536,6 +536,12 @@
     "DMM6500|>>|:SENS:FUNC \"FRES\"",
     "DMM6500|>>|:SENS:FUNC?",
     "DMM6500|<<|\"\"FRES\"\"",
+    "DMM6500|>>|:SENS:FRES:ODET OFF",
+    "DMM6500|>>|:SENS:FRES:ODET?",
+    "DMM6500|<<|0",
+    "DMM6500|>>|:SENS:FRES:OCOM OFF",
+    "DMM6500|>>|:SENS:FRES:OCOM?",
+    "DMM6500|<<|0",
     "DMM6500|>>|:SENS:FRES:RANG 1000000",
     "DMM6500|>>|:SENS:FRES:RANG?",
     "DMM6500|<<|1000000",
@@ -548,12 +554,6 @@
     "DMM6500|>>|:SENS:FRES:AZER ON",
     "DMM6500|>>|:SENS:FRES:AZER?",
     "DMM6500|<<|1",
-    "DMM6500|>>|:SENS:FRES:ODET OFF",
-    "DMM6500|>>|:SENS:FRES:ODET?",
-    "DMM6500|<<|0",
-    "DMM6500|>>|:SENS:FRES:OCOM OFF",
-    "DMM6500|>>|:SENS:FRES:OCOM?",
-    "DMM6500|<<|0",
     "DMM6500|>>|:SENS:FRES:REL:STAT OFF",
     "DMM6500|>>|:SENS:FRES:REL:STAT?",
     "DMM6500|<<|0"
@@ -569,6 +569,24 @@
      "Q",
      ":SENS:FUNC?",
      "\"\"FRES\"\""
+    ],
+    [
+     "W",
+     ":SENS:FRES:ODET OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:ODET?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:OCOM OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:OCOM?",
+     "0"
     ],
     [
      "W",
@@ -605,24 +623,6 @@
      "Q",
      ":SENS:FRES:AZER?",
      "1"
-    ],
-    [
-     "W",
-     ":SENS:FRES:ODET OFF"
-    ],
-    [
-     "Q",
-     ":SENS:FRES:ODET?",
-     "0"
-    ],
-    [
-     "W",
-     ":SENS:FRES:OCOM OFF"
-    ],
-    [
-     "Q",
-     ":SENS:FRES:OCOM?",
-     "0"
     ],
     [
      "W",
