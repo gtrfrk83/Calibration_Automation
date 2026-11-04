@@ -1,0 +1,785 @@
+{
+ "schema": 3,
+ "kind": "manual-reading",
+ "options": {
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "function_prompt": false,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Keithley Model 485 Autoranging Picoammeter - Instruction Manual (485-901-01 Rev. F)",
+  "pages": "Verification procedure p. 3-1; Table 3-1, Figure 3-1 and Table 3-2 p. 3-2; Zero Check p. 2-4; Specifications (front of the manual)",
+  "cite": "Keithley 485 Instruction Manual, Table 3-2 Range Accuracy, p. 3-2",
+  "limits": "Printed in Table 3-2 (Allowable Readings, 18-28 °C); checked against the published 1-year accuracy",
+  "report_note": "Keithley 485 performance verification, Section 3.5 and Table 3-2 of the Instruction Manual: each range is driven by a DC calibrator through a measured resistor (calibrator setting V = I x R), positive and negative current. Limits are the Allowable Readings of Table 3-2.",
+  "note": "Table 3-2: 7 ranges, positive and negative current (14 points) plus the zero check. The DC calibrator (Fluke 5560A, 5522A or 5520A) sources V = I x R through the lab's resistance box (measured values in specs/build_keithley_485_spec.py); the technician selects the range and types the reading."
+ },
+ "models": {
+  "485": {
+   "name": "Keithley 485",
+   "brand": "Keithley",
+   "model_note": "Keithley Model 485 Autoranging Picoammeter (4 1/2 digit, 2 nA to 2 mA)"
+  }
+ },
+ "groups": {
+  "R10": {
+   "title": "Set up for the 2 nA range: resistance box at 10^10",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^10 (9.93242 GΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 2 nA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^10 position (measured value 9.93242 GΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 2 nA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  },
+  "R9": {
+   "title": "Set up for the 20 nA range: resistance box at 10^9",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^9 (1.010135 GΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 20 nA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^9 position (measured value 1.010135 GΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 20 nA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  },
+  "R8": {
+   "title": "Set up for the 200 nA range: resistance box at 10^8",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^8 (99.9569 MΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 200 nA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^8 position (measured value 99.9569 MΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 200 nA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  },
+  "R7": {
+   "title": "Set up for the 2 µA range: resistance box at 10^7",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^7 (10.014901 MΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 2 µA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^7 position (measured value 10.014901 MΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 2 µA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  },
+  "R6": {
+   "title": "Set up for the 20 µA range: resistance box at 10^6",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^6 (999.6345 kΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 20 µA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^6 position (measured value 999.6345 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 20 µA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  },
+  "R5": {
+   "title": "Set up for the 200 µA range: resistance box at 10^5",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^5 (99.97457 kΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 200 µA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^5 position (measured value 99.97457 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 200 µA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  },
+  "R4": {
+   "title": "Set up for the 2 mA range: resistance box at 10^4",
+   "summary": "Calibrator NORMAL HI / LO -> resistance box at 10^4 (10.00129 kΩ) in the shielded fixture -> low-noise coax -> 485 INPUT. 485 on the 2 mA range.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you change the resistor (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Resistor",
+     "Set the Agilent 16340A RC Box (asset ATS-4225) to the 10^4 position (measured value 10.00129 kΩ). It must be in a shielded (metal) enclosure, as the test fixture of Figure 3-1 (p. 3-2). The calibrator setting is calculated from this measured value."
+    ],
+    [
+     "Calibrator",
+     "Calibrator output HI -> resistor input (+), output LO -> the fixture LO (-), which is the BNC shield; the fixture case to the calibrator ground (Figure 3-1: three banana jacks +, - and ground). (Which calibrator ground terminal: UNVERIFIED.)"
+    ],
+    [
+     "485 input",
+     "Fixture BNC output -> 485 INPUT with a low-noise coaxial cable such as the Keithley 4801 (step 8, p. 3-1). Keep the cable still during the reading."
+    ],
+    [
+     "485 range",
+     "Release ZERO CHECK, REL and LOG off, then press the 2 mA range button (manual range, not AUTO)."
+    ]
+   ],
+   "caution": "The calibrator applies about 19 V DC to the fixture. Do not exceed 30 V rms between the 485 input low and chassis ground (p. 2-3)."
+  }
+ },
+ "resistance_box": {
+  "name": "Agilent 16340A RC Box",
+  "serial": "1937J00597",
+  "asset": "ATS-4225",
+  "certificate": "Keysight WO-01470653",
+  "calibrated": "2026-07-24",
+  "ohms": {
+   "10^2": 100.0213,
+   "10^3": 999.802,
+   "10^4": 10001.29,
+   "10^5": 99974.57,
+   "10^6": 999634.5,
+   "10^7": 10014901.0,
+   "10^8": 99956900.0,
+   "10^9": 1010135000.0,
+   "10^10": 9932420000.0,
+   "10^11": 99707000000.0
+  },
+  "u_ppm_k2": {
+   "10^2": 66.999787,
+   "10^3": 66.1000198,
+   "10^4": 66.0099987,
+   "10^5": 1.2,
+   "10^6": 1.66,
+   "10^7": 5.35,
+   "10^8": 60.0,
+   "10^9": 193.0,
+   "10^10": 240.0,
+   "10^11": 206.0
+  }
+ },
+ "steps": [
+  {
+   "table": "F",
+   "step": 1,
+   "section": "Zero check",
+   "switch": "ZERO CHECK, 2nA range",
+   "range": "",
+   "models": [
+    "485"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Zero check (2nA range, ZERO CHECK locked in)",
+   "setup": "Warm up the 485 for one hour (3.4, p. 3-1). INPUT open: no cable on the 485 INPUT. Select the 2nA range, REL and LOG off, press ZERO CHECK in to the locked position, adjust the front-panel ZERO trimpot for .0000 +/- 1 count, then release ZERO CHECK (steps 4 and 5, p. 3-1; 2.7.2, p. 2-4). The calibrator has no output.",
+   "question": "The 485 reads .0000 +/- 1 count on the 2nA range with ZERO CHECK in (after the ZERO adjustment).",
+   "setup_key": "NONE",
+   "id": "F-1"
+  },
+  {
+   "table": "3-2",
+   "step": 1,
+   "section": "DC current",
+   "switch": "2 nA range",
+   "range": "2 nA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "nA",
+   "factor": 1e-09,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "1.8920",
+   "high": "1.9080",
+   "accuracy": "±(0.4 % rdg + 4 counts)",
+   "tol_text": "Table 3-2 (p. 3-2): 1.8920 to 1.9080 nA   (specification ±(0.4 % rdg + 4 counts), 1 year, 18-28 °C: ±0.008 nA; resolution 0.0001 nA)",
+   "applied": {
+    "value": 18.8716,
+    "frequency": null
+   },
+   "nominal": 1.9e-09,
+   "dsb_out": "18.87160 V DC",
+   "resistor": {
+    "position": "10^10",
+    "ohms": 9932420000.0,
+    "u_ppm": 240.0
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "2 nA range, +1.9000 nA",
+   "settle": 10,
+   "group": "R10",
+   "note": "Positive current. Calibrator 18.8716 V DC through the 10^10 resistor (9.93242 GΩ): V = I x R = 1.9000 nA x 9.93242 GΩ (Table 3-2).",
+   "ref": "T3-2 2 nA +",
+   "id": "3-2-1"
+  },
+  {
+   "table": "3-2",
+   "step": 2,
+   "section": "DC current",
+   "switch": "2 nA range",
+   "range": "2 nA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "nA",
+   "factor": 1e-09,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-1.9080",
+   "high": "-1.8920",
+   "accuracy": "±(0.4 % rdg + 4 counts)",
+   "tol_text": "Table 3-2 (p. 3-2): -1.9080 to -1.8920 nA   (specification ±(0.4 % rdg + 4 counts), 1 year, 18-28 °C: ±0.008 nA; resolution 0.0001 nA)",
+   "applied": {
+    "value": -18.8716,
+    "frequency": null
+   },
+   "nominal": -1.9e-09,
+   "dsb_out": "-18.87160 V DC",
+   "resistor": {
+    "position": "10^10",
+    "ohms": 9932420000.0,
+    "u_ppm": 240.0
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "2 nA range, -1.9000 nA",
+   "settle": 10,
+   "group": "R10",
+   "note": "Negative current. Calibrator -18.8716 V DC through the 10^10 resistor (9.93242 GΩ): V = I x R = 1.9000 nA x 9.93242 GΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 2 nA -",
+   "id": "3-2-2"
+  },
+  {
+   "table": "3-2",
+   "step": 3,
+   "section": "DC current",
+   "switch": "20 nA range",
+   "range": "20 nA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "nA",
+   "factor": 1e-09,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "18.923",
+   "high": "19.077",
+   "accuracy": "±(0.4 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): 18.923 to 19.077 nA   (specification ±(0.4 % rdg + 1 count), 1 year, 18-28 °C: ±0.077 nA; resolution 0.001 nA)",
+   "applied": {
+    "value": 19.19257,
+    "frequency": null
+   },
+   "nominal": 1.9e-08,
+   "dsb_out": "19.19257 V DC",
+   "resistor": {
+    "position": "10^9",
+    "ohms": 1010135000.0,
+    "u_ppm": 193.0
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "20 nA range, +19.000 nA",
+   "settle": 10,
+   "group": "R9",
+   "note": "Positive current. Calibrator 19.19257 V DC through the 10^9 resistor (1.010135 GΩ): V = I x R = 19.000 nA x 1.010135 GΩ (Table 3-2).",
+   "ref": "T3-2 20 nA +",
+   "id": "3-2-3"
+  },
+  {
+   "table": "3-2",
+   "step": 4,
+   "section": "DC current",
+   "switch": "20 nA range",
+   "range": "20 nA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "nA",
+   "factor": 1e-09,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-19.077",
+   "high": "-18.923",
+   "accuracy": "±(0.4 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): -19.077 to -18.923 nA   (specification ±(0.4 % rdg + 1 count), 1 year, 18-28 °C: ±0.077 nA; resolution 0.001 nA)",
+   "applied": {
+    "value": -19.19257,
+    "frequency": null
+   },
+   "nominal": -1.9e-08,
+   "dsb_out": "-19.19257 V DC",
+   "resistor": {
+    "position": "10^9",
+    "ohms": 1010135000.0,
+    "u_ppm": 193.0
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "20 nA range, -19.000 nA",
+   "settle": 10,
+   "group": "R9",
+   "note": "Negative current. Calibrator -19.19257 V DC through the 10^9 resistor (1.010135 GΩ): V = I x R = 19.000 nA x 1.010135 GΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 20 nA -",
+   "id": "3-2-4"
+  },
+  {
+   "table": "3-2",
+   "step": 5,
+   "section": "DC current",
+   "switch": "200 nA range",
+   "range": "200 nA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "nA",
+   "factor": 1e-09,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "189.61",
+   "high": "190.39",
+   "accuracy": "±(0.2 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): 189.61 to 190.39 nA   (specification ±(0.2 % rdg + 1 count), 1 year, 18-28 °C: ±0.39 nA; resolution 0.01 nA)",
+   "applied": {
+    "value": 18.99181,
+    "frequency": null
+   },
+   "nominal": 1.9e-07,
+   "dsb_out": "18.99181 V DC",
+   "resistor": {
+    "position": "10^8",
+    "ohms": 99956900.0,
+    "u_ppm": 60.0
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "200 nA range, +190.00 nA",
+   "settle": 5,
+   "group": "R8",
+   "note": "Positive current. Calibrator 18.99181 V DC through the 10^8 resistor (99.9569 MΩ): V = I x R = 190.00 nA x 99.9569 MΩ (Table 3-2).",
+   "ref": "T3-2 200 nA +",
+   "id": "3-2-5"
+  },
+  {
+   "table": "3-2",
+   "step": 6,
+   "section": "DC current",
+   "switch": "200 nA range",
+   "range": "200 nA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "nA",
+   "factor": 1e-09,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-190.39",
+   "high": "-189.61",
+   "accuracy": "±(0.2 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): -190.39 to -189.61 nA   (specification ±(0.2 % rdg + 1 count), 1 year, 18-28 °C: ±0.39 nA; resolution 0.01 nA)",
+   "applied": {
+    "value": -18.99181,
+    "frequency": null
+   },
+   "nominal": -1.9e-07,
+   "dsb_out": "-18.99181 V DC",
+   "resistor": {
+    "position": "10^8",
+    "ohms": 99956900.0,
+    "u_ppm": 60.0
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "200 nA range, -190.00 nA",
+   "settle": 5,
+   "group": "R8",
+   "note": "Negative current. Calibrator -18.99181 V DC through the 10^8 resistor (99.9569 MΩ): V = I x R = 190.00 nA x 99.9569 MΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 200 nA -",
+   "id": "3-2-6"
+  },
+  {
+   "table": "3-2",
+   "step": 7,
+   "section": "DC current",
+   "switch": "2 µA range",
+   "range": "2 µA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "1.8971",
+   "high": "1.9029",
+   "accuracy": "±(0.15 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): 1.8971 to 1.9029 µA   (specification ±(0.15 % rdg + 1 count), 1 year, 18-28 °C: ±0.00295 µA; resolution 0.0001 µA)",
+   "applied": {
+    "value": 19.02831,
+    "frequency": null
+   },
+   "nominal": 1.9e-06,
+   "dsb_out": "19.02831 V DC",
+   "resistor": {
+    "position": "10^7",
+    "ohms": 10014901.0,
+    "u_ppm": 5.35
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "2 µA range, +1.9000 µA",
+   "settle": 5,
+   "group": "R7",
+   "note": "Positive current. Calibrator 19.02831 V DC through the 10^7 resistor (10.014901 MΩ): V = I x R = 1.9000 µA x 10.014901 MΩ (Table 3-2).",
+   "ref": "T3-2 2 µA +",
+   "id": "3-2-7"
+  },
+  {
+   "table": "3-2",
+   "step": 8,
+   "section": "DC current",
+   "switch": "2 µA range",
+   "range": "2 µA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-1.9029",
+   "high": "-1.8971",
+   "accuracy": "±(0.15 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): -1.9029 to -1.8971 µA   (specification ±(0.15 % rdg + 1 count), 1 year, 18-28 °C: ±0.00295 µA; resolution 0.0001 µA)",
+   "applied": {
+    "value": -19.02831,
+    "frequency": null
+   },
+   "nominal": -1.9e-06,
+   "dsb_out": "-19.02831 V DC",
+   "resistor": {
+    "position": "10^7",
+    "ohms": 10014901.0,
+    "u_ppm": 5.35
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "2 µA range, -1.9000 µA",
+   "settle": 5,
+   "group": "R7",
+   "note": "Negative current. Calibrator -19.02831 V DC through the 10^7 resistor (10.014901 MΩ): V = I x R = 1.9000 µA x 10.014901 MΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 2 µA -",
+   "id": "3-2-8"
+  },
+  {
+   "table": "3-2",
+   "step": 9,
+   "section": "DC current",
+   "switch": "20 µA range",
+   "range": "20 µA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "18.980",
+   "high": "19.020",
+   "accuracy": "±(0.1 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): 18.980 to 19.020 µA   (specification ±(0.1 % rdg + 1 count), 1 year, 18-28 °C: ±0.02 µA; resolution 0.001 µA)",
+   "applied": {
+    "value": 18.99306,
+    "frequency": null
+   },
+   "nominal": 1.9e-05,
+   "dsb_out": "18.99306 V DC",
+   "resistor": {
+    "position": "10^6",
+    "ohms": 999634.5,
+    "u_ppm": 1.66
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "20 µA range, +19.000 µA",
+   "settle": 5,
+   "group": "R6",
+   "note": "Positive current. Calibrator 18.99306 V DC through the 10^6 resistor (999.6345 kΩ): V = I x R = 19.000 µA x 999.6345 kΩ (Table 3-2).",
+   "ref": "T3-2 20 µA +",
+   "id": "3-2-9"
+  },
+  {
+   "table": "3-2",
+   "step": 10,
+   "section": "DC current",
+   "switch": "20 µA range",
+   "range": "20 µA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-19.020",
+   "high": "-18.980",
+   "accuracy": "±(0.1 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): -19.020 to -18.980 µA   (specification ±(0.1 % rdg + 1 count), 1 year, 18-28 °C: ±0.02 µA; resolution 0.001 µA)",
+   "applied": {
+    "value": -18.99306,
+    "frequency": null
+   },
+   "nominal": -1.9e-05,
+   "dsb_out": "-18.99306 V DC",
+   "resistor": {
+    "position": "10^6",
+    "ohms": 999634.5,
+    "u_ppm": 1.66
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "20 µA range, -19.000 µA",
+   "settle": 5,
+   "group": "R6",
+   "note": "Negative current. Calibrator -18.99306 V DC through the 10^6 resistor (999.6345 kΩ): V = I x R = 19.000 µA x 999.6345 kΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 20 µA -",
+   "id": "3-2-10"
+  },
+  {
+   "table": "3-2",
+   "step": 11,
+   "section": "DC current",
+   "switch": "200 µA range",
+   "range": "200 µA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "189.80",
+   "high": "190.20",
+   "accuracy": "±(0.1 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): 189.80 to 190.20 µA   (specification ±(0.1 % rdg + 1 count), 1 year, 18-28 °C: ±0.2 µA; resolution 0.01 µA)",
+   "applied": {
+    "value": 18.99517,
+    "frequency": null
+   },
+   "nominal": 0.00019,
+   "dsb_out": "18.99517 V DC",
+   "resistor": {
+    "position": "10^5",
+    "ohms": 99974.57,
+    "u_ppm": 1.2
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "200 µA range, +190.00 µA",
+   "settle": 5,
+   "group": "R5",
+   "note": "Positive current. Calibrator 18.99517 V DC through the 10^5 resistor (99.97457 kΩ): V = I x R = 190.00 µA x 99.97457 kΩ (Table 3-2).",
+   "ref": "T3-2 200 µA +",
+   "id": "3-2-11"
+  },
+  {
+   "table": "3-2",
+   "step": 12,
+   "section": "DC current",
+   "switch": "200 µA range",
+   "range": "200 µA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-190.20",
+   "high": "-189.80",
+   "accuracy": "±(0.1 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): -190.20 to -189.80 µA   (specification ±(0.1 % rdg + 1 count), 1 year, 18-28 °C: ±0.2 µA; resolution 0.01 µA)",
+   "applied": {
+    "value": -18.99517,
+    "frequency": null
+   },
+   "nominal": -0.00019,
+   "dsb_out": "-18.99517 V DC",
+   "resistor": {
+    "position": "10^5",
+    "ohms": 99974.57,
+    "u_ppm": 1.2
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "200 µA range, -190.00 µA",
+   "settle": 5,
+   "group": "R5",
+   "note": "Negative current. Calibrator -18.99517 V DC through the 10^5 resistor (99.97457 kΩ): V = I x R = 190.00 µA x 99.97457 kΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 200 µA -",
+   "id": "3-2-12"
+  },
+  {
+   "table": "3-2",
+   "step": 13,
+   "section": "DC current",
+   "switch": "2 mA range",
+   "range": "2 mA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "1.8980",
+   "high": "1.9020",
+   "accuracy": "±(0.1 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): 1.8980 to 1.9020 mA   (specification ±(0.1 % rdg + 1 count), 1 year, 18-28 °C: ±0.002 mA; resolution 0.0001 mA)",
+   "applied": {
+    "value": 19.00245,
+    "frequency": null
+   },
+   "nominal": 0.0019,
+   "dsb_out": "19.00245 V DC",
+   "resistor": {
+    "position": "10^4",
+    "ohms": 10001.29,
+    "u_ppm": 66.0099987
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "2 mA range, +1.9000 mA",
+   "settle": 5,
+   "group": "R4",
+   "note": "Positive current. Calibrator 19.00245 V DC through the 10^4 resistor (10.00129 kΩ): V = I x R = 1.9000 mA x 10.00129 kΩ (Table 3-2).",
+   "ref": "T3-2 2 mA +",
+   "id": "3-2-13"
+  },
+  {
+   "table": "3-2",
+   "step": 14,
+   "section": "DC current",
+   "switch": "2 mA range",
+   "range": "2 mA",
+   "models": [
+    "485"
+   ],
+   "kind": "DCV",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "test": "numeric",
+   "low": "-1.9020",
+   "high": "-1.8980",
+   "accuracy": "±(0.1 % rdg + 1 count)",
+   "tol_text": "Table 3-2 (p. 3-2): -1.9020 to -1.8980 mA   (specification ±(0.1 % rdg + 1 count), 1 year, 18-28 °C: ±0.002 mA; resolution 0.0001 mA)",
+   "applied": {
+    "value": -19.00245,
+    "frequency": null
+   },
+   "nominal": -0.0019,
+   "dsb_out": "-19.00245 V DC",
+   "resistor": {
+    "position": "10^4",
+    "ohms": 10001.29,
+    "u_ppm": 66.0099987
+   },
+   "unc_kind": "CURRENT_VIA_R",
+   "report_desc": "2 mA range, -1.9000 mA",
+   "settle": 5,
+   "group": "R4",
+   "note": "Negative current. Calibrator -19.00245 V DC through the 10^4 resistor (10.00129 kΩ): V = I x R = 1.9000 mA x 10.00129 kΩ (Table 3-2). Step 10 reverses the leads at the calibrator; the program sources the negative voltage instead.",
+   "ref": "T3-2 2 mA -",
+   "id": "3-2-14"
+  }
+ ]
+}

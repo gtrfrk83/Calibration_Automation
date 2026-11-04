@@ -1,0 +1,44 @@
+{
+ "schema": 1,
+ "id": "Keithley_485_Verification",
+ "name": "Keithley 485 Picoammeter Performance Verification",
+ "manufacturer": "Keithley",
+ "model": "485",
+ "category": "Picoammeter",
+ "version": "1",
+ "order": 82,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Keithley_485_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keithley_485_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keithley_485_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_qt.py",
+   "handheld_unc.py",
+   "ui_port.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keithley_485_pv.json"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keithley_485_Verification.py",
+  "Procedures/Keithley_485_Verification.procedure.json",
+  "specs/keithley_485_pv.json",
+  "specs/build_keithley_485_spec.py",
+  "tests/test_keithley_485_points.py"
+ ]
+}

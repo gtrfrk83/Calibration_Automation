@@ -292,6 +292,15 @@ Procedures/Fluke_77IV_Verification.py   (engine: handheld_dmm.py; spec: specs/fl
   Not included: the calibration ADJUSTMENT (Table 3, pp. 14-16), fuse test, diode test (it has no step in Table 2).
   Rebuild the spec after editing the table:  python3 specs/build_77_spec.py     Demo with:  python Procedures/Fluke_77IV_Verification.py --demo
 
+Keithley 485 picoammeter (automated performance verification: lists on the Automated Calibrations tab)
+-------------------------------------------------------------------------------------------------
+Procedures/Keithley_485_Verification.py   (engine: handheld_dmm.py; spec: specs/keithley_485_pv.json built by specs/build_keithley_485_spec.py)
+  15 points: zero check, then the 7 ranges of Table 3-2 (2 nA .. 2 mA) at + and - current. The calibrator (5560A / 5522A / 5520A, or by hand) sources V = I x R through
+  the lab's resistance box (measured values at the top of the builder); readings are typed. Limits = Table 3-2 Allowable Readings (p. 3-2).
+  Resistance box: Agilent 16340A RC Box, asset ATS-4225 (Keysight report WO-01470653); values and k = 2 uncertainties in BOX / RESISTORS / RESISTOR_U of the builder.
+  Every point prints an uncertainty (DC volts budget combined with the resistor's) and TAR / TUR.
+  Rebuild the spec (after a box recalibration):  python3 specs/build_keithley_485_spec.py     Demo with:  python Procedures/Keithley_485_Verification.py --demo
+
 Fluke 101 digital multimeter (automated performance verification: lists on the Automated Calibrations tab)
 -------------------------------------------------------------------------------------------------
 Procedures/Fluke_101_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_101_pv.json built by specs/build_fluke_101_spec.py; diagrams: diagrams/README_fluke101.txt)
