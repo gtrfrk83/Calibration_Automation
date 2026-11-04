@@ -27,6 +27,7 @@ class SimFluke5700ATransport(_SimBase):
         self.boost, self.rlock, self.btype = False, False, {'V': 'VB5725', 'I': 'IB5725'}
         self.amp_connected = True                                # a 5725A is on the cable and powered (test hook)
         self.rlock_unit = None
+        self.stby_lag, self._stby_left = 0, 0                    # test hook: ISR? reports operate for this many reads after STBY (a real 5700A takes a moment to leave operate)
         self.settle_polls = 1
         self._polls = 0
 
@@ -37,7 +38,9 @@ class SimFluke5700ATransport(_SimBase):
         f_ = self.bench.fluke
         needs = self._needs_amp(f_.get('unit'), f_['volts'], f_['freq'])
         active = self.boost or (needs and self.amp_connected and self._designated(f_.get('unit')))   # BENCH 2026-11-04: bit 3 follows the output: set while an amplifier output is active, whether chosen by BOOST or by the 5700A itself (UNVERIFIED model)
-        return (int(bool(f['operate'])) | (int(self.extsense) << 2) | (int(active) << 3) | (int(self.rcomp) << 4) | (int(self.rlock) << 5) | (int(settled) << 12))
+        lagging = self._stby_left > 0
+        self._stby_left = max(0, self._stby_left - 1)
+        return (int(bool(f['operate']) or lagging) | (int(self.extsense) << 2) | (int(active) << 3) | (int(self.rcomp) << 4) | (int(self.rlock) << 5) | (int(settled) << 12))
 
     @staticmethod
     def _needs_amp(unit, value, hz):
@@ -74,7 +77,7 @@ class SimFluke5700ATransport(_SimBase):
         if u == 'ISR?':
             return str(self._isr())
         if u == 'STBY':
-            f['operate'] = False; self._polls = 0; return None
+            f['operate'] = False; self._polls = 0; self._stby_left = self.stby_lag; return None
         if u == 'OPER':
             f['operate'] = True; self._polls = 0; return None
         m = re.match(r'^BOOST (ON|OFF)$', u)

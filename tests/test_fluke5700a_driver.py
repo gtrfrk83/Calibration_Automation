@@ -177,12 +177,43 @@ class Amplifier(unittest.TestCase):
         self.assertFalse([c for c in ct.sent if c.startswith('CUR_POST') and '?' not in c])
         d.amplifier_off()
 
-    def test_the_amplifier_is_only_prepared_with_the_output_in_standby(self):
+    def test_a_slow_standby_is_waited_for_before_the_amplifier_is_prepared(self):
+        # bench 2026-11-04: 'the 5725A is only switched in with the output in standby' although the engine had just sent STBY: the real 5700A takes a moment to leave operate
+        d, ct, bench = make()
+        d.STANDBY_WAIT = (2.0, 0.0)
+        d.operate()
+        ct.handle('STBY')
+        ct._stby_left = 3                                    # ISR? still reports operate for three reads
+        d.amplifier_on('V')                                  # waits, then prepares
+        self.assertIn('BTYPE VB5725', ct.sent)
+        self.assertGreaterEqual(ct.sent.count('STBY'), 2)    # STBY was sent once more while waiting
+        d.amplifier_off()
+
+    def test_a_calibrator_that_never_leaves_operate_is_a_safety_error_with_the_isr_value(self):
+        d, ct, bench = make()
+        d.STANDBY_WAIT = (0.05, 0.01)
+        d.operate()
+        original = ct.handle
+
+        def stuck(cmd):
+            if cmd.strip().upper() == 'STBY':
+                ct.sent.append(cmd.strip())
+                return None                                  # ignores STBY
+            return original(cmd)
+        ct.handle = stuck
+        with self.assertRaises(drivers.SafetyError) as cm:
+            d.amplifier_on('V')
+        self.assertIn('ISR? still reports operate', str(cm.exception))
+        self.assertIn('binary', str(cm.exception))
+        self.assertNotIn('BTYPE VB5725', ct.sent)
+
+    def test_an_operating_output_is_put_in_standby_before_the_amplifier_is_prepared(self):
         d, ct, bench = make()
         d.operate()
-        with self.assertRaises(drivers.SafetyError):
-            d.amplifier_on('V')
-        self.assertNotIn('BTYPE VB5725', ct.sent)
+        d.amplifier_on('V')                                  # STBY is sent and confirmed first, then the amplifier is prepared
+        self.assertFalse(d.is_operating())
+        self.assertLess(ct.sent.index('STBY'), ct.sent.index('BTYPE VB5725'))
+        d.amplifier_off()
 
     def test_no_amplifier_on_the_cable_is_reported_with_the_isr_value_and_the_fault_text(self):
         d, ct, bench = make()

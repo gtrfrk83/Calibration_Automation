@@ -167,13 +167,32 @@ class Fluke5700A(Instrument):
         if not reply.startswith(post[:4]):
             raise InstrumentError(f'{self.label}: the current output post {post} was not accepted (CUR_POST? answered {reply!r})')
 
+    STANDBY_WAIT = (10.0, 0.3)               # seconds to wait for ISR? to report standby before the amplifier is prepared, and the poll interval
+
+    def _require_standby(self):
+        """The amplifier is only prepared with the output in STANDBY. The engine's STBY at the start of a point is not confirmed, and the real 5700A can take a moment to leave operate (bench
+        2026-11-04: 'the 5725A is only switched in with the output in standby'), so ISR? bit 0 is polled for STANDBY_WAIT seconds, STBY is sent once more, and only then is it a SafetyError."""
+        timeout, poll = self.STANDBY_WAIT
+        end = time.monotonic() + timeout
+        resent = False
+        while True:
+            reply = str(self.query_retry('isr.query', attempts=2, delay=0.3)).strip()
+            if not _bit(reply, ISR_OPER):
+                return
+            if not resent:
+                self.send('oper.stby')
+                resent = True
+            if time.monotonic() >= end:
+                raise SafetyError(f'{self.label}: the 5725A is only switched in with the output in standby, and ISR? still reports operate after {timeout:g} s and a second STBY '
+                                  f'(answered {reply!r}, binary {int(float(reply.replace(",", " ").split()[0])):016b})')
+            time.sleep(poll)
+
     def amplifier_on(self, kind):
         """PREPARE the 5725A, with the output in STANDBY and BEFORE the target output is set: stale faults cleared, BOOST OFF and RANGELCK OFF (a clean slate), BTYPE VB5725 (voltage) or IB5725
         (current, and CUR_POST IB5725). kind 'V' or 'I'. BOOST and the range lock are NOT sent here: both act on the PRESENT output (guide: RANGELCK 'locks the present range'; Operator Guide: an
         amplifier is selected for settings above the calibrator's range, and BOOST is for the others), so amplifier_activate() sends them after the target output is set (bench 2026-11-04:
         fault 860, "Can't Use Amplifier For This Output", at 10 A DC and 740 V / 50 kHz when BOOST ON / the lock came first)."""
-        if self.isr(ISR_OPER):
-            raise SafetyError(f'{self.label}: the 5725A is only switched in with the output in standby')
+        self._require_standby()
         stale = self._drain_faults()
         if stale:
             self.log.add('##', 'faults cleared before the amplifier was switched in: ' + '; '.join(r for r, _ in stale), self.label)
