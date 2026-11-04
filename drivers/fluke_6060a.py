@@ -284,9 +284,10 @@ def encode_learn(state: dict) -> str:
     put(33, 40, round(s.get('freq_step_hz', 1e6)))
     fm_res_digit = int(round(math.log10(s.get('fm_res_hz', 10.0))))
     dev = s.get('fm_dev_hz', 5000.0)
-    scale = fm_display_res_hz(dev) if fm_res_digit == 1 else 10.0 ** fm_res_digit      # the displayed digits, as the bench 6060A stores them (2026-11-03)
+    display = fm_res_digit in (1, 2)                                # 'B' / 'C': the displayed digits, as the bench 6060A stores them (2026-11-03 / 04)
+    scale = fm_display_res_hz(dev) if display else 10.0 ** fm_res_digit
     put(41, 44, round(dev / scale))
-    nibs[56] = fm_res_digit                                         # char 57
+    nibs[56] = (2 if dev >= 99950.0 else 1) if display else fm_res_digit       # char 57: 'B' to 99.9 kHz, 'C' from 100 kHz (owner bench 2026-11-04)
     put(45, 48, round(s.get('fm_step_hz', 100.0) / 100.0))
     nibs[63] = 2                                                    # char 64: FM step resolution 100 Hz
     rate = {400: 0b01, 1000: 0b10}.get(s.get('mod_rate_hz', 1000), 0)
@@ -539,7 +540,9 @@ class Fluke6060A(Instrument):
         bad = []
         for key, want in expect.items():
             got = state.get(key)
-            if key == 'fm_dev_hz' and state['fm_res_hz'] == 10.0 and got is not None:
+            if key == 'fm_dev_hz' and got is not None and state['fm_res_hz'] in (10.0, 100.0):
+                # Owner bench 2026-11-04: 100 kHz set came back as 'AAGE' (100) with char 57 'C' (not 'B'), refused as 10 kHz. The digits are judged at the display resolution of
+                # the value asked for when char 57 is 'B' or 'C' (bench: 5.00 kHz and 10.0 kHz 'B', 100 kHz 'C'); 'A' holds plain 1 Hz counts.
                 # Owner bench 2026-11-03: 10.0 kHz set and shown on the front panel came back as 'AAGE' (100) with resolution char 57 'B' (10 Hz), the same character as the
                 # preset's 5.00 kHz (500). The field holds the three DISPLAYED digits; their scale is the display's resolution for the value (10 Hz below 10 kHz, 100 Hz to
                 # 99.9 kHz, 1 kHz above: the last one UNVERIFIED). The learn string cannot tell 1.00 kHz from 10.0 kHz; the 8902A reading of the point would.

@@ -205,6 +205,21 @@ class LearnString(unittest.TestCase):
         self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 1_000.0}, decode_learn(bench)), [], 'the string cannot tell 1.00 kHz from 10.0 kHz (the 8902A reading can)')
         self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 5_000.0}, decode_learn(PRESET_LEARN)), [])
 
+    def test_the_bench_learn_string_at_100_khz_reads_back_as_100_khz(self):
+        """Owner bench 2026-11-04: FM 100 kHz on a 250 MHz carrier was refused ('asked 100000, learn string says 10000.0'). LM99 as shown on screen (checksum good): chars 41-44 'AAGE'
+        = 100 digits, char 57 'C' (not the 'B' of the 10 kHz string). 100 digits at the 1 kHz display resolution is 100 kHz."""
+        bench = 'BOABAAAAAAEGAAAKAAAAAAAAAOOGLCIAAAAPECEAAAGEAAABJCEEBBBGCLKKKCAC'
+        self.assertTrue(learn_checksum_ok(bench))
+        st = decode_learn(bench)
+        self.assertEqual((st['frequency_hz'], st['amplitude_dbm'], st['int_fm'], st['fm_dev_digits'], st['fm_res_hz']), (250_000_000, 7.0, True, 100, 100.0))
+        self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': 100_000.0}, st), [])
+        self.assertEqual(st['fm_dev_hz'], 100_000.0)
+        self.assertTrue(Fluke6060A.compare(None, {'fm_dev_hz': 101_000.0}, decode_learn(bench)))
+        for khz in (100.0, 250.0, 380.0):                                  # the simulator stores what the bench does: 'C' from 100 kHz
+            enc = encode_learn(dict(fm_dev_hz=khz * 1e3, fm_res_hz=10.0))
+            self.assertEqual(enc[56], 'C')
+            self.assertEqual(Fluke6060A.compare(None, {'fm_dev_hz': khz * 1e3}, decode_learn(enc)), [])
+
     def test_bad_strings_are_refused(self):
         for bad in (PRESET_LEARN[:-1], PRESET_LEARN + 'A', PRESET_LEARN[:-1] + 'Q', PRESET_LEARN[:-1] + 'B', ''):
             with self.assertRaises(InstrumentError, msg=bad):
