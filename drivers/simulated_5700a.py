@@ -73,7 +73,7 @@ class SimFluke5700ATransport(_SimBase):
             return str(self.faults.pop(0)) if self.faults else '0'
         m = re.match(r'^EXPLAIN\? (\d+)$', u)
         if m:
-            return {'860': "Can't Use Amplifier For This Output"}.get(m.group(1), f'simulated fault {m.group(1)}')
+            return {'860': "Can't Use Amplifier For This Output", '802': "Amplifier Must Remain On For This Output"}.get(m.group(1), f'simulated fault {m.group(1)}')
         if u == 'ISR?':
             return str(self._isr())
         if u == 'STBY':
@@ -89,6 +89,9 @@ class SimFluke5700ATransport(_SimBase):
                     self.faults.append(860); return None      # BENCH-FITTED 2026-11-04: BOOST ON is a request about the PRESENT output; at 0 V (or another function) the amplifier cannot be used: fault 860 (UNVERIFIED model)
                 self.boost = self.amp_connected
             else:
+                f_ = self.bench.fluke
+                if self.amp_connected and self._designated(f_.get('unit')) and self._needs_amp(f_.get('unit'), f_['volts'], f_['freq']):
+                    self.faults.append(802); return None      # BENCH FINDING 2026-11-04: fault 802 'Amplifier Must Remain On For This Output' when the amplifier is taken out while the present output needs it (UNVERIFIED model)
                 self.boost = False
             return None
         m = re.match(r'^RANGELCK (ON|OFF)$', u)

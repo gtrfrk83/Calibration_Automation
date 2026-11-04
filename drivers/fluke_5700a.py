@@ -158,7 +158,8 @@ class Fluke5700A(Instrument):
             self.send('out.volts.dc', volts=volts)
 
     _amp = None                              # 'V' or 'I' while the 5725A is active (set by amplifier_on)
-    _locked = False                          # RANGELCK ON was sent (amplifier_lock)
+    _locked = False                          # RANGELCK ON was sent (amplifier_activate)
+    _boosted = False                         # BOOST ON was sent (only when the 5700A had not chosen the amplifier by itself)
     CURRENT_POST = 'NORMAL'                  # the DMM6500 manual's figures take current from the calibrator OUTPUT HI / LO (p. 2-30, 2-34, 2-37): UNVERIFIED for an original 5700A
 
     def _post(self, post):
@@ -196,15 +197,14 @@ class Fluke5700A(Instrument):
         stale = self._drain_faults()
         if stale:
             self.log.add('##', 'faults cleared before the amplifier was switched in: ' + '; '.join(r for r, _ in stale), self.label)
-        self.send('boost', state='OFF')              # a clean slate: an earlier failed run can leave BOOST or the range lock ON, and a stale lock pins the wrong range
-        self.send('rangelck', state='OFF')
-        amp = 'VB5725' if kind == 'V' else 'IB5725'
+        self.send('rangelck', state='OFF')           # a clean slate for the lock (a stale lock pins the wrong range). BOOST OFF is NOT sent here: the 5700A refuses it with fault 802 'Amplifier Must
+        amp = 'VB5725' if kind == 'V' else 'IB5725'  # Remain On For This Output' while the present output still needs the amplifier (bench 2026-11-04)
         self.send('btype', amp=amp)
         if amp not in self.ask('btype.query').strip().upper():
             raise InstrumentError(f'{self.label}: the amplifier type {amp} was not accepted (BTYPE? did not list it)')
         if kind == 'I':
             self._post('IB5725')
-        self._amp, self._locked = kind, False
+        self._amp, self._locked, self._boosted = kind, False, False
 
     def amplifier_activate(self):
         """After the TARGET output is set, still in STANDBY: if ISR? bit 3 shows no amplifier active (it is selected by itself for settings above the 5700A's own range, so often it already is),
@@ -214,8 +214,9 @@ class Fluke5700A(Instrument):
             return
         if not self.isr(ISR_BOOST):
             self.send('boost', state='ON')
+            self._boosted = True
             self.check_error('BOOST ON')
-        if self._amp == 'I':
+        if self._amp == 'I' and not self._locked:
             self.send('rangelck', state='ON')
             self._locked = True
             self.check_error('RANGELCK ON')
@@ -238,15 +239,24 @@ class Fluke5700A(Instrument):
                               'Is the 5725A cabled to the 5700A, powered on and not in standby?')
 
     def amplifier_off(self):
-        """BOOST OFF, RANGELCK OFF and the current post back to NORMAL after a current boost. Call with the output in STANDBY.
-        ISR? bits 3 and 5 are NOT required to clear: on the bench (2026-11-04, 740 V at 50 kHz) bit 3 was still 1 after BOOST OFF, because the 5700A selects the amplifier by itself for an output
-        above its own range (Operator Guide, 'B' key), so the bit follows the output setting, not the BOOST state. The raw ISR? value is written to the command log for the bench session."""
+        """Take the 5725A out, with the output in STANDBY. The 5700A refuses to take the amplifier out while the PRESENT output still needs it (bench 2026-11-04: fault 802, "Amplifier Must
+        Remain On For This Output", on BOOST OFF at the end of a 10 A point and again at the start of the next), so the order is: the output is set to ZERO (standby, harmless), RANGELCK OFF,
+        BOOST OFF only if BOOST ON was sent, and the current post back to NORMAL after a current boost. Best effort: the faults this gives, if any, are written to the command log, not raised
+        (it runs in a finally). ISR? bits 3 and 5 are not required to clear (bit 3 follows the output setting); the raw value is logged for the bench session."""
         kind, self._amp = self._amp, None
-        self._locked = False
-        self.send('boost', state='OFF')
+        boosted, self._boosted, self._locked = self._boosted, False, False
+        if kind == 'I':
+            self.send('out.amps.dc', amps=0)
+        elif kind == 'V':
+            self.send('out.volts.dc', volts=0)
         self.send('rangelck', state='OFF')           # always: harmless when not locked, and it clears a lock left by a failed step
+        if boosted:
+            self.send('boost', state='OFF')
         if kind == 'I':
             self._post(self.CURRENT_POST)
+        left = self._drain_faults()
+        if left:
+            self.log.add('##', 'faults after the amplifier was taken out: ' + '; '.join(r for r, _ in left), self.label)
         value = int(float(str(self.query_retry('isr.query', attempts=2, delay=0.3)).replace(',', ' ').split()[0]))
         self.log.add('##', f'ISR? after the amplifier was taken out: {value} (binary {value:016b}); BOOST bit {value >> ISR_BOOST & 1}, RLOCK bit {value >> ISR_RLOCK & 1} (not required to be 0)', self.label)
 

@@ -47,7 +47,7 @@ class Amplifier(unittest.TestCase):
     def test_current_boost_sequence_and_back(self):
         d, ct, bench = make()
         d.amplifier_on('I')
-        self.assertEqual(self.sent(ct, 'BTYPE', 'CUR_POST', 'BOOST', 'RANGELCK'), ['BOOST OFF', 'RANGELCK OFF', 'BTYPE IB5725', 'CUR_POST IB5725'])     # a clean slate, then the setup: no BOOST ON yet
+        self.assertEqual(self.sent(ct, 'BTYPE', 'CUR_POST', 'BOOST', 'RANGELCK'), ['RANGELCK OFF', 'BTYPE IB5725', 'CUR_POST IB5725'])     # a clean slate for the lock, then the setup: no BOOST command at all (BOOST OFF would be refused with 802 while the output needs the amplifier)
         d.set_output_amps(10.0, None, True)
         d.amplifier_activate()
         d.check_error('ok')
@@ -57,8 +57,50 @@ class Amplifier(unittest.TestCase):
         self.assertNotIn('CUR_POST NORMAL', ct.sent)                       # the post is already the amplifier's
         d.amplifier_confirm()
         d.amplifier_off()
-        self.assertEqual(self.sent(ct, 'BOOST', 'RANGELCK', 'CUR_POST')[-3:], ['BOOST OFF', 'RANGELCK OFF', 'CUR_POST NORMAL'])
+        self.assertNotIn('BOOST OFF', ct.sent)                             # BOOST ON was never sent (the 5700A chose the amplifier itself): no BOOST OFF, which it would refuse with 802
+        after = ct.sent[ct.sent.index('OUT 0 A, 0 HZ'):]                    # the output is zeroed FIRST, then the lock and the post
+        self.assertEqual([c for c in after if c.startswith(('RANGELCK', 'CUR_POST')) and '?' not in c], ['RANGELCK OFF', 'CUR_POST NORMAL'])
         self.assertFalse(ct.boost or ct.rlock)
+        self.assertEqual(ct.faults, [])
+
+    def test_boost_off_with_the_output_still_needing_the_amplifier_is_refused_with_fault_802(self):
+        # bench 2026-11-04: 'Amplifier Must Remain On For This Output' (fault 802) on BOOST OFF at the end of a 10 A point and at the start of the next
+        d, ct, bench = make()
+        d.amplifier_on('I')
+        d.set_output_amps(5.0, None, True)
+        d.amplifier_activate()
+        d.send('boost', state='OFF')
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.check_error('x')
+        self.assertIn('802', str(cm.exception))
+        self.assertIn('Amplifier Must Remain On For This Output', str(cm.exception))
+
+    def test_taking_the_amplifier_out_zeroes_the_output_first_and_sends_boost_off_only_after_boost_on(self):
+        d, ct, bench = make()
+        d.amplifier_on('I')
+        d.set_output_amps(0.0, None, True)
+        d.amplifier_activate()                                             # BOOST ON had to be sent for a zero
+        self.assertIn('BOOST ON', ct.sent)
+        d.set_output_amps(5.0, None, True)                                 # the output now needs the amplifier
+        d.amplifier_off()
+        i = len(ct.sent) - 1 - ct.sent[::-1].index('OUT 0 A, 0 HZ')
+        self.assertLess(i, ct.sent.index('BOOST OFF', i))                  # zero first, then BOOST OFF
+        self.assertEqual(ct.faults, [])                                    # no 802
+        self.assertFalse(ct.boost)
+
+    def test_consecutive_amplifier_outputs_need_no_second_setup_and_no_lock_again(self):
+        d, ct, bench = make()
+        d.amplifier_on('I')
+        for amps in (10.0, 5.0, -5.0, -10.0):
+            d.set_output_amps(amps, None, True)
+            d.amplifier_activate()
+            d.check_error('ok')
+            d.amplifier_confirm()
+        self.assertEqual(ct.sent.count('RANGELCK ON'), 1)
+        self.assertEqual(ct.sent.count('BTYPE IB5725'), 1)
+        self.assertNotIn('BOOST OFF', ct.sent)
+        d.amplifier_off()
+        self.assertEqual(ct.faults, [])
 
     def test_a_zero_current_needs_boost_on_after_the_output(self):
         d, ct, bench = make()
@@ -99,8 +141,7 @@ class Amplifier(unittest.TestCase):
         d.set_output_volts(740.0, 50000.0)
         d.amplifier_activate()
         d.amplifier_confirm()
-        d.amplifier_off()                                        # must not raise although bit 3 is still 1
-        self.assertTrue(d.isr(3))
+        d.amplifier_off()                                        # must not raise
         self.assertFalse(ct.boost or ct.rlock)
         self.assertTrue(any('ISR? after the amplifier was taken out' in e[3] for e in d.log.entries))
 

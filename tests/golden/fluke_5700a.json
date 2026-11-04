@@ -489,7 +489,6 @@
     "5700A|<<|0",
     "5700A|>>|FAULT?",
     "5700A|<<|0",
-    "5700A|>>|BOOST OFF",
     "5700A|>>|RANGELCK OFF",
     "5700A|>>|BTYPE VB5725",
     "5700A|>>|BTYPE?",
@@ -507,10 +506,6 @@
      "Q",
      "FAULT?",
      "0"
-    ],
-    [
-     "W",
-     "BOOST OFF"
     ],
     [
      "W",
@@ -580,18 +575,20 @@
    "call": "",
    "case": "Fluke5700A.amplifier_off[V]",
    "log": [
-    "5700A|>>|BOOST OFF",
+    "5700A|>>|OUT 0 V, 0 HZ",
     "5700A|>>|RANGELCK OFF",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
     "5700A|>>|ISR?",
-    "5700A|<<|8",
-    "5700A|##|ISR? after the amplifier was taken out: 8 (binary 0000000000001000); BOOST bit 1, RLOCK bit 0 (not required to be 0)"
+    "5700A|<<|0",
+    "5700A|##|ISR? after the amplifier was taken out: 0 (binary 0000000000000000); BOOST bit 0, RLOCK bit 0 (not required to be 0)"
    ],
    "method": "Fluke5700A.amplifier_off",
    "result": "returned None",
    "wire": [
     [
      "W",
-     "BOOST OFF"
+     "OUT 0 V, 0 HZ"
     ],
     [
      "W",
@@ -599,8 +596,13 @@
     ],
     [
      "Q",
+     "FAULT?",
+     "0"
+    ],
+    [
+     "Q",
      "ISR?",
-     "8"
+     "0"
     ]
    ]
   },
@@ -609,10 +611,9 @@
    "case": "Fluke5700A.amplifier_on[I]",
    "log": [
     "5700A|>>|ISR?",
-    "5700A|<<|8",
+    "5700A|<<|0",
     "5700A|>>|FAULT?",
     "5700A|<<|0",
-    "5700A|>>|BOOST OFF",
     "5700A|>>|RANGELCK OFF",
     "5700A|>>|BTYPE IB5725",
     "5700A|>>|BTYPE?",
@@ -627,16 +628,12 @@
     [
      "Q",
      "ISR?",
-     "8"
+     "0"
     ],
     [
      "Q",
      "FAULT?",
      "0"
-    ],
-    [
-     "W",
-     "BOOST OFF"
     ],
     [
      "W",
@@ -727,11 +724,13 @@
    "call": "",
    "case": "Fluke5700A.amplifier_off[I]",
    "log": [
-    "5700A|>>|BOOST OFF",
+    "5700A|>>|OUT 0 A, 0 HZ",
     "5700A|>>|RANGELCK OFF",
     "5700A|>>|CUR_POST NORMAL",
     "5700A|>>|CUR_POST?",
     "5700A|<<|NORMAL",
+    "5700A|>>|FAULT?",
+    "5700A|<<|0",
     "5700A|>>|ISR?",
     "5700A|<<|0",
     "5700A|##|ISR? after the amplifier was taken out: 0 (binary 0000000000000000); BOOST bit 0, RLOCK bit 0 (not required to be 0)"
@@ -741,7 +740,7 @@
    "wire": [
     [
      "W",
-     "BOOST OFF"
+     "OUT 0 A, 0 HZ"
     ],
     [
      "W",
@@ -755,6 +754,11 @@
      "Q",
      "CUR_POST?",
      "NORMAL"
+    ],
+    [
+     "Q",
+     "FAULT?",
+     "0"
     ],
     [
      "Q",
@@ -798,7 +802,6 @@
     "5700A|<<|0",
     "5700A|>>|FAULT?",
     "5700A|<<|0",
-    "5700A|>>|BOOST OFF",
     "5700A|>>|RANGELCK OFF",
     "5700A|>>|BTYPE IB5725",
     "5700A|>>|BTYPE?",
@@ -819,10 +822,6 @@
      "Q",
      "FAULT?",
      "0"
-    ],
-    [
-     "W",
-     "BOOST OFF"
     ],
     [
      "W",
@@ -877,13 +876,12 @@
    "case": "Fluke5700A.amplifier_on[output operating]",
    "log": [
     "5700A|>>|ISR?",
-    "5700A|<<|4105",
+    "5700A|<<|4097",
     "5700A|>>|STBY",
     "5700A|>>|ISR?",
-    "5700A|<<|8",
+    "5700A|<<|0",
     "5700A|>>|FAULT?",
     "5700A|<<|0",
-    "5700A|>>|BOOST OFF",
     "5700A|>>|RANGELCK OFF",
     "5700A|>>|BTYPE VB5725",
     "5700A|>>|BTYPE?",
@@ -895,7 +893,7 @@
     [
      "Q",
      "ISR?",
-     "4105"
+     "4097"
     ],
     [
      "W",
@@ -908,16 +906,12 @@
     [
      "Q",
      "ISR?",
-     "8"
+     "0"
     ],
     [
      "Q",
      "FAULT?",
      "0"
-    ],
-    [
-     "W",
-     "BOOST OFF"
     ],
     [
      "W",

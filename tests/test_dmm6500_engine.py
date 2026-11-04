@@ -190,7 +190,7 @@ class Combo5700A5725A(Calibrator5700A):
         self.assertEqual(len(self.amp_ids), 13)
         io.close()
 
-    def test_the_amplifier_is_switched_in_with_the_output_in_standby_and_out_again_after_the_point(self):
+    def test_the_amplifier_is_switched_in_with_the_output_in_standby_and_stays_engaged_for_the_next_point_of_the_same_kind(self):
         io, bench, ct, dt = self.build()
         io.measure(BY_REF['DCI.10A.1'])
         sent = ct.sent
@@ -201,9 +201,34 @@ class Combo5700A5725A(Calibrator5700A):
         self.assertLess(sent.index('OUT 10 A, 0 HZ'), sent.index('RANGELCK ON'))     # the lock pins the PRESENT range: after the output
         self.assertIn('CUR_POST IB5725', sent)
         self.assertLess(sent.index('RANGELCK ON'), sent.index('OPER'))
-        self.assertEqual([c for c in sent if '?' not in c][-1], 'CUR_POST NORMAL')
-        self.assertIn('BOOST OFF', sent)
-        self.assertFalse(ct.boost)
+        self.assertTrue(ct.rlock)                                                   # the amplifier stays engaged after a good point (the manual locks once and steps through 10, 5, -5, -10 A)
+        n = len(sent)
+        for ref in ('DCI.10A.2', 'DCI.10A.3', 'DCI.10A.4'):                         # bench 2026-11-04: the second point stopped with fault 802 when each point took the amplifier out first
+            io.measure(BY_REF[ref])
+        later = sent[n:]
+        self.assertNotIn('BOOST OFF', sent)
+        self.assertNotIn('BTYPE IB5725', later)                                     # no second setup
+        self.assertNotIn('RANGELCK ON', later)                                      # nor a second lock
+        self.assertEqual(ct.faults, [])
+        io.measure(BY_REF['ACV.10.1'] if 'ACV.10.1' in BY_REF else BY_REF['DCV.10.1'])      # a point the 5700A makes by itself: the amplifier is taken out first
+        self.assertFalse(ct.rlock)
+        out0 = len(sent) - 1 - sent[::-1].index('OUT 0 A, 0 HZ')
+        self.assertIn('CUR_POST NORMAL', sent[out0:])                               # zero first, then the lock off and the post back
+        self.assertEqual(ct.faults, [])
+        io.close()
+
+    def test_closing_takes_the_amplifier_out_and_a_failed_point_does_too(self):
+        io, bench, ct, dt = self.build()
+        io.measure(BY_REF['DCI.10A.1'])
+        self.assertTrue(ct.rlock)
+        io.close()
+        self.assertFalse(ct.rlock)
+        io, bench, ct, dt = self.build()
+        ct.refuse = 'OUT 10 A'
+        with self.assertRaises(drivers.InstrumentError):
+            io.measure(BY_REF['DCI.10A.1'])
+        self.assertFalse(ct.rlock)
+        self.assertIsNone(io._amp)
         io.close()
 
     def test_voltage_points_use_the_voltage_amplifier(self):

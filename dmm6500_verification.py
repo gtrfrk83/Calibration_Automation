@@ -299,9 +299,17 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
     def standby(self):
         self.cal.standby_quiet()
 
+    def amplifier_out(self):
+        """The 5725A is taken out (output zeroed first, see Fluke5700A.amplifier_off). Never raises."""
+        if self._amp is not None and hasattr(self.cal, 'amplifier_off'):
+            try: self.cal.amplifier_off()
+            except Exception: pass
+            finally: self._amp = None
+
     def close(self):
         try: self.standby()
         except Exception: pass
+        self.amplifier_out()
         try: self.dmm.cleanup()
         except Exception: pass
         for obj in (self.dmm, self.cal, getattr(self, 'ref', None)):
@@ -419,6 +427,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
     def measure(self, p):
         self.last_eval = {}
         self.standby()
+        done = False
         try:
             self.check_terminals(p)
             if self.virtual: self.virtual_hooks(p)
@@ -430,10 +439,10 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
             self.dmm.check_errors('configuring ' + p['description'])
             amp = p['source'] == 'calibrator' and not manual and self.uses_amp(p)
             if hasattr(self.cal, 'amplifier_on') and not amp and self._amp is not None:
-                self.cal.amplifier_off(); self._amp = None                # a point the 5700A makes by itself: the amplifier is taken out
+                self.amplifier_out()                                       # a point the 5700A makes by itself: the amplifier is taken out (the 10 A points keep it engaged, as the manual does)
             if p['source'] == 'calibrator' and not manual:
                 if amp and self._amp != ('V' if p['kind'] in ('DCV', 'ACV', 'DIGV') else 'I'):
-                    if self._amp is not None: self.cal.amplifier_off()
+                    self.amplifier_out()
                     self._amp = 'V' if p['kind'] in ('DCV', 'ACV', 'DIGV') else 'I'
                     self.cal.amplifier_on(self._amp)                       # the output is still in standby here
                 if p.get('rel_zero'): self.cal.set_output_volts(0, None, dc=True)
@@ -454,12 +463,12 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
                 self.last_eval = dict(center=rtd_cvd.temperature(ref if ref is not None else p['source_ohms']), reference=ref if ref is not None else p['source_ohms'])
             elif ref is not None and p.get('std_relative'):
                 self.last_eval = dict(center=ref, reference=ref)
+            done = True
             return reading
         finally:
             self.standby()
-            if self._amp is not None and hasattr(self.cal, 'amplifier_off'):
-                try: self.cal.amplifier_off()
-                finally: self._amp = None                              # the amplifier is taken out at the end of every point that used it (the output is in standby)
+            if not done:
+                self.amplifier_out()                                   # a failed point: the amplifier is taken out. A good one leaves it engaged for the next point of the same kind
 
 
 class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
