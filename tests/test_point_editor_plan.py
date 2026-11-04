@@ -199,11 +199,15 @@ class DryClock(unittest.TestCase):
 
 
 class WhenThePlanCannotBeComplete(unittest.TestCase):
-    def test_a_point_the_procedure_does_not_automate_says_so_and_keeps_what_was_recorded(self):
+    def test_a_point_whose_routine_cannot_run_says_so_and_keeps_what_was_recorded(self):
+        # the 8846A procedure automates AC points now (the filter is set and read back); a refusal in that step must still be reported, not raised
+        from unittest import mock
+        import drivers
         b = PH.f8846()
         self.addCleanup(b.stop)
         ac = next(q for q in b.points if q['kind'] == 'ACV')
-        plan = b.app.pm_plan_point(ac)
+        with mock.patch.object(drivers.Fluke8846A, 'set_ac_filter', side_effect=RuntimeError('AC filter set-up is not lab-verified')):
+            plan = b.app.pm_plan_point(ac)
         self.assertIn('lab-verified', plan.error)
         self.assertFalse(plan.complete)
         self.assertTrue(plan.entries and plan.entries[0].wire == 'STBY')

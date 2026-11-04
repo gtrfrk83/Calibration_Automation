@@ -97,8 +97,9 @@ COVERAGE = {
         'Fluke5522A': dict(covered=['open', 'set_lcomp'], no_command=['lcomp_allowed']),    # inherits the rest; LCOMP ON/OFF with read-back (owner request 2026-10-26)
     },
     'scpi_dmm': {
-        'ScpiDmm': dict(covered=['connect', 'remote', 'local', 'cleanup', 'configure', 'configure_frequency', 'read'], no_command=[]),
-        'Fluke8846A': dict(covered=['connect_for_adjustment', 'unlock_calibration', 'lock_calibration', 'adjust_step', 'record_calibration'],
+        'ScpiDmm': dict(covered=['connect', 'remote', 'local', 'cleanup', 'configure', 'configure_frequency', 'read', 'check_errors'], no_command=[]),
+        'Fluke8846A': dict(covered=['connect_for_adjustment', 'unlock_calibration', 'lock_calibration', 'adjust_step', 'record_calibration',
+                                    'configure_frequency_point', 'null_on', 'null_off', 'set_ac_filter'],
                            no_command=[]),
         'Agilent34401A': dict(covered=['set_ac_filter_slow'], no_command=[]),
     },
@@ -628,6 +629,24 @@ def cases_scpi_dmm(c):
     c.run('ScpiDmm.connect[34401A]', a.connect)
     c.run('ScpiDmm.configure[CAP unsupported@34401A]', a.configure, 'CAP', 1e-7)
     c.run('Agilent34401A.set_ac_filter_slow', a.set_ac_filter_slow)
+    # 8846A verification extras (AC filter, frequency function, 2-wire null): the replies a meter that accepts them would give (UNVERIFIED on a bench 8846A)
+    ok = [(r'^SYST:ERR\?', '+0,"No error"')]
+    flt = c.inst(Fluke8846A, Scripted(ok + [(r'^DET:BAND\?', '+3.000000E+00')]), label='8846A')
+    c.run('Fluke8846A.set_ac_filter', flt.set_ac_filter, 3)
+    c.run('Fluke8846A.set_ac_filter[bad value]', flt.set_ac_filter, 5)
+    c.run('Fluke8846A.set_ac_filter[ignored]', c.inst(Fluke8846A, Scripted([(r'^DET:BAND\?', '+2.000000E+01')]), label='8846A').set_ac_filter, 3)
+    frq = c.inst(Fluke8846A, Scripted(ok + [(r'^DET:BAND\?', '+3.000000E+00')]), label='8846A')
+    c.run('Fluke8846A.configure_frequency_point', frq.configure_frequency_point, 10)
+    rej = c.inst(Fluke8846A, Scripted([(r'^SYST:ERR\?', '-113,"Undefined header"')]), label='8846A')
+    c.run('Fluke8846A.configure_frequency_point[rejected]', rej.configure_frequency_point, 10)
+    nul = c.inst(Fluke8846A, Scripted(ok + [(r'^CALC:NULL:OFFS\?', '+1.234500000E-01'), (r'^CALC:STAT\?', '1')]), label='8846A')
+    c.run('Fluke8846A.null_on', nul.null_on, 0.12345)
+    c.run('Fluke8846A.null_on[offset not taken]', c.inst(Fluke8846A, Scripted(ok + [(r'^CALC:NULL:OFFS\?', '+0.000000000E+00'), (r'^CALC:STAT\?', '1')]), label='8846A').null_on, 0.12345)
+    c.run('Fluke8846A.null_on[state not on]', c.inst(Fluke8846A, Scripted(ok + [(r'^CALC:NULL:OFFS\?', '+1.234500000E-01'), (r'^CALC:STAT\?', '0')]), label='8846A').null_on, 0.12345)
+    c.run('Fluke8846A.null_off', c.inst(Fluke8846A, Scripted(ok + [(r'^CALC:STAT\?', '0')]), label='8846A').null_off)
+    c.run('Fluke8846A.null_off[still on]', c.inst(Fluke8846A, Scripted(ok + [(r'^CALC:STAT\?', '1')]), label='8846A').null_off)
+    c.run('ScpiDmm.check_errors', c.inst(Fluke8846A, Scripted(ok), label='8846A').check_errors, 'a test')
+    c.run('ScpiDmm.check_errors[error]', c.inst(Fluke8846A, Scripted([(r'^SYST:ERR\?', '-221,"Settings conflict"')]), label='8846A').check_errors, 'a test')
     over = c.inst(ScpiDmm, Scripted([(r'^READ\?', '+9.90000000E+37')]), label='DMM')
     c.run('ScpiDmm.read[overload]', over.read)
     wrong = c.inst(Fluke8846A, Scripted([(r'\*IDN\?', 'OTHER,1234,1,1')]), opened=False, label='8846A')
