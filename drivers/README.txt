@@ -1,5 +1,8 @@
 Instrument drivers
 ==================
+A new driver file needs NO edit to __init__.py: `drivers.<Name>` / `from drivers import <Name>` finds the file that defines the class and imports it (see __getattr__ at the end of
+__init__.py), so a procedure package can carry a driver.  The explicit imports in __init__.py are the fast path for the drivers the suite already ships.
+
 One driver per instrument MODEL. Procedures call intent-level methods
 (fluke.set_dc_volts(0.006), scope.set_vertical_scale(1, 0.01)); the command strings live only here.
 

@@ -24,6 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / 'Procedures'))
 
 import fluke6060a_uncertainty as fu  # noqa: E402
 import fluke6060a_verification as fv  # noqa: E402

@@ -108,9 +108,9 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'Procedures/Agilent_34401A.py': ('execute', 'reset_then', '_next'),
     'Procedures/Fluke_8846A_Verification.py': ('execute', 'reset_then', '_next'),
     'fluke8808a_verification.py': ('execute', 'reset_then', '_next'),
-    'fluke6060a_verification.py': ('execute', 'reset_then', '_next'),
+    'Procedures/fluke6060a_verification.py': ('execute', 'reset_then', '_next'),
     'bk5491b_verification.py': ('execute', 'reset_then', '_next'),
-    'hp8591a_verification.py': ('execute', 'reset_then', '_next'),
+    'Procedures/hp8591a_verification.py': ('execute', 'reset_then', '_next'),
 }
 
 
@@ -200,7 +200,10 @@ class EnginesCallTheStartupHelper(unittest.TestCase):
 
     def test_every_procedure_launcher_uses_a_checked_engine(self):
         engine_mods = {Path(r).stem for r in ENGINES} | {'WaveSurfer_WS4104HD', 'Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment', 'Fluke_8808A_Adjustment', 'HP_8902A_Cal_Factors'}
+        helpers = {'fluke6060a_uncertainty'}           # a procedure's own module that is not a launcher and drives no instrument (the 6060A GIDEP uncertainty budgets)
         for path in sorted((ROOT / 'Procedures').glob('*.py')):
+            if path.stem in helpers:
+                continue
             tree = ast.parse(path.read_text(encoding='utf-8'))
             imported = set()
             for n in ast.walk(tree):

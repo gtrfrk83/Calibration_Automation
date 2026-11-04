@@ -216,7 +216,7 @@ class _SectionRow(QFrame):
             p.setPen(QPen(QColor(t['focus']), 2))
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRoundedRect(r.adjusted(1, 1, -1, -1), M.radius, M.radius)
-        dot = t['bad_dot'] if self.bad else (t['good_dot'] if self.tot and self.ok == self.tot else (t['info_dot'] if self.ok else t['neutral_dot']))
+        dot = t['bad_dot'] if self.bad else (t['good_dot'] if self.tot and self.ok == self.tot else (t['warn_dot'] if self.ok else t['neutral_dot']))
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QColor(dot))
         p.drawEllipse(QPointF(18, self.height() / 2), 4.5, 4.5)

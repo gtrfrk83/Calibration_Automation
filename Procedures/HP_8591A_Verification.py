@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))   # shared modules sit next to the Manager
+sys.path.append(str(Path(__file__).resolve().parent))          # the engine and its window code sit here, with the launcher
 import hp8591a_verification
 
 if __name__ == '__main__':

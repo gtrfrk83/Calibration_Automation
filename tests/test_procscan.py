@@ -37,8 +37,12 @@ class ScannedEqualsOldRegistry(unittest.TestCase):
     def test_no_scan_problems_and_no_unregistered_launcher(self):
         result = procscan.scan_folder(ROOT / 'Procedures')
         self.assertEqual(result.problems, [])
-        launchers = {p.name for p in (ROOT / 'Procedures').glob('*.py')} - {'User_Datasheet.py', '__init__.py'}
+        # engines / window code that live in Procedures/ (so a package can update them) have no sidecar of their own: they are not launchers
+        launchers = {p.name for p in (ROOT / 'Procedures').glob('*.py') if (ROOT / 'Procedures' / (p.stem + '.procedure.json')).is_file()} - {'User_Datasheet.py', '__init__.py'}
         self.assertEqual({p.launcher_name for p in result.procs}, launchers)
+        support = {p.name for p in (ROOT / 'Procedures').glob('*.py')} - launchers - {'User_Datasheet.py', '__init__.py'}
+        named = {Path(f).name for p in result.procs for f in p.own_files if f.startswith('Procedures/')}
+        self.assertEqual(sorted(support - named), [], 'a .py in Procedures/ with no sidecar that no procedure lists in own_files')
 
     def test_every_declared_file_exists_and_diagram_prefixes_match_hookups(self):
         for p in procscan.procs(ROOT):

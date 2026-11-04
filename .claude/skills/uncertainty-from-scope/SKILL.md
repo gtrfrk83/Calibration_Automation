@@ -5,7 +5,7 @@ description: Use when assigning measurement uncertainties (and TUR) to a Calibra
 
 # Uncertainties from the standards and the A2LA scope
 
-Worked example: `fluke6060a_uncertainty.py` (6060A GIDEP), `specs/a2la_1888_03_rf.json` (built by `specs/build_a2la_cmc_rf.py`), `report_pdf.py` (`scope_star_note`). NOTES.md is the authority if anything here is older.
+Worked example: `Procedures/fluke6060a_uncertainty.py` (6060A GIDEP), `specs/a2la_1888_03_rf.json` (built by `specs/build_a2la_cmc_rf.py`), `report_pdf.py` (`scope_star_note`). NOTES.md is the authority if anything here is older.
 
 ## 1. Inputs
 - The scope: A2LA certificate 1888.03. Encode the lines you need in a `specs/a2la_*.json` with a committed builder script, read from the RENDERED scope pages (not extracted text).
