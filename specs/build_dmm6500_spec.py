@@ -24,7 +24,8 @@ PRINT PROBLEMS FOUND (each is listed again in the final report):
     on the calibrator setting.  The 4-wire short table is built as printed (zero checks, 1 ohm to 100 kohm).
   * DC current 10 uA to 10 mA (pp. 2-31): the table lists the TOLERANCE (printed unit 'uA' for every range, meaning the range's own unit) about the reference-DMM reading;
     the 100 mA, 1 A and 3 A tables are limits about the calibrator setpoint (p. 2-33).  10 A (p. 2-45) is a limit about the nominal.
-  * Digitize current: the 10 uA range is asked for in the steps (p. 2-34 step 5) but has no table: not built.  The setpoint column holds a typical reference value; the limit
+  * Digitize current: the 10 uA range is asked for in the steps (p. 2-34 step 5) but has no table: not built (owner decision 2026-11-04: leave it out; the data sheet SPEC-DMM6500
+    Rev. A p. 9 lists digitize current accuracy for 100 uA to 10 A only, so there is no limit to build it from).  The setpoint column holds a typical reference value; the limit
     half-widths are constant per range and are used about the reference reading (or the calibrator setting).
   * AC volts and AC current at 20 Hz are below the 30 Hz-300 kHz range the manual quotes for the 30 Hz detector bandwidth: those points use bandwidth 3 (the specified
     one) and the rest 30 (the 40 Hz current points are inside the range).  Owner to confirm.
