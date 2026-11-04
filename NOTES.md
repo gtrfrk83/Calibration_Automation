@@ -2229,6 +2229,18 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- 96270A frequency counter for the GIDEP frequency points (owner, 2026-11-04: "use the frequency counter built into the 96270"; the owner pushed the 96000 Series Remote
+  Programmers Manual as `96000__rpmeng0100.pdf`). Commands read on the RENDERED pages (printed numbers): INST FCO p. 32, :FCO:RANG 1 | 2 | 3 (50 MHz @ 10 kohm, 50 MHz @ 50 ohm,
+  300 MHz @ 50 ohm) p. 41, :TRIG:GATE 0.2 | 2 | 20 | 80 and :INIT:CONT 0 p. 42, MEAS? p. 43 (single mode: starts and returns one reading; 9.91E37 = none), :ROSC:SOUR? /
+  :ROSC:LOCK? p. 49, example 'Frequency Measurement - simple' p. 60. `Fluke96270A.measure_counter_hz(range, gate, expect_hz)`: output OFF, INST FCO, the reference must be
+  EXTernal and locked (the lab GPS: on its internal reference the counter is 0.05 ppm = 15 Hz at 300 MHz against +/-10 Hz), range / gate / single mode each read back,
+  SYST:ERR?, MEAS? with the timeout at gate + 10 s; a reading more than 1 % from the expected value is refused. The engine puts the 96270A back to SINE after each reading
+  (the power meter is selected and zeroed again at the next level point). Spec: 4.1.5 10 MHz reference `meas: fco_freq`, range 2, group FCOREF (6060A rear 10 MHz IN/OUT,
+  REF INT, to the rear 300 MHz Counter BNC); Tables 2 / 3 to 299.99999 MHz range 3, group FCORF, 6060A at +7 dBm (the counter needs 0.5 V pk-pk) and REF EXT on the GPS;
+  gate 2 s (1 Hz at 100 to 300 MHz). 399.99999 / 499.99999 MHz stay typed. Uncertainty unchanged (GPS Frequency - Measure CMC); the budget text names the 96270A counter.
+  UNVERIFIED: the reply text of INST? / FCO:RANG? / TRIG:GATE? / INIT:CONT? / ROSC:SOUR? (matched loosely), how long MEAS? takes beyond the gate, that the 6060A rear
+  10 MHz output reaches 0.5 V pk-pk. Simulator: counter in `Sim96270AMeter` (`ref_out_hz`, `rosc`, `rosc_locked`). Tests: `tests/test_fluke6060a_gidep.py`
+  Counter96270A, golden cases in `tests/golden_6060a.py`. NOT run on the bench yet.
 - HP 5334B REMOVED (owner, 2026-11-04: "still can't get the 5334 to run correctly....can we abandon it and use the frequency counter built into the 96270?"; asked:
   "Remove it"). Commits be3b199 (driver, simulator, CTRA / CTRC groups, address box) and f9de457 (LF line ends after error 4.2 at Test connections) are reverted: the
   10 MHz reference output is typed again and Tables 2 and 3 are read on the 8902A again, until the 96270A counter is wired in. The 5334B manual stays in the repo.

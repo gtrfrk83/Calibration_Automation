@@ -1154,7 +1154,7 @@ class PowerMeterMode(_NoSleep):
     def test_the_existing_rf_commands_are_unchanged(self):
         for key, template in ORIGINAL_RF_COMMANDS.items():
             self.assertEqual(RF_COMMANDS[key].template, template, key)
-        self.assertEqual(sorted(k for k in RF_COMMANDS if k not in ORIGINAL_RF_COMMANDS), sorted({**reference_instruments.PMETER_COMMANDS, **reference_instruments.FM_COMMANDS, **reference_instruments.AM_COMMANDS}))
+        self.assertEqual(sorted(k for k in RF_COMMANDS if k not in ORIGINAL_RF_COMMANDS), sorted({**reference_instruments.PMETER_COMMANDS, **reference_instruments.FM_COMMANDS, **reference_instruments.AM_COMMANDS, **reference_instruments.FCO_COMMANDS}))
         self.assertEqual(cmdreg.lint_registry(RF_COMMANDS), [])
 
     def test_the_new_commands_have_pages_and_the_unverified_ones_are_listed(self):

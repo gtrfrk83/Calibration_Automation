@@ -288,13 +288,27 @@ def _gps(r, p, reading, standard, value, what):
     r.assumptions += [GPS_RULE, what]
 
 
+FCO_NOTE = ('The 96270A counter runs on the lab GPS 10 MHz (external reference; the program checks ROSC:SOURce? and ROSC:LOCKed?). Its own specification (reference accuracy + 0.5 count, '
+            '96000 Series Product Specifications) and the 1 Hz resolution of a 2 s gate are not part of the reported figure under this rule.')
+
+
 def _freq(r, p, reading, path):
+    if p.get('meas') == 'fco_freq':
+        _gps(r, p, reading, 'Fluke 96270A frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']), FCO_NOTE)
+        return
+    if p.get('meas') == 'manual':
+        _gps(r, p, reading, 'Laboratory frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
+             'Typed reading from the lab\'s counter (above the 96270A counter\'s 310 MHz), which runs on the GPS-referenced 10 MHz.')
+        return
     _gps(r, p, reading, 'HP 8902A frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
          'The 8902A time base must be on the lab\'s GPS-referenced 10 MHz for this step (the document applies the counter\'s reference, REF EXT). Its own counter specification '
          '(+/-3 counts or 30 Hz, p. 1-21) and the 10 Hz display resolution are not part of the reported figure under this rule.')
 
 
 def _reffreq(r, p, reading, path):
+    if p.get('meas') == 'fco_freq':
+        _gps(r, p, reading, 'Fluke 96270A frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']), FCO_NOTE)
+        return
     _gps(r, p, reading, 'Laboratory frequency counter on the GPS 10 MHz', _at(p, reading, p['nominal']),
          'Typed reading from the lab\'s counter, which runs on the GPS-referenced 10 MHz.')
 

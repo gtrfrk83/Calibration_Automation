@@ -43,7 +43,7 @@ class SpecTests(unittest.TestCase):
         self.assertEqual(got, {'G-3': 1, 'G-4.1': 1, 'G-4.1b': 13, 'G-4.2a': 9, 'G-4.2b-2.5': 25, 'G-4.2b-250': 25, 'G-4.2b-520': 25, 'G-4.3': 2, 'G-4.4-0.15': 8, 'G-4.4-250': 8,
                                'G-4.4-520': 8, 'G-4.5': 9, 'G-4.6-T9': 27, 'G-4.6-T10': 27, 'G-4.7a': 6, 'G-4.7b': 18, 'G-4.8': 1, 'G-4.9': 1})
         self.assertEqual(len(points()), 214)
-        self.assertEqual({p['group'] for p in points()}, {'POWERON', 'REFOSC', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
+        self.assertEqual({p['group'] for p in points()}, {'POWERON', 'FCOREF', 'FCORF', 'RX', 'RXPWR', 'PM', 'DEVM', 'SA'})
 
     def test_the_100_khz_carrier_is_moved_to_150_khz_and_2_5_mhz_for_table_5(self):
         """Owner 2026-11-03: Tables 4, 6, 7 at the document's 100 kHz run at 150 kHz (the 8902A RF input); Table 5 (tuned RF level) at 2.5 MHz, where the 8902A tuned level starts."""
@@ -73,13 +73,13 @@ class SpecTests(unittest.TestCase):
         pts = [p for p in points() if p['func'] == 'FREQ']
         self.assertEqual([p['nominal'] / 1e6 for p in pts], [100.0, 111.11111, 122.22222, 133.33333, 144.44444, 155.55555, 166.66666, 177.77777, 188.88888, 199.99999, 299.99999, 399.99999, 499.99999])
         # owner 2026-11-04: above the 96270A counter's 310 MHz the points are typed from the lab's own counter
-        self.assertEqual([p['meas'] for p in pts], ['freq_count'] * 11 + ['manual'] * 2)
+        self.assertEqual([p['meas'] for p in pts], ['fco_freq'] * 11 + ['manual'] * 2)
         self.assertTrue(all('GPS 10 MHz' in p['manual_prompt'] for p in pts[-2:]))
         for p in pts:
             self.assertAlmostEqual(p['high'] - p['nominal'], 10.0, places=3)
             self.assertAlmostEqual(p['nominal'] - p['low'], 10.0, places=3)
         ref = by_ref('4.1.5 10 MHz reference output')
-        self.assertEqual((ref['low'], ref['high'], ref['meas']), (9999940.0, 10000060.0, 'manual'))
+        self.assertEqual((ref['low'], ref['high'], ref['meas'], ref['fco']), (9999940.0, 10000060.0, 'fco_freq', {'range': 2, 'gate_s': 2.0}))
 
     def test_table_4_limits(self):
         got = {(p['gen']['freq_mhz'], p['gen']['level_dbm']): (p['low'], p['high'], p['meas']) for s in SPEC['sections'] if s['id'] == 'G-4.2a' for p in s['points']}
@@ -248,7 +248,7 @@ class GidepEngine(GidepBench):
         self.assertEqual(HP8902A._tune(HP8902A, 520.0), ('tune.mhz', {'mhz': 520.0}))
 
     def test_typed_points_are_marked_manual_and_judged(self):
-        self.run_points(refs=['4.1.5 10 MHz reference output', '4.6 Table 9 30 MHz 100 Hz 10 kHz'])
+        self.run_points(refs=['4.1 Table 3 399.99999 MHz', '4.6 Table 9 30 MHz 100 Hz 10 kHz'])
         found = {E.POINTS[int(k) - 1]['ref']: r for k, r in self.app.found.items()}
         self.assertEqual(len(found), 2)
         self.assertTrue(all(r['manual'] and r['result'] == 'PASS' for r in found.values()))
@@ -258,9 +258,9 @@ class GidepEngine(GidepBench):
         self.assertIn('FM:DEV 10000', self.pm.sent)
         self.assertEqual(rf_state(self.bench)['frequency_hz'], 30000000)                    # the 6060A carrier frequency was set to the 96270A carrier (30 MHz), read back
         self.assertIn('FM:INT:FREQ 100', self.pm.sent)
-        self.app.mo_ask = lambda p, **k: manual_override.parse_reading(p, '10.001')       # 10.001 MHz: outside +/-6 ppm
+        self.app.mo_ask = lambda p, **k: manual_override.parse_reading(p, '400.001')      # 400.001 MHz: outside +/-10 Hz
         self.app.found.clear(); self.app.results.clear()
-        self.run_points(refs=['4.1.5 10 MHz reference output'])
+        self.run_points(refs=['4.1 Table 3 399.99999 MHz'])
         self.assertEqual([r['result'] for r in self.app.found.values()], ['FAIL'])
 
     def test_relative_level_rows_are_computed_from_the_reference(self):
@@ -557,3 +557,45 @@ class PllLockWait(GidepBench):
         self.assertFalse(Fluke6060A._pll_only((0, 0o010, 0o001)))
         self.assertFalse(Fluke6060A._pll_only((0o002, 0o010, 0)))
         self.assertTrue(Fluke6060A._pll_only((0, 0o010, 0)))
+
+
+class Counter96270A(GidepBench):
+    """Owner 2026-11-04: "can we abandon it and use the frequency counter built into the 96270?" The 10 MHz reference output (range 2) and Tables 2 / 3 to 299.99999 MHz (range 3, 6060A at
+    +7 dBm) are read on the 96270A counter (rear 300 MHz Counter BNC, Remote Programmers Manual pp. 32, 41 to 43, 49); the 96270A must be on its external (GPS) reference."""
+
+    def test_the_reference_and_the_rf_points_are_read_on_the_96270a_counter(self):
+        refs = ['4.1.5 10 MHz reference output', '4.1 Table 2 100.00000 MHz', '4.1 Table 3 299.99999 MHz']
+        self.run_points(refs=refs)
+        self.assertEqual(self.errors(), [])
+        found = {E.POINTS[int(k) - 1]['ref']: r for k, r in self.app.found.items()}
+        self.assertEqual(sorted(found), sorted(refs))
+        self.assertTrue(all(r['result'] == 'PASS' and not r['manual'] for r in found.values()))
+        sent = self.pm.sent
+        self.assertIn('INST FCO', sent)
+        self.assertIn(':FCO:RANG 2', sent)
+        self.assertIn(':FCO:RANG 3', sent)
+        self.assertIn(':TRIG:GATE 2', sent)
+        self.assertEqual(self.pm.state['INST'], 'SINE')                 # back to the leveled sine after each reading
+        self.assertEqual(self.pm.state['OUTP'], '0')
+        self.assertFalse(rf_state(self.bench)['rf_on'])
+
+    def test_a_10_mhz_reading_outside_6_ppm_fails(self):
+        self.pm.ref_out_hz = 10e6 * (1 + 8e-6)
+        self.run_points(refs=['4.1.5 10 MHz reference output'])
+        self.assertEqual([r['result'] for r in self.app.found.values()], ['FAIL'])
+
+    def test_the_96270a_on_its_internal_reference_stops_with_a_clear_message(self):
+        self.pm.rosc = 'INT'
+        self.app.mo_failed = lambda p, exc: None                          # no typed replacement: the run stops on the error
+        self.run_points(refs=['4.1 Table 2 100.00000 MHz'])
+        self.assertTrue(any('not EXTernal' in (d[3] or '') for d in self.errors()), self.h.dialogs[-3:])
+        self.assertFalse(rf_state(self.bench)['rf_on'], 'RF is off after the failed point')
+        self.assertEqual(self.pm.state['INST'], 'SINE')
+
+    def test_a_power_level_point_after_the_counter_selects_the_power_meter_again(self):
+        lvl = next(p for p in E.POINTS if p['meas'] == 'level_pm')
+        self.run_points(refs=['4.1 Table 2 100.00000 MHz', lvl['ref']])
+        self.assertEqual(self.errors(), [])
+        self.assertEqual(self.non_pass(), [])
+        i = max(i for i, c in enumerate(self.pm.sent) if c == 'INST FCO')
+        self.assertTrue(any(c.startswith('INST PMET') for c in self.pm.sent[i:]))

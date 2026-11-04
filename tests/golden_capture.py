@@ -206,7 +206,7 @@ COVERAGE = {
                              no_command=['reading_timeout', 'acal_timeout', 'acal_info']),      # pure arithmetic / tables
     },
     'reference_instruments': {
-        'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup', 'select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm', 'setup_am'], no_command=[]),   # setup_am: cases in the hp_8591a fixture; the last five before it: the power-meter subset (cases in the fluke_6060a fixture)
+        'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup', 'select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm', 'setup_am', 'measure_counter_hz'], no_command=[]),   # setup_am: cases in the hp_8591a fixture; the last five before it: the power-meter subset (cases in the fluke_6060a fixture)
         'AgilentAFG': dict(covered=['connect', 'sine', 'square', 'output', 'cleanup'], no_command=['max_hz']),   # property
         'ReferenceMeter': dict(covered=['connect', 'frequency', 'ac_rms', 'power', 'dc'], no_command=[]),
     },

@@ -51,11 +51,12 @@ DEFAULT_RF_ADDR = 'GPIB0::4::INSTR'                        # the 96270A: the sam
 NO_LF = 'None (I set the generator by hand)'
 LF_CHOICES = {NO_LF: None, 'Keysight 33210A': drivers.Keysight33210A, 'Keysight 33220A': drivers.Keysight33220A, 'Keysight 33250A': drivers.Keysight33250A}
 LF_VRMS = 0.7071                                          # test 3 and 6: "0.7071 V rms as read by the DVM" (UNVERIFIED: the generator is set to this into High Z; check the DVM)
-MEAS = ('selftest', 'freq_count', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'devmeter', 'derived')
+MEAS = ('selftest', 'freq_count', 'fco_freq', 'level_pm', 'level_rx', 'harmonic', 'spur', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'thd_typed', 'manual', 'devmeter', 'derived')
 GROUP_TITLE = {'POWERON': 'Power-on self test', 'RX': '6060A RF OUTPUT to the 8902A RF INPUT', 'RXPWR': '6060A RF OUTPUT to the 11722A sensor module (8902A RF power)',
                'PM': '6060A RF OUTPUT to the NRP40T sensor on the 96270A', 'SA': '6060A RF OUTPUT to the 8563E', 'EXT1K': '8902A and LF generator at 1 kHz (external modulation)',
                'EXT10K': '8902A and LF generator at 10 kHz (external modulation)', 'EXT400': '8902A and LF generator at 400 Hz (external modulation)',
-               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'DEVM': '96270A FM output to the 6060A DEVIATION METER INPUT (typed readings)'}
+               'REFOSC': '6060A 10 MHz IN/OUT to a frequency counter', 'FCOREF': '6060A rear 10 MHz IN/OUT to the 96270A rear counter input',
+               'FCORF': '6060A RF OUTPUT to the 96270A rear counter input (6060A on the GPS 10 MHz)', 'DEVM': '96270A FM output to the 6060A DEVIATION METER INPUT (typed readings)'}
 WARM_UP = ('The 8902A needs 30 minutes of warm-up before its power, AM and FM calibrations (8902A manual), and the 8563E and the 6060A should be on long enough to be stable. '
            'The program does not wait for it.')
 TYPED_THD_TEXT = ('Test 6: THD at 10 kHz is typed from your own distortion analyzer (the 8902A measures distortion only at 1 kHz and 400 Hz). Untick to leave those 17 points out.')
@@ -85,8 +86,11 @@ def load_spec(path=None):
                 raise SpecError(f'{where}: low must not be above high')
             if not p['low'] <= p['nominal'] <= p['high']:
                 raise SpecError(f'{where}: limits do not contain the nominal')
-            if p['meas'] not in ('selftest', 'derived', 'manual', 'devmeter') and 'gen' not in p:
+            fco_ref = p['meas'] == 'fco_freq' and p['group'] == 'FCOREF'      # the 6060A rear 10 MHz output on the 96270A counter: nothing is programmed
+            if p['meas'] not in ('selftest', 'derived', 'manual', 'devmeter') and 'gen' not in p and not fco_ref:
                 raise SpecError(f'{where}: a measured point needs a generator setting')
+            if p['meas'] == 'fco_freq' and not ((p.get('fco') or {}).get('range') in (1, 2, 3) and (p.get('fco') or {}).get('gate_s') in (0.2, 2.0, 20.0, 80.0)):
+                raise SpecError(f'{where}: a 96270A counter point needs fco (range 1, 2 or 3; gate_s 0.2, 2, 20 or 80)')
             if p['meas'] == 'devmeter' and 'fmsrc' not in p:
                 raise SpecError(f'{where}: a deviation-meter point needs an fmsrc (the 96270A FM setting)')
     for s in spec['sections']:
@@ -447,7 +451,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         if p['meas'] == 'level_pm': return self.pm_param('f6060a.settle.pm', PM_SETTLE_S)
         if p['meas'] in ('harmonic', 'spur'): return self.pm_param('f6060a.settle.sa', SA_SETTLE_S)
-        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count', 'devmeter'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
+        if p['meas'] in ('level_rx', 'mod_rate', 'am_depth', 'fm_dev', 'thd', 'freq_count', 'fco_freq', 'devmeter'): return self.pm_param('f6060a.settle.mod', MOD_SETTLE_S)
         return self.pm_param('f6060a.settle.default', DEFAULT_SETTLE_S)
 
     def _need(self, name, what):
@@ -496,8 +500,16 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             return TypedPoint(p.get('manual_prompt') or 'Read the 6060A Modulation Display deviation and type it in kHz.')
         if kind == 'manual':                                       # the reading comes from the technician's own instrument (nothing is programmed, no RF is switched on)
             return TypedPoint(p.get('manual_prompt') or 'Read your instrument and type the value.')
+        if kind == 'fco_freq' and not p.get('gen'):                # the 6060A rear 10 MHz output on the 96270A counter: nothing is programmed, no RF is switched on
+            self._need('pm', '96270A')
+            try:
+                return self._count(p, p['nominal'])
+            except (SafetyError, ReadingUnavailable):
+                raise
+            except Exception as exc:                               # no reading, the reference not external: a typed reading may replace it
+                raise ReadingUnavailable(str(exc)) from exc
         self._devmeter = False                                     # a point that uses the 6060A output: RF state is read back again
-        needs = {'freq_count': ('rx', '8902A'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
+        needs = {'freq_count': ('rx', '8902A'), 'fco_freq': ('pm', '96270A'), 'level_pm': ('pm', '96270A'), 'level_rx': ('rx', '8902A'), 'harmonic': ('sa', '8563E'), 'spur': ('sa', '8563E'),
                  'mod_rate': ('rx', '8902A'), 'am_depth': ('rx', '8902A'), 'fm_dev': ('rx', '8902A'), 'thd': ('rx', '8902A')}
         if kind in needs:
             self._need(*needs[kind])
@@ -551,6 +563,21 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.pm.zero()
         self._pm_key = p['zero_key']
 
+    def _count(self, p, expect_hz):
+        """One 96270A counter reading (owner 2026-11-04: the frequency points on the 96270A's built-in counter), then the 96270A back to the leveled sine with its output OFF (read back). The power
+        meter is selected (and zeroed) again at the next level point."""
+        c = p['fco']
+        self._pm_key = None
+        try:
+            return self.pm.measure_counter_hz(c['range'], c['gate_s'], expect_hz=expect_hz)
+        finally:
+            try:
+                self.pm.select_sine()
+            except SafetyError:
+                raise
+            except Exception as exc:                               # noqa: BLE001 - the reading's own error (if any) is the one reported
+                self.log.add('!!', f'96270A back to SINE after the counter: {exc}', '96270A')
+
     def _read_value(self, p):
         kind, rx = p['meas'], self.rx
         f = p['gen']['freq_mhz']
@@ -559,6 +586,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             # No automatic 15.1SP time-base check: owner bench 2026-10-28, sending 15.1SP left the 8902A showing '1' (the special-function display) and locked until a preset.
             # The reference connection is the operator's hook-up step (see the group notice); the 8902A switches to the external 10 MHz by itself.
             return rx.measure_frequency_hz(f, resolution_hz=r['resolution_hz'])
+        if kind == 'fco_freq':
+            return self._count(p, f * 1e6)
         if kind == 'level_pm':
             return self.pm.read_dbm()
         if kind == 'level_rx':
@@ -777,6 +806,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return rx_in
         if g == 'REFOSC':
             return ('6060A rear panel 10 MHz IN/OUT to the frequency counter input (50 ohm), REF INT/EXT switch to INT. Read the counter and type the frequency in Hz. The 6060A RF output is not used.')
+        if g == 'FCOREF':
+            return ('6060A rear panel 10 MHz IN/OUT to the 96270A rear 300 MHz Counter BNC, 6060A REF INT/EXT switch to INT (its own reference is measured). The 96270A must be on its external '
+                    '10 MHz reference (the lab GPS); the program checks this. The program reads the 96270A counter (range 50 MHz @ 50 ohm, 2 s gate). The 6060A RF output is not used.')
+        if g == 'FCORF':
+            return ('6060A RF OUTPUT to the 96270A rear 300 MHz Counter BNC (50 ohm; it needs at least 0.5 V pk-pk, the program sets the 6060A to +7 dBm). 6060A rear panel 10 MHz IN/OUT to the lab '
+                    'GPS 10 MHz, REF INT/EXT switch to EXT (the document applies the counter\'s reference, 4.1.6). The 96270A must be on the same GPS 10 MHz (external reference; the program checks '
+                    'this). The program reads the 96270A counter (range 300 MHz @ 50 ohm, 2 s gate).')
         if g == 'DEVM':
             return ('96270A leveling-head RF OUTPUT to the 6060A DEVIATION METER INPUT (the 6060A RF OUTPUT is not used). On the 6060A press SPCL 6, 1 and set the 400/1000 switch to the deviation range the '
                     'point says (50 kHz or 500 kHz). The program sets the 96270A carrier, level (+7 dBm), FM rate and deviation (each read back), switches its output ON for the point, and asks you to type the 6060A '

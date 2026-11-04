@@ -7242,6 +7242,547 @@
    ]
   },
   {
+   "call": "2, 2.0, 10000000.0",
+   "case": "Fluke96270A.measure_counter_hz[10 MHz reference, range 2]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FCO",
+    "96270A|>>|INST?",
+    "96270A|<<|FCOUNTER",
+    "96270A|>>|:ROSC:SOUR?",
+    "96270A|<<|EXT",
+    "96270A|>>|:ROSC:LOCK?",
+    "96270A|<<|1",
+    "96270A|>>|:FCO:RANG 2",
+    "96270A|>>|:FCO:RANG?",
+    "96270A|<<|2",
+    "96270A|>>|:TRIG:GATE 2",
+    "96270A|>>|:TRIG:GATE?",
+    "96270A|<<|2.0",
+    "96270A|>>|:INIT:CONT 0",
+    "96270A|>>|:INIT:CONT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|MEAS?",
+    "96270A|<<|1.00000030000E+07",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "returned 10000003.0",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FCO"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FCOUNTER"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:LOCK?",
+     "1"
+    ],
+    [
+     "W",
+     ":FCO:RANG 2"
+    ],
+    [
+     "Q",
+     ":FCO:RANG?",
+     "2"
+    ],
+    [
+     "W",
+     ":TRIG:GATE 2"
+    ],
+    [
+     "Q",
+     ":TRIG:GATE?",
+     "2.0"
+    ],
+    [
+     "W",
+     ":INIT:CONT 0"
+    ],
+    [
+     "Q",
+     ":INIT:CONT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     12.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "1.00000030000E+07"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "3, 2.0, 199999990.0",
+   "case": "Fluke96270A.measure_counter_hz[RF 199.99999 MHz, range 3]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FCO",
+    "96270A|>>|INST?",
+    "96270A|<<|FCOUNTER",
+    "96270A|>>|:ROSC:SOUR?",
+    "96270A|<<|EXT",
+    "96270A|>>|:ROSC:LOCK?",
+    "96270A|<<|1",
+    "96270A|>>|:FCO:RANG 3",
+    "96270A|>>|:FCO:RANG?",
+    "96270A|<<|3",
+    "96270A|>>|:TRIG:GATE 2",
+    "96270A|>>|:TRIG:GATE?",
+    "96270A|<<|2.0",
+    "96270A|>>|:INIT:CONT 0",
+    "96270A|>>|:INIT:CONT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|MEAS?",
+    "96270A|<<|1.99999990000E+08",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\""
+   ],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "returned 199999990.0",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FCO"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FCOUNTER"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:LOCK?",
+     "1"
+    ],
+    [
+     "W",
+     ":FCO:RANG 3"
+    ],
+    [
+     "Q",
+     ":FCO:RANG?",
+     "3"
+    ],
+    [
+     "W",
+     ":TRIG:GATE 2"
+    ],
+    [
+     "Q",
+     ":TRIG:GATE?",
+     "2.0"
+    ],
+    [
+     "W",
+     ":INIT:CONT 0"
+    ],
+    [
+     "Q",
+     ":INIT:CONT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     12.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "1.99999990000E+08"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "3, 2.0, 199999990.0",
+   "case": "Fluke96270A.measure_counter_hz[no signal]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FCO",
+    "96270A|>>|INST?",
+    "96270A|<<|FCOUNTER",
+    "96270A|>>|:ROSC:SOUR?",
+    "96270A|<<|EXT",
+    "96270A|>>|:ROSC:LOCK?",
+    "96270A|<<|1",
+    "96270A|>>|:FCO:RANG 3",
+    "96270A|>>|:FCO:RANG?",
+    "96270A|<<|3",
+    "96270A|>>|:TRIG:GATE 2",
+    "96270A|>>|:TRIG:GATE?",
+    "96270A|<<|2.0",
+    "96270A|>>|:INIT:CONT 0",
+    "96270A|>>|:INIT:CONT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|MEAS?",
+    "96270A|<<|9.91E+37"
+   ],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "raised InstrumentError: 96270A counter has no reading ('9.91E+37'): is the signal at the rear 300 MHz Counter BNC, at least 0.5 V pk-pk?",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FCO"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FCOUNTER"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:LOCK?",
+     "1"
+    ],
+    [
+     "W",
+     ":FCO:RANG 3"
+    ],
+    [
+     "Q",
+     ":FCO:RANG?",
+     "3"
+    ],
+    [
+     "W",
+     ":TRIG:GATE 2"
+    ],
+    [
+     "Q",
+     ":TRIG:GATE?",
+     "2.0"
+    ],
+    [
+     "W",
+     ":INIT:CONT 0"
+    ],
+    [
+     "Q",
+     ":INIT:CONT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     12.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "9.91E+37"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ]
+   ]
+  },
+  {
+   "call": "3, 2.0, 400000000.0",
+   "case": "Fluke96270A.measure_counter_hz[400 MHz, above range 3]",
+   "log": [],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "raised InstrumentError: 400 MHz is outside counter range 3 (50.5 to 310 MHz, 96000 Series Product Specifications)",
+   "wire": []
+  },
+  {
+   "call": "3, 1.0, 200000000.0",
+   "case": "Fluke96270A.measure_counter_hz[bad gate]",
+   "log": [],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "raised InstrumentError: 96270A counter gate 1 s is not 0.2, 2, 20 or 80 s (p. 42)",
+   "wire": []
+  },
+  {
+   "call": "3, 2.0, 200000000.0",
+   "case": "Fluke96270A.measure_counter_hz[internal reference]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FCO",
+    "96270A|>>|INST?",
+    "96270A|<<|FCOUNTER",
+    "96270A|>>|:ROSC:SOUR?",
+    "96270A|<<|INT"
+   ],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "raised InstrumentError: 96270A reference is 'INT', not EXTernal: set the 96270A to its external 10 MHz reference (the lab GPS) for the frequency points. On its internal reference the counter is +/-0.05 ppm, 15 Hz at 300 MHz, against +/-10 Hz limits.",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FCO"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FCOUNTER"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "INT"
+    ]
+   ]
+  },
+  {
+   "call": "3, 2.0, 200000000.0",
+   "case": "Fluke96270A.measure_counter_hz[external reference not locked]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "96270A|>>|INST FCO",
+    "96270A|>>|INST?",
+    "96270A|<<|FCOUNTER",
+    "96270A|>>|:ROSC:SOUR?",
+    "96270A|<<|EXT",
+    "96270A|>>|:ROSC:LOCK?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.measure_counter_hz",
+   "result": "raised InstrumentError: 96270A is not locked to its external 10 MHz reference (ROSC:LOCK? = 0): check the GPS 10 MHz at the 96270A reference input.",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "INST FCO"
+    ],
+    [
+     "Q",
+     "INST?",
+     "FCOUNTER"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:LOCK?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.select_sine[after the counter]",
+   "log": [
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0,\"No error\"",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.select_sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
    "call": "250000000.0",
    "case": "Fluke96270A.select_power_meter[no sensor]",
    "log": [

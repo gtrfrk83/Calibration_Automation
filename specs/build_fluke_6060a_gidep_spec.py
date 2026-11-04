@@ -26,6 +26,10 @@ def hz_text(hz):
     return f'{int(hz):,}'.replace(',', ' ')
 
 
+FCO = 'the Fluke 96270A frequency counter (rear 300 MHz Counter BNC) on the lab GPS 10 MHz (owner, 2026-11-04: "use the frequency counter built into the 96270")'
+FCO_RANGE_LOW, FCO_RANGE_HIGH = 2, 3        # :FCOunter:RANGe 2 = 50 MHz @ 50 ohm, 3 = 300 MHz @ 50 ohm (Remote Programmers Manual p. 41)
+FCO_GATE_S = 2.0                            # :TRIG:GATE 2 (p. 42): 8 / 9 digits (Product Specifications); 20 s would show one more digit at ten times the time
+FCO_LEVEL_DBM = 7.0                         # the counter needs 0.5 V pk-pk minimum (about -2 dBm into 50 ohm); +7 dBm is 1.4 V pk-pk, under its +/-5 V pk maximum
 COUNTER_MAX_MHZ = D('310')                 # 96270A frequency counter, specified 0.9 to 310 MHz (96000 Series Product Specifications, Frequency Counter)
 COUNT_STEP_MHZ = D('0.00001')                                                 # the printed limits are the applied value +/-0.00001 MHz (10 Hz), 1 count of the counter's LSD
 REF_LOW_HZ, REF_HIGH_HZ = 9999940, 10000060                                   # 4.1.5
@@ -127,12 +131,13 @@ def build_spec():
         flags=['Prompt-based pass / fail: the document says only that the self test takes about 5 s. The reading is 1 for passed and 0 for failed. UNVERIFIED: no remote self-test result is confirmed.'])
 
     # 4.1 frequency accuracy
-    s = section('G-4.1', 'Frequency accuracy', '4.1.5: 6060A rear 10 MHz IN/OUT to the counter, REF INT. Then the counter\'s 10 MHz reference is applied (REF EXT) and the 8902A (with the same reference) reads the RF output.', 'REFOSC')
-    add(s, '4.1.5', tag='10 MHz reference output', func='REFFREQ', meas='manual', description='Reference oscillator 10 MHz IN/OUT frequency (counter), 9 999 940 to 10 000 060 Hz', nominal=10000000.0,
-        low=float(REF_LOW_HZ), high=float(REF_HIGH_HZ), unit='Hz', manual_prompt='Read the frequency counter on the 6060A rear 10 MHz IN/OUT (REF INT) and type the frequency in Hz (limits 9 999 940 to 10 000 060 Hz).',
-        flags=['Typed reading: the document measures it with the Agilent 53132A counter; no counter is driven by this program. The limits are the printed 9,999,940 Hz to 10.000 060 MHz (+/-6 ppm, Table 1).'])
-    s = section('G-4.1b', 'Frequency accuracy (Tables 2 and 3)', 'Connect the 6060A rear 10 MHz IN/OUT to the 8902A time base input (REF INT/EXT as the document\'s step 4.1.6 says: the counter reference), the RF OUTPUT to the 8902A RF INPUT. '
-                'The 8902A replaces the counter; its resolution is 10 Hz.', 'RX')
+    s = section('G-4.1', 'Frequency accuracy', '4.1.5: 6060A rear 10 MHz IN/OUT (REF INT) to the 96270A rear 300 MHz Counter BNC; the 96270A is on the lab GPS 10 MHz (external reference).', 'FCOREF')
+    add(s, '4.1.5', tag='10 MHz reference output', func='REFFREQ', meas='fco_freq', fco=dict(range=FCO_RANGE_LOW, gate_s=FCO_GATE_S),
+        description='Reference oscillator 10 MHz IN/OUT frequency (counter), 9 999 940 to 10 000 060 Hz', nominal=10000000.0, low=float(REF_LOW_HZ), high=float(REF_HIGH_HZ), unit='Hz',
+        flags=[UNV + ' (53132A counter -> ' + FCO + ', range 50 MHz @ 50 ohm, 2 s gate).', 'The limits are the printed 9,999,940 Hz to 10.000 060 MHz (+/-6 ppm, Table 1). UNVERIFIED that '
+               'the 6060A rear 10 MHz output reaches the counter\'s 0.5 V pk-pk minimum.'])
+    s = section('G-4.1b', 'Frequency accuracy (Tables 2 and 3)', 'The 6060A RF OUTPUT (+7 dBm) to the 96270A rear 300 MHz Counter BNC; the 6060A rear 10 MHz IN/OUT to the lab GPS 10 MHz, REF EXT (the '
+                'document applies the counter\'s reference, 4.1.6); the 96270A on the same GPS 10 MHz. 399.99999 and 499.99999 MHz are above the counter\'s range: typed from the lab\'s own counter.', 'FCORF')
     for tbl, mhzs in (('Table 2', TABLE2_MHZ), ('Table 3', TABLE3_MHZ)):
         for mhz in mhzs:
             if mhz > COUNTER_MAX_MHZ:                                   # owner 2026-11-04: above the 96270A counter's range, typed from the lab's own counter
@@ -143,9 +148,12 @@ def build_spec():
                     flags=[f'Typed reading (owner, 2026-11-04): above the 96270A frequency counter\'s specified range (0.9 to 310 MHz, 96000 Series Product Specifications), so the '
                            'technician reads it on the lab\'s own counter. Printed limits +/-0.00001 MHz (10 Hz).'])
                 continue
-            add(s, f'4.1 {tbl}', tag=f'{mhz} MHz', func='FREQ', meas='freq_count', description=f'Frequency {mhz} MHz ({tbl})', gen=dict(freq_mhz=num(mhz), level_dbm=None), rx=dict(resolution_hz=COUNT_RES_HZ),
+            add(s, f'4.1 {tbl}', tag=f'{mhz} MHz', func='FREQ', meas='fco_freq', description=f'Frequency {mhz} MHz ({tbl})', gen=dict(freq_mhz=num(mhz), level_dbm=FCO_LEVEL_DBM),
+                fco=dict(range=FCO_RANGE_HIGH, gate_s=FCO_GATE_S),
                 nominal=num(mhz * D(10) ** 6), low=f((mhz - COUNT_STEP_MHZ) * D(10) ** 6), high=f((mhz + COUNT_STEP_MHZ) * D(10) ** 6), unit='Hz',
-                flags=[UNV + ' (53132A counter -> 8902A frequency counter).', 'The printed limits are +/-0.00001 MHz (10 Hz); the 8902A reads at 10 Hz resolution (7.1SP), so the limit is one count. The document does not give a level: the preset level is left unchanged.'])
+                flags=[UNV + ' (53132A counter -> ' + FCO + ', range 300 MHz @ 50 ohm, 2 s gate).', 'The printed limits are +/-0.00001 MHz (10 Hz); a 2 s gate shows 8 / 9 digits (1 Hz at '
+                       '100 to 300 MHz) and the counter is specified to the reference accuracy + 0.5 count. The document does not give a level: the program sets +7 dBm (the counter needs '
+                       '0.5 V pk-pk, about -2 dBm into 50 ohm).'])
 
     # 4.2 amplitude
     s = section('G-4.2a', 'Amplitude: power meter (Table 4)', f'{fname(LOW_MHZ)}: the 8902A with the 11722A sensor module; 250 and 520 MHz: the NRP40T on the 96270A. 13, 10 and 0 dBm at each frequency.', 'RXPWR')
@@ -283,19 +291,19 @@ def build_spec():
     return dict(
         schema=1, kind='rf-generator-pv', model='6060A',
         source=dict(cite=f'{DOC}, Calibration Procedure for Synthesized Signal Generator 6060 A/AN (Fluke), 30 April 2017 (GIDEP)', limits_text='GIDEP T.O. 33K3-4-911-1 (Fluke 6060A/AN)',
-                    note='Points and limits are the document\'s own tables. Its measuring instruments (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (8902A, 96270A + NRP40T, 8563E); '
+                    note='Points and limits are the document\'s own tables. Its measuring instruments (53132A, E4418B + 8482A, N5530SE26, E4440A, E8257D, FMAV) are replaced by the lab bench (8902A, 96270A + NRP40T and its frequency counter, 8563E); '
                          'each replacement is flagged UNVERIFIED on the point. The Calibration Performance Table is "Not Required"; Appendix A (reference oscillator adjustment) is not built.'),
         options=dict(count_resolution_hz=COUNT_RES_HZ, fm_max_khz=FM_MAX_KHZ, checkpoint_requires_ref=True),     # points were renumbered on 2026-11-03: a saved result must name its point
         constants=dict(harm_count=HARM_COUNT),
         discrepancies=[
-            'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) needs a counter this program does not drive: that reading is typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.',
+            'The document measures with instruments this bench does not have; the 8902A, 96270A + NRP40T and 8563E replace them (see the flags). The reference-oscillator frequency (4.1.5) and the frequency points up to 300 MHz (Tables 2 and 3) are read on the 96270A frequency counter (on the GPS 10 MHz); 399.99999 and 499.99999 MHz are above its range and are typed. The deviation-meter checks (4.6) use the 96270A FM output as the source and the 6060A display is typed.',
             'Table 2 prints 100.00000 to 199.99999 MHz in steps of 11.11111 MHz; the last row is printed 199.99999 (not 199.99999 + rounding): used as printed.',
             'Spur frequencies of Table 12 are printed as absolute frequencies; those within 1 MHz of the carrier are measured as offsets (both sides), those within 1 kHz are typed.',
             'The document recalls stored state 9,8 in 4.3 and gives no carrier for 4.3, 4.9; 300 MHz and 520 MHz are used.',
             'Tables 4, 6 and 7: the document\'s 100 kHz carrier is moved to 150 kHz (owner, 2026-11-03), where the 8902A RF input range starts; the 6060A between 100 and 150 kHz is not verified.',
             'Table 5: the document\'s -127 dBm row is left out at every carrier (owner, 2026-11-03: "delete the -127db test points...stop at -120dB"); the levels end at -120 dBm.',
             'Table 5: the document\'s 100 kHz carrier is moved to 2.5 MHz (owner, 2026-11-03), where the 8902A tuned RF level starts (error 20 at 150 kHz); the 6060A level below 2.5 MHz is not verified by Table 5.',
-            'Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 8902A frequency counter covers the display range (+/-1 count).'],
+            'Table 1 also lists display range, amplitude, internal modulation, AM / FM accuracy, deviation meter, spectral purity and residual AM / FM: each is covered by a test above; the 96270A counter readings cover the display range (+/-1 count).'],
         sections=sections)
 
 

@@ -4,6 +4,10 @@ It answers the commands drivers/reference_instruments.py sends for the SINE know
 UNIT:POW, PMET:TRIG / AVER / FREQ / IDN? / ZERO? / READ?). The reading is the level the simulated 6060A is outputting (drivers.simulated_6060a.rf_state) plus a small fixed, configurable
 error; it is the sensor floor when RF is off or when the power meter has not been zeroed at the present frequency.
 
+Frequency counter (added 2026-11-04, owner: the GIDEP frequency points on the 96270A counter): INST FCO, :FCO:RANG, :TRIG:GATE, :INIT:CONT, MEAS?, :ROSC:SOUR? and :ROSC:LOCK?.
+Ranges 1 and 2 count the 6060A rear 10 MHz output (`ref_out_hz`), range 3 the 6060A RF output when RF is on and at least -2 dBm (0.5 V pk-pk into 50 ohm); otherwise MEAS? answers 9.91E37.
+That the input follows the range is a SIMULATION choice (the real counter counts whatever is cabled to the rear BNC).
+
 Simulation choices that are NOT facts about the real instrument or an R&S NRP40T: the sensor identity text, the floor (-90 dBm), the size of the error, that an un-zeroed sensor reads 0.5 dB
 high at the floor. Keep this file out of any evidence: nothing here is calibration data.
 """
@@ -30,6 +34,11 @@ class Sim96270AMeter(_SimBase):
         self.errors = []
         self.state = {'INST': 'SINE', 'UNIT': 'DBM', 'PMET:TRIG': 'SING', 'PMET:AVER': 'AUTO', 'PMET:FREQ': '1E6', 'OUTP': '0'}
         self.level_offset_db = {}           # frequency (Hz, as set with PMET:FREQ) -> extra error in dB at that frequency
+        self.ref_out_hz = 10e6 * (1 + 0.3e-6)  # the 6060A rear 10 MHz IN/OUT (REF INT) the technician cables to the counter
+        self.counter_ppm = 0.0002           # relative error of a counter reading (the 96270A is on the GPS 10 MHz)
+        self.rosc = 'EXT'                   # ROSC:SOUR? reply; 'INT' = the 96270A on its own reference
+        self.rosc_locked = '1'
+        self.counter = {'RANG': '1', 'GATE': '2.0', 'CONT': '0'}
 
     def write(self, text):
         if not self.opened:
@@ -58,7 +67,7 @@ class Sim96270AMeter(_SimBase):
             return self.errors.pop(0) if self.errors else '0,"No error"'
         if u.startswith('INST '):
             name = u.split()[1]
-            s['INST'] = 'PMETER' if name.startswith('PMET') else 'FM' if name == 'FM' else 'SINE'
+            s['INST'] = 'PMETER' if name.startswith('PMET') else 'FM' if name == 'FM' else 'FCOUNTER' if name.startswith('FCO') else 'SINE'
             s['OUTP'] = '0'
             return None
         m = re.match(r'(FREQ|POW|FM:STAT|FM:DEV|FM:INT:FREQ)\s+(\S+)$', u)          # the FM instrument (Remote Programmers Manual p. 38 and the example p. 59); values are echoed as sent (Hz, dBm)
@@ -89,6 +98,22 @@ class Sim96270AMeter(_SimBase):
             return None
         if u == 'OUTP?':
             return s['OUTP']
+        if u == ':ROSC:SOUR?':
+            return self.rosc
+        if u == ':ROSC:LOCK?':
+            return self.rosc_locked
+        m = re.match(r':(FCO:RANG|TRIG:GATE|INIT:CONT)\s+(\S+)$', u)
+        if m:
+            if s['INST'] != 'FCOUNTER':
+                self.errors.append('-221,"Settings conflict: frequency counter not selected"')
+                return None
+            key = {'FCO:RANG': 'RANG', 'TRIG:GATE': 'GATE', 'INIT:CONT': 'CONT'}[m.group(1)]
+            self.counter[key] = m.group(2) if key != 'GATE' else str(min((0.2, 2.0, 20.0, 80.0), key=lambda g: abs(g - float(m.group(2)))))
+            return None
+        if u in (':FCO:RANG?', ':TRIG:GATE?', ':INIT:CONT?'):
+            return self.counter[{':FCO:RANG?': 'RANG', ':TRIG:GATE?': 'GATE', ':INIT:CONT?': 'CONT'}[u]]
+        if u == 'MEAS?' and s['INST'] == 'FCOUNTER':
+            return self._count()
         m = re.match(r'PMET:(TRIG|AVER|FREQ)\s+(\S+)$', u)
         if m:
             s['PMET:' + m.group(1)] = m.group(2)
@@ -119,6 +144,19 @@ class Sim96270AMeter(_SimBase):
         raise TransportError(f'simulated 96270A: unknown command {text!r}')
 
     zeroed_at = None
+
+    def _count(self):
+        if self.counter['RANG'] in ('1', '2'):
+            hz = self.ref_out_hz
+        else:
+            src = rf_state(self.bench)
+            if not src['rf_on'] or src['amplitude_dbm'] < -2.0 or not 50.5e6 < src['frequency_hz'] <= 310e6:
+                return '9.91E+37'
+            hz = src['frequency_hz']
+        gate = float(self.counter['GATE'])
+        res = 10 ** round(__import__('math').log10(max(hz / {0.2: 1e7, 2.0: 1e8, 20.0: 1e9, 80.0: 1e10}[gate], 1e-3)))      # about 8 / 9 / 10 / 11 digits (Product Specifications)
+        value = round(hz * (1 + self.counter_ppm * 1e-6) / res) * res
+        return f'{value:.11E}'
 
 
 def make_pm_transport(bench):

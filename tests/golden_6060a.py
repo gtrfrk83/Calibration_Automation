@@ -36,7 +36,7 @@ COVERAGE = {
 }
 COVERAGE.pop('gpib_address')                                             # a helper module with no Instrument class: it only appears in LINT_FILES
 
-PM_COVERED = ['select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm']     # added to COVERAGE['reference_instruments']['Fluke96270A']['covered'] by golden_capture
+PM_COVERED = ['select_power_meter', 'zero', 'read_dbm', 'select_sine', 'setup_fm', 'measure_counter_hz']     # added to COVERAGE['reference_instruments']['Fluke96270A']['covered'] by golden_capture
 
 
 def _source(bench, mhz=250.0, dbm=-10.0, on=True, **extra):
@@ -241,6 +241,22 @@ def cases_pmeter(c):
     c.run('Fluke96270A.setup_fm', pm.setup_fm, 250e6, 7.0, 100e3, 4000.0)
     c.run('Fluke96270A.setup_fm[above the 96270A deviation limit]', pm.setup_fm, 250e6, 7.0, 370e3, 4000.0)
     c.run('Fluke96270A.select_sine[after FM]', pm.select_sine)
+    c.run('Fluke96270A.measure_counter_hz[10 MHz reference, range 2]', pm.measure_counter_hz, 2, 2.0, 10e6)
+    gen.set_frequency(199.99999)
+    gen.set_level(7.0)
+    gen.rf(True)
+    c.run('Fluke96270A.measure_counter_hz[RF 199.99999 MHz, range 3]', pm.measure_counter_hz, 3, 2.0, 199.99999e6)
+    gen.rf(False)
+    c.run('Fluke96270A.measure_counter_hz[no signal]', pm.measure_counter_hz, 3, 2.0, 199.99999e6)
+    c.run('Fluke96270A.measure_counter_hz[400 MHz, above range 3]', pm.measure_counter_hz, 3, 2.0, 400e6)
+    c.run('Fluke96270A.measure_counter_hz[bad gate]', pm.measure_counter_hz, 3, 1.0, 200e6)
+    t.rosc = 'INT'
+    c.run('Fluke96270A.measure_counter_hz[internal reference]', pm.measure_counter_hz, 3, 2.0, 200e6)
+    t.rosc = 'EXT'
+    t.rosc_locked = '0'
+    c.run('Fluke96270A.measure_counter_hz[external reference not locked]', pm.measure_counter_hz, 3, 2.0, 200e6)
+    t.rosc_locked = '1'
+    c.run('Fluke96270A.select_sine[after the counter]', pm.select_sine)
     nosensor = c.inst(Fluke96270A, Sim96270AMeter(bench, sensor='NONE,NONE,NONE,NONE'), label='96270A')
     c.run('Fluke96270A.select_power_meter[no sensor]', nosensor.select_power_meter, 250e6)
     implausible = c.inst(Fluke96270A, Scripted([(r'^PMET1:READ\?', '9.91E+37')]), label='96270A')

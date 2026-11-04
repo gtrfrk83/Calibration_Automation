@@ -210,6 +210,45 @@ AM_RATE_MIN_HZ, AM_RATE_MAX_HZ, AM_DEPTH_MIN_PCT, AM_DEPTH_MAX_PCT = 1.0, 220e3,
 AM_CARRIER_MIN_HZ, AM_CARRIER_MAX_HZ = 50e3, 4.024e9
 PM_NO_READING = 9.0e37                       # :FETCh? answers 9.91E+37 when there is no reading (p. 41)
 
+# ---- Fluke 96270A frequency counter (FCOunter logical instrument): ADDED for the 6060A GIDEP frequency points (owner, 2026-11-04: "use the frequency counter built into the 96270"). Read on the RENDERED
+# pages of the owner's 96000 Series Remote Programmers Manual (96000__rpmeng0100.pdf, printed pages): INSTrument[:SELect] FCOunter p. 32, :FCOunter:RANGe p. 41 (1 = 50 MHz @ 10 kohm, 2 = 50 MHz @ 50 ohm,
+# 3 = 300 MHz @ 50 ohm; *RST 1), :INIT:CONTinuous p. 42 (0 = single event; *RST 0), :TRIG:GATE p. 42 (0.2 | 2 | 20 | 80 s, rounded to the closest; *RST 2.0), MEASure? p. 43 (in SINGle mode it starts a
+# measurement and returns it when complete; 9.91E37 when no measurement function is selected), [:SOUR]:ROSC:SOURce? and :LOCKed? p. 49 (EXTernal needs a reference within +/-0.3 ppm; LOCKed? = 1 when
+# locked), example "Frequency Measurement - simple" p. 60 (INST FCO; TRIGGER:GATE 20; MEAS?). Product Specifications (Frequency Counter): rear 300 MHz Counter BNC, 0.9 to 310 MHz specified, 50 ohm above
+# 50.5 MHz, 0.5 V pk-pk minimum, accuracy with an external reference = reference accuracy + 0.5 count (0.2 / 2 / 20 s gates). Nothing has run on hardware. NOT verified: the text of the INST?, FCO:RANG?,
+# TRIG:GATE?, INIT:CONT? and ROSC:SOUR? replies (matched loosely: 'FCO' prefix, number, number, 0 / OFF, 'EXT' / 'ENAR' prefix), how long MEAS? takes beyond the gate (FCO_READ_MARGIN_S).
+FCO_COMMANDS = {
+    'fco.inst.set': Cmd('INST FCO', 'Select the frequency counter', 'FCOunter is a logical instrument of the 96270A; selecting it puts the output into standby and sets the rear BNC as the counter input '
+                        '(INP:REAR, p. 34)', kind='set', readback='inst.query', verified=True, ref=_rf('INSTrument[:SELect] FCOunter; example p. 60', 32)),
+    'fco.range.set': Cmd(':FCO:RANG {n}', 'Counter range', '1 = 50 MHz @ 10 kohm, 2 = 50 MHz @ 50 ohm, 3 = 300 MHz @ 50 ohm', placeholders={'n': Placeholder('enum', '', '3', enum=('1', '2', '3'))},
+                         kind='set', readback='fco.range.query', verified=True, ref=_rf(':FCOunter:RANGe', 41)),
+    'fco.range.query': Cmd(':FCO:RANG?', 'Counter range', kind='query', verified=True, ref=_rf(':FCOunter:RANGe?', 41)),
+    'fco.gate.set': Cmd(':TRIG:GATE {s:g}', 'Counter gate time', '0.2, 2, 20 or 80 s', placeholders={'s': Placeholder('float', 'g', 2.0)}, kind='set', readback='fco.gate.query', verified=True,
+                        ref=_rf(':TRIG:GATE', 42)),
+    'fco.gate.query': Cmd(':TRIG:GATE?', 'Counter gate time', kind='query', verified=True, ref=_rf(':TRIG:GATE?', 42)),
+    'fco.single.set': Cmd(':INIT:CONT 0', 'Single-event counter', 'One measurement per MEAS? (repetitive mode is 1)', kind='set', readback='fco.single.query', verified=True,
+                          ref=_rf(':INIT:CONTinuous', 42)),
+    'fco.single.query': Cmd(':INIT:CONT?', 'Counter trigger mode', kind='query', verified=True, ref=_rf(':INIT:CONTinuous?', 42)),
+    'fco.measure': Cmd('MEAS?', 'Counter reading', 'In single mode a measurement is started and returned when complete (Hz); 9.91E37 = no reading', kind='query', verified=True,
+                       ref=_rf('MEASure?', 43)),
+    'rosc.source.query': Cmd(':ROSC:SOUR?', 'Reference source', 'INTernal or EXTernal (ENARow = EXTernal)', kind='query', verified=True, ref=_rf('[:SOUR]:ROSC:SOURce?', 49)),
+    'rosc.locked.query': Cmd(':ROSC:LOCK?', 'Reference locked', '1 when locked to the selected reference', kind='query', verified=True, ref=_rf('[:SOUR]:ROSC:LOCKed?', 49)),
+}
+for _k, _c in list(FCO_COMMANDS.items()):
+    FCO_COMMANDS[_k] = _dc.replace(_c, ref=f'{_c.ref}. NOT run on hardware')
+RF_COMMANDS.update(FCO_COMMANDS)
+FCO_RANGES = {1: (0.9e6, 50.5e6), 2: (0.9e6, 50.5e6), 3: (50.5e6, 310e6)}     # Product Specifications: bands 0.9 to 50.5 MHz, >50.5 to 310 MHz (50 ohm)
+FCO_GATES = (0.2, 2.0, 20.0, 80.0)
+FCO_READ_MARGIN_S = 10.0                     # MEAS? answers within gate + this (a choice of this driver; the manual gives no figure)
+
+
+def _num(reply: str):
+    """'3', '+3', '2.0', '2.00000E+00' -> float; None when the reply holds no number."""
+    try:
+        return float(str(reply).strip().strip('"').split(',')[0].split()[0])
+    except (ValueError, IndexError):
+        return None
+
 
 def _bool_reply(reply: str) -> bool:
     r = reply.strip().upper()
@@ -402,6 +441,57 @@ class Fluke96270A(Instrument):
         if not math.isclose(got, rate_hz, rel_tol=1e-4):
             raise InstrumentError(f'96270A AM rate set {rate_hz:g} Hz, reports {got:g} (UNVERIFIED: the unit of the AM:INT:FREQ? reply is not in the manual)')
         self.check_error('AM setup')
+
+    def measure_counter_hz(self, range_n: int, gate_s: float, expect_hz: float | None = None, require_ext_ref: bool = True) -> float:
+        """One frequency-counter reading in Hz (rear 300 MHz Counter BNC): output OFF, INST FCO, the reference must be EXTernal and locked (the lab GPS 10 MHz; on the internal reference the
+        counter's 0.05 ppm is 15 Hz at 300 MHz), FCO:RANG, TRIG:GATE, INIT:CONT 0 (each read back), SYST:ERR?, then MEAS? with the timeout raised to gate + FCO_READ_MARGIN_S. 9.91E37 and a
+        reading far from `expect_hz` (more than 1 %: the wrong signal or no signal) raise InstrumentError. The counter stays selected: call select_sine() afterwards. Never retried."""
+        range_n = int(range_n)
+        if range_n not in FCO_RANGES:
+            raise InstrumentError(f'96270A counter range {range_n} is not 1, 2 or 3 (p. 41)')
+        if float(gate_s) not in FCO_GATES:
+            raise InstrumentError(f'96270A counter gate {gate_s:g} s is not 0.2, 2, 20 or 80 s (p. 42)')
+        if expect_hz is not None:
+            lo, hi = FCO_RANGES[range_n]
+            if not lo <= expect_hz <= hi:
+                raise InstrumentError(f'{expect_hz / 1e6:g} MHz is outside counter range {range_n} ({lo / 1e6:g} to {hi / 1e6:g} MHz, 96000 Series Product Specifications)')
+        self.output(False)
+        self.send('fco.inst.set')
+        reply = self.ask('inst.query').strip().strip('"').upper()
+        if not reply.startswith('FCO'):
+            raise InstrumentError(f'96270A did not select the frequency counter: INST? answered {reply!r}')
+        if require_ext_ref:
+            src = self.ask('rosc.source.query').strip().strip('"').upper()
+            if not src.startswith(('EXT', 'ENAR')):
+                raise InstrumentError(f'96270A reference is {src!r}, not EXTernal: set the 96270A to its external 10 MHz reference (the lab GPS) for the frequency points. '
+                                      'On its internal reference the counter is +/-0.05 ppm, 15 Hz at 300 MHz, against +/-10 Hz limits.')
+            if not _bool_reply(self.ask('rosc.locked.query')):
+                raise InstrumentError('96270A is not locked to its external 10 MHz reference (ROSC:LOCK? = 0): check the GPS 10 MHz at the 96270A reference input.')
+        self.send('fco.range.set', n=str(range_n))
+        got = self.ask('fco.range.query').strip()
+        if _num(got) != range_n:
+            raise InstrumentError(f'96270A counter range set {range_n}, FCO:RANG? answered {got!r}')
+        self.send('fco.gate.set', s=float(gate_s))
+        got = self.ask('fco.gate.query').strip()
+        if _num(got) is None or not math.isclose(_num(got), float(gate_s), rel_tol=1e-6):
+            raise InstrumentError(f'96270A counter gate set {gate_s:g} s, TRIG:GATE? answered {got!r}')
+        self.send('fco.single.set')
+        if _bool_reply(self.ask('fco.single.query')):
+            raise InstrumentError('96270A counter did not go to single-event mode (INIT:CONT? answered on)')
+        self.check_error('frequency counter setup')
+        prev = getattr(self.t, 'timeout', None)
+        self.t.set_timeout(max(float(gate_s) + FCO_READ_MARGIN_S, prev or 0.0))
+        try:
+            raw = self.ask('fco.measure').strip()
+        finally:
+            self.t.set_timeout(prev if prev is not None else self.DEFAULT_TIMEOUT)
+        value = _num(raw)
+        if value is None or not math.isfinite(value) or abs(value) >= PM_NO_READING:
+            raise InstrumentError(f'96270A counter has no reading ({raw!r}): is the signal at the rear 300 MHz Counter BNC, at least 0.5 V pk-pk?')
+        if expect_hz is not None and abs(value - expect_hz) > 0.01 * expect_hz:
+            raise InstrumentError(f'96270A counter read {value:.10g} Hz, far from the expected {expect_hz:.10g} Hz: check the counter cable and the 6060A RF output')
+        self.check_error('frequency counter reading')
+        return value
 
     def select_sine(self):
         """Back to the leveled-sine source: the known state again (SINE, dBm, offsets off, output OFF), each read back."""
