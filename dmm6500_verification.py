@@ -277,10 +277,6 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
         self.is_manual = lambda p: False        # the App sets this: points measured with a standard the technician connects
         self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
         self._amp = None
-        self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
-        self._amp = None
-        self.uses_amp = lambda p: False         # the App sets this: points made through the 5725A amplifier (5700A + 5725A)
-        self._amp = None
         self._tc_offset = None
         self._short_settled = False
         try:
@@ -443,6 +439,7 @@ class IO(manual_override.ReadGuardMixin, reset_startup.IOResetMixin, procmods_en
                 if p.get('rel_zero'): self.cal.set_output_volts(0, None, dc=True)
                 else: self.source(p)
                 self.cal.check_error(p['description'])        # the calibrator refuses outputs it cannot make; never operate then
+                if self._amp is not None and hasattr(self.cal, 'amplifier_confirm'): self.cal.amplifier_confirm()      # BOOST / range lock read back with the amplifier output set, still in standby
                 self.cal.operate_unverified()
                 if hasattr(self.cal, 'wait_settled'): self.cal.wait_settled(self.pm_param('dmm6500.settle.cal_report', 60.0))
             time.sleep(virtualbench.scaled(self.settle(p), self.virtual))

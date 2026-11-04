@@ -167,7 +167,7 @@ class Fluke5700A(Instrument):
             raise InstrumentError(f'{self.label}: the current output post {post} was not accepted (CUR_POST? answered {reply!r})')
 
     def amplifier_on(self, kind):
-        """The 5725A in the circuit, with the output in STANDBY: BTYPE VB5725 (voltage) or IB5725 (current, and CUR_POST IB5725), BOOST ON, RANGELCK ON, each read back. kind 'V' or 'I'."""
+        """The 5725A in the circuit, with the output in STANDBY: BTYPE VB5725 (voltage) or IB5725 (current, and CUR_POST IB5725), BOOST ON, RANGELCK ON (read back later by amplifier_confirm). kind 'V' or 'I'."""
         if self.isr(ISR_OPER):
             raise SafetyError(f'{self.label}: the 5725A is only switched in with the output in standby')
         amp = 'VB5725' if kind == 'V' else 'IB5725'
@@ -177,12 +177,24 @@ class Fluke5700A(Instrument):
         if kind == 'I':
             self._post('IB5725')
         self.send('boost', state='ON')
-        if not self.isr(ISR_BOOST):
-            raise InstrumentError(f'{self.label}: BOOST ON was not accepted (ISR? bit 3): is the 5725A connected and powered on?')
         self.send('rangelck', state='ON')
-        if not self.isr(ISR_RLOCK):
-            raise InstrumentError(f'{self.label}: RANGELCK ON was not accepted (ISR? bit 5)')
-        self._amp = kind
+        self._amp = kind              # BOOST and RANGELCK are read back by amplifier_confirm() AFTER the output is set: on the bench ISR? bit 3 read 0 straight after BOOST ON (2026-11-04)
+
+    def amplifier_confirm(self):
+        """With the amplifier output set and the output still in STANDBY: ISR? must show BOOST (bit 3) and RLOCK (bit 5). On a failure the message gives the raw ISR? value and the fault queue
+        (the bit meaning is from the Series II guide, UNVERIFIED for an original 5700A)."""
+        reply = str(self.query_retry('isr.query', attempts=2, delay=0.3)).strip()
+        token = reply.replace(',', ' ').split()[0]
+        value = int(float(token))
+        missing = [name for name, bit in (('BOOST (bit 3)', ISR_BOOST), ('range lock (bit 5)', ISR_RLOCK)) if not value >> bit & 1]
+        if not missing:
+            return
+        try:
+            fault = self.read_error()
+        except Exception as e:
+            fault = f'unreadable ({e})'
+        raise InstrumentError(f'{self.label}: the amplifier is not active: {" and ".join(missing)} is not set in ISR? (answered {reply!r}, binary {value:016b}; FAULT? answered {fault!r}). '
+                              'Is the 5725A cabled to the 5700A, powered on and not in standby?')
 
     def amplifier_off(self):
         """BOOST OFF and RANGELCK OFF (each read back), and the current post back to NORMAL after a current boost. Call with the output in STANDBY."""

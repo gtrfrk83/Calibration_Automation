@@ -26,6 +26,7 @@ class SimFluke5700ATransport(_SimBase):
         self.extsense, self.rcomp, self.post = False, False, 'NORMAL'
         self.boost, self.rlock, self.btype = False, False, {'V': 'VB5725', 'I': 'IB5725'}
         self.amp_connected = True                                # a 5725A is on the cable and powered (test hook)
+        self.out_since_boost = False
         self.settle_polls = 1
         self._polls = 0
 
@@ -33,7 +34,8 @@ class SimFluke5700ATransport(_SimBase):
         f = self.bench.fluke
         self._polls += 1
         settled = f['operate'] and self._polls > self.settle_polls
-        return (int(bool(f['operate'])) | (int(self.extsense) << 2) | (int(self.boost) << 3) | (int(self.rcomp) << 4) | (int(self.rlock) << 5) | (int(settled) << 12))
+        active = self.boost and self.out_since_boost       # BENCH FINDING 2026-11-04: ISR? bit 3 read 0 straight after BOOST ON; modelled as 'active once an output is set' (the reason is UNVERIFIED)
+        return (int(bool(f['operate'])) | (int(self.extsense) << 2) | (int(active) << 3) | (int(self.rcomp) << 4) | (int(self.rlock) << 5) | (int(settled) << 12))
 
     def handle(self, cmd):
         u = cmd.strip().upper()
@@ -68,7 +70,7 @@ class SimFluke5700ATransport(_SimBase):
             f['operate'] = True; self._polls = 0; return None
         m = re.match(r'^BOOST (ON|OFF)$', u)
         if m:
-            self.boost = m.group(1) == 'ON' and self.amp_connected; return None
+            self.boost = m.group(1) == 'ON' and self.amp_connected; self.out_since_boost = False; return None
         m = re.match(r'^RANGELCK (ON|OFF)$', u)
         if m:
             self.rlock = m.group(1) == 'ON'; return None
@@ -98,6 +100,7 @@ class SimFluke5700ATransport(_SimBase):
             if (UNITS[unit] == 'A' and abs(value) > 2.2 and not self.boost) or (UNITS[unit] == 'V' and hz > 1000 and abs(value) > 220 and not self.boost):
                 self.faults.append(540); return None             # above the 5700A's own range: the 5725A (BOOST) is needed (the sheet's ranges; UNVERIFIED)
             f['volts'] = value
+            self.out_since_boost = True
             f['unit'] = UNITS[unit]
             f['freq'] = float(m.group(3)) if m.group(3) else 0.0
             return None

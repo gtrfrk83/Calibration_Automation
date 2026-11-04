@@ -62,11 +62,27 @@ class Amplifier(unittest.TestCase):
             d.amplifier_on('V')
         self.assertNotIn('BOOST ON', ct.sent)
 
-    def test_no_amplifier_on_the_cable_is_reported(self):
+    def test_no_amplifier_on_the_cable_is_reported_with_the_isr_value_and_the_fault_text(self):
         d, ct, bench = make()
         ct.amp_connected = False
-        with self.assertRaises(drivers.InstrumentError):
-            d.amplifier_on('I')
+        d.amplifier_on('I')                                  # the commands are accepted; the amplifier is confirmed once the output is set
+        d.set_output_amps(1.0, None, True)
+        with self.assertRaises(drivers.InstrumentError) as cm:
+            d.amplifier_confirm()
+        msg = str(cm.exception)
+        self.assertIn('BOOST (bit 3)', msg)
+        self.assertIn("answered '", msg)
+        self.assertIn('FAULT? answered', msg)
+
+    def test_isr_bit_3_is_not_required_straight_after_boost_on(self):
+        # bench finding 2026-11-04: ISR? bit 3 read 0 right after BOOST ON (before any output was set) and the old check stopped the run
+        d, ct, bench = make()
+        d.amplifier_on('I')                                  # must not raise
+        self.assertFalse(d.isr(3))
+        d.set_output_amps(10.0, None, True)
+        d.amplifier_confirm()                                # BOOST and RLOCK are set once the output is set
+        self.assertTrue(d.isr(3) and d.isr(5))
+        d.amplifier_off()
 
     def test_the_simulated_5700a_refuses_what_needs_the_amplifier(self):
         d, ct, bench = make()
