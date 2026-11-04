@@ -319,7 +319,8 @@ def point_description(p) -> str:
     parts = [range_text] if range_text else []
     if p.get('filter_hz'):
         parts.append(f"{p['filter_hz']:g} Hz filter")
-    if p.get('mixed') or kind == 'TEMP':     # a section that mixes functions needs the function name (a temperature point has no range to print)
+    if p.get('mixed') or kind == 'TEMP' or not range_text:     # a section that mixes functions needs the function name; a point with no range (a DMM6500 temperature point,
+                                                             # a point stored without one) is named by its function, so a description is never empty (a report rebuilt from history matches rows by it)
         parts.insert(0, KIND_NAMES[kind])
     return ', '.join(parts)
 
