@@ -5,7 +5,7 @@
  "manufacturer": "Keithley",
  "model": "DMM6500",
  "category": "Digital Multimeter",
- "version": "1",
+ "version": "2",
  "order": 82,
  "description": "Standalone calibration procedure (simulated bench only: no DMM6500 command verified on a real meter)",
  "launcher": "Procedures/Keithley_DMM6500_Verification.py",
