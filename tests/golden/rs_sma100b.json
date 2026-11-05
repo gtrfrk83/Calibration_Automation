@@ -5,7 +5,7 @@
    "case": "RSSMA100B.connect",
    "log": [
     "SMA100B|>>|*IDN?",
-    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.30.047.40",
+    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30",
     "SMA100B|>>|*CLS",
     "SMA100B|>>|OUTP OFF",
     "SMA100B|>>|OUTP?",
@@ -35,7 +35,7 @@
     [
      "Q",
      "*IDN?",
-     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.30.047.40"
+     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
     ],
     [
      "W",
@@ -77,15 +77,15 @@
    "case": "RSSMA100B.identify",
    "log": [
     "SMA100B|>>|*IDN?",
-    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.30.047.40"
+    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
    ],
    "method": "RSSMA100B.identify",
-   "result": "returned 'Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.30.047.40'",
+   "result": "returned 'Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30'",
    "wire": [
     [
      "Q",
      "*IDN?",
-     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.30.047.40"
+     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
     ]
    ]
   },
@@ -384,10 +384,10 @@
     "SMA100B|>>|FREQ?",
     "SMA100B|<<|1500000000",
     "SMA100B|>>|SYST:ERR?",
-    "SMA100B|<<|-222,\"Data out of range\""
+    "SMA100B|<<|-222,\"Data out of range;:SOURce1:FREQuency:CW 7000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)\""
    ],
    "method": "RSSMA100B.set_frequency",
-   "result": "raised InstrumentError: SMA100B: FREQ 7000000000: set 7000000000.0, instrument reports '1500000000' (error queue: -222,\"Data out of range\")",
+   "result": "raised InstrumentError: SMA100B: FREQ 7000000000: set 7000000000.0, instrument reports '1500000000' (error queue: -222,\"Data out of range;:SOURce1:FREQuency:CW 7000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)\")",
    "wire": [
     [
      "W",
@@ -401,7 +401,7 @@
     [
      "Q",
      "SYST:ERR?",
-     "-222,\"Data out of range\""
+     "-222,\"Data out of range;:SOURce1:FREQuency:CW 7000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)\""
     ]
    ]
   },

@@ -1,0 +1,5 @@
+R&S SMA100B bench record 20261105_084508 GPIB0::28::INSTR
+
+FAILED: TransportError: Could not open GPIB0::28::INSTR: VI_ERROR_RSRC_NFOUND (-1073807343): Insufficient location information or the requested device or resource is not present in the system.
+
+--- command log (every command and exact reply)

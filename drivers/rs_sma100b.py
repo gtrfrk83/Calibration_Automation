@@ -97,7 +97,7 @@ COMMANDS = {
     'pow.limit.query': Cmd('POW:LIM?', 'Level limit', 'Maximum RF output level, dBm. Not changed by *RST (factory preset 30); read only, never set by this driver',
                            kind='query', verified=False, ref=_r('[:SOURce<hw>]:POWer:LIMit[:AMPLitude]', '746')),
     'rosc.set': Cmd('ROSC:SOUR {src}', 'Reference oscillator source', 'INT or EXT. Not changed by *RST (factory preset INT)',
-                    placeholders={'src': Placeholder('enum', '', 'INT', enum=REF_SOURCES)}, kind='set', readback='rosc.query', verified=False,
+                    placeholders={'src': Placeholder('enum', '', 'EXT', enum=REF_SOURCES)}, kind='set', readback='rosc.query', verified=False,
                     ref=_r('[:SOURce]:ROSCillator:SOURce', '756')),
     'rosc.query': Cmd('ROSC:SOUR?', 'Reference oscillator source', 'INT or EXT (reply text UNVERIFIED)', kind='query', verified=False,
                       ref=_r('[:SOURce]:ROSCillator:SOURce', '756')),
@@ -107,6 +107,38 @@ COMMANDS['reset'] = cmdreg.reset_cmd(False, _r('*RST (equivalent to SYSTem:PRESe
                                      note='RF output OFF, CW, -30 dBm, modulation off. The reference source and the level limit are NOT reset (p. 746, 756)')
 COMMANDS['opc.query'] = cmdreg.opc_cmd(False, _r('*OPC?', '489'))
 
+
+# ---- bench records (bench-first driver workflow, NOTES.md; tools/bench/records/README.md): the real reply each command gave on the owner's unit (serial 124249,
+# firmware 5.40.102.30, GPIB1::28).  This does NOT flip `verified` by itself (that also needs a driver_verify pass); it puts the recorded evidence next to the page in `ref`.
+def _bench(table):
+    import dataclasses
+    for key, text in table.items():
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, ref=f'{c.ref}; BENCH {text}')
+
+
+_B = '2026-11-05 sma100b_bench'
+_bench({
+    'idn.query': f'{_B} step 1: "Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30"',
+    'opt.query': f'{_B} step 1: "SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720" (no quotes)',
+    'err.query': f'{_B} steps 1-3: \'0,"No error"\'; out of range: \'-222,"Data out of range;:SOURce1:FREQuency:CW 1000000000000 (IdPDbFreq,...)"\' (detail after ";")',
+    'status.clear': f'{_B} step 2: accepted (queue 0 after)',
+    'reset': f'{_B} step 2: *RST accepted; afterwards 1 GHz, -30 dBm, RF 0, CW, DBM, MOD 0, offsets 0 / 1 / 0; ROSC EXT and POW:LIM 20 unchanged (as p. 746 / 756)',
+    'opc.query': f'{_B} step 2: "1" at once after *RST / *CLS',
+    'selftest': f'{_B} step 2: "0" after 4.4 s',
+    'outp.on': f'{_B} step 3: OUTP? 1', 'outp.off': f'{_B} steps 2-3: OUTP? 0', 'outp.query': f'{_B} steps 1-3: "0" / "1"',
+    'mod.off': f'{_B} step 2: MOD:ALL:STAT? 0', 'mod.query': f'{_B} steps 1-2: "0"',
+    'unit.dbm': f'{_B} step 2: UNIT:POW? DBM', 'unit.query': f'{_B} steps 1-2: "DBM"',
+    'freq.mode.cw': f'{_B} step 2: FREQ:MODE? CW', 'freq.mode.query': f'{_B} steps 1-2: "CW"',
+    'pow.mode.cw': f'{_B} step 2: POW:MODE? CW', 'pow.mode.query': f'{_B} steps 1-2: "CW"',
+    'freq.set': f'{_B} step 2: FREQ 1000000000 -> FREQ? 1000000000; FREQ 1e+12 -> FREQ? unchanged + -222',
+    'freq.query': f'{_B} steps 1-3: plain integer Hz ("500013", "1000000000")',
+    'pow.set': f'{_B} step 2: POW -30.00 -> POW? -30', 'pow.query': f'{_B} steps 1-3: "-30", "-3.46787486224656" (full float)',
+    'freq.offs.query': f'{_B} steps 1-2: "0"', 'freq.mult.query': f'{_B} steps 1-2: "1"', 'pow.offs.query': f'{_B} steps 1-2: "0"',
+    'pow.limit.query': f'{_B} steps 1-3: "20" (dBm; survives *RST)',
+    'rosc.query': f'{_B} steps 1-3: "EXT" (survives *RST)',
+    # rosc.set: NOT sent on the bench (the unit stays on EXT); its driver_verify sample is EXT so a run there does not move the reference.
+})
 
 class RSSMA100B(SurpriseMixin, Instrument):
     MODEL = 'R&S SMA100B'

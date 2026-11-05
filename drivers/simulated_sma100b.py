@@ -3,7 +3,10 @@
 It speaks the commands of drivers/rs_sma100b.py (short forms, the optional ':SOURce' / ':OUTPut1' prefixes, a leading ':') plus *IDN? *OPT? *RST *CLS *OPC? *TST?,
 and keeps an error queue in the manual's format ('0,"No error"' when empty, SCPI -113 / -222 / -224 otherwise, p. 783).
 
-Simulation choices that are NOT facts about the real generator (nothing here has been compared with a real unit): the *IDN? / *OPT? text, the frequency range
+Replies compared with the owner's unit (bench 2026-11-05, tools/bench/records/2026-11-05_sma100b_*.txt): *IDN? format, SYST:ERR? '0,"No error"' and the -222 text for
+FREQ, OUTP? / MOD:ALL:STAT? '0' / '1', FREQ:MODE? / POW:MODE? 'CW', UNIT:POW? 'DBM', ROSC:SOUR? 'EXT', FREQ? plain integer Hz, POW? '-30', POW:LIM? '20', the offsets
+'0' / '1' / '0', *TST? '0', *OPC? '1', and that ROSC / POW:LIM survive *RST.
+Simulation choices that are NOT facts about the real generator: the *OPT? text, the frequency range
 (8 kHz to `max_hz`, default 6 GHz: option SMAB-B106), the level range (-145 dBm to +18 dBm), the reply formats of every query (numbers as '%.12g', mode words
 'CW', UNIT:POW? 'DBM', ROSC:SOUR? 'INT' / 'EXT', OUTP? '0' / '1'). The reference source and level limit survive *RST as the manual says (p. 746, 756).
 Keep this file out of any evidence: nothing here is calibration data.
@@ -14,7 +17,7 @@ import re
 
 from .simulated import SimBench, _SimBase
 
-IDN = 'Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.30.047.40'
+IDN = 'Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30'     # format as recorded 2026-11-05 (serial changed)
 _NODE = re.compile(r'^:?(?:SOUR(?:CE)?1?:)?')
 
 
@@ -152,7 +155,7 @@ class SimSMA100BTransport(_SimBase):
                 return None
             out = (v - self.freq_offs) / self.freq_mult
             if not self.min_hz <= out <= self.max_hz:
-                self._err(-222, 'Data out of range')
+                self._err(-222, f'Data out of range;:SOURce1:FREQuency:CW {v:.0f} (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)')   # as recorded
             else:
                 self.freq_hz = round(v, 3)
             return None
