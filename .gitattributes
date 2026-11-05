@@ -1,2 +1,4 @@
 # git archive (and GitHub "Download ZIP") write the commit and its date into BUILD.txt; suite_info.build_id() shows it in every window title.
 BUILD.txt export-subst
+# Reference manuals stay in the repository but are left out of every build (git archive / Download ZIP): reference_manuals/README.md.
+reference_manuals/ export-ignore

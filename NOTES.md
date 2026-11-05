@@ -2507,3 +2507,11 @@ Tests: tests/test_driver_rs_sma100b.py; golden fixture tests/golden/rs_sma100b.j
   which would have moved this unit off its external reference). STILL TO DO before verified=True: one Driver verification pass on the unit (rosc.set is the only command never sent).
 - Driver verification 2026-11-05 08:56 (tester mtyler): the 17 queries PASS -> verified=True (`DRIVER_VERIFIED` in the driver). Not yet verified: the 7 set commands, outp.on / outp.off and
   reset (bench-script records only; a second Driver verification run with those rows ticked finishes it), and status.clear (driver_verify never sends *CLS: stays UNVERIFIED, listed).
+
+## Reference manuals folder (2026-11-05)
+Owner request: "move the manuals into a separate folder that won't be included in the build package but still available for you to reference".
+- `96000__rpmeng0100.pdf` and `SMA100B_UserManual_en_14.pdf` moved from the repository root to `reference_manuals/` (file names unchanged, so every citation by
+  file name still holds; the driver files were NOT edited, to keep the procedure fingerprints unchanged).
+- `.gitattributes`: `reference_manuals/ export-ignore`, so the build (`git archive`) and GitHub "Download ZIP" leave the folder out (about 17.8 MB smaller).
+- Not the app's `manuals/` folder (`manuals.py`, the operator's manual viewer); nothing in `reference_manuals/` is shown in the app. New source manuals go here; see
+  `reference_manuals/README.md`.
