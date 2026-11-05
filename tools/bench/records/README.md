@@ -85,3 +85,7 @@ Driver verification (manager > Driver verification...) pass on this unit.
 - step 3 --settings --signal (…_step3_settings_signal.txt): internal time base; "nothing connected" step: 10 readings, Mean 6.162 653 MHz, Std Dev 85.2 kHz;
   stage 3 (10 MHz on Channel 1 per the prompt): Mean 6.233 285 MHz, Std Dev 91.7 kHz, count 100. NOT 10 MHz: not triggering cleanly (what was connected
   is being asked). Error queue empty; reference restored.
+- step 4 --settings --ext-ref, build b24b268 (…_step4_settings_ext_ref_abort.txt): 48 / 48 pass. Nothing connected: *OPC? timed out after 20 s, the driver
+  sent device clear + *CLS, and the counter answered at once (SYST:ERR? "+0,"No error"", reference queries); the reference was restored. The abort WORKS.
+- step 5 --settings --signal (…_step5_settings_signal_10mhz.txt): 50 / 50 pass. The no-signal abort again; then 10 MHz on Channel 1, internal time base
+  (Option 010): count 100, Mean 9 999 999.690 35 Hz (-0.031 ppm), Std Dev 5.18 mHz. The 6.2 MHz of step 3 was the hook-up, not the counter.

@@ -1,0 +1,541 @@
+Keysight 53220A bench record 20261105_121039 GPIB1::3::INSTR
+
+*IDN? Agilent Technologies,53220A,MY50010466,02.05-1519.666-1.19-4.15-127-155-35  (GPIB1::3::INSTR)
+reference oscillator found: {'source': 'EXT', 'auto': False, 'ext_freq': 10000000.0}
+--- stage 1: read-only queries
+options parsed from *OPT?: {'timebase': '010', 'ch3': None, 'pulse': None, 'unknown': [], 'codes': {'010'}, 'raw': '010,0,0,0,400'}
+PASS  query *OPT?  010,0,0,0,400
+PASS  query SYST:ERR?  +0,"No error"
+PASS  query SENS:ROSC:SOUR?  EXT
+PASS  query SENS:ROSC:SOUR:AUTO?  0
+PASS  query SENS:ROSC:EXT:FREQ?  +1.00000000E+007
+PASS  query SENS:FREQ:MODE?  AUTO
+PASS  query SENS:FREQ:GATE:SOUR?  TIME
+PASS  query SENS:FREQ:GATE:TIME?  +1.00000000000000E-002
+PASS  query SAMP:COUN?  +10
+PASS  query TRIG:COUN?  +1
+PASS  query TRIG:DEL?  +0.00000000000000E+000
+PASS  query TRIG:SOUR?  BUS
+PASS  query CALC:STAT?  1
+PASS  query CALC:AVER:STAT?  1
+PASS  query INP1:COUP?  DC
+PASS  query INP1:IMP?  +5.00000000E+001
+PASS  query INP1:PROB?  +1
+PASS  query INP1:RANG?  +5.00000000E+000
+PASS  query INP1:FILT?  0
+PASS  query INP1:NREJ?  0
+PASS  query INP1:LEV:AUTO?  0
+PASS  query INP1:LEV?  +0.00000000E+000
+PASS  query INP1:SLOP?  POS
+PASS  query INP2:COUP?  DC
+PASS  query INP2:IMP?  +5.00000000E+001
+PASS  query INP2:PROB?  +1
+PASS  query INP2:RANG?  +5.00000000E+000
+PASS  query INP2:FILT?  0
+PASS  query INP2:NREJ?  0
+PASS  query INP2:LEV:AUTO?  0
+PASS  query INP2:LEV?  +0.00000000E+000
+PASS  query INP2:SLOP?  POS
+PASS  error queue after the queries  
+--- stage 2: the configurations the procedure sends (each write asks first)
+PASS  reset_to_defaults (*RST, *CLS, *OPC?, error queue)  53220A: reset OK
+  ok  reset (*RST)
+  ok  clear status (*CLS)
+  ok  wait for completion (*OPC?)
+  ok  drain error queue: queue empty
+  ok  inputs, level and trigger known (the next point sets them again): Factory reset state; the reference oscillator is set per test
+PASS  time base INTERNAL (set, read back)  {'source': 'INT', 'auto': False, 'ext_freq': 10000000.0}
+PASS  configure frequency Ch 1, 10 MHz, gate 10 ms (Test 1 / 2a)  
+PASS     CONF? after frequency Ch 1, 10 MHz, gate 10 ms (Test 1 / 2a)  "FREQ +1.00000000000000E+007,+1.00000000000000E-002"
+PASS  configure frequency Ch 2, 115 MHz, gate 10 ms (Test 2b)  
+PASS     CONF? after frequency Ch 2, 115 MHz, gate 10 ms (Test 2b)  "FREQ +1.15000000000000E+008,+1.15000000000000E-001,(@2)"
+PASS  configure single period Ch 1 (Test 3)  
+PASS     CONF? after single period Ch 1 (Test 3)  "SPER"
+PASS  configure pulse width Ch 1 (Test 4a)  
+PASS     CONF? after pulse width Ch 1 (Test 4a)  "PWID +0.00000000000000E+000V"
+PASS  configure time interval Ch 1 to Ch 2 (Test 5)  
+PASS     CONF? after time interval Ch 1 to Ch 2 (Test 5)  "TINT"
+PASS  statistics with NOTHING connected must be refused (9.91E37, or no readings: aborted)  refused as expected: The 53220A did not finish 10 readings in 20 s: no signal, or no usable signal, at the input (level, frequency or connection). The measurement was aborted.
+PASS  the counter answers after that  {'source': 'INT', 'auto': False, 'ext_freq': 10000000.0}
+--- stage 3: 10 MHz on Channel 1
+PASS  configure frequency Ch 1, 10 MHz, gate 10 ms  
+PASS  100 readings: Mean / Std Dev / count, the Mean within 1 ppm of 10 MHz  {'mean': 9999999.69035221, 'sdev': 0.00517931846810757, 'count': 100}
+PASS  error queue after the readings  
+cleanup: reference oscillator now {'source': 'EXT', 'auto': False, 'ext_freq': 10000000.0} (found {'source': 'EXT', 'auto': False, 'ext_freq': 10000000.0})
+
+--- summary: 50 passed, 0 failed
+
+--- command log (every command and exact reply)
+    0.000  53220A     >>  *CLS
+    0.003  53220A     >>  *IDN?
+    0.010  53220A     <<  Agilent Technologies,53220A,MY50010466,02.05-1519.666-1.19-4.15-127-155-35
+    0.011  53220A     >>  *OPT?
+    0.012  53220A     <<  010,0,0,0,400
+    0.013  53220A     >>  SENS:ROSC:SOUR?
+    0.014  53220A     <<  EXT
+    0.014  53220A     >>  SENS:ROSC:SOUR:AUTO?
+    0.016  53220A     <<  0
+    0.016  53220A     >>  SENS:ROSC:EXT:FREQ?
+    0.018  53220A     <<  +1.00000000E+007
+    0.018  53220A     >>  *OPT?
+    0.020  53220A     <<  010,0,0,0,400
+    0.020  53220A     >>  SYST:ERR?
+    0.022  53220A     <<  +0,"No error"
+    0.022  53220A     >>  SENS:ROSC:SOUR?
+    0.039  53220A     <<  EXT
+    0.039  53220A     >>  SENS:ROSC:SOUR:AUTO?
+    0.041  53220A     <<  0
+    0.041  53220A     >>  SENS:ROSC:EXT:FREQ?
+    0.042  53220A     <<  +1.00000000E+007
+    0.043  53220A     >>  SENS:FREQ:MODE?
+    0.044  53220A     <<  AUTO
+    0.044  53220A     >>  SENS:FREQ:GATE:SOUR?
+    0.046  53220A     <<  TIME
+    0.046  53220A     >>  SENS:FREQ:GATE:TIME?
+    0.047  53220A     <<  +1.00000000000000E-002
+    0.047  53220A     >>  SAMP:COUN?
+    0.049  53220A     <<  +10
+    0.049  53220A     >>  TRIG:COUN?
+    0.050  53220A     <<  +1
+    0.050  53220A     >>  TRIG:DEL?
+    0.052  53220A     <<  +0.00000000000000E+000
+    0.052  53220A     >>  TRIG:SOUR?
+    0.054  53220A     <<  BUS
+    0.054  53220A     >>  CALC:STAT?
+    0.055  53220A     <<  1
+    0.055  53220A     >>  CALC:AVER:STAT?
+    0.057  53220A     <<  1
+    0.057  53220A     >>  INP1:COUP?
+    0.058  53220A     <<  DC
+    0.058  53220A     >>  INP1:IMP?
+    0.060  53220A     <<  +5.00000000E+001
+    0.060  53220A     >>  INP1:PROB?
+    0.061  53220A     <<  +1
+    0.062  53220A     >>  INP1:RANG?
+    0.063  53220A     <<  +5.00000000E+000
+    0.063  53220A     >>  INP1:FILT?
+    0.065  53220A     <<  0
+    0.065  53220A     >>  INP1:NREJ?
+    0.066  53220A     <<  0
+    0.066  53220A     >>  INP1:LEV:AUTO?
+    0.068  53220A     <<  0
+    0.068  53220A     >>  INP1:LEV?
+    0.084  53220A     <<  +0.00000000E+000
+    0.084  53220A     >>  INP1:SLOP?
+    0.086  53220A     <<  POS
+    0.086  53220A     >>  INP2:COUP?
+    0.088  53220A     <<  DC
+    0.088  53220A     >>  INP2:IMP?
+    0.090  53220A     <<  +5.00000000E+001
+    0.090  53220A     >>  INP2:PROB?
+    0.092  53220A     <<  +1
+    0.092  53220A     >>  INP2:RANG?
+    0.093  53220A     <<  +5.00000000E+000
+    0.094  53220A     >>  INP2:FILT?
+    0.095  53220A     <<  0
+    0.095  53220A     >>  INP2:NREJ?
+    0.097  53220A     <<  0
+    0.097  53220A     >>  INP2:LEV:AUTO?
+    0.114  53220A     <<  0
+    0.115  53220A     >>  INP2:LEV?
+    0.116  53220A     <<  +0.00000000E+000
+    0.116  53220A     >>  INP2:SLOP?
+    0.118  53220A     <<  POS
+    0.118  53220A     >>  SYST:ERR?
+    0.121  53220A     <<  +0,"No error"
+    0.121  53220A     >>  *RST
+    4.763  53220A     >>  *CLS
+    4.764  53220A     >>  *OPC?
+    4.823  53220A     <<  1
+    4.823  53220A     >>  SYST:ERR?
+    4.825  53220A     <<  +0,"No error"
+    4.826  53220A     >>  SENS:ROSC:SOUR INT
+    4.827  53220A     >>  SENS:ROSC:SOUR?
+    4.894  53220A     <<  INT
+    4.895  53220A     >>  SENS:ROSC:SOUR?
+    4.897  53220A     <<  INT
+    4.897  53220A     >>  SENS:ROSC:SOUR:AUTO?
+    4.899  53220A     <<  0
+    4.899  53220A     >>  SENS:ROSC:EXT:FREQ?
+    4.901  53220A     <<  +1.00000000E+007
+    4.901  53220A     >>  INP1:COUP DC
+    4.902  53220A     >>  INP1:COUP?
+    4.963  53220A     <<  DC
+    4.963  53220A     >>  INP1:IMP 50
+    4.964  53220A     >>  INP1:IMP?
+    5.021  53220A     <<  +5.00000000E+001
+    5.021  53220A     >>  INP1:PROB 1
+    5.022  53220A     >>  INP1:PROB?
+    5.068  53220A     <<  +1
+    5.069  53220A     >>  INP1:RANG 5
+    5.070  53220A     >>  INP1:RANG?
+    5.129  53220A     <<  +5.00000000E+000
+    5.129  53220A     >>  INP1:FILT OFF
+    5.130  53220A     >>  INP1:FILT?
+    5.176  53220A     <<  0
+    5.177  53220A     >>  INP1:NREJ OFF
+    5.178  53220A     >>  INP1:NREJ?
+    5.224  53220A     <<  0
+    5.224  53220A     >>  CONF:FREQ 10000000,DEF,(@1)
+    5.226  53220A     >>  CONF?
+    5.275  53220A     <<  "FREQ +1.00000000000000E+007,+1.00000000000000E-002"
+    5.275  53220A     --  channel is not in the CONF? reply ('FREQ +1.00000000000000E+007,+1.00000000000000E-002'): (@1) not confirmed by read-back (the function was)
+    5.275  53220A     >>  INP1:LEV:AUTO OFF
+    5.276  53220A     >>  INP1:LEV:AUTO?
+    5.336  53220A     <<  0
+    5.336  53220A     >>  INP1:LEV 0
+    5.337  53220A     >>  INP1:LEV?
+    5.383  53220A     <<  +0.00000000E+000
+    5.383  53220A     >>  INP1:SLOP POS
+    5.384  53220A     >>  INP1:SLOP?
+    5.444  53220A     <<  POS
+    5.444  53220A     >>  SENS:FREQ:MODE AUTO
+    5.467  53220A     >>  SENS:FREQ:MODE?
+    5.490  53220A     <<  AUTO
+    5.491  53220A     >>  SENS:FREQ:GATE:SOUR TIME
+    5.492  53220A     >>  SENS:FREQ:GATE:SOUR?
+    5.552  53220A     <<  TIME
+    5.552  53220A     >>  SENS:FREQ:GATE:TIME 0.01
+    5.553  53220A     >>  SENS:FREQ:GATE:TIME?
+    5.601  53220A     <<  +1.00000000000000E-002
+    5.601  53220A     >>  SYST:ERR?
+    5.603  53220A     <<  +0,"No error"
+    5.603  53220A     >>  CONF?
+    5.607  53220A     <<  "FREQ +1.00000000000000E+007,+1.00000000000000E-002"
+    5.608  53220A     >>  INP2:COUP DC
+    5.609  53220A     >>  INP2:COUP?
+    5.655  53220A     <<  DC
+    5.655  53220A     >>  INP2:IMP 50
+    5.657  53220A     >>  INP2:IMP?
+    5.727  53220A     <<  +5.00000000E+001
+    5.727  53220A     >>  INP2:PROB 1
+    5.728  53220A     >>  INP2:PROB?
+    5.775  53220A     <<  +1
+    5.775  53220A     >>  INP2:RANG 5
+    5.776  53220A     >>  INP2:RANG?
+    5.822  53220A     <<  +5.00000000E+000
+    5.823  53220A     >>  INP2:FILT OFF
+    5.824  53220A     >>  INP2:FILT?
+    5.870  53220A     <<  0
+    5.870  53220A     >>  INP2:NREJ OFF
+    5.886  53220A     >>  INP2:NREJ?
+    5.930  53220A     <<  0
+    5.930  53220A     >>  CONF:FREQ 115000000,DEF,(@2)
+    5.932  53220A     >>  CONF?
+    5.982  53220A     <<  "FREQ +1.15000000000000E+008,+1.15000000000000E-001,(@2)"
+    5.982  53220A     >>  INP2:LEV:AUTO OFF
+    5.984  53220A     >>  INP2:LEV:AUTO?
+    6.030  53220A     <<  0
+    6.030  53220A     >>  INP2:LEV 0
+    6.031  53220A     >>  INP2:LEV?
+    6.091  53220A     <<  +0.00000000E+000
+    6.091  53220A     >>  INP2:SLOP POS
+    6.092  53220A     >>  INP2:SLOP?
+    6.139  53220A     <<  POS
+    6.139  53220A     >>  SENS:FREQ:MODE AUTO
+    6.140  53220A     >>  SENS:FREQ:MODE?
+    6.187  53220A     <<  AUTO
+    6.187  53220A     >>  SENS:FREQ:GATE:SOUR TIME
+    6.188  53220A     >>  SENS:FREQ:GATE:SOUR?
+    6.235  53220A     <<  TIME
+    6.235  53220A     >>  SENS:FREQ:GATE:TIME 0.01
+    6.236  53220A     >>  SENS:FREQ:GATE:TIME?
+    6.296  53220A     <<  +1.00000000000000E-002
+    6.296  53220A     >>  SYST:ERR?
+    6.298  53220A     <<  +0,"No error"
+    6.298  53220A     >>  CONF?
+    6.302  53220A     <<  "FREQ +1.15000000000000E+008,+1.15000000000000E-001,(@2)"
+    6.303  53220A     >>  INP1:COUP DC
+    6.303  53220A     >>  INP1:COUP?
+    6.350  53220A     <<  DC
+    6.350  53220A     >>  INP1:IMP 50
+    6.351  53220A     >>  INP1:IMP?
+    6.398  53220A     <<  +5.00000000E+001
+    6.398  53220A     >>  INP1:PROB 1
+    6.399  53220A     >>  INP1:PROB?
+    6.447  53220A     <<  +1
+    6.447  53220A     >>  INP1:RANG 5
+    6.448  53220A     >>  INP1:RANG?
+    6.508  53220A     <<  +5.00000000E+000
+    6.508  53220A     >>  INP1:FILT OFF
+    6.509  53220A     >>  INP1:FILT?
+    6.556  53220A     <<  0
+    6.556  53220A     >>  INP1:NREJ OFF
+    6.557  53220A     >>  INP1:NREJ?
+    6.604  53220A     <<  0
+    6.604  53220A     >>  CONF:SPER (@1)
+    6.605  53220A     >>  CONF?
+    6.665  53220A     <<  "SPER"
+    6.666  53220A     --  channel is not in the CONF? reply ('SPER'): (@1) not confirmed by read-back (the function was)
+    6.666  53220A     >>  INP1:LEV:AUTO OFF
+    6.667  53220A     >>  INP1:LEV:AUTO?
+    6.713  53220A     <<  0
+    6.713  53220A     >>  INP1:LEV 0
+    6.714  53220A     >>  INP1:LEV?
+    6.762  53220A     <<  +0.00000000E+000
+    6.762  53220A     >>  INP1:SLOP POS
+    6.763  53220A     >>  INP1:SLOP?
+    6.809  53220A     <<  POS
+    6.809  53220A     >>  SYST:ERR?
+    6.811  53220A     <<  +0,"No error"
+    6.811  53220A     >>  CONF?
+    6.813  53220A     <<  "SPER"
+    6.814  53220A     >>  INP1:COUP DC
+    6.815  53220A     >>  INP1:COUP?
+    6.874  53220A     <<  DC
+    6.874  53220A     >>  INP1:IMP 50
+    6.875  53220A     >>  INP1:IMP?
+    6.922  53220A     <<  +5.00000000E+001
+    6.922  53220A     >>  INP1:PROB 1
+    6.923  53220A     >>  INP1:PROB?
+    6.970  53220A     <<  +1
+    6.970  53220A     >>  INP1:RANG 5
+    6.971  53220A     >>  INP1:RANG?
+    7.018  53220A     <<  +5.00000000E+000
+    7.018  53220A     >>  INP1:FILT OFF
+    7.019  53220A     >>  INP1:FILT?
+    7.078  53220A     <<  0
+    7.078  53220A     >>  INP1:NREJ OFF
+    7.079  53220A     >>  INP1:NREJ?
+    7.126  53220A     <<  0
+    7.126  53220A     >>  CONF:PWID 0V,(@1)
+    7.127  53220A     >>  CONF?
+    7.176  53220A     <<  "PWID +0.00000000000000E+000V"
+    7.176  53220A     --  channel is not in the CONF? reply ('PWID +0.00000000000000E+000V'): (@1) not confirmed by read-back (the function was)
+    7.176  53220A     >>  INP1:LEV:AUTO OFF
+    7.178  53220A     >>  INP1:LEV:AUTO?
+    7.237  53220A     <<  0
+    7.237  53220A     >>  INP1:LEV 0
+    7.239  53220A     >>  INP1:LEV?
+    7.286  53220A     <<  +0.00000000E+000
+    7.287  53220A     >>  INP1:SLOP POS
+    7.289  53220A     >>  INP1:SLOP?
+    7.334  53220A     <<  POS
+    7.335  53220A     >>  SYST:ERR?
+    7.338  53220A     <<  +0,"No error"
+    7.339  53220A     >>  CONF?
+    7.342  53220A     <<  "PWID +0.00000000000000E+000V"
+    7.343  53220A     >>  INP1:COUP DC
+    7.345  53220A     >>  INP1:COUP?
+    7.391  53220A     <<  DC
+    7.392  53220A     >>  INP1:IMP 50
+    7.394  53220A     >>  INP1:IMP?
+    7.453  53220A     <<  +5.00000000E+001
+    7.454  53220A     >>  INP1:PROB 1
+    7.455  53220A     >>  INP1:PROB?
+    7.501  53220A     <<  +1
+    7.501  53220A     >>  INP1:RANG 5
+    7.502  53220A     >>  INP1:RANG?
+    7.549  53220A     <<  +5.00000000E+000
+    7.550  53220A     >>  INP1:FILT OFF
+    7.551  53220A     >>  INP1:FILT?
+    7.597  53220A     <<  0
+    7.597  53220A     >>  INP1:NREJ OFF
+    7.598  53220A     >>  INP1:NREJ?
+    7.657  53220A     <<  0
+    7.657  53220A     >>  INP2:COUP DC
+    7.658  53220A     >>  INP2:COUP?
+    7.704  53220A     <<  DC
+    7.704  53220A     >>  INP2:IMP 50
+    7.706  53220A     >>  INP2:IMP?
+    7.753  53220A     <<  +5.00000000E+001
+    7.753  53220A     >>  INP2:PROB 1
+    7.754  53220A     >>  INP2:PROB?
+    7.814  53220A     <<  +1
+    7.814  53220A     >>  INP2:RANG 5
+    7.816  53220A     >>  INP2:RANG?
+    7.862  53220A     <<  +5.00000000E+000
+    7.862  53220A     >>  INP2:FILT OFF
+    7.879  53220A     >>  INP2:FILT?
+    7.909  53220A     <<  0
+    7.909  53220A     >>  INP2:NREJ OFF
+    7.910  53220A     >>  INP2:NREJ?
+    7.957  53220A     <<  0
+    7.958  53220A     >>  CONF:TINT (@1),(@2)
+    7.973  53220A     >>  CONF?
+    8.019  53220A     <<  "TINT"
+    8.019  53220A     --  channel is not in the CONF? reply ('TINT'): (@1),(@2) not confirmed by read-back (the function was)
+    8.019  53220A     >>  INP1:LEV:AUTO OFF
+    8.037  53220A     >>  INP1:LEV:AUTO?
+    8.066  53220A     <<  0
+    8.066  53220A     >>  INP1:LEV 0
+    8.068  53220A     >>  INP1:LEV?
+    8.113  53220A     <<  +0.00000000E+000
+    8.114  53220A     >>  INP1:SLOP POS
+    8.131  53220A     >>  INP1:SLOP?
+    8.161  53220A     <<  POS
+    8.162  53220A     >>  INP2:LEV:AUTO OFF
+    8.163  53220A     >>  INP2:LEV:AUTO?
+    8.223  53220A     <<  0
+    8.223  53220A     >>  INP2:LEV 0
+    8.224  53220A     >>  INP2:LEV?
+    8.271  53220A     <<  +0.00000000E+000
+    8.271  53220A     >>  INP2:SLOP POS
+    8.274  53220A     >>  INP2:SLOP?
+    8.319  53220A     <<  POS
+    8.320  53220A     >>  SYST:ERR?
+    8.323  53220A     <<  +0,"No error"
+    8.323  53220A     >>  CONF?
+    8.325  53220A     <<  "TINT"
+   11.250  53220A     >>  INP1:COUP DC
+   11.251  53220A     >>  INP1:COUP?
+   11.310  53220A     <<  DC
+   11.310  53220A     >>  INP1:IMP 50
+   11.311  53220A     >>  INP1:IMP?
+   11.358  53220A     <<  +5.00000000E+001
+   11.358  53220A     >>  INP1:PROB 1
+   11.360  53220A     >>  INP1:PROB?
+   11.406  53220A     <<  +1
+   11.406  53220A     >>  INP1:RANG 5
+   11.407  53220A     >>  INP1:RANG?
+   11.466  53220A     <<  +5.00000000E+000
+   11.467  53220A     >>  INP1:FILT OFF
+   11.468  53220A     >>  INP1:FILT?
+   11.515  53220A     <<  0
+   11.515  53220A     >>  INP1:NREJ OFF
+   11.516  53220A     >>  INP1:NREJ?
+   11.562  53220A     <<  0
+   11.563  53220A     >>  CONF:FREQ 10000000,DEF,(@1)
+   11.564  53220A     >>  CONF?
+   11.613  53220A     <<  "FREQ +1.00000000000000E+007,+1.00000000000000E-002"
+   11.614  53220A     --  channel is not in the CONF? reply ('FREQ +1.00000000000000E+007,+1.00000000000000E-002'): (@1) not confirmed by read-back (the function was)
+   11.614  53220A     >>  INP1:LEV:AUTO OFF
+   11.615  53220A     >>  INP1:LEV:AUTO?
+   11.674  53220A     <<  0
+   11.674  53220A     >>  INP1:LEV 0
+   11.675  53220A     >>  INP1:LEV?
+   11.721  53220A     <<  +0.00000000E+000
+   11.722  53220A     >>  INP1:SLOP POS
+   11.724  53220A     >>  INP1:SLOP?
+   11.771  53220A     <<  POS
+   11.771  53220A     >>  SENS:FREQ:MODE AUTO
+   11.789  53220A     >>  SENS:FREQ:MODE?
+   11.818  53220A     <<  AUTO
+   11.819  53220A     >>  SENS:FREQ:GATE:SOUR TIME
+   11.821  53220A     >>  SENS:FREQ:GATE:SOUR?
+   11.879  53220A     <<  TIME
+   11.879  53220A     >>  SENS:FREQ:GATE:TIME 0.01
+   11.881  53220A     >>  SENS:FREQ:GATE:TIME?
+   11.928  53220A     <<  +1.00000000000000E-002
+   11.928  53220A     >>  SYST:ERR?
+   11.930  53220A     <<  +0,"No error"
+   11.931  53220A     >>  SAMP:COUN 10
+   11.932  53220A     >>  SAMP:COUN?
+   11.978  53220A     <<  +10
+   11.979  53220A     >>  TRIG:COUN 1
+   11.980  53220A     >>  TRIG:COUN?
+   12.039  53220A     <<  +1
+   12.040  53220A     >>  TRIG:DEL 0
+   12.041  53220A     >>  TRIG:DEL?
+   12.087  53220A     <<  +0.00000000000000E+000
+   12.088  53220A     >>  TRIG:SOUR BUS
+   12.089  53220A     >>  TRIG:SOUR?
+   12.135  53220A     <<  BUS
+   12.136  53220A     >>  CALC:STAT ON
+   12.137  53220A     >>  CALC:STAT?
+   12.184  53220A     <<  1
+   12.184  53220A     >>  CALC:AVER:STAT ON
+   12.186  53220A     >>  CALC:AVER:STAT?
+   12.245  53220A     <<  1
+   12.245  53220A     >>  INIT
+   12.247  53220A     >>  *TRG
+   12.248  53220A     >>  *OPC?
+   32.296  53220A     >>  *CLS
+   32.298  53220A     !!  readings not complete after 20 s: measurement aborted (device clear, *CLS)
+   32.299  53220A     >>  SYST:ERR?
+   32.303  53220A     <<  +0,"No error"
+   32.303  53220A     >>  SENS:ROSC:SOUR?
+   32.306  53220A     <<  INT
+   32.306  53220A     >>  SENS:ROSC:SOUR:AUTO?
+   32.310  53220A     <<  0
+   32.310  53220A     >>  SENS:ROSC:EXT:FREQ?
+   32.345  53220A     <<  +1.00000000E+007
+   55.337  53220A     >>  INP1:COUP DC
+   55.338  53220A     >>  INP1:COUP?
+   55.399  53220A     <<  DC
+   55.399  53220A     >>  INP1:IMP 50
+   55.401  53220A     >>  INP1:IMP?
+   55.447  53220A     <<  +5.00000000E+001
+   55.447  53220A     >>  INP1:PROB 1
+   55.449  53220A     >>  INP1:PROB?
+   55.496  53220A     <<  +1
+   55.496  53220A     >>  INP1:RANG 5
+   55.497  53220A     >>  INP1:RANG?
+   55.544  53220A     <<  +5.00000000E+000
+   55.544  53220A     >>  INP1:FILT OFF
+   55.545  53220A     >>  INP1:FILT?
+   55.605  53220A     <<  0
+   55.605  53220A     >>  INP1:NREJ OFF
+   55.607  53220A     >>  INP1:NREJ?
+   55.653  53220A     <<  0
+   55.653  53220A     >>  CONF:FREQ 10000000,DEF,(@1)
+   55.654  53220A     >>  CONF?
+   55.704  53220A     <<  "FREQ +1.00000000000000E+007,+1.00000000000000E-002"
+   55.704  53220A     --  channel is not in the CONF? reply ('FREQ +1.00000000000000E+007,+1.00000000000000E-002'): (@1) not confirmed by read-back (the function was)
+   55.704  53220A     >>  INP1:LEV:AUTO OFF
+   55.706  53220A     >>  INP1:LEV:AUTO?
+   55.765  53220A     <<  0
+   55.766  53220A     >>  INP1:LEV 0
+   55.767  53220A     >>  INP1:LEV?
+   55.814  53220A     <<  +0.00000000E+000
+   55.814  53220A     >>  INP1:SLOP POS
+   55.816  53220A     >>  INP1:SLOP?
+   55.862  53220A     <<  POS
+   55.862  53220A     >>  SENS:FREQ:MODE AUTO
+   55.863  53220A     >>  SENS:FREQ:MODE?
+   55.910  53220A     <<  AUTO
+   55.910  53220A     >>  SENS:FREQ:GATE:SOUR TIME
+   55.911  53220A     >>  SENS:FREQ:GATE:SOUR?
+   55.971  53220A     <<  TIME
+   55.971  53220A     >>  SENS:FREQ:GATE:TIME 0.01
+   55.972  53220A     >>  SENS:FREQ:GATE:TIME?
+   56.019  53220A     <<  +1.00000000000000E-002
+   56.020  53220A     >>  SYST:ERR?
+   56.022  53220A     <<  +0,"No error"
+   56.022  53220A     >>  SAMP:COUN 100
+   56.023  53220A     >>  SAMP:COUN?
+   56.069  53220A     <<  +100
+   56.070  53220A     >>  TRIG:COUN 1
+   56.071  53220A     >>  TRIG:COUN?
+   56.118  53220A     <<  +1
+   56.118  53220A     >>  TRIG:DEL 0
+   56.119  53220A     >>  TRIG:DEL?
+   56.179  53220A     <<  +0.00000000000000E+000
+   56.179  53220A     >>  TRIG:SOUR BUS
+   56.180  53220A     >>  TRIG:SOUR?
+   56.227  53220A     <<  BUS
+   56.227  53220A     >>  CALC:STAT ON
+   56.229  53220A     >>  CALC:STAT?
+   56.274  53220A     <<  1
+   56.275  53220A     >>  CALC:AVER:STAT ON
+   56.276  53220A     >>  CALC:AVER:STAT?
+   56.337  53220A     <<  1
+   56.337  53220A     >>  INIT
+   56.338  53220A     >>  *TRG
+   56.339  53220A     >>  *OPC?
+   57.342  53220A     <<  1
+   57.343  53220A     >>  CALC:AVER:COUN:CURR?
+   57.345  53220A     <<  +100
+   57.345  53220A     >>  CALC:AVER:AVER?
+   57.347  53220A     <<  +9.99999969035221E+006
+   57.347  53220A     >>  CALC:AVER:SDEV?
+   57.349  53220A     <<  +5.17931846810757E-003
+   57.350  53220A     >>  SYST:ERR?
+   57.352  53220A     <<  +0,"No error"
+   57.352  53220A     >>  SENS:ROSC:SOUR?
+   57.354  53220A     <<  INT
+   57.354  53220A     >>  SENS:ROSC:SOUR:AUTO?
+   57.357  53220A     <<  0
+   57.357  53220A     >>  SENS:ROSC:EXT:FREQ?
+   57.359  53220A     <<  +1.00000000E+007
+   57.359  53220A     >>  SENS:ROSC:SOUR EXT
+   57.361  53220A     >>  SENS:ROSC:SOUR?
+   57.503  53220A     <<  EXT
+   57.503  53220A     >>  SYST:ERR?
+   57.520  53220A     <<  +0,"No error"
+   57.522  53220A     >>  SENS:ROSC:SOUR?
+   57.524  53220A     <<  EXT
+   57.525  53220A     >>  SENS:ROSC:SOUR:AUTO?
+   57.527  53220A     <<  0
+   57.527  53220A     >>  SENS:ROSC:EXT:FREQ?
+   57.529  53220A     <<  +1.00000000E+007

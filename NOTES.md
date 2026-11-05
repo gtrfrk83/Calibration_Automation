@@ -2217,12 +2217,12 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   `conf_no_channel` now replays exactly these). Two findings:
   1. NO SIGNAL HANGS THE COUNTER (not 9.91E37): *OPC? never answered and every later command timed out, so the reference could not be restored.
      `measure_stats` now aborts on the *OPC? timeout: device clear (viClear) + *CLS, a '!!' log line, then InstrumentError 'did not finish N readings ...: no
-     signal' (the procedure's typed-reading offer applies and the counter answers the next point). UNVERIFIED on the bench: that the device clear brings the
-     53220A back. Simulator opt-in `no_signal_hangs`.
+     signal' (the procedure's typed-reading offer applies and the counter answers the next point). CONFIRMED on the bench 2026-11-05 (steps 4 and 5,
+     build b24b268): after the abort the counter answered at once and the reference was restored. Simulator opt-in `no_signal_hangs`.
   2. 10 MHz on Channel 1 read Mean 6.23 MHz, Std Dev 92 kHz (and 6.16 MHz in the 'nothing connected' step): the counter is not triggering cleanly; what was
-     connected is being asked of the owner. The bench script now asks to disconnect Channel 1 before the no-signal step, checks the counter answers after it,
+     connected was the hook-up: step 5 read 10 MHz as 9 999 999.690 Hz (-0.031 ppm, internal Option 010 time base), Std Dev 5.2 mHz, 100 readings. The bench script now asks to disconnect Channel 1 before the no-signal step, checks the counter answers after it,
      and fails stage 3 unless the Mean is within 1 ppm of 10 MHz. Simulator opt-in `open_input_noise_hz`.
-- NOT run on the bench yet (the abort and the procedure after these changes).
+- Bench script: every stage passes on the owner's 53220A (steps 4 and 5). The PROCEDURE has not been rerun since these changes.
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.

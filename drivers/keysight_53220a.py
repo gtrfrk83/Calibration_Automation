@@ -470,7 +470,7 @@ class Keysight53220A(SurpriseMixin, Instrument):
         """The readings did not complete within `wait` s.  Bench 2026-11-05 (owner's 53220A, k53220a_bench_20261105_110049): with no signal the counter does NOT
         return 9.91E37; it keeps waiting for edges, *OPC? never answers and every later command times out.  A device clear (IEEE 488.2 / VISA viClear) aborts the
         measurement and empties the output queue; *CLS then clears the status.  Raises InstrumentError ('no signal'), so a procedure offers a typed reading and the
-        counter answers the next point.  UNVERIFIED on the bench: that the device clear brings the 53220A back (the Programmer's Reference is not on file)."""
+        counter answers the next point.  Bench 2026-11-05 (k53220a_bench steps 4 and 5, build b24b268): after the abort the counter answered at once."""
         try:
             self.t.clear()
             self.send('status.clear')
