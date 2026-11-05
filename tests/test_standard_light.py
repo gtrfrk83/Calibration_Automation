@@ -49,7 +49,7 @@ class Sheet(unittest.TestCase):
             printed, hi, unit, pct = PRINTED[r['kind']]
             with self.subTest(kind=r['kind']):
                 self.assertEqual((r['amp_lo'], r['amp_hi'], r['unit']), (0.0, hi, unit))        # stored as printed, nothing converted
-                self.assertEqual(r['direction'], 'output')
+                self.assertEqual(r['direction'], 'input')
                 self.assertEqual(len(r['specs']), 1)
                 self.assertEqual(r['specs'][0]['period'], '1 yr')
         printed = {rng['kind']: rng['printed'] for f in self.data['functions'] for rng in f['ranges']}
@@ -105,14 +105,15 @@ class Sheet(unittest.TestCase):
         self.assertEqual(sm.classify('Voltage, DC')[0], 'DCV')
 
     def test_lookup_in_each_unit_is_its_own(self):
-        h = self.s.lookup('LUX', 10000.0)
+        h = self.s.lookup('LUX', 10000.0, direction='input')
         self.assertAlmostEqual(h.limit, 290.0, 9)
         self.assertEqual(h.row['unit'], 'lux')
-        self.assertAlmostEqual(self.s.lookup('FC', 1000.0).limit, 29.0, 9)
-        self.assertAlmostEqual(self.s.lookup('LAMBERT', 50000.0).limit, 1450.0, 9)
-        self.assertAlmostEqual(self.s.lookup('UVIRR', 1000.0).limit, 50.0, 9)
-        self.assertIsNone(self.s.lookup('LUX', 35001.0))                                        # no extrapolation
+        self.assertAlmostEqual(self.s.lookup('FC', 1000.0, direction='input').limit, 29.0, 9)
+        self.assertAlmostEqual(self.s.lookup('LAMBERT', 50000.0, direction='input').limit, 1450.0, 9)
+        self.assertAlmostEqual(self.s.lookup('UVIRR', 1000.0, direction='input').limit, 50.0, 9)
+        self.assertIsNone(self.s.lookup('LUX', 35001.0, direction='input'))                                        # no extrapolation
         self.assertIsNone(self.s.lookup('DCV', 1.0))
+        self.assertIsNone(self.s.lookup('LUX', 10000.0))                                        # 'Light - Measure': no 'output' (sourcing) rows
 
     def test_budget_for_a_lux_point_is_the_cmc(self):
         b = ub.build('LUX', 10000.0, 'lux', standard=self.s, scope=None)
