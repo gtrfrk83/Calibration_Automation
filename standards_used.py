@@ -292,21 +292,30 @@ class Assignment:
         return dict(standards=self.uses(), basis=self.basis, candidates=[c.as_dict() for c in self.candidates], tie_break=self.tie_break, why=(('SIMULATED RUN - not evidence. ' if self.demo else '') + self.why), gap=self.gap, unlisted=self.unlisted, demo=self.demo)
 
 
-def assign(listed, observed, covers, exclude=(), engine_default=None) -> Assignment:
+def is_uut(s, exclude=(), uut_asset='') -> bool:
+    """A listed standard that is really the unit under test.  With the UUT's asset number entered: only an entry with THAT asset number (a same-model second instrument with another
+    asset is a standard).  Without it: the model rule (every listed entry of the UUT's model)."""
+    if s.model not in exclude:
+        return False
+    ua = str(uut_asset or '').strip()
+    return True if not ua else s.asset.strip().lower() == ua.lower()
+
+
+def assign(listed, observed, covers, exclude=(), engine_default=None, uut_asset='') -> Assignment:
     """listed   StandardsUsed (the candidates, in tie-break order)
     observed    [model key] seen on the wire for this point, or None when the engine / point has no capture
     covers      callable(StandardUse) -> text of the spec row that covers the point (truthy) or ''   (spec-row coverage: kind, amplitude, frequency band, direction)
-    exclude     model keys never counted as observed (the unit under test's own model)
+    exclude     model keys of the unit under test; uut_asset its asset number: see is_uut (asset match when entered, else the model rule)
     engine_default  the standard the engine itself used for the point: with no capture it stays the assumed one when it is listed and covers the point
     Returns the Assignment: observed use wins; with none the first listed standard that covers the point is ASSUMED."""
     a = Assignment()
-    cov = [(s, covers(s)) for s in listed]
+    cov = [(s, covers(s)) for s in listed if not is_uut(s, exclude, uut_asset)]
     a.candidates = [s for s, t in cov if t]
     text = {id(s): t for s, t in cov}
     if not a.candidates:
         a.gap, a.why = True, 'no listed standard has a specification row for this point'
         return a
-    seen = [m for m in (observed or []) if m not in exclude]
+    seen = list(observed or [])                      # the wire gives a model, not an asset: a model counts when a non-UUT entry of it is a candidate (the pools below)
     prim_pool = [s for s in a.candidates if s.role in PRIMARY_ROLES]
     sec_pool = [s for s in a.candidates if s.role in SECOND_ROLES]
     hit = next(((m, s) for m in seen for s in prim_pool if s.model == m), None)

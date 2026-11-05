@@ -215,6 +215,44 @@ class Assign(unittest.TestCase):
         self.assertEqual(a.primary.model, '5560A')
         self.assertIsNone(a.second)
 
+    def test_uut_asset_number_decides_when_entered(self):
+        L = su.StandardsUsed([dict(model='34461A', asset='A-100', role='measure'), dict(model='34461A', asset='A-200', role='measure'), dict(model='5560A')])
+        cov = self.covers({'34461A', '5560A'})
+        seen = ['5560A', '34461A']
+        # same model, different asset: still a standard
+        a = su.assign(L, seen, cov, exclude=('34461A',), uut_asset='A-100')
+        self.assertEqual((a.primary.model, a.second.model, a.second.asset), ('5560A', '34461A', 'A-200'))
+        # same asset: excluded (and not offered as a candidate either)
+        b = su.assign(L, seen, cov, exclude=('34461A',), uut_asset='A-200')
+        self.assertEqual(b.second.asset, 'A-100')
+        only = su.StandardsUsed([dict(model='34461A', asset='A-100', role='measure'), dict(model='5560A')])
+        c = su.assign(only, seen, cov, exclude=('34461A',), uut_asset='a-100')          # case-insensitive
+        self.assertIsNone(c.second)
+        self.assertNotIn('34461A', [x.model for x in c.candidates])
+        # a listed entry with no asset is not the UUT when the UUT asset is known
+        d = su.assign(su.StandardsUsed([dict(model='34461A', role='measure'), dict(model='5560A')]), seen, cov, exclude=('34461A',), uut_asset='A-100')
+        self.assertEqual(d.second.model, '34461A')
+
+    def test_no_uut_asset_falls_back_to_the_model_rule(self):
+        L = su.StandardsUsed([dict(model='34461A', asset='A-200', role='measure'), dict(model='5560A')])
+        a = su.assign(L, ['5560A', '34461A'], self.covers({'34461A', '5560A'}), exclude=('34461A',), uut_asset='')
+        self.assertIsNone(a.second)
+        self.assertEqual(a.primary.model, '5560A')
+
+    def test_the_review_passes_the_uut_asset_through(self):
+        app, _T = TR.truevolt_app()
+        specs, default = M.specs_for(app)
+        L = su.StandardsUsed([dict(model='5560A', asset='A-1'), dict(model='5790B', asset='A-5', role='measure')])
+        obs = {r.spec.step: ['5560A', '5790B'] for r in M.ReviewModel(specs, default).rows}
+        m = M.ReviewModel(specs, default)
+        m.apply_standards(L, obs, False, ('5790B',), 'A-5')                 # the 5790B IS the unit under test
+        self.assertFalse([r for r in m.rows if r.cur.second])
+        m2 = M.ReviewModel(specs, default)
+        m2.apply_standards(L, obs, False, ('5790B',), 'A-999')              # a different instrument of that model
+        self.assertTrue([r for r in m2.rows if r.cur.second == '5790B'])
+        m2.reset()                                                          # reset re-applies with the same UUT asset
+        self.assertTrue([r for r in m2.rows if r.cur.second == '5790B'])
+
     def test_gap(self):
         a = su.assign(su.StandardsUsed([dict(model='5560A')]), ['5560A'], self.covers(set()))
         self.assertTrue(a.gap)

@@ -118,7 +118,7 @@ def _standards_annotate(model, app):
         import standards_used as su
         su.install()
         uut = su.model_of_label(getattr(sys.modules.get(type(app).__module__), 'MODEL', '') or '')
-        model.run_info = (su.observed_for(app), is_demo(app), (uut,) if uut else ())          # what the window needs to apply a list chosen later
+        model.run_info = (su.observed_for(app), is_demo(app), (uut,) if uut else (), asset_of(app))          # what the window needs to apply a list chosen later
         listed = su.session_list()
         if listed:
             model.apply_standards(listed, *model.run_info)

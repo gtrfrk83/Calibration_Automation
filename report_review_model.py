@@ -534,13 +534,13 @@ class ReviewModel:
             self.apply_standards(*self._applied)
 
     # ---- standards from the run (standards_used)
-    def apply_standards(self, listed, observed=None, demo=False, exclude=()):
+    def apply_standards(self, listed, observed=None, demo=False, exclude=(), uut_asset=''):
         """Attach the owner's list and the run's observed use: every row gets an Assignment (observed / assumed, why, tie-break).  Numbers change only where the run
         shows something the engine's own default does not already say: a different observed standard (row standard follows it) or a SECOND observed standard (its u
         joins the budget in RSS).  A row whose observed standard is the engine's default prints exactly what it always printed.  An empty list does nothing.
         `observed` {point id: [model]} or None (no capture); rows the person set themselves are left alone."""
         import standards_used as su
-        self._applied = (listed, observed, demo, exclude)
+        self._applied = (listed, observed, demo, exclude, uut_asset)
         for r in self.rows:                                 # undo what an earlier application set (never a person's own pick)
             r.use = None
             if getattr(r, 'auto', False):
@@ -554,11 +554,11 @@ class ReviewModel:
             sp = r.spec
             seen = None if observed is None else observed.get(str(sp.step), [])
             if sp.calc is not None or sp.locked or not sp.q or sp.q.get('source') == 'none':
-                r.use = _fixed_use(sp, listed, seen, exclude, locked=bool(sp.locked))
+                r.use = _fixed_use(sp, listed, seen, exclude, locked=bool(sp.locked), uut_asset=uut_asset)
                 continue
             def covers(s, q=sp.q):
                 return coverage_text(q, s)
-            a = su.assign(listed, seen, covers, exclude, engine_default=sp.default_std)
+            a = su.assign(listed, seen, covers, exclude, engine_default=sp.default_std, uut_asset=uut_asset)
             a.demo = bool(demo)
             r.use = a
             if r.manual is not None or r.typed is not None or a.primary is None:
@@ -694,14 +694,14 @@ def use_divisor(model) -> str:
         return 'unknown'
 
 
-def _fixed_use(sp, listed, seen, exclude, locked=False):
+def _fixed_use(sp, listed, seen, exclude, locked=False, uut_asset=''):
     """The Assignment of a row the review cannot re-evaluate (oscilloscope / generator adapters, locked rows): the engine's own standard, listed or not.  No number changes."""
     import standards_used as su
     a = su.Assignment()
     if not sp.default_std:
         a.why = 'no standard applies to this point' if locked else 'the engine prints this point from the lab scope or a fixed source'
         return a
-    ent = next(iter(listed.find(sp.default_std)), None)
+    ent = next((e for e in listed.find(sp.default_std) if not su.is_uut(e, exclude, uut_asset)), None)
     if ent is None:
         a.unlisted = True
         a.why = f'the engine used {sp.default_std}, which is not in the list'
