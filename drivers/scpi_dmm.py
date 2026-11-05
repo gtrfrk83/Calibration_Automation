@@ -90,6 +90,12 @@ class ScpiDmm(Instrument):
     def configure_frequency(self):
         self.send('conf.freq')
 
+    def check_errors(self, context: str = ''):
+        """SYST:ERR? (read-only). Raises if the meter's error queue is not empty, so a rejected command stops the run."""
+        reply = self.ask('err.query').strip()
+        if reply.split(',')[0].strip() not in ('0', '+0', '-0'):
+            raise InstrumentError(f'{self.MODEL} reported an error{" after " + context if context else ""}: {reply}')
+
     def read(self) -> float:
         """READ? -> first field as a float; rejects non-finite or overload (9.9E37) values."""
         raw = self.ask('read').strip().split(',')[0]
@@ -120,10 +126,81 @@ CAL_COMMANDS = {
 }
 
 
+# Commands the 8846A verification adds for the AC filter, the frequency function and the 2-wire null (owner bench work, Oct 2026).
+# All UNVERIFIED: taken from the 8845A/8846A programming manual and the 34401A / Truevolt command sets, not from a recorded 8846A reply.
+_VREF = 'Fluke 8845A/8846A programming manual and the 34401A / Truevolt command sets; not confirmed by a recorded 8846A reply'
+VERIFY_COMMANDS = {
+    'band.set': Cmd('DET:BAND {hz:g}', 'AC filter', 'AC detector bandwidth 3, 20 or 200 Hz (3 Hz = slow filter; CONF:VOLT:AC resets it)',
+                    placeholders={'hz': Placeholder('float', 'g', 3.0)}, kind='set', verified=False, ref=_VREF),
+    'band.query': Cmd('DET:BAND?', 'AC filter read-back', 'Reads the AC detector bandwidth back', kind='query', verified=False, ref=_VREF),
+    'freq.gate': Cmd('FREQ:APER {gate:g}', 'Frequency gate time', 'Gate (aperture) time of the frequency function, seconds',
+                     placeholders={'gate': Placeholder('float', 'g', 1.0)}, kind='set', verified=False, ref=_VREF),
+    'freq.range': Cmd('FREQ:VOLT:RANG {range:g}', 'Frequency input range', 'Voltage range of the frequency input',
+                      placeholders={'range': Placeholder('float', 'g', 10.0)}, kind='set', verified=False, ref=_VREF),
+    'null.func': Cmd('CALC:FUNC NULL', 'Math function: null', 'Selects the null (relative) math function', kind='set', verified=False, ref=_VREF),
+    'null.offset': Cmd('CALC:NULL:OFFS {offset:.9g}', 'Null offset', 'The value subtracted from the readings while the null is on',
+                       placeholders={'offset': Placeholder('float', '.9g', 0.0)}, kind='set', verified=False, ref=_VREF),
+    'null.offset.query': Cmd('CALC:NULL:OFFS?', 'Null offset read-back', 'Reads the null offset back', kind='query', verified=False, ref=_VREF),
+    'null.on': Cmd('CALC:STAT ON', 'Null on', 'Switches the math function on', kind='set', verified=False, ref=_VREF),
+    'null.off': Cmd('CALC:STAT OFF', 'Null off', 'Switches the math function off', kind='set', verified=False, ref=_VREF),
+    'null.state.query': Cmd('CALC:STAT?', 'Null state', 'Reads whether the math function is on', kind='query', verified=False, ref=_VREF),
+}
+
+
 class Fluke8846A(ScpiDmm):
     MODEL = 'Fluke 8846A'
     IDN_MATCH = ('8846',)
-    COMMANDS = CAL_COMMANDS
+    COMMANDS = {**CAL_COMMANDS, **VERIFY_COMMANDS}
+
+    def configure_frequency_point(self, voltage_range: float):
+        """Frequency function: CONF:FREQ, the 3 Hz filter (sets the lowest frequency; DET:BAND is the command the
+        8846A already accepts and reads back for the AC points), 1 s gate, input voltage range.
+        UNVERIFIED on the 8846A: FREQ:APER and FREQ:VOLT:RANG come from the 34401A / Truevolt sets. The error
+        queue is cleared first and read after EACH command, so a rejection names the exact command. Writes are not retried."""
+        self.send('status.clear')
+        self.send('conf.freq')
+        self.check_errors('CONF:FREQ')
+        self.set_ac_filter(3)
+        self.check_errors('DET:BAND 3')
+        self.send('freq.gate', gate=1)
+        self.check_errors('FREQ:APER 1')
+        self.send('freq.range', range=voltage_range)
+        self.check_errors(f'FREQ:VOLT:RANG {voltage_range:g}')
+
+    def null_on(self, offset: float):
+        """Null the present function: CALC:FUNC NULL, CALC:NULL:OFFS <offset>, CALC:STAT ON. The offset and the state are
+        read back and compared, and SYST:ERR? is read after each command, so a rejected or ignored command stops the run.
+        UNVERIFIED on the 8846A (command set taken from the 34401A / Truevolt family). Writes are not retried."""
+        self.send('status.clear')
+        self.send('null.func')
+        self.check_errors('CALC:FUNC NULL')
+        self.send('null.offset', offset=offset)
+        self.check_errors('CALC:NULL:OFFS')
+        got = float(self.ask('null.offset.query').strip().split(',')[0])
+        if abs(got - offset) > 1e-6 * max(abs(offset), 1e-3):
+            raise InstrumentError(f'{self.MODEL} null offset reads back {got:.9g}, expected {offset:.9g}')
+        self.send('null.on')
+        self.check_errors('CALC:STAT ON')
+        if self.ask('null.state.query').strip().lstrip('+') not in ('1', '1.0'):
+            raise InstrumentError(f'{self.MODEL} did not report the null function on')
+
+    def null_off(self):
+        """CALC:STAT OFF, checked with SYST:ERR? and CALC:STAT?, so the null never carries over to another point."""
+        self.send('null.off')
+        self.check_errors('CALC:STAT OFF')
+        if self.ask('null.state.query').strip().lstrip('+') not in ('0', '0.0'):
+            raise InstrumentError(f'{self.MODEL} did not report the null function off')
+
+    def set_ac_filter(self, hz: float = 3.0):
+        """DET:BAND <hz> (3, 20 or 200), then read it back with DET:BAND? and compare. UNVERIFIED on hardware:
+        the command and its reply format come from the 8845A/8846A programming manual, not from a bench run.
+        CONF:VOLT:AC resets the filter, so call this after configure(). A write is never retried."""
+        if hz not in (3, 20, 200):
+            raise InstrumentError(f'AC filter must be 3, 20 or 200 Hz, not {hz}')
+        self.send('band.set', hz=hz)
+        got = float(self.ask('band.query').strip().split(',')[0])
+        if abs(got - hz) > 1e-6 * max(hz, 1):
+            raise InstrumentError(f'{self.MODEL} AC filter reads back {got:g} Hz, expected {hz:g} Hz')
 
     # ---- calibration / adjustment interface (Fluke 8845A/8846A Calibration Manual) ------------------
     # Safety-critical: these change the meter's calibration. Replies are checked exactly as the

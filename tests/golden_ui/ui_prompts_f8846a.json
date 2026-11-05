@@ -113,32 +113,43 @@
  ],
  "first_prompt_cancelled": [
   {
-   "kind": "info",
-   "title": "Connected (DEMO)",
-   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
    "buttons": [
     "OK"
-   ]
+   ],
+   "kind": "info",
+   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
   },
   {
-   "kind": "ask_ok_cancel",
-   "title": "Reset instruments",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "answer": true,
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "answer": true
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
   },
   {
-   "kind": "operator_prompt",
-   "title": "Zero offset — physical setup required",
-   "text": "Zero-offset setup: FRONT terminals",
+   "answer": false,
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "1 of 134"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "image": "hook_8846A_5560A_SHORT.png",
+   "kind": "operator_prompt",
    "steps": [
     [
      "Select terminals",
@@ -149,49 +160,49 @@
      "Install the manual-prescribed low-thermal short/shorted leads. Do NOT use the 5560A as a zero source."
     ]
    ],
-   "facts": [
-    [
-     "Point",
-     "1 of 135"
-    ],
-    [
-     "Terminals",
-     "FRONT"
-    ]
-   ],
-   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "hook_8846A_5560A_SHORT.png",
-   "answer": false
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
   }
  ],
  "high_voltage_refused": [
   {
-   "kind": "info",
-   "title": "Connected (DEMO)",
-   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
    "buttons": [
     "OK"
-   ]
+   ],
+   "kind": "info",
+   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
   },
   {
-   "kind": "ask_ok_cancel",
-   "title": "Reset instruments",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "answer": true,
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "answer": true
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
   },
   {
-   "kind": "operator_prompt",
-   "title": "Zero offset — physical setup required",
-   "text": "Zero-offset setup: FRONT terminals",
+   "answer": true,
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "1 of 134"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "image": "hook_8846A_5560A_SHORT.png",
+   "kind": "operator_prompt",
    "steps": [
     [
      "Select terminals",
@@ -202,59 +213,119 @@
      "Install the manual-prescribed low-thermal short/shorted leads. Do NOT use the 5560A as a zero source."
     ]
    ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
    "facts": [
     [
      "Point",
-     "1 of 135"
+     "83 of 134"
     ],
     [
      "Terminals",
      "FRONT"
     ]
    ],
-   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "hook_8846A_5560A_SHORT.png",
-   "answer": true
+   "image": "hook_8846A_5560A_OPEN.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Use the front-panel FRONT/REAR switch to select the FRONT terminals."
+    ],
+    [
+     "Set up the input",
+     "Leave CURRENT input OPEN (no calibrator connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
   },
   {
-   "kind": "ask_yes_no",
-   "title": "HIGH VOLTAGE — 1000 V",
-   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "2 of 134"
+    ],
+    [
+     "Test",
+     "DCV 0.1 V (range 0.1)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_VOLT.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 8846A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for DCV tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
    "buttons": [
     "Yes",
     "No"
    ],
-   "answer": false
+   "kind": "ask_yes_no",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
   }
  ],
  "virtual_run": [
   {
-   "kind": "info",
-   "title": "Connected (DEMO)",
-   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
    "buttons": [
     "OK"
-   ]
+   ],
+   "kind": "info",
+   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
   },
   {
-   "kind": "ask_ok_cancel",
-   "title": "Reset instruments",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "answer": true,
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "answer": true
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
   },
   {
-   "kind": "operator_prompt",
-   "title": "Zero offset — physical setup required",
-   "text": "Zero-offset setup: FRONT terminals",
+   "answer": true,
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "1 of 134"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "image": "hook_8846A_5560A_SHORT.png",
+   "kind": "operator_prompt",
    "steps": [
     [
      "Select terminals",
@@ -265,47 +336,344 @@
      "Install the manual-prescribed low-thermal short/shorted leads. Do NOT use the 5560A as a zero source."
     ]
    ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
    "facts": [
     [
      "Point",
-     "1 of 135"
+     "83 of 134"
     ],
     [
      "Terminals",
      "FRONT"
     ]
    ],
-   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "hook_8846A_5560A_SHORT.png",
-   "answer": true
+   "image": "hook_8846A_5560A_OPEN.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Use the front-panel FRONT/REAR switch to select the FRONT terminals."
+    ],
+    [
+     "Set up the input",
+     "Leave CURRENT input OPEN (no calibrator connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
   },
   {
-   "kind": "ask_yes_no",
-   "title": "HIGH VOLTAGE — 1000 V",
-   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "2 of 134"
+    ],
+    [
+     "Test",
+     "DCV 0.1 V (range 0.1)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_VOLT.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 8846A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for DCV tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
    "buttons": [
     "Yes",
     "No"
    ],
-   "answer": true
+   "kind": "ask_yes_no",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
   },
   {
-   "kind": "ask_yes_no",
-   "title": "HIGH VOLTAGE — 1000 V",
-   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "answer": true,
    "buttons": [
     "Yes",
     "No"
    ],
-   "answer": true
+   "kind": "ask_yes_no",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
   },
   {
-   "kind": "error",
-   "title": "Measurement stopped",
-   "text": "AC filter and Fluke source setup must be lab-verified before automatic output is enabled.",
+   "answer": true,
    "buttons": [
-    "OK"
-   ]
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.",
+   "title": "HIGH VOLTAGE — 750 V AC"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.",
+   "title": "HIGH VOLTAGE — 750 V AC"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.",
+   "title": "HIGH VOLTAGE — 750 V AC"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "48 of 134"
+    ],
+    [
+     "Test",
+     "OHM4 10 ohm (range 10)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_RES4.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "58 of 134"
+    ],
+    [
+     "Test",
+     "OHM2 100 ohm (range 100)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_RES2.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "74 of 134"
+    ],
+    [
+     "Test",
+     "CAP 1e-09 F (range 1e-09)"
+    ]
+   ],
+   "image": "fluke8846a_panel.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect capacitance fixture; verify OPEN compensation and meter setup per manual."
+    ]
+   ],
+   "text": "Connect for CAP tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "84 of 134"
+    ],
+    [
+     "Test",
+     "DCI 0.0001 A (range 0.0001)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_I_400MA.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Move leads to 8846A CURRENT input and LO (and, if coming from the 10 A points, back to the calibrator's LOW-current output terminals). Check fuses and current ratings."
+    ]
+   ],
+   "text": "Connect for DCI tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "105 of 134"
+    ],
+    [
+     "Test",
+     "DCI 10 A (range 10)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_I_10A.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Move the calibrator leads from its LOW-current output terminals to its HIGH-current output terminals (AUX), and the meter leads to the 10 A input. Check fuses, lead rating and current ratings before continuing."
+    ]
+   ],
+   "text": "Connect for DCI tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "108 of 134"
+    ],
+    [
+     "Test",
+     "ACI 0.0001 A @ 1000 Hz (range 0.0001)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_I_400MA.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Move leads to 8846A CURRENT input and LO (and, if coming from the 10 A points, back to the calibrator's LOW-current output terminals). Check fuses and current ratings."
+    ]
+   ],
+   "text": "Connect for ACI tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "134 of 134"
+    ],
+    [
+     "Test",
+     "ACI 10 A @ 45 Hz (range 10)"
+    ]
+   ],
+   "image": "hook_8846A_5560A_I_10A.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Move the calibrator leads from its LOW-current output terminals to its HIGH-current output terminals (AUX), and the meter leads to the 10 A input. Check fuses, lead rating and current ratings before continuing."
+    ]
+   ],
+   "text": "Connect for ACI tests",
+   "title": "Rewire / verify before enabling output"
   }
  ]
 }

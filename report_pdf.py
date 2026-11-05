@@ -344,7 +344,7 @@ def point_uncertainty(p, standard=None) -> str:
     Without `standard` this is the scope CMC.  With the calibrator that applied the point (model text such as '5522A', see specmanager) the
     value is the larger of the budget built from that standard's published specification and the CMC, rounded up: never below the CMC."""
     sc = scope()
-    if sc is None or p.get('source') == 'none':      # zero-offset points (short / open input) use no source, so no source CMC applies
+    if sc is None or p.get('zero_offset') or p.get('source') == 'none':      # zero-offset points (short / open input) use no source, so no source CMC applies and no uncertainty is shown
         return ''
     import uncertainty
     unit = 'ohm' if p['kind'].startswith('OHM') else p['unit']
