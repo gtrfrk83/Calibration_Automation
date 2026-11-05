@@ -373,5 +373,40 @@ class NoFingerprintedFileIsEdited(unittest.TestCase):
                 self.assertNotIn(f'"{f}"', side, f'{f} is in a verified procedure fingerprint')
 
 
+class OfferedStandards(unittest.TestCase):
+    """The Standard drop-down also offers 5700A / 33250A / 96270A where their sheet covers the point (owner decision); today's numbers do not move."""
+
+    def test_new_sources_are_offered_only_where_the_sheet_covers_and_the_old_order_is_kept(self):
+        self.assertEqual(M.SOURCE_STANDARDS[:3], ('5560A', '5522A', '5520A'))
+        self.assertEqual(M.SOURCE_STANDARDS[3:], ('5700A', '33250A', '96270A'))
+        app, _T = TR.truevolt_app(n=40)
+        specs, default = M.specs_for(app)
+        seen_new = set()
+        for s in specs:
+            if s.locked:
+                continue
+            opts = M.offered_standards(s)
+            self.assertEqual([o for o in opts if o in ('5560A', '5522A', '5520A')], [o for o in ('5560A', '5522A', '5520A') if o in opts])
+            self.assertIn(s.default_std, opts)
+            for o in opts:
+                if o in ('5700A', '33250A', '96270A'):
+                    seen_new.add(o)
+                    import uncertainty_budget as ub
+                    b = ub.build(s.q['kind'], s.q['nominal'], M._unit_of(s.q), standard=o, frequency=s.q.get('frequency'), scope=M.scope(), range_value=s.q.get('range'))
+                    self.assertIsNotNone(b.hit, (o, s.description))           # offered only where the sheet has a row
+                    e = M.evaluate(s, o)
+                    if e.cmc is not None and e.reported is not None:
+                        self.assertGreaterEqual(e.reported, e.cmc * (1 - 1e-12))
+        self.assertIn('5700A', seen_new)
+
+    def test_default_rows_print_the_same_with_the_longer_list(self):
+        for app in (TR.truevolt_app()[0],):
+            specs, default = M.specs_for(app)
+            m = M.ReviewModel(specs, default, asset='A-100')
+            for r in m.rows:
+                if not r.changed:
+                    self.assertEqual(r.reported_text, r.spec.printed.get('Uncertainty', r.cur.unc_text))
+
+
 if __name__ == '__main__':
     unittest.main()

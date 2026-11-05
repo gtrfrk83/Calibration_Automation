@@ -22,8 +22,8 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 
 FORMAT_VERSION = 1
-SOURCE_STANDARDS = ('5560A', '5522A', '5520A')                     # calibrators that SOURCE a point for the multimeter engines (uncertainty_budget direction 'output')
-LABELS = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A', 'A2LA-5500A-COIL': 'Fluke 5500A/COIL (50 turns)'}
+SOURCE_STANDARDS = ('5560A', '5522A', '5520A', '5700A', '33250A', '96270A')                     # calibrators that SOURCE a point for the multimeter engines (uncertainty_budget direction 'output')
+LABELS = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A', '5700A': 'Fluke 5700A', '33250A': 'Keysight 33250A', '96270A': 'Fluke 96270A', 'A2LA-5500A-COIL': 'Fluke 5500A/COIL (50 turns)'}
 LOCKED_FREQUENCY = 'Lab frequency'
 
 AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, NO_UNC = 'As budgeted', 'Raised to scope', 'Not in scope', 'Standard changed', 'No uncertainty required'
