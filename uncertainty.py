@@ -101,7 +101,7 @@ class Scope:
             hits = [_u(b, 0.0) for b in _tc_bands(entry, tc) if _temp_in(nominal, b)]       # '(> lo to hi)' bands: an edge belongs to the lower band
             return max(hits) if hits else None
         value = abs(nominal)
-        if kind == 'ACV':
+        if kind in ('ACV', 'POWAC'):     # AC power: bands by the generated watts and the frequency (scope line valid at PF = 1 only)
             return self._ac(entry, value, value, frequency, by_range=False)
         if kind == 'ACI':
             return self._ac(entry, value, value if range_value is None else range_value, frequency, by_range=range_value is not None)
@@ -154,10 +154,10 @@ class Scope:
         unit = _SCOPE_UNIT.get(kind, '')
         value = abs(nominal)
         best = None
-        if kind in ('ACV', 'ACI'):
+        if kind in ('ACV', 'ACI', 'POWAC'):
             if frequency is None:
                 return ''
-            selector = value if (kind == 'ACV' or range_value is None) else range_value
+            selector = value if (kind != 'ACI' or range_value is None) else range_value
             by_range = kind == 'ACI' and range_value is not None
             for block in entry['ranges']:
                 if (block['lo'] <= selector <= block['hi']):
@@ -178,7 +178,7 @@ class Scope:
             return ''
         band = best[1]
         parts = []
-        as_percent = kind in ('ACV', 'ACI', 'CAP')           # the AC tables are printed in % of reading (0.39 % + 80 nA); the DC ones per unit (8.9 µV/V + 0.8 µV)
+        as_percent = kind in ('ACV', 'ACI', 'CAP', 'POWAC')           # the AC tables are printed in % of reading (0.39 % + 80 nA); the DC ones per unit (8.9 µV/V + 0.8 µV)
         if band.get('rel'):
             parts.append(f"{float(band['rel']) * 100:.6g} %" if as_percent else _si_text(band['rel'], f'{unit}/{unit}' if unit else ''))
         if band.get('abs'):
@@ -236,7 +236,7 @@ class Scope:
         return None, '', 'no scope entry for this test (e.g. RMS noise)'
 
 
-_SCOPE_UNIT = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM': 'Ohm', 'CAP': 'F', 'FREQ': 'Hz'}
+_SCOPE_UNIT = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM': 'Ohm', 'CAP': 'F', 'FREQ': 'Hz', 'POWAC': 'W'}
 
 
 def _si_text(value, unit):

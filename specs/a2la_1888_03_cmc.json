@@ -5005,6 +5005,81 @@
     }
    ],
    "basis": "measure"
+  },
+  {
+   "parameter": "AC Power \u2013 Generate",
+   "kind": "POWAC",
+   "standard": "Multifunction calibrator",
+   "notes": "Bands by the generated power (W) at (45 to 65) Hz and PF = 1 only (footnote 3 of the scope heading: text not transcribed, UNVERIFIED). Added 2026-11-05 from the owner's screenshot of the scope; page number not recorded.",
+   "ranges": [
+    {
+     "lo": 0.01,
+     "hi": 0.1,
+     "rows": [
+      {
+       "f_lo": 45.0,
+       "f_hi": 65.0,
+       "rel": 0.0023,
+       "abs": 0.0,
+       "rng": 0.0
+      }
+     ]
+    },
+    {
+     "lo": 0.1,
+     "hi": 890.0,
+     "rows": [
+      {
+       "f_lo": 45.0,
+       "f_hi": 65.0,
+       "rel": 0.0013,
+       "abs": 0.0,
+       "rng": 0.0
+      }
+     ]
+    },
+    {
+     "lo": 890.0,
+     "hi": 3000.0,
+     "rows": [
+      {
+       "f_lo": 45.0,
+       "f_hi": 65.0,
+       "rel": 0.0013,
+       "abs": 0.0,
+       "rng": 0.0
+      }
+     ]
+    },
+    {
+     "lo": 3000.0,
+     "hi": 20500.0,
+     "rows": [
+      {
+       "f_lo": 45.0,
+       "f_hi": 65.0,
+       "rel": 0.0013,
+       "abs": 0.0,
+       "rng": 0.0
+      }
+     ]
+    },
+    {
+     "lo": 20500.0,
+     "hi": 120000.0,
+     "rows": [
+      {
+       "f_lo": 45.0,
+       "f_hi": 65.0,
+       "rel": 0.001,
+       "abs": 0.0,
+       "rng": 0.0
+      }
+     ]
+    }
+   ],
+   "basis": "generate",
+   "pf": 1.0
   }
  ],
  "oscilloscope": {

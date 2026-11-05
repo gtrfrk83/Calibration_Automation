@@ -80,7 +80,7 @@ class Transcription(unittest.TestCase):
         self.assertIn('rendered page images', self.entry['notes'])
 
     def test_entry_count_and_kinds_unchanged(self):
-        self.assertEqual(len(self.data['entries']), 15)
+        self.assertEqual(len(self.data['entries']), 16)                      # 15 + AC Power - Generate (specs/build_a2la_cmc_power.py)
         self.assertEqual([e['kind'] for e in self.data['entries']].count('TEMP'), 1)
 
 
