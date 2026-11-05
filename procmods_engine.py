@@ -124,6 +124,7 @@ for _key, _default, _what in (('zero', 1.5, 'settle before a zero-offset reading
     _t('a34410a', 'settle.' + _key, _default, 0.2, 120.0, f'Keysight 34410A / 34411A: {_what}')
 _t('a53220a', 'settle.lh', 2.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle after the 96270A output is on (Leveling Head)')
 _t('a53220a', 'settle.mw', 3.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle after the 96270A output is on (Microwave O/P)')
+_t('a53220a', 'settle.sma', 2.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle after the R&S SMA100B RF output is on')
 _t('a53220a', 'settle.manual', 2.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle, stimulus from another standard')
 _t('fgen', 'settle.timebase', 2.0, 0.2, 120.0, 'Function generator: settle, time base')
 _t('fgen', 'settle.acamp', 1.0, 0.2, 120.0, 'Function generator: settle, AC amplitude')

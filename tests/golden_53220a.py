@@ -5,7 +5,7 @@ DRIVER_CASES['keysight_53220a'] (cases and resets).  The simulated counter is dr
 """
 from __future__ import annotations
 
-from drivers.keysight_53220a import AgilentAFGPulse, Keysight53210A, Keysight53220A, Keysight53230A
+from drivers.keysight_53220a import AgilentAFGPulse, Keysight53210A, Keysight53220A, Keysight53230A, SMA100BSource
 from drivers.simulated_fgen import make_fgen_bench
 from drivers.simulated_53220a import make_53220a_bench
 
@@ -18,6 +18,7 @@ COVERAGE = {
     'Keysight53210A': dict(covered=['connect', 'configure_point'], no_command=[]),         # inherited methods on the unverified command set; the microwave input is Channel 2
     'AgilentAFGPulse': dict(covered=['connect', 'pulse', 'output', 'cleanup', 'check_errors', 'reset_to_defaults'], no_command=[]),      # the 33250A as the pulse generator (User's Guide pp. 153-168)
     'Fluke96270AWide': dict(covered=[], no_command=[]),                                    # only MAX_HZ differs from Fluke96270A (its own fixture covers the commands)
+    'SMA100BSource': dict(covered=['connect', 'set_rf', 'check_error'], no_command=['max_hz']),   # the R&S SMA100B as the RF source (rs_sma100b fixture covers its commands)
 }
 
 
@@ -96,3 +97,14 @@ def driver_cases(c):
     gbench.gen['stuck_on'] = False
     c.run('AgilentAFGPulse.cleanup', g.cleanup)
     c.run('AgilentAFGPulse.reset_to_defaults', g.reset_to_defaults)
+
+    sbench, _rf, _ct = make_53220a_bench('53220A', 'USB')                                           # the R&S SMA100B as the RF source, on its simulated twin (owner's options)
+    s = c.inst(SMA100BSource, sbench.sma_transport, opened=False, label='SMA100B')
+    c.run('SMA100BSource.connect', s.connect)
+    c.run('SMA100BSource.set_rf[10 MHz +7 dBm]', s.set_rf, 10e6, 7.0)
+    c.run('SMA100BSource.set_rf[5.88 GHz -27 dBm]', s.set_rf, 5.88e9, -27.0)
+    c.run('SMA100BSource.set_rf[40 GHz refused]', s.set_rf, 40e9, -10.0)
+    c.run('SMA100BSource.set_rf[above the level limit refused]', s.set_rf, 1e9, 21.0)
+    sbench.sma_transport.errors.append('-222,"Data out of range"')
+    c.run('SMA100BSource.check_error[error queued]', s.check_error, 'ctx')
+    c.run('SMA100BSource.check_error[empty]', s.check_error, 'ctx')

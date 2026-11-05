@@ -3,7 +3,8 @@
 Test points and limits are NOT written in this file: they are loaded from specs/keysight_53220a_pv.json, built by specs/build_53220a_spec.py from the Keysight
 53210A/53220A/53230A Assembly Level Service Guide, chapter 1 Performance Tests (the record pages 90-99 carry the limits).  Two-way: the program configures the
 counter over USB, LAN or GPIB (set, read back, compare; the error queue is checked; nothing is written twice), makes 100 readings on one software trigger and judges the counter's
-own Mean or Std Dev.  Stimulus: the Fluke 96270A RF reference source where it can make the signal, otherwise the standard the operator connects (the prompt names it).
+own Mean or Std Dev.  Stimulus: the RF source chosen in the settings drawer (Fluke 96270A RF reference source or R&S SMA100B signal generator) where it can make the signal, otherwise the
+standard the operator connects (the prompt names it).
 Hardware I/O is OFF in demo mode.  Never run unattended: wiring confirmations are required.
 
     import keysight_53220a_verification
@@ -42,9 +43,13 @@ PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 INTERFACES = ('USB', 'LAN', 'GPIB')
 DEFAULT_ADDR = {'USB': 'USB0::0x0957::0x0000::MY00000000::INSTR', 'LAN': 'TCPIP0::192.168.0.10::inst0::INSTR', 'GPIB': 'GPIB0::3::INSTR'}      # UNVERIFIED examples: press Find instruments
 DEFAULT_RF_ADDR = 'GPIB0::4::INSTR'                                                                                                          # UNVERIFIED example
+DEFAULT_SMA_ADDR = 'GPIB1::28::INSTR'             # the owner's SMA100B on the bench 2026-11-05 (GPIB1::28; 28 is the factory preset, User Manual p. 788)
+# The RF source (owner 2026-11-05): the Fluke 96270A or the R&S SMA100B (drivers/rs_sma100b.py through k53.SMA100BSource).  One is connected per session; the address box remembers each.
+RF_SOURCE_CHOICES = ('Fluke 96270A', 'R&S SMA100B')
+RF_SOURCE_KEY = {RF_SOURCE_CHOICES[0]: '96270A', RF_SOURCE_CHOICES[1]: 'SMA100B'}
 TB_CHOICES = ('Standard time base', 'Option 010 (OCXO)')
 CH3_CHOICES = ('No microwave channel', 'Option 106 (6 GHz)', 'Option 115 (15 GHz)')
-STIM_CHOICES = ('Fluke 96270A where it can', 'Other standards for every test')
+STIM_CHOICES = ('RF source where it can', 'Other standards for every test')       # the RF source: RF_SOURCE_CHOICES (a saved 'Fluke 96270A where it can' falls back to the first: same meaning)
 PULSE_GEN_CHOICES = ('Pulse generator: Keysight 81134A or equivalent', 'Pulse generator: Agilent 33250A')
 # The Agilent 33250A as the pulse generator for Tests 4a, 4b and 5 (owner decision 2026-10-27).  From the Agilent 33250A User's Guide, read as page images (printed pages): pulse width
 # 8 ns minimum (p. 167, p. 320), edge time 5 ns minimum (p. 168), width at least 1.6 x edge time (p. 167), period 20 ns minimum (p. 166), 10 Vpp into 50 ohm (p. 320), ONE Output
@@ -52,12 +57,16 @@ PULSE_GEN_CHOICES = ('Pulse generator: Keysight 81134A or equivalent', 'Pulse ge
 # no pulse point of the chapter is within these limits, so no point is routed to it; tests/test_keysight_53220a_points.py fails if a point becomes feasible (it must then be routed).
 GEN_33250A = dict(name='Agilent 33250A', min_width_s=max(k53.PULSE_LIMITS['min_width_s'], 1.6 * k53.PULSE_LIMITS['min_edge_s']), min_edge_s=k53.PULSE_LIMITS['min_edge_s'],
                   min_period_s=k53.PULSE_LIMITS['min_period_s'], max_vpp=k53.PULSE_LIMITS['max_vpp'], outputs=1)
-REF_CHOICES = ('House 10 MHz standard', '96270A 10 MHz Ref Out')
+REF_CHOICES = ('House 10 MHz standard', 'RF source 10 MHz Ref Out')            # a saved '96270A 10 MHz Ref Out' falls back to the house standard
 # 96270A output routes: Leveling Head 1 mHz to 4.024 GHz, -130 to +24 dBm; Microwave O/P direct to 27 GHz, -4 to +24 dBm (-100 dBm with the Extended Low Level option).  The route is a
 # front-panel choice (no remote command is documented: UNVERIFIED), so the hook-up prompt names it.
 LH_MAX_HZ, MW_MAX_HZ = 4.024e9, 27e9
 LH_MIN_DBM, RF_MAX_DBM = -130.0, 24.0
 MW_MIN_DBM, MW_MIN_DBM_EXT = -4.0, -100.0     # the owner's 96270A has NO Extended Low Level (2026-10-27): above 4 GHz the Microwave O/P is used and its floor is -4 dBm
+# R&S SMA100B: ONE RF output for the whole range (no Leveling Head / Microwave O/P), 8 kHz up to the frequency option (k53.sma100b_max_hz).  Its level range depends on the options and
+# is in the specifications document, not on file: the plan does not gate the level beyond the input guard and POW:LIM? (read at connect); the generator refuses what it cannot make
+# (-222, read from the error queue before the output is switched on).  The owner's unit has B35 (high output power with the step attenuator, User Manual p. 228-230), so the 5.88 GHz
+# -27 dBm point needs no external attenuator with it.
 INPUT_CAP_DBM = 10.0           # the level at the counter input is never planned above this (a conservative guard, UNVERIFIED against the input damage level)
 GROUP_TITLE = {'TIMEBASE': 'absolute time base', 'CH1': 'Channel 1', 'CH2': 'Channel 2', 'CH3_LH': 'microwave channel (from the Leveling Head)', 'CH3_MW': 'microwave channel (from the Microwave O/P)',
                'PULSE_CH1': 'pulse width, Channel 1', 'PULSE_CH2': 'pulse width, Channel 2', 'TINT': 'time interval, Channel 1 to Channel 2', 'BURST': 'pulse burst frequency',
@@ -241,8 +250,9 @@ def pulse_shortfalls(st, gen=GEN_33250A):
 
 
 def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
-    """How a point is stimulated.  stim: dict(mode 'auto' | 'manual', rf True/False (a 96270A is connected), loss_db, ext_low, pulse_gen '81134A' | '33250A').
-    Returns dict(mode 'rf' | 'manual' | 'none', route 'LH' | 'MW' | None, level_set, atten_db, reason).  atten_db: the external attenuation the technician must fit after the 96270A
+    """How a point is stimulated.  stim: dict(mode 'auto' | 'manual', rf True/False (an RF source is connected), source '96270A' | 'SMA100B' (default 96270A), loss_db, ext_low (96270A only),
+    sma_max_hz / sma_limit_dbm (SMA100B, read at connect; None = not known yet), pulse_gen '81134A' | '33250A').
+    Returns dict(mode 'rf' | 'manual' | 'none', route 'LH' | 'MW' | 'SMA' | None, level_set, atten_db, reason).  atten_db: the external attenuation the technician must fit after the 96270A
     Microwave O/P when the level at the counter is below what that output can make (the level is kept as printed).  Raises ValueError when the level would exceed the input guard."""
     st = p['stimulus']
     g = st['group']
@@ -265,10 +275,20 @@ def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
     if g == 'BURST':
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
+    src = 'R&S SMA100B' if stim.get('source') == 'SMA100B' else '96270A'
     if stim.get('mode') != 'auto' or not stim.get('rf'):
-        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason='The selected stimulus is another standard' if stim.get('mode') != 'auto' else 'No 96270A is connected')
+        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason='The selected stimulus is another standard' if stim.get('mode') != 'auto' else f'No {src} is connected')
     f, loss = st['frequency'], float(stim.get('loss_db') or 0.0)
     level = cast(float, target) + loss          # (type only) every RF stimulus has a level_dbm; None here would raise TypeError as before
+    if stim.get('source') == 'SMA100B':
+        top, limit = stim.get('sma_max_hz'), stim.get('sma_limit_dbm')
+        if f < k53.SMA100B_MIN_HZ or (top is not None and f > top):
+            return dict(mode='manual', route=None, level_set=None, atten_db=0.0,
+                        reason=f'{_hz(f)} is outside the R&S SMA100B range ({k53.SMA100B_MIN_HZ / 1e3:g} kHz to {(top or 0) / 1e9:g} GHz with its frequency option)')
+        if limit is not None and level > limit:
+            return dict(mode='manual', route=None, level_set=None, atten_db=0.0,
+                        reason=f'{level:g} dBm is above the R&S SMA100B level limit ({limit:g} dBm, POW:LIM?; set on its front panel only)')
+        return dict(mode='rf', route='SMA', level_set=level, atten_db=0.0, reason='')
     if g == 'LH' and f <= LH_MAX_HZ:
         if LH_MIN_DBM <= level <= RF_MAX_DBM:
             return dict(mode='rf', route='LH', level_set=level, atten_db=0.0, reason='')
@@ -304,7 +324,7 @@ def counts_text(model, options, pulse_gen='81134A'):
 
 
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
-    """Bench I/O: the counter under test and the Fluke 96270A (when used), both through the instrument drivers."""
+    """Bench I/O: the counter under test and the RF source (Fluke 96270A or R&S SMA100B, stim['source']; when used), both through the instrument drivers."""
 
     def __init__(self, ctr_address, rf_address, interface='USB', transports=None, mods=None, virtual=False, surprise_handler=None, stim=None, gen_address='', gen_transport=None):
         self.log = drivers.CommandLog()
@@ -328,8 +348,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self.ctr.connect()
             self.ctr.check_errors('connecting')
             if rf_t is not None:
-                self.rf = k53.Fluke96270AWide(rf_t, self.log, label='96270A')
-                self.rf.connect()
+                if self.stim.get('source') == 'SMA100B':
+                    self.rf = k53.SMA100BSource(rf_t, self.log, label='SMA100B')
+                    self.rf.connect()
+                    self.stim.update(sma_max_hz=self.rf.max_hz, sma_limit_dbm=self.rf.level_limit_dbm)
+                else:
+                    self.rf = k53.Fluke96270AWide(rf_t, self.log, label='96270A')
+                    self.rf.connect()
                 self.stim['rf'] = True
             if gen_transport is not None:
                 self.gen = k53.AgilentAFGPulse(gen_transport, self.log, label='33250A')
@@ -395,6 +420,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         if route == 'MW': return self.pm_param('a53220a.settle.mw', 3.0)
         if route == 'LH': return self.pm_param('a53220a.settle.lh', 2.0)
+        if route == 'SMA': return self.pm_param('a53220a.settle.sma', 2.0)
         if route == 'PULSE': return self.pm_param('a53220a.settle.pulse', 1.0)
         return self.pm_param('a53220a.settle.manual', 2.0)
 
@@ -463,7 +489,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.addrs = {i: s.get(f'ctr_addr_{i}', DEFAULT_ADDR[i]) for i in INTERFACES}
         self._iface_shown = self.interface.get()
         self.ctr_addr = port.var(self.addrs[self._iface_shown])
-        self.rf_addr = port.var(s.get('rf_addr', DEFAULT_RF_ADDR))
+        self.rf_source = port.var(pick('rf_source', RF_SOURCE_CHOICES, RF_SOURCE_CHOICES[0]))
+        self.rf_addrs = {'96270A': s.get('rf_addr', DEFAULT_RF_ADDR), 'SMA100B': s.get('sma_addr', DEFAULT_SMA_ADDR)}       # one address per RF source
+        self._rf_shown = RF_SOURCE_KEY[self.rf_source.get()]
+        self.rf_addr = port.var(self.rf_addrs[self._rf_shown])
         self.gen_addr = port.var(s.get('gen_addr', ''))                # the Agilent 33250A (pulse generator); empty = another pulse generator, set by hand
         self.period = port.var(pick('period', PERIODS, PERIOD_LABEL[SPEC['default_period']]))
         self.tb_opt = port.var(pick('tb_opt', TB_CHOICES, TB_CHOICES[0]))
@@ -514,8 +543,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         except ValueError: loss = 0.0
         rf = (self.io.rf is not None) if self.io is not None else (bool(self.rf_addr.get().strip()) or self.virtual)         # once connected, what is really connected
         gen = (self.io.gen is not None) if self.io is not None else (bool(self.gen_addr.get().strip()) or self.virtual)
+        src = RF_SOURCE_KEY[self.rf_source.get()]
+        io_stim = self.io.stim if self.io is not None else {}
+        if self.io is not None and self.io.rf is not None and io_stim.get('source', '96270A') != src:
+            rf = False                     # the source connected is not the one selected now: press Test connections again
         return dict(mode='auto' if self.stim_mode.get() == STIM_CHOICES[0] else 'manual', rf=rf, gen=gen, loss_db=loss, ext_low=bool(self.ext_low.get()),
-                    pulse_gen='33250A' if self.pulse_gen.get() == PULSE_GEN_CHOICES[1] else '81134A')
+                    pulse_gen='33250A' if self.pulse_gen.get() == PULSE_GEN_CHOICES[1] else '81134A', source=src,
+                    sma_max_hz=io_stim.get('sma_max_hz'), sma_limit_dbm=io_stim.get('sma_limit_dbm'))
 
     def plan(self, p) -> dict[str, Any]:
         try: return plan_stimulus(p, self.stim_state())
@@ -560,7 +594,23 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.ui_view.set_choices(self, 'ctr', ())
         if not self.demo: self._save_settings()
 
-    def pm_driver_classes(self): return (counter_class(), k53.Fluke96270AWide)
+    def on_rf_source(self):
+        """The RF source changed (96270A / SMA100B): the address box shows the address remembered for it; a session connected to the other source must reconnect."""
+        old, new = self._rf_shown, RF_SOURCE_KEY[self.rf_source.get()]
+        if new == old: return
+        self.rf_addrs[old] = self.rf_addr.get()
+        self.rf_addr.set(self.rf_addrs[new]); self._rf_shown = new
+        self.ui_view.set_choices(self, 'rf', ())
+        if self.io is not None and self.io.rf is not None:
+            self.status.set(f'RF source changed to {self.rf_source.get()}: press Test connections to connect it (until then its points are on other standards).')
+        if not self.demo: self._save_settings()
+        self.refresh()
+
+    def rf_name(self):
+        """The RF source selected in the drawer, as printed in prompts ('96270A' or 'R&S SMA100B')."""
+        return 'R&S SMA100B' if RF_SOURCE_KEY[self.rf_source.get()] == 'SMA100B' else '96270A'
+
+    def pm_driver_classes(self): return (counter_class(), k53.SMA100BSource if RF_SOURCE_KEY[self.rf_source.get()] == 'SMA100B' else k53.Fluke96270AWide)
 
     def pm_plan_point(self, p):
         """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
@@ -570,7 +620,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         def build(mods):
             bench, rft, ct = make_53220a_bench(MODEL, 'USB')
             self._prepare_bench(bench, p)
-            return IO('sim', 'sim', 'USB', transports=(ct, rft), mods=mods, stim=self.stim_state())
+            stim = self.stim_state()
+            return IO('sim', 'sim', 'USB', transports=(ct, bench.sma_transport if stim['source'] == 'SMA100B' else rft), mods=mods, stim=stim)
         return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p))
 
     # ------------------------------------------------------------------ table
@@ -640,7 +691,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         flags = ('  |  ' + '; '.join(p['flags'])) if p.get('flags') else ''
         why = self.manual_reason(p)
         att = self.plan(p).get('atten_db')
-        stim = f'Other standard: {why}' if why else ('Agilent 33250A (set and switched on by the program)' if self.plan(p)['mode'] == 'pulse' else '96270A' + (f' with {att:g} dB external attenuation: {self.plan(p)["reason"]}' if att else '') if p['stimulus']['group'] != 'NONE' else 'none')
+        stim = f'Other standard: {why}' if why else ('Agilent 33250A (set and switched on by the program)' if self.plan(p)['mode'] == 'pulse' else self.rf_name() + (f' with {att:g} dB external attenuation: {self.plan(p)["reason"]}' if att else '') if p['stimulus']['group'] != 'NONE' else 'none')
         self.detail.set(f'{p["description"]}\nManual page {p["page"]}{flags}\n'
                         f'Setup: {self.setup_text(p)}\nStimulus: {stim}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
@@ -660,7 +711,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         g = p['group']
         base = '50 ohm cables (RG-58 in the manual). '
         rear = ' Use the rear-panel input (Option 201).' if '201' in self.option_codes() else ''
-        ref = ('the 10 MHz reference from the 96270A REF OUT to the counter EXT REF IN (and the house standard to the 96270A reference input)' if self.ref_mode.get() == REF_CHOICES[1]
+        src = self.rf_name()
+        ref = (f'the 10 MHz reference from the {src} REF OUT to the counter EXT REF IN (and the house standard to the {src} reference input)' if self.ref_mode.get() == REF_CHOICES[1]
                else 'the house 10 MHz standard to the counter EXT REF IN')
         if g == 'NONE': return 'Nothing is connected for the self-test; the counter performs a Factory Reset afterwards.'
         if g == 'TIMEBASE':
@@ -668,7 +720,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g in ('CH1', 'CH2'):
             return base + f'{self.stim_text(p)} to Channel {1 if g == "CH1" else 2} (50 ohm, DC); {ref}.' + rear
         if g in ('CH3_LH', 'CH3_MW'):
-            mw = 'the 96270A Microwave O/P' if g == 'CH3_MW' else 'the 96270A Leveling Head output'
+            mw = ('the R&S SMA100B RF output (an adapter from its PC 2.92 mm connector)' if RF_SOURCE_KEY[self.rf_source.get()] == 'SMA100B'
+                  else 'the 96270A Microwave O/P' if g == 'CH3_MW' else 'the 96270A Leveling Head output')
             return base + f'{self.stim_text(p)} from {mw} to the microwave input ({chan_name(p)}); {ref}.' + rear
         if g in ('PULSE_CH1', 'PULSE_CH2'):
             return base + f'{"Agilent 33250A" if p.get("gen") == "33250A" else "Pulse generator"} output to Channel {1 if g == "PULSE_CH1" else 2}: {self.stim_text(p)}; {ref}.' + rear
@@ -711,7 +764,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self._vb = make_53220a_bench(MODEL, self.interface.get(), getattr(self, 'virtual_options', None) or DEFAULT_OPTIONS[MODEL])
             use_rf = stim['mode'] == 'auto'
             use_gen = use_rf and stim['pulse_gen'] == '33250A'
-            return IO('virtual', 'virtual', self.interface.get(), transports=(self._vb[2], self._vb[1] if use_rf else None, self._vb[0].gen_transport if use_gen else None), mods=self.pm_state, virtual=True, stim=stim)
+            rf_t = (self._vb[0].sma_transport if stim['source'] == 'SMA100B' else self._vb[1]) if use_rf else None
+            return IO('virtual', 'virtual', self.interface.get(), transports=(self._vb[2], rf_t, self._vb[0].gen_transport if use_gen else None), mods=self.pm_state, virtual=True, stim=stim)
         use_gen = stim['mode'] == 'auto' and stim['pulse_gen'] == '33250A'
         return IO(self.ctr_addr.get(), self.rf_addr.get() if stim['mode'] == 'auto' else '', self.interface.get(), mods=self.pm_state, surprise_handler=self._surprise_handler(), stim=stim,
                   gen_address=self.gen_addr.get() if use_gen else '')
@@ -751,7 +805,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.demo: self._save_settings()
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         opt = self.apply_detected_options()
-        rf = f'\n96270A: {self.io.rf.idn}' if self.io.rf is not None else '\nNo 96270A: every stimulus is another standard.'
+        rf = f'\n{self.rf_name()}: {self.io.rf.idn}' if self.io.rf is not None else f'\nNo {self.rf_name()}: every stimulus is another standard.'
+        if self.io.rf is not None and self.io.stim.get('source') == 'SMA100B':
+            r = self.io.rf
+            top = r.max_hz
+            rf += (f'\nSMA100B options {",".join(r.options) or "none"} ({f"to {top / 1e9:g} GHz" if top else "frequency option not recognised: the generator decides"}), '
+                   f'level limit {r.level_limit_dbm:g} dBm, reference {r.ref_source}.')
+            if r.ref_source != 'EXT':
+                rf += ('\nWARNING: the SMA100B is on its INTERNAL reference. Test 1 compares the counter with the stimulus: lock the SMA100B to the house 10 MHz '
+                       '(REF IN, reference source External on its front panel) before the run.')
+        self.refresh()
         self.status.set('Connected: ' + self.io.ident + tag + '. Stimulus output is NOT enabled.')
         port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'Keysight {MODEL}: {self.io.ident}{rf}{tag}\n{opt}\nStimulus output is not enabled.')
 
@@ -775,7 +838,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.addrs[self.interface.get()] = self.ctr_addr.get()
         for i in INTERFACES:
             self.settings.set(f'ctr_addr_{i}', self.addrs[i])
-        for key, var in (('interface', self.interface), ('rf_addr', self.rf_addr), ('gen_addr', self.gen_addr), ('period', self.period), ('tb_opt', self.tb_opt), ('ch3_opt', self.ch3_opt), ('stim_mode', self.stim_mode),
+        self.rf_addrs[self._rf_shown] = self.rf_addr.get()
+        self.settings.set('rf_addr', self.rf_addrs['96270A']); self.settings.set('sma_addr', self.rf_addrs['SMA100B'])
+        for key, var in (('interface', self.interface), ('rf_source', self.rf_source), ('gen_addr', self.gen_addr), ('period', self.period), ('tb_opt', self.tb_opt), ('ch3_opt', self.ch3_opt), ('stim_mode', self.stim_mode),
                          ('ref_mode', self.ref_mode), ('loss_db', self.loss), ('pulse_gen', self.pulse_gen)):
             self.settings.set(key, var.get())
         for key, var in (('pulse_opt', self.pulse_opt), ('rear_opt', self.rear_opt), ('ext_low', self.ext_low)):
@@ -800,12 +865,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def time_base_text(self): return 'Option 010 time base' if '010' in self.option_codes() else 'standard time base'
 
     def attenuation_needs(self, points):
-        """[(name, need)] for the points that need external attenuation after the 96270A Microwave O/P."""
+        """[(name, need)] for the points that need external attenuation after the 96270A Microwave O/P (never with the SMA100B)."""
         need = sorted({self.plan(p)['atten_db'] for p in points if self.plan(p).get('atten_db')})
         return [('External attenuator', STIM_NEEDS['MW'] + ' (' + ' / '.join(f'{a:g} dB' for a in need) + ' for the cable loss set)')] if need else []
 
     def other_standards(self, points):
-        """The standards the selected run needs besides the 96270A: [(name, need)] for the manual points."""
+        """The standards the selected run needs besides the RF source: [(name, need)] for the manual points."""
         out = {}
         for p in points:
             if p['stimulus']['group'] != 'NONE' and self.is_manual(p):
@@ -814,11 +879,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _prompt_start(self, points):
         """Warm-up, environment and the reference oscillator, asked once at the start of a run.  Returns False if the technician cancels."""
-        steps = [('Warm-up', f'The {MODEL} must have warmed up for 45 minutes (2.5 hours after delivery, 72 hours if stored for months) (Service Guide p. 28). Allow the 96270A and the other standards their own warm-up.'),
+        steps = [('Warm-up', f'The {MODEL} must have warmed up for 45 minutes (2.5 hours after delivery, 72 hours if stored for months) (Service Guide p. 28). Allow the {self.rf_name()} and the other standards their own warm-up.'),
                  ('Environment', 'Ambient 18 to 28 C (ideally 23 C +/- 1 C) and relative humidity below 80 % (p. 28).'),
                  ('Cables', '50 ohm cables (RG-58 in the manual); the counter inputs are set to 50 ohm, DC coupled.'),
                  ('10 MHz reference', 'Tests 2 to 7 use the EXTERNAL reference: ' + ('the house 10 MHz standard (better than 1e-10) to EXT REF IN.' if self.ref_mode.get() == REF_CHOICES[0] else
-                  'the 96270A 10 MHz REF OUT to EXT REF IN, with the 96270A itself locked to the house standard. Test 1 uses the internal time base.') +
+                  f'the {self.rf_name()} 10 MHz REF OUT to EXT REF IN, with the {self.rf_name()} itself locked to the house standard. Test 1 uses the internal time base.') +
                   ' The program changes the reference setting (stored in non-volatile memory) and puts it back as found when the session ends.')]
         steps.insert(0, ('Installed options', f'Declared: {", ".join(sorted(self.option_codes())) or "none"} ({self.time_base_text()}). This run: ' + counts_text(MODEL, self.option_codes())
                          + '. Cancel and change the option selectors if this is not what the counter has (the counter reports its own options with *OPT? at connect; your selection decides).'))
@@ -827,7 +892,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             steps.append(('Other standards needed', '; '.join(f'{k}: {v}' for k, v in std)))
         return port.operator_prompt('Before the verification', 'Warm-up and conditions', steps,
             facts=[('Limits', f'{self.period.get()}, {self.timebase_opt() == "010" and "Option 010" or "standard time base"}'), ('Options', ', '.join(sorted(self.option_codes())) or 'none'),
-                   ('Stimulus', self.stim_mode.get()), ('Pulse generator', self.pulse_gen.get()), ('Interface', self.interface.get())],
+                   ('Stimulus', self.stim_mode.get()), ('RF source', self.rf_source.get()), ('Pulse generator', self.pulse_gen.get()), ('Interface', self.interface.get())],
             caution=f'The program restores the {MODEL} factory defaults (*RST) before the first point, then sets inputs, function, gate and trigger for every point.',
             ok='Conditions met - start', parent=self.root)
 
@@ -848,6 +913,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
+        if not self.fast_demo and self.io is not None and self.io.rf is not None and self.io.stim.get('source', '96270A') != RF_SOURCE_KEY[self.rf_source.get()]:
+            self.test_connections()                                        # the RF source was changed after connecting: connect the one selected now
         if not self.fast_demo and self.io is None: self.test_connections()
         if not self.fast_demo and self.io is None: return
         points = [q for q in points if self.active(q)]                     # the options read from the counter at connect may remove points
@@ -860,7 +927,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _prompt_setup(self, p, plan):
         """Confirm the physical hook-up when the wiring group changes (with the picture, if installed), or the standard to set for a point on another standard."""
         group, manual = p['group'], plan['mode'] == 'manual'
-        src = 'manual' if manual else ('33250A' if plan['mode'] == 'pulse' else '96270A')
+        src = 'manual' if manual else ('33250A' if plan['mode'] == 'pulse' else 'SMA100B' if plan.get('route') == 'SMA' else '96270A')
         image = None if group == 'NONE' else (find_diagram(src, group) or (find_diagram('manual', group) if src == '33250A' else None))                 # the self-test connects nothing: no picture is expected
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Manual page', p['page'])]
         if image is None and group != 'NONE':
@@ -879,13 +946,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 [('Output off', 'The Agilent 33250A output is switched off before you rewire.'), ('Wiring', self.setup_text(p)),
                  ('33250A', 'Its Output connector goes to the counter input (50 ohm). The program sets the pulse (' + self.stim_text(p) + ', edge time 5 ns), reads every setting back and switches the output on for the measurement only.')],
                 facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
-        steps = [('Output off', 'The 96270A output is put in standby before you rewire.'), ('Wiring', self.setup_text(p))]
+        steps = [('Output off', f'The {self.rf_name()} output is {"switched off" if plan.get("route") == "SMA" else "put in standby"} before you rewire.'), ('Wiring', self.setup_text(p))]
         if plan.get('atten_db'):
             steps.append(('External attenuation', f'{plan["reason"]}. Fit it between the Microwave O/P (or its cable) and the counter input. The level required at the counter input is '
                           f'{p["stimulus"]["level_dbm"]:g} dBm +/- 0.5 dBm (Service Guide p. 66): verify it with a power meter or use cables / an attenuator of certified loss. The attenuator value is the '
                           f'difference only; the manual lists no attenuator.'))
         if plan['route'] == 'MW':
             steps.append(('96270A output', 'Select the Microwave O/P (direct output) on the 96270A front panel; the program cannot select the route (no remote command is documented).'))
+        elif plan['route'] == 'SMA':
+            steps.append(('R&S SMA100B', f'The program sets {_hz(p["stimulus"]["frequency"])} at {plan["level_set"]:g} dBm (the printed {p["stimulus"]["level_dbm"]:g} dBm plus the '
+                          f'{self.stim_state()["loss_db"]:g} dB cable loss), CW, modulation off, reads both back and switches RF on for the measurement only.'))
         elif plan['route'] == 'LH':
             steps.append(('96270A output', 'Select the Leveling Head output on the 96270A front panel and connect the head; the program cannot select the route (no remote command is documented).'))
         return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}', steps, facts=facts,
@@ -916,7 +986,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             reading = (p['low'] + span * (0.5 + 0.38 * math.sin(p['id'] * 1.71))) if p['stat'] == 'mean' else (p['high'] * 0.3 if p['stat'] == 'sdev' else 0.0)   # deterministic, labelled synthetic
             self.mo_finish(p, reading, True, lambda: self._record(p, reading, True, plan['mode'])); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
-            stim = {k: v for k, v in self.stim_state().items() if k != 'rf'}        # read on the UI thread (Tk variables); a cable loss or stimulus change made after connecting applies to this point
+            stim = {k: v for k, v in self.stim_state().items() if k not in ('rf', 'source', 'sma_max_hz', 'sma_limit_dbm')}   # read on the UI thread; a cable loss or stimulus change made after connecting applies to this point (the RF source is the one connected)
 
             def work():
                 try:

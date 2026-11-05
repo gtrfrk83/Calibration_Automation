@@ -7,14 +7,15 @@
  "category": "Frequency Counter",
  "version": "1",
  "order": 73,
- "description": "Automated performance verification of the Keysight 53220A counter (Service Guide chapter 1), 96270A stimulus. Points follow the declared options: 28 (no microwave channel), 32 (Option 106), 34 (Option 115); quick check 20 / 24 / 26. Pulse tests 4 and 5 need a pulse generator (the Agilent 33250A is selectable but cannot make the 5 ns pulse).",
+ "description": "Automated performance verification of the Keysight 53220A counter (Service Guide chapter 1), 96270A or R&S SMA100B RF stimulus (chosen in the settings drawer). Points follow the declared options: 28 (no microwave channel), 32 (Option 106), 34 (Option 115); quick check 20 / 24 / 26. Pulse tests 4 and 5 need a pulse generator (the Agilent 33250A is selectable but cannot make the 5 ns pulse).",
  "launcher": "Procedures/Keysight_53220A_Verification.py",
  "engine": [
   "keysight_53220a_verification.py"
  ],
  "drivers": [
   "keysight_53220a",
-  "reference_instruments"
+  "reference_instruments",
+  "rs_sma100b"
  ],
  "specs": [
   "specs/keysight_53220a_pv.json"
@@ -32,7 +33,8 @@
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/keysight_53220a.py",
-   "drivers/reference_instruments.py"
+   "drivers/reference_instruments.py",
+   "drivers/rs_sma100b.py"
   ],
   "spec": [
    "specs/keysight_53220a_pv.json"

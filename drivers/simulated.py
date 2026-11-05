@@ -25,6 +25,7 @@ class SimBench:
     external_signal: Any
     gen: Any
     gen_transport: Any
+    sma_transport: Any
     mdo: Any
     mdo_state: Any
     meter: Any

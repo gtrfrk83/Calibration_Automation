@@ -32,6 +32,7 @@ from cmdreg import Cmd, Placeholder
 from surprise import SurpriseMixin
 from .base import Instrument, InstrumentError
 from .reference_instruments import AgilentAFG, Fluke96270A
+from .rs_sma100b import RSSMA100B
 from .transport import TransportError, bus_of
 
 PR = "Keysight 53220A/53230A Programmer's Reference"
@@ -482,6 +483,63 @@ class Fluke96270AWide(SurpriseMixin, Fluke96270A):
     Table 3-1) instead of the 6.2 GHz the MDO4000C tests use.  No command is added: which output connector is used (Leveling Head / Microwave O/P) and the reference in / out are set
     on the front panel by the operator (the remote commands for them are UNVERIFIED: the Remote Programmers Manual is not on file)."""
     MAX_HZ = 27e9
+
+
+# R&S SMA100B as the RF source of this procedure (owner 2026-11-05: "calibrate it with the option of the 96270 and the SMA100B").  The SMA100B driver (drivers/rs_sma100b.py) is used
+# as it is: no command is added.  This class only gives it the three calls the 53220A engine makes on its RF source (set_rf, check_error, output) so the engine treats both alike.
+# The SMA100B has ONE RF output (front panel, PC 2.92 mm on the B112..B131 frequency options: User Manual p. 37), so there is no Leveling Head / Microwave O/P route and no
+# external attenuator: the level is set at the generator output (plus the cable loss).
+# Maximum frequency per frequency option: the R&S option NAMES (B103 = 3 GHz ... B167 = 67 GHz).  The User Manual says only 'frequency range from 8 kHz to up to 20 GHz (overrange
+# 72 GHz)' (p. 21) and refers to the specifications document for the ranges (p. 703, 753), which is NOT on file: UNVERIFIED.  The owner's unit reports SMAB-B131 (bench 2026-11-05).
+# Every 53220A RF point is at or below 15 GHz, so any option from B120 up covers the whole chapter; the generator's own -222 'Data out of range' is the final word in any case.
+SMA100B_MIN_HZ = 8e3                                           # User Manual p. 21
+SMA100B_MAX_HZ_BY_OPTION = {'B103': 3e9, 'B106': 6e9, 'B112': 12.75e9, 'B120': 20e9, 'B131': 31.8e9, 'B140': 40e9, 'B140N': 40e9, 'B150': 50e9, 'B150N': 50e9,
+                            'B167': 67e9, 'B167N': 67e9}       # UNVERIFIED (option names; the specifications document is not on file)
+
+
+def sma100b_max_hz(options) -> float | None:
+    """The highest frequency of the installed frequency option (*OPT? 'SMAB-B131' -> 31.8e9); None when no frequency option is recognised."""
+    best = None
+    for o in options or ():
+        code = str(o).strip().upper().replace('SMAB-', '')
+        hz = SMA100B_MAX_HZ_BY_OPTION.get(code)
+        if hz is not None and (best is None or hz > best):
+            best = hz
+    return best
+
+
+class SMA100BSource(RSSMA100B):
+    """The R&S SMA100B as the 53220A RF stimulus: connect() is the driver's own (RF OFF confirmed, options / reference / level limit read) followed by the CW set-up (dBm, CW,
+    modulation off, no offsets, every setting read back).  set_rf() writes the frequency and the level (each read back; a level above POW:LIM? is refused before it is sent),
+    waits for *OPC? and reads the error queue.  The reference source is only READ (the lab keeps it on EXT, the house 10 MHz; bench 2026-11-05 'EXT')."""
+    MODEL = 'R&S SMA100B'
+
+    def connect(self, address=None):
+        super().connect(address)
+        try:
+            self.cw_setup()
+        except Exception:
+            self.close()
+            raise
+        return self
+
+    @property
+    def max_hz(self) -> float | None:
+        return sma100b_max_hz(self.options)
+
+    def set_rf(self, frequency_hz, level_dbm):
+        top = self.max_hz
+        if frequency_hz < SMA100B_MIN_HZ or (top is not None and frequency_hz > top):
+            raise InstrumentError(f'{frequency_hz / 1e9:g} GHz is outside the {self.MODEL} range ({SMA100B_MIN_HZ / 1e3:g} kHz to '
+                                  f'{(top or 0) / 1e9:g} GHz with {",".join(self.options) or "no options"})')
+        limit = self.level_limit()                     # checked before ANY write, so a refused point leaves the generator as it was (set_level checks again)
+        if level_dbm > limit + 1e-9:
+            raise InstrumentError(f'{self.MODEL}: {level_dbm:g} dBm is above its level limit {limit:g} dBm (POW:LIM?): nothing was sent')
+        self.setup(frequency_hz, level_dbm)
+        self.check_errors(f'{frequency_hz:g} Hz, {level_dbm:g} dBm')
+
+    def check_error(self, context=''):
+        self.check_errors(context)
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------

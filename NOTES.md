@@ -2179,6 +2179,25 @@ unchanged - UNVERIFIED (the manual prints 5 ns only; the 33250A's own pulse widt
 Test 5 (two outputs 49.9 ns apart) is by hand with either generator (the 33250A has one output). Hook-up pictures for the 33250A are owner-supplied (diagrams/README_53220a.txt).
 
 
+## 53220A family: R&S SMA100B as the RF source (2026-11-05; simulated bench only, never run on hardware with the counter)
+Owner request: "calibrate it with the option of the 96270 and the SMA100B". Owner answers 2026-11-05: the SMA100B options are B35, B86, B93, B131, B709, K720 (the same list the unit
+reports to *OPT?, bench record 2026-11-05); a drawer selector, not a per-test choice.
+- Driver: `drivers/rs_sma100b.py` (merged from `claude/ecstatic-knuth-wufu56`, queries verified on the owner's unit; set / output / reset still verified=False) used AS IS through
+  `k53.SMA100BSource` (drivers/keysight_53220a.py): connect = the driver's connect (RF OFF confirmed, options / reference / POW:LIM read) + `cw_setup()` (dBm, CW, modulation off,
+  no offsets, read back); `set_rf(f, dBm)` refuses a frequency outside 8 kHz..option maximum and a level above POW:LIM? BEFORE sending anything, then `setup()` (each value read back,
+  *OPC?) and the error queue. No command added.
+- Settings drawer: 'RF source' = Fluke 96270A / R&S SMA100B; the address box keeps one address per source (settings `rf_addr`, `sma_addr`; SMA100B default GPIB1::28::INSTR as on
+  the bench). `STIM_CHOICES[0]` is now 'RF source where it can', `REF_CHOICES[1]` 'RF source 10 MHz Ref Out' (old saved texts fall back to the first choice). Changing the source after
+  connecting makes its points manual until Test connections; a run reconnects first.
+- Routing (`plan_stimulus`, source 'SMA100B'): every CW point (Tests 1, 2, 3, 6a, 6b) is route 'SMA', level = printed level + cable loss, NO external attenuator (6a 5.88 GHz is set
+  at -27 dBm directly: B35 has the step attenuator, User Manual pp. 228-230). Pulse (Tests 4, 5) and burst (Test 7) stay on other standards: the bench unit has no K22 / K23.
+  Frequency maximum from the option name (B131 = 31.8 GHz; `SMA100B_MAX_HZ_BY_OPTION`, UNVERIFIED: the specifications document is not on file; every point is at or below 15 GHz).
+  The level range is not gated beyond POW:LIM? and the 10 dBm input guard: the generator's -222 is the final word.
+- Reference: only READ. Connect warns when ROSC:SOUR? is INT (Test 1 compares the counter's internal time base with the stimulus). Settle: new tunable `a53220a.settle.sma` (2 s).
+- Uncertainty unchanged (owner rule 2026-10-26: frequency points use the 'Frequency - Measure' CMC alone; the source does not enter).
+- Hook-up pictures: `diagrams/hook_53220a_SMA100B_<GROUP>.png` (none supplied). Sidecars list `rs_sma100b` and fingerprint `drivers/rs_sma100b.py`.
+- Simulated: `SimSMA100B53220` (drivers/simulated_53220a.py, `bench.sma_transport`) mirrors its RF output into `bench.rf1`. Tests: `SMA100BStimulus`, `SMA100BFlow`.
+
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
 - **Deleted:** every `*_view_tk.py` (30), `Calibration_Procedure_Manager.py`, `ui_theme.py` (the toolkit-free part stays as `ui_theme_core.py`), `ui_shell`, `ui_port_tk`, `branding`, `datasheet_builder_ui`, `datasheet_builder_check_ui`, `specmanager_ui`, `spec_editor_ui`, `labregistry_ui`, `instrument_scan_ui`, `mdd_import_ui`, `packages_ui`, `verified_ui`, `procmods_ui`, `procmods_point_ui`, `run_queue_ui`, `report_dialog`, `report_review` (its flow is `report_review_flow.py`), `manual_grid`, `Start_Calibration_Suite.bat`, `diagnostics.install` (the Tk exception hook).
