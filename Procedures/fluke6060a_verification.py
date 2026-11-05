@@ -1251,10 +1251,25 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return False
         synthetic = self.demo or any(self.results[str(q['id'])].get('synthetic') for q in POINTS if q['ref'] in p['derive']['inputs'])
         result = 'PASS' if judge(p, value) else 'FAIL'
-        self.results[str(p['id'])] = dict(reading=value, result=result, synthetic=synthetic, manual=False, derived=True, timestamp=datetime.now().isoformat(timespec='seconds'),
-                                          data=self.mode_label, **self.pm_result_fields())
+        self.results[str(p['id'])] = dict(reading=value, result=result, synthetic=synthetic, manual=False, derived=True, ref=p['ref'],      # ref: a reload keeps it (2026-11-05)
+                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
         return True
+
+    def _derive_all(self):
+        """Every computed point again from its stored inputs, in both result sets (after a load). Never raises."""
+        keep = self._mode
+        try:
+            for mode in (datamode.FOUND, datamode.LEFT):
+                self._mode = mode
+                for q in POINTS:
+                    if q['meas'] == 'derived':
+                        try:
+                            self._derive_point(q)
+                        except Exception:
+                            pass
+        finally:
+            self._mode = keep
 
     def _derive_after(self, p):
         """A section reading was recorded or replaced (also a typed one): every derived point that uses it and has all its inputs is computed again."""
@@ -1287,6 +1302,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.freq_range.set(data['freq_range'])
         dropped = drop_stale_results(data, POINTS, require_ref=bool((SPEC.get('options') or {}).get('checkpoint_requires_ref')))
         self.load_results(data)
+        self._derive_all()                                           # owner report 2026-11-05: the Table 5 relative rows were saved without a ref and dropped on reload
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_options(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.'
                                                      + (f' {dropped} result(s) left out: their test point has changed since they were saved.' if dropped else ''))

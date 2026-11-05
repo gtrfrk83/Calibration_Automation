@@ -740,3 +740,35 @@ class DeleteReadingAndInop(GidepBench):
         with mock.patch.object(E.port, 'ask_yes_no', return_value=False):
             self.assertFalse(self.app.mark_inop(p, reason='x'))
         self.assertEqual(self.app.found[str(p['id'])]['result'], 'PASS')
+
+
+class RelativeRowsSurviveReload(GidepBench):
+    """Owner report 2026-11-05: the PDF had no Table 5 relative (judged) rows. They were saved without a ref, and a reload drops a result without one
+    (checkpoint_requires_ref), so after Load progress / a restart every relative row was gone. They now save their ref, and a load computes them again."""
+
+    REFS = ['4.2 Table 5 250 MHz 0 dBm reference', '4.2 Table 5 250 MHz -10 dBm', '4.2 Table 5 250 MHz -10 dBm relative']
+
+    def rel_key(self):
+        return str(next(p for p in E.POINTS if p['ref'] == self.REFS[2])['id'])
+
+    def test_the_relative_row_is_saved_with_its_ref(self):
+        self.run_points(refs=self.REFS)
+        self.assertEqual(self.app.found[self.rel_key()]['ref'], self.REFS[2])
+
+    def test_an_old_checkpoint_without_refs_on_the_relative_rows_gets_them_back_on_load(self):
+        import json
+        self.run_points(refs=self.REFS)
+        path = self.app._checkpoint_path()
+        data = json.loads(path.read_text())
+        stripped = 0
+        for rec in data['results'].values():
+            if rec.get('derived'):
+                rec.pop('ref', None)                                     # as saved before the fix
+                stripped += 1
+        self.assertEqual(stripped, 1)
+        path.write_text(json.dumps(data))
+        self.app.found.clear()
+        with mock.patch.object(E.port, 'choose_file', return_value=str(path)), mock.patch.object(E.port, 'ask_yes_no', return_value=True):
+            self.app.load()
+        self.assertIn(self.rel_key(), self.app.found)
+        self.assertEqual(self.app.found[self.rel_key()]['result'], 'PASS')

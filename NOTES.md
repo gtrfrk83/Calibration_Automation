@@ -2246,6 +2246,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- Table 5 relative rows missing from the report (owner's PDF 2026-11-05: only the 'recorded' absolute rows printed). The computed relative rows were saved without `ref`,
+  and with `checkpoint_requires_ref` a reload drops a result without one: after Load progress or a restart every relative row was gone (nothing computed them again).
+  `_derive_point` now stores `ref`, and `load` runs `_derive_all` (every computed point again from its stored inputs, As Found and As Left), so older checkpoints
+  recover. Tests: RelativeRowsSurviveReload. Same PDF: the 48 deviation-meter rows were N/A because the lab database still holds the 96270A sheet from before the FM rows
+  were added (seed() only loads a model that is missing): re-import specs/standards/fluke_96270a_standard.json in Standards Specs (checked: 0 -> 45 of 48).
 - Delete a reading / mark INOP (owner, 2026-11-05: "i need a way to delete data in the as found data column and mark a test point inop"). Right-click on a 6060A
   point (both 6060A procedures): 'Delete As Found reading...' (As Left in As Left mode; asks first, removes the record and the computed points that used it, the point is
   pending again) and 'Mark INOP...' (asks an optional reason; a record with result INOP, no reading, never a pass; asks before replacing a measured reading). INOP shows in
