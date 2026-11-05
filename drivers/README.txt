@@ -35,6 +35,11 @@ One driver per instrument MODEL. Procedures call intent-level methods
                         stable reading; read-only (no reset commands)
   simulated_28x.py      Simulated 287 / 289 on the IR cable (function, range, REL, Low Pass, drift, overload)
   simulated_fgen.py     Simulated generator + 5790B + counter (53131A / 53132A or generic) + power meter bench for fgen_verification.py
+  rs_sma100b.py         R&S SMA100B RF signal generator over GPIB (factory address 28): CW frequency, level (refused above POW:LIM?), RF on / off confirmed,
+                        modulation off, offsets / multiplier confirmed 0 / 1, reference INT / EXT; every command has a User Manual page, all verified=False (no bench run yet)
+  simulated_sma100b.py  Simulated SMA100B (error queue, -222 out of range, the level limit and reference source that *RST does not reset)
+  sma100b_bench.py      First GPIB session for the SMA100B:  python -m drivers.sma100b_bench [--settings [--selftest] [--rf]] [--address GPIB0::28::INSTR]
+                        (read-only by default; every write asks for a typed y; writes a record file of every command and reply)
   selftest.py           Safe hardware check:  python -m drivers.selftest --sim
                         python -m drivers.selftest --fluke ASRL9::INSTR --baud 9600 --scope USB0::...::INSTR
   _template.py          Starting point for a new model (includes the reset declaration)

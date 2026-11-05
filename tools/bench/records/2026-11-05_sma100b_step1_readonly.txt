@@ -1,0 +1,53 @@
+R&S SMA100B bench record 20261105_084524 GPIB1::28::INSTR
+
+*IDN? Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30  (GPIB1::28::INSTR)
+--- stage 1: read-only queries
+PASS  query *IDN?  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+PASS  query *OPT?  SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+PASS  query SYST:ERR?  0,"No error"
+PASS  query OUTP?  0
+PASS  query FREQ?  500013
+PASS  query POW?  -3.46787486224656
+PASS  query POW:LIM?  20
+PASS  query ROSC:SOUR?  EXT
+PASS  query FREQ:MODE?  CW
+PASS  query POW:MODE?  CW
+PASS  query UNIT:POW?  DBM
+PASS  query MOD:ALL:STAT?  0
+PASS  query FREQ:OFFS?  0
+PASS  query FREQ:MULT?  1
+PASS  query POW:OFFS?  0
+
+--- command log (every command and exact reply)
+    0.000  SMA100B    >>  *IDN?
+    0.008  SMA100B    <<  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+    0.008  SMA100B    >>  *IDN?
+    0.010  SMA100B    <<  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+    0.010  SMA100B    >>  *OPT?
+    0.012  SMA100B    <<  SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+    0.012  SMA100B    >>  SYST:ERR?
+    0.013  SMA100B    <<  0,"No error"
+    0.013  SMA100B    >>  OUTP?
+    0.015  SMA100B    <<  0
+    0.015  SMA100B    >>  FREQ?
+    0.017  SMA100B    <<  500013
+    0.017  SMA100B    >>  POW?
+    0.018  SMA100B    <<  -3.46787486224656
+    0.018  SMA100B    >>  POW:LIM?
+    0.035  SMA100B    <<  20
+    0.036  SMA100B    >>  ROSC:SOUR?
+    0.037  SMA100B    <<  EXT
+    0.037  SMA100B    >>  FREQ:MODE?
+    0.039  SMA100B    <<  CW
+    0.039  SMA100B    >>  POW:MODE?
+    0.040  SMA100B    <<  CW
+    0.041  SMA100B    >>  UNIT:POW?
+    0.042  SMA100B    <<  DBM
+    0.042  SMA100B    >>  MOD:ALL:STAT?
+    0.043  SMA100B    <<  0
+    0.044  SMA100B    >>  FREQ:OFFS?
+    0.045  SMA100B    <<  0
+    0.045  SMA100B    >>  FREQ:MULT?
+    0.046  SMA100B    <<  1
+    0.047  SMA100B    >>  POW:OFFS?
+    0.048  SMA100B    <<  0

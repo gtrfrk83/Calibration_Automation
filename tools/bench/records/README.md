@@ -57,3 +57,19 @@ Driver: PMET1: commands (as on the bench), continuous trigger by default (SING i
 - ZR: residual 0 W after 22 s. The 1 mW calibration READ-BACK was wrong in the driver: it read after C0 (calibrator off: 6E-08 W). Fixed: read with the calibrator on, C0 last.
 - -115, -121, -127 dBm: error 96 (no signal) 1.2 s after T3. The driver sent the tune + S4 again at every level (a re-acquisition); fixed: a setup the receiver
   already holds is not sent again. Step 6c checks whether the locked receiver now reaches -127 dBm.
+
+## 2026-11-05 R&S SMA100B, drivers/sma100b_bench.py (2026-11-05_sma100b_*.txt)
+Unit: SMA100B serial 124249, firmware 5.40.102.30, options SMAB-B35, B86, B93, B131, B709, K720, on GPIB1::28 (factory address). GPIB0::28 -> VI_ERROR_RSRC_NFOUND
+(the SMA100B is on board 1, like the 6060A bench: 2026-11-05_sma100b_gpib0_not_found.txt).
+- Step 1 (read-only): every query answered at once; the generator was at 500 013 Hz, -3.468 dBm (the operator's own setting), RF off, ROSC EXT, POW:LIM 20 dBm, CW, DBM,
+  modulation off, offsets 0 / 1 / 0. POW? answers the full float ("-3.46787486224656"), FREQ? a plain integer.
+- Step 2 (--settings --selftest, every write typed y): *CLS, OUTP OFF -> 0; *RST, *CLS, *OPC? 1, queue empty; UNIT:POW DBM, FREQ:MODE CW, POW:MODE CW, MOD:ALL:STAT 0 all read
+  back; ROSC EXT and POW:LIM 20 unchanged by *RST (as the manual, p. 746 / 756); FREQ 1000000000 / POW -30.00 read back exactly; FREQ 1e+12 refused: FREQ? unchanged and
+  -222,"Data out of range;:SOURce1:FREQuency:CW 1000000000000 (IdPDbFreq,...)" (device detail after ';'), then 0,"No error"; *TST? 0 after 4.4 s. NOTE: *RST replaced the
+  operator's front-panel setting (500 kHz, -3.5 dBm), as it will in every run.
+- Step 3 (--settings --rf): OUTP ON -> OUTP? 1; with RF on FREQ? 1000000000, POW? -30; OUTP OFF -> 0; cleanup OFF -> 0.
+Every command of drivers/rs_sma100b.py now has its recorded reply in `ref` (BENCH ...) except rosc.set (not sent: the unit stays on EXT). verified stays False until a
+Driver verification (manager > Driver verification...) pass on this unit.
+- Driver verification 2026-11-05 08:56 (tester mtyler; 2026-11-05_sma100b_driver_verify_queries.txt): queries only (the window's default ticks), 17 passed, 0 failed.
+  Those 17 are now verified=True. Still to run with the set / output / reset rows ticked: mod.off, unit.dbm, freq.mode.cw, pow.mode.cw, freq.set, pow.set, rosc.set
+  (sample EXT), outp.on, outp.off, reset. status.clear (*CLS) is never sent by driver_verify.

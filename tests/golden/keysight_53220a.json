@@ -3239,6 +3239,365 @@
      "0"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "SMA100BSource.connect",
+   "log": [
+    "SMA100B|>>|*IDN?",
+    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30",
+    "SMA100B|>>|*CLS",
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|*OPT?",
+    "SMA100B|<<|SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720",
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|EXT",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|20",
+    "SMA100B|--|reference EXT, level limit 20 dBm, options SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720",
+    "SMA100B|>>|UNIT:POW DBM",
+    "SMA100B|>>|UNIT:POW?",
+    "SMA100B|<<|DBM",
+    "SMA100B|>>|FREQ:MODE CW",
+    "SMA100B|>>|FREQ:MODE?",
+    "SMA100B|<<|CW",
+    "SMA100B|>>|POW:MODE CW",
+    "SMA100B|>>|POW:MODE?",
+    "SMA100B|<<|CW",
+    "SMA100B|>>|MOD:ALL:STAT 0",
+    "SMA100B|>>|MOD:ALL:STAT?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:MULT?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|POW:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "SMA100BSource.connect",
+   "result": "returned <SMA100BSource>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720"
+    ],
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "20"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "W",
+     "FREQ:MODE CW"
+    ],
+    [
+     "Q",
+     "FREQ:MODE?",
+     "CW"
+    ],
+    [
+     "W",
+     "POW:MODE CW"
+    ],
+    [
+     "Q",
+     "POW:MODE?",
+     "CW"
+    ],
+    [
+     "W",
+     "MOD:ALL:STAT 0"
+    ],
+    [
+     "Q",
+     "MOD:ALL:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:MULT?",
+     "1"
+    ],
+    [
+     "Q",
+     "POW:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "10000000.0, 7.0",
+   "case": "SMA100BSource.set_rf[10 MHz +7 dBm]",
+   "log": [
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|20",
+    "SMA100B|>>|FREQ 10000000",
+    "SMA100B|>>|FREQ?",
+    "SMA100B|<<|10000000",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|20",
+    "SMA100B|>>|POW 7.00",
+    "SMA100B|>>|POW?",
+    "SMA100B|<<|7",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|*OPC?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "SMA100BSource.set_rf",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "POW:LIM?",
+     "20"
+    ],
+    [
+     "W",
+     "FREQ 10000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "10000000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "20"
+    ],
+    [
+     "W",
+     "POW 7.00"
+    ],
+    [
+     "Q",
+     "POW?",
+     "7"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "5880000000.0, -27.0",
+   "case": "SMA100BSource.set_rf[5.88 GHz -27 dBm]",
+   "log": [
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|20",
+    "SMA100B|>>|FREQ 5880000000",
+    "SMA100B|>>|FREQ?",
+    "SMA100B|<<|5880000000",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|20",
+    "SMA100B|>>|POW -27.00",
+    "SMA100B|>>|POW?",
+    "SMA100B|<<|-27",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|*OPC?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "SMA100BSource.set_rf",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "POW:LIM?",
+     "20"
+    ],
+    [
+     "W",
+     "FREQ 5880000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "5880000000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "20"
+    ],
+    [
+     "W",
+     "POW -27.00"
+    ],
+    [
+     "Q",
+     "POW?",
+     "-27"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "40000000000.0, -10.0",
+   "case": "SMA100BSource.set_rf[40 GHz refused]",
+   "log": [],
+   "method": "SMA100BSource.set_rf",
+   "result": "raised InstrumentError: 40 GHz is outside the R&S SMA100B range (8 kHz to 31.8 GHz with SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720)",
+   "wire": []
+  },
+  {
+   "call": "1000000000.0, 21.0",
+   "case": "SMA100BSource.set_rf[above the level limit refused]",
+   "log": [
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|20"
+   ],
+   "method": "SMA100BSource.set_rf",
+   "result": "raised InstrumentError: R&S SMA100B: 21 dBm is above its level limit 20 dBm (POW:LIM?): nothing was sent",
+   "wire": [
+    [
+     "Q",
+     "POW:LIM?",
+     "20"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "SMA100BSource.check_error[error queued]",
+   "log": [
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|-222,\"Data out of range\""
+   ],
+   "method": "SMA100BSource.check_error",
+   "result": "raised InstrumentError: R&S SMA100B reported an error (ctx): -222,\"Data out of range\"",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "-222,\"Data out of range\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "SMA100BSource.check_error[empty]",
+   "log": [
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "SMA100BSource.check_error",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
   }
  ],
  "name": "keysight_53220a",

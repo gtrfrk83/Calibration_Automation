@@ -23,6 +23,7 @@ import re
 
 from .simulated import SimBench, _SimBase
 from .simulated_mdo import SimRF
+from .simulated_sma100b import SimSMA100BTransport
 from .transport import TransportError
 
 OVERFLOW_TEXT = '+9.91000000000000E+37'
@@ -418,6 +419,19 @@ class SimPulseGen33250A(_SimGenBase):
         return out
 
 
+class SimSMA100B53220(SimSMA100BTransport):
+    """The simulated R&S SMA100B cabled to the simulated counter: the owner's options (bench 2026-11-05: B35, B86, B93, B131, B709, K720; 31.8 GHz is the option name, UNVERIFIED),
+    POW:LIM 20 dBm and reference EXT as recorded.  Its RF output is mirrored into bench.<rf_key> (the dict the simulated counter reads), like the simulated 96270A."""
+    def __init__(self, bench, rf_key='rf1'):
+        self.rf_key = rf_key
+        super().__init__(bench, max_hz=31.8e9, options='SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720', level_limit=20.0, ref_source='EXT')
+
+    def handle(self, cmd):
+        out = super().handle(cmd)
+        setattr(self.bench, self.rf_key, dict(on=self.rf_on, f=self.freq_hz, p=self.output_dbm() if self.rf_on else self.level_dbm))
+        return out
+
+
 def make_53220a_bench(model='53230A', bus='USB', options=None):
     """(bench, 96270A transport, counter transport).  bench.rf1 is the 96270A state, bench.ext_ref_present (default True) the 10 MHz on Ext Ref In, bench.external_signal the standard
     the operator connects (default None), bench.cable_loss_db (default 0), bench.atten_db (external attenuator after the 96270A, default 0)."""
@@ -429,5 +443,6 @@ def make_53220a_bench(model='53230A', bus='USB', options=None):
     bench.atten_db = 0.0
     rf = SimRF27(bench, 'rf1')
     ctr = Sim53220ATransport(bench, model, bus, options)
+    bench.sma_transport = SimSMA100B53220(bench)             # the R&S SMA100B as the RF source instead of the 96270A (same bench.rf1; connect one or the other)
     bench.gen_transport = SimPulseGen33250A(bench)          # the Agilent 33250A as the pulse generator (bench.gen_transport; the return value of this function is unchanged)
     return bench, rf, ctr

@@ -1,0 +1,127 @@
+Driver verification  2026-11-05T08:56:47
+driver RSSMA100B   model R&S SMA100B
+instrument Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30   address GPIB1::28::INSTR
+tester mtyler
+17 passed, 0 to check, 0 failed, 0 not sent
+
+PASS    err.query                      SYST:ERR?   -> 0,"No error"
+PASS    idn.query                      *IDN?   -> Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+PASS    opt.query                      *OPT?   -> SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+PASS    selftest                       *TST?   -> 0
+PASS    outp.query                     OUTP?   -> 0
+PASS    mod.query                      MOD:ALL:STAT?   -> 0
+PASS    unit.query                     UNIT:POW?   -> DBM
+PASS    freq.mode.query                FREQ:MODE?   -> CW
+PASS    pow.mode.query                 POW:MODE?   -> CW
+PASS    freq.query                     FREQ?   -> 1000000000
+PASS    pow.query                      POW?   -> -30
+PASS    freq.offs.query                FREQ:OFFS?   -> 0
+PASS    freq.mult.query                FREQ:MULT?   -> 1
+PASS    pow.offs.query                 POW:OFFS?   -> 0
+PASS    pow.limit.query                POW:LIM?   -> 20
+PASS    rosc.query                     ROSC:SOUR?   -> EXT
+PASS    opc.query                      *OPC?   -> 1
+
+--- command log ---
+    0.000  R&S SMA100B >>  *IDN?
+    0.002  R&S SMA100B <<  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+   16.080  R&S SMA100B >>  SYST:ERR?
+   16.082  R&S SMA100B <<  0,"No error"
+   16.082  R&S SMA100B >>  SYST:ERR?
+   16.083  R&S SMA100B <<  0,"No error"
+   16.083  R&S SMA100B >>  SYST:ERR?
+   16.085  R&S SMA100B <<  0,"No error"
+   16.085  R&S SMA100B >>  *IDN?
+   16.086  R&S SMA100B <<  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+   16.086  R&S SMA100B >>  SYST:ERR?
+   16.088  R&S SMA100B <<  0,"No error"
+   16.088  R&S SMA100B >>  SYST:ERR?
+   16.089  R&S SMA100B <<  0,"No error"
+   16.089  R&S SMA100B >>  *OPT?
+   16.090  R&S SMA100B <<  SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+   16.091  R&S SMA100B >>  SYST:ERR?
+   16.092  R&S SMA100B <<  0,"No error"
+   16.092  R&S SMA100B >>  SYST:ERR?
+   16.093  R&S SMA100B <<  0,"No error"
+   16.093  R&S SMA100B >>  *TST?
+   20.384  R&S SMA100B <<  0
+   20.384  R&S SMA100B >>  SYST:ERR?
+   20.386  R&S SMA100B <<  0,"No error"
+   20.386  R&S SMA100B >>  SYST:ERR?
+   20.389  R&S SMA100B <<  0,"No error"
+   20.389  R&S SMA100B >>  OUTP?
+   20.391  R&S SMA100B <<  0
+   20.391  R&S SMA100B >>  SYST:ERR?
+   20.394  R&S SMA100B <<  0,"No error"
+   20.394  R&S SMA100B >>  SYST:ERR?
+   20.397  R&S SMA100B <<  0,"No error"
+   20.397  R&S SMA100B >>  MOD:ALL:STAT?
+   20.413  R&S SMA100B <<  0
+   20.413  R&S SMA100B >>  SYST:ERR?
+   20.415  R&S SMA100B <<  0,"No error"
+   20.415  R&S SMA100B >>  SYST:ERR?
+   20.417  R&S SMA100B <<  0,"No error"
+   20.417  R&S SMA100B >>  UNIT:POW?
+   20.420  R&S SMA100B <<  DBM
+   20.420  R&S SMA100B >>  SYST:ERR?
+   20.422  R&S SMA100B <<  0,"No error"
+   20.422  R&S SMA100B >>  SYST:ERR?
+   20.424  R&S SMA100B <<  0,"No error"
+   20.424  R&S SMA100B >>  FREQ:MODE?
+   20.426  R&S SMA100B <<  CW
+   20.426  R&S SMA100B >>  SYST:ERR?
+   20.429  R&S SMA100B <<  0,"No error"
+   20.429  R&S SMA100B >>  SYST:ERR?
+   20.431  R&S SMA100B <<  0,"No error"
+   20.431  R&S SMA100B >>  POW:MODE?
+   20.432  R&S SMA100B <<  CW
+   20.432  R&S SMA100B >>  SYST:ERR?
+   20.434  R&S SMA100B <<  0,"No error"
+   20.434  R&S SMA100B >>  SYST:ERR?
+   20.436  R&S SMA100B <<  0,"No error"
+   20.436  R&S SMA100B >>  FREQ?
+   20.437  R&S SMA100B <<  1000000000
+   20.437  R&S SMA100B >>  SYST:ERR?
+   20.439  R&S SMA100B <<  0,"No error"
+   20.439  R&S SMA100B >>  SYST:ERR?
+   20.441  R&S SMA100B <<  0,"No error"
+   20.441  R&S SMA100B >>  POW?
+   20.442  R&S SMA100B <<  -30
+   20.442  R&S SMA100B >>  SYST:ERR?
+   20.458  R&S SMA100B <<  0,"No error"
+   20.458  R&S SMA100B >>  SYST:ERR?
+   20.460  R&S SMA100B <<  0,"No error"
+   20.460  R&S SMA100B >>  FREQ:OFFS?
+   20.461  R&S SMA100B <<  0
+   20.461  R&S SMA100B >>  SYST:ERR?
+   20.463  R&S SMA100B <<  0,"No error"
+   20.463  R&S SMA100B >>  SYST:ERR?
+   20.465  R&S SMA100B <<  0,"No error"
+   20.465  R&S SMA100B >>  FREQ:MULT?
+   20.466  R&S SMA100B <<  1
+   20.466  R&S SMA100B >>  SYST:ERR?
+   20.468  R&S SMA100B <<  0,"No error"
+   20.468  R&S SMA100B >>  SYST:ERR?
+   20.469  R&S SMA100B <<  0,"No error"
+   20.469  R&S SMA100B >>  POW:OFFS?
+   20.471  R&S SMA100B <<  0
+   20.471  R&S SMA100B >>  SYST:ERR?
+   20.472  R&S SMA100B <<  0,"No error"
+   20.472  R&S SMA100B >>  SYST:ERR?
+   20.474  R&S SMA100B <<  0,"No error"
+   20.474  R&S SMA100B >>  POW:LIM?
+   20.475  R&S SMA100B <<  20
+   20.475  R&S SMA100B >>  SYST:ERR?
+   20.477  R&S SMA100B <<  0,"No error"
+   20.477  R&S SMA100B >>  SYST:ERR?
+   20.479  R&S SMA100B <<  0,"No error"
+   20.479  R&S SMA100B >>  ROSC:SOUR?
+   20.480  R&S SMA100B <<  EXT
+   20.480  R&S SMA100B >>  SYST:ERR?
+   20.482  R&S SMA100B <<  0,"No error"
+   20.482  R&S SMA100B >>  SYST:ERR?
+   20.483  R&S SMA100B <<  0,"No error"
+   20.483  R&S SMA100B >>  *OPC?
+   20.485  R&S SMA100B <<  1
+   20.485  R&S SMA100B >>  SYST:ERR?
+   20.486  R&S SMA100B <<  0,"No error"

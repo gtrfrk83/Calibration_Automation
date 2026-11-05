@@ -48,18 +48,20 @@ def build_ui(self):
     self.rear_check = f.wide(H.checkbutton(None, 'Option 201 rear-panel inputs', self.rear_opt, self.on_options))
     f.rule()
     self.stim_combo = f.row('Stimulus', f.combo(self.stim_mode, list(E.STIM_CHOICES), 28, command=self.refresh))
+    self.src_combo = f.row('RF source', f.combo(self.rf_source, list(E.RF_SOURCE_CHOICES), 20, command=self.on_rf_source))
+    f.note('R&S SMA100B: one RF output for every RF point (8 kHz to its frequency option; B131 = 31.8 GHz), level set at its output plus the cable loss, so the 5.88 GHz -27 dBm point needs no external attenuator. It should stay locked to the house 10 MHz (reference External); the program reads and reports it, it does not change it.')
     self.pulse_combo = f.row('Pulse tests 4 and 5', f.combo(self.pulse_gen, list(E.PULSE_GEN_CHOICES), 40, command=self.on_pulse_gen))
     f.note('With the Agilent 33250A Tests 4a / 4b run at 8 ns (its minimum pulse width; limits are the same half-widths centred on 8 ns, UNVERIFIED) and the program drives it. Test 5 (two outputs 49.9 ns apart) is set by hand with another pulse generator.')
     self.ref_combo = f.row('10 MHz reference', f.combo(self.ref_mode, list(E.REF_CHOICES), 24))
     self.loss_entry = f.row('Cable loss (dB)', f.combo(self.loss, ['0', '0.5', '1', '2', '3', '6'], 8, state='normal', command=self.refresh))
     self.low_check = f.wide(H.checkbutton(None, '96270A has the Extended Low Level option (the bench 96270A has NOT: leave off)', self.ext_low, self.refresh))
-    f.note('The cable loss is added to the level the 96270A is set to. Above 4 GHz the Microwave O/P is used; where it cannot make the level (5.88 GHz at -27 dBm) an external attenuator is called for in the prompt. The output route is chosen on the 96270A front panel.')
+    f.note('The cable loss is added to the level the RF source is set to. 96270A: above 4 GHz the Microwave O/P is used; where it cannot make the level (5.88 GHz at -27 dBm) an external attenuator is called for in the prompt. The output route is chosen on the 96270A front panel.')
     f.rule()
     self.iface_combo = f.row(f'{MODEL} interface', f.combo(self.interface, list(INTERFACES), 10, command=self.on_interface))
     self.ctr_entry = f.row(f'{MODEL} address / resource', f.combo(self.ctr_addr, (), 38, state='normal'), fill=True)
     f.note('USB: USB0::<mfgID>::<modelID>::<serial>::INSTR; LAN: TCPIP0::<ip>::inst0::INSTR; GPIB: GPIB0::<address>::INSTR. The examples are not verified for your bench: use Find instruments.')
-    self.rf_entry = f.row('96270A address / resource', f.combo(self.rf_addr, (), 38, state='normal'), fill=True)
-    f.note('Leave the 96270A address empty to use other standards for every test.')
+    self.rf_entry = f.row('RF source address / resource', f.combo(self.rf_addr, (), 38, state='normal'), fill=True)
+    f.note('The address of the RF source chosen above (each source keeps its own; the bench SMA100B is GPIB1::28). Leave it empty to use other standards for every test.')
     self.gen_entry = f.row('33250A address / resource', f.combo(self.gen_addr, (), 38, state='normal'), fill=True)
     f.note('The Agilent 33250A pulse generator (used when "Agilent 33250A" is chosen above). Leave empty to set the pulse by hand.')
     B.find_and_test(sh, self, 'Find instruments', self.find_instruments)
@@ -71,10 +73,10 @@ def build_ui(self):
 
 def sync_buttons(self):
     B.sync_buttons(self, (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find),
-                   [(c, B.idle_state(c)) for c in (self.period_combo, self.set_combo, self.tb_combo, self.ch3_combo, self.pulse_check, self.rear_check, self.stim_combo, self.ref_combo,
+                   [(c, B.idle_state(c)) for c in (self.period_combo, self.set_combo, self.tb_combo, self.ch3_combo, self.pulse_check, self.rear_check, self.stim_combo, self.src_combo, self.ref_combo,
                                                   self.loss_entry, self.low_check)])
 
 
 def set_choices(self, which, values):
-    """The drop-down values of the counter address ('ctr'), 96270A address ('rf') or 33250A address ('gen') box."""
+    """The drop-down values of the counter address ('ctr'), RF source address ('rf') or 33250A address ('gen') box."""
     {'ctr': self.ctr_entry, 'rf': self.rf_entry, 'gen': self.gen_entry}[which].configure(values=values)

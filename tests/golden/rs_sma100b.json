@@ -1,0 +1,897 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "RSSMA100B.connect",
+   "log": [
+    "SMA100B|>>|*IDN?",
+    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30",
+    "SMA100B|>>|*CLS",
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|*OPT?",
+    "SMA100B|<<|SMAB-B106,SMAB-K720",
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|INT",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10",
+    "SMA100B|--|reference INT, level limit 10 dBm, options SMAB-B106,SMAB-K720"
+   ],
+   "method": "RSSMA100B.connect",
+   "result": "returned <RSSMA100B>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "SMAB-B106,SMAB-K720"
+    ],
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "INT"
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.identify",
+   "log": [
+    "SMA100B|>>|*IDN?",
+    "SMA100B|<<|Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
+   ],
+   "method": "RSSMA100B.identify",
+   "result": "returned 'Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30'",
+   "wire": [
+    [
+     "Q",
+     "*IDN?",
+     "Rohde&Schwarz,SMA100B,1419.8888K02/100001,5.40.102.30"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.read_fixed_state",
+   "log": [
+    "SMA100B|>>|*OPT?",
+    "SMA100B|<<|SMAB-B106,SMAB-K720",
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|INT",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10",
+    "SMA100B|--|reference INT, level limit 10 dBm, options SMAB-B106,SMAB-K720"
+   ],
+   "method": "RSSMA100B.read_fixed_state",
+   "result": "returned ('INT', 10.0, ('SMAB-B106', 'SMAB-K720'))",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "SMAB-B106,SMAB-K720"
+    ],
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "INT"
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "RSSMA100B.check_errors",
+   "log": [
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "RSSMA100B.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.cw_setup",
+   "log": [
+    "SMA100B|>>|UNIT:POW DBM",
+    "SMA100B|>>|UNIT:POW?",
+    "SMA100B|<<|DBM",
+    "SMA100B|>>|FREQ:MODE CW",
+    "SMA100B|>>|FREQ:MODE?",
+    "SMA100B|<<|CW",
+    "SMA100B|>>|POW:MODE CW",
+    "SMA100B|>>|POW:MODE?",
+    "SMA100B|<<|CW",
+    "SMA100B|>>|MOD:ALL:STAT 0",
+    "SMA100B|>>|MOD:ALL:STAT?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:MULT?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|POW:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "RSSMA100B.cw_setup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "W",
+     "FREQ:MODE CW"
+    ],
+    [
+     "Q",
+     "FREQ:MODE?",
+     "CW"
+    ],
+    [
+     "W",
+     "POW:MODE CW"
+    ],
+    [
+     "Q",
+     "POW:MODE?",
+     "CW"
+    ],
+    [
+     "W",
+     "MOD:ALL:STAT 0"
+    ],
+    [
+     "Q",
+     "MOD:ALL:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:MULT?",
+     "1"
+    ],
+    [
+     "Q",
+     "POW:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.confirm_no_offsets",
+   "log": [
+    "SMA100B|>>|FREQ:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:MULT?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|POW:OFFS?",
+    "SMA100B|<<|0"
+   ],
+   "method": "RSSMA100B.confirm_no_offsets",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "FREQ:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:MULT?",
+     "1"
+    ],
+    [
+     "Q",
+     "POW:OFFS?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.reference_source",
+   "log": [
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|INT"
+   ],
+   "method": "RSSMA100B.reference_source",
+   "result": "returned 'INT'",
+   "wire": [
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "INT"
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "RSSMA100B.set_reference[EXT]",
+   "log": [
+    "SMA100B|>>|ROSC:SOUR EXT",
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|EXT",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "RSSMA100B.set_reference",
+   "result": "returned 'EXT'",
+   "wire": [
+    [
+     "W",
+     "ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'INT'",
+   "case": "RSSMA100B.set_reference[INT]",
+   "log": [
+    "SMA100B|>>|ROSC:SOUR INT",
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|INT",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "RSSMA100B.set_reference",
+   "result": "returned 'INT'",
+   "wire": [
+    [
+     "W",
+     "ROSC:SOUR INT"
+    ],
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "INT"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.level_limit",
+   "log": [
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10"
+   ],
+   "method": "RSSMA100B.level_limit",
+   "result": "returned 10.0",
+   "wire": [
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "1500000000.0",
+   "case": "RSSMA100B.set_frequency",
+   "log": [
+    "SMA100B|>>|FREQ 1500000000",
+    "SMA100B|>>|FREQ?",
+    "SMA100B|<<|1500000000",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "RSSMA100B.set_frequency",
+   "result": "returned 1500000000.0",
+   "wire": [
+    [
+     "W",
+     "FREQ 1500000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "1500000000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "7000000000.0",
+   "case": "RSSMA100B.set_frequency[above range]",
+   "log": [
+    "SMA100B|>>|FREQ 7000000000",
+    "SMA100B|>>|FREQ?",
+    "SMA100B|<<|1500000000",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|-222,\"Data out of range;:SOURce1:FREQuency:CW 7000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)\""
+   ],
+   "method": "RSSMA100B.set_frequency",
+   "result": "raised InstrumentError: SMA100B: FREQ 7000000000: set 7000000000.0, instrument reports '1500000000' (error queue: -222,\"Data out of range;:SOURce1:FREQuency:CW 7000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)\")",
+   "wire": [
+    [
+     "W",
+     "FREQ 7000000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "1500000000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "-222,\"Data out of range;:SOURce1:FREQuency:CW 7000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)\""
+    ]
+   ]
+  },
+  {
+   "call": "-20.0",
+   "case": "RSSMA100B.set_level",
+   "log": [
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10",
+    "SMA100B|>>|POW -20.00",
+    "SMA100B|>>|POW?",
+    "SMA100B|<<|-20",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\""
+   ],
+   "method": "RSSMA100B.set_level",
+   "result": "returned -20.0",
+   "wire": [
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ],
+    [
+     "W",
+     "POW -20.00"
+    ],
+    [
+     "Q",
+     "POW?",
+     "-20"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "12.0",
+   "case": "RSSMA100B.set_level[above the limit]",
+   "log": [
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10"
+   ],
+   "method": "RSSMA100B.set_level",
+   "result": "raised InstrumentError: R&S SMA100B: 12 dBm is above the level limit 10 dBm (POW:LIM?): the output would be capped while POW? reads 12. Raise the limit on the front panel only if the set-up allows it",
+   "wire": [
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.wait_done",
+   "log": [
+    "SMA100B|>>|*OPC?",
+    "SMA100B|<<|1"
+   ],
+   "method": "RSSMA100B.wait_done",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "100000000.0, 0.0",
+   "case": "RSSMA100B.setup",
+   "log": [
+    "SMA100B|>>|FREQ 100000000",
+    "SMA100B|>>|FREQ?",
+    "SMA100B|<<|100000000",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10",
+    "SMA100B|>>|POW 0.00",
+    "SMA100B|>>|POW?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|*OPC?",
+    "SMA100B|<<|1"
+   ],
+   "method": "RSSMA100B.setup",
+   "result": "returned (100000000.0, 0.0)",
+   "wire": [
+    [
+     "W",
+     "FREQ 100000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "100000000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ],
+    [
+     "W",
+     "POW 0.00"
+    ],
+    [
+     "Q",
+     "POW?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "RSSMA100B.output[on]",
+   "log": [
+    "SMA100B|>>|OUTP ON",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|1"
+   ],
+   "method": "RSSMA100B.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP ON"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.is_output_on",
+   "log": [
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|1"
+   ],
+   "method": "RSSMA100B.is_output_on",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.read_setting",
+   "log": [
+    "SMA100B|>>|FREQ?",
+    "SMA100B|<<|100000000",
+    "SMA100B|>>|POW?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|1"
+   ],
+   "method": "RSSMA100B.read_setting",
+   "result": "returned (100000000.0, 0.0, True)",
+   "wire": [
+    [
+     "Q",
+     "FREQ?",
+     "100000000"
+    ],
+    [
+     "Q",
+     "POW?",
+     "0"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "RSSMA100B.output[off]",
+   "log": [
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0"
+   ],
+   "method": "RSSMA100B.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.self_test",
+   "log": [
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|*TST?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0"
+   ],
+   "method": "RSSMA100B.self_test",
+   "result": "returned (True, '0')",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.confirm_no_offsets[level offset left on]",
+   "log": [
+    "SMA100B|>>|FREQ:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:MULT?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|POW:OFFS?",
+    "SMA100B|<<|2"
+   ],
+   "method": "RSSMA100B.confirm_no_offsets",
+   "result": "raised InstrumentError: R&S SMA100B level offset is 2.0, must be 0: the displayed value would not be the output. Reset the generator (*RST) first",
+   "wire": [
+    [
+     "Q",
+     "FREQ:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:MULT?",
+     "1"
+    ],
+    [
+     "Q",
+     "POW:OFFS?",
+     "2"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.reset_to_defaults",
+   "log": [
+    "SMA100B|>>|*RST",
+    "SMA100B|>>|*CLS",
+    "SMA100B|>>|*OPC?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|UNIT:POW DBM",
+    "SMA100B|>>|UNIT:POW?",
+    "SMA100B|<<|DBM",
+    "SMA100B|>>|FREQ:MODE CW",
+    "SMA100B|>>|FREQ:MODE?",
+    "SMA100B|<<|CW",
+    "SMA100B|>>|POW:MODE CW",
+    "SMA100B|>>|POW:MODE?",
+    "SMA100B|<<|CW",
+    "SMA100B|>>|MOD:ALL:STAT 0",
+    "SMA100B|>>|MOD:ALL:STAT?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|FREQ:MULT?",
+    "SMA100B|<<|1",
+    "SMA100B|>>|POW:OFFS?",
+    "SMA100B|<<|0",
+    "SMA100B|>>|SYST:ERR?",
+    "SMA100B|<<|0,\"No error\"",
+    "SMA100B|>>|*OPT?",
+    "SMA100B|<<|SMAB-B106,SMAB-K720",
+    "SMA100B|>>|ROSC:SOUR?",
+    "SMA100B|<<|INT",
+    "SMA100B|>>|POW:LIM?",
+    "SMA100B|<<|10",
+    "SMA100B|--|reference INT, level limit 10 dBm, options SMAB-B106,SMAB-K720"
+   ],
+   "method": "RSSMA100B.reset_to_defaults",
+   "result": "returned ResetReport(instrument='SMA100B', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='RF OFF confirmed (OUTP OFF, OUTP?)', ok=True, detail=''), ResetStep(name='dBm, CW, modulation off, no offsets', ok=True, detail=''), ResetStep(name='reference source and level limit read', ok=True, detail='INT / 10 dBm')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "W",
+     "FREQ:MODE CW"
+    ],
+    [
+     "Q",
+     "FREQ:MODE?",
+     "CW"
+    ],
+    [
+     "W",
+     "POW:MODE CW"
+    ],
+    [
+     "Q",
+     "POW:MODE?",
+     "CW"
+    ],
+    [
+     "W",
+     "MOD:ALL:STAT 0"
+    ],
+    [
+     "Q",
+     "MOD:ALL:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ:MULT?",
+     "1"
+    ],
+    [
+     "Q",
+     "POW:OFFS?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "SMAB-B106,SMAB-K720"
+    ],
+    [
+     "Q",
+     "ROSC:SOUR?",
+     "INT"
+    ],
+    [
+     "Q",
+     "POW:LIM?",
+     "10"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "RSSMA100B.cleanup",
+   "log": [
+    "SMA100B|>>|OUTP OFF",
+    "SMA100B|>>|OUTP?",
+    "SMA100B|<<|0"
+   ],
+   "method": "RSSMA100B.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  }
+ ],
+ "name": "rs_sma100b",
+ "schema": 1
+}

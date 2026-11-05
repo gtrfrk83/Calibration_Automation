@@ -996,6 +996,139 @@ class Flow(unittest.TestCase):
             A.to_visa('12', 'USB', default_gpib=False)
 
 
+class SMA100BStimulus(unittest.TestCase):
+    """Owner 2026-11-05: the R&S SMA100B as the RF source instead of the 96270A (bench unit: B35, B86, B93, B131, B709, K720; POW:LIM 20 dBm; reference EXT)."""
+
+    def stim(self, **k):
+        return dict(dict(mode='auto', rf=True, loss_db=0.0, ext_low=False, source='SMA100B'), **k)
+
+    def test_every_cw_point_goes_to_its_one_output_with_the_loss_added_and_no_attenuator(self):
+        for p in PTS:
+            if p['stimulus']['group'] in ('LH', 'MW'):
+                pl = A.plan_stimulus(p, self.stim(loss_db=1.5, sma_max_hz=31.8e9, sma_limit_dbm=20.0))
+                self.assertEqual((pl['mode'], pl['route'], pl['atten_db']), ('rf', 'SMA', 0.0), p['ref'])
+                self.assertAlmostEqual(pl['level_set'], p['stimulus']['level_dbm'] + 1.5)
+        pl = A.plan_stimulus(by_ref('6a.5.88GHz.mean'), self.stim())                         # the 96270A needs 23 dB external attenuation here; the SMA100B sets -27 dBm itself
+        self.assertEqual((pl['mode'], pl['route'], pl['level_set'], pl['atten_db']), ('rf', 'SMA', -27.0, 0.0))
+
+    def test_pulse_and_burst_stay_on_other_standards(self):
+        for ref in ('4a.ch1.5ns.mean', '5.ch1-ch2.49.9ns.mean', '7a.6GHz.200ns.mean', '7c.1.35GHz.400ns.mean'):
+            self.assertEqual(A.plan_stimulus(by_ref(ref), self.stim())['mode'], 'manual', ref)       # the bench SMA100B has no K22 pulse modulation
+
+    def test_frequency_option_and_level_limit_send_a_point_to_another_standard(self):
+        pl = A.plan_stimulus(by_ref('6b.15GHz.mean'), self.stim(sma_max_hz=6e9))
+        self.assertEqual(pl['mode'], 'manual')
+        self.assertIn('outside the R&S SMA100B range', pl['reason'])
+        pl = A.plan_stimulus(by_ref('2a.10MHz.mean'), self.stim(loss_db=2.0, sma_limit_dbm=8.0))       # 7 dBm + 2 dB > 8 dBm limit
+        self.assertEqual(pl['mode'], 'manual')
+        self.assertIn('level limit', pl['reason'])
+        self.assertIn('No R&S SMA100B is connected', A.plan_stimulus(by_ref('2a.10MHz.mean'), self.stim(rf=False))['reason'])
+
+    def test_max_frequency_from_the_options(self):
+        self.assertEqual(K.sma100b_max_hz(('SMAB-B35', 'SMAB-B86', 'SMAB-B93', 'SMAB-B131', 'SMAB-B709', 'SMAB-K720')), 31.8e9)
+        self.assertEqual(K.sma100b_max_hz(('SMAB-B106', 'SMAB-K720')), 6e9)
+        self.assertIsNone(K.sma100b_max_hz(('SMAB-K720',)))
+
+    def test_the_source_driver_refuses_out_of_range_before_sending(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        import drivers
+        b, _rf, _ct = make_53220a_bench('53220A')
+        s = K.SMA100BSource(b.sma_transport, drivers.CommandLog(), label='SMA100B')
+        s.connect()
+        self.assertEqual((s.max_hz, s.level_limit_dbm, s.ref_source), (31.8e9, 20.0, 'EXT'))
+        n = len(b.sma_transport.sent)
+        with self.assertRaises(InstrumentError):
+            s.set_rf(40e9, -10.0)
+        with self.assertRaises(InstrumentError):
+            s.set_rf(1e9, 21.0)                                          # above POW:LIM?: refused by the driver
+        self.assertFalse([c for c in b.sma_transport.sent[n:] if c.upper().startswith(('FREQ ', 'POW '))])
+        s.set_rf(5.88e9, -27.0)
+        self.assertEqual((b.sma_transport.freq_hz, b.sma_transport.level_dbm, b.sma_transport.rf_on), (5.88e9, -27.0, False))
+
+
+class SMA100BFlow(unittest.TestCase):
+    """The engine on the simulated bench with the R&S SMA100B as the RF source (Flow's helpers, not its tests)."""
+    OPTIONS = Flow.OPTIONS
+    setUp, tearDown, app, connect, wire = Flow.setUp, Flow.tearDown, Flow.app, Flow.connect, Flow.wire
+
+    def sma_app(self, model='53220A', **settings):
+        a = self.app(model, **settings)
+        a.rf_source.set(A.RF_SOURCE_CHOICES[1]); a.on_rf_source()
+        return a
+
+    def test_a_full_run_drives_the_sma100b_and_never_the_96270a(self):
+        for model in ('53220A', '53230A'):
+            a = self.sma_app(model)
+            self.connect(a)
+            self.assertIsInstance(a.io.rf, K.SMA100BSource)
+            self.assertTrue(self.hn.run_all())
+            self.assertTrue(all(r['result'] == 'PASS' for r in a.results.values()), model)
+            self.assertFalse(self.hn.boxes('showerror'), self.hn.boxes('showerror'))
+            self.assertFalse(self.wire(a, '96270A'))
+            rf_pts = [p for p in a.active_points() if p['stimulus']['group'] in ('LH', 'MW')]
+            for p in rf_pts:
+                r = a.results[str(p['id'])]
+                self.assertEqual((r['stimulus'], r['atten_db']), ('rf', 0.0), p['ref'])
+            sma = [t.upper() for t in self.wire(a, 'SMA100B')]
+            self.assertEqual(sma.count('OUTP ON'), len([p for p in rf_pts if p['stat'] == 'mean']))
+            ons = [i for i, t in enumerate(sma) if t == 'OUTP ON']
+            for x, y in zip(ons, ons[1:]):
+                self.assertIn('OUTP OFF', sma[x + 1:y], 'the RF output stayed on between two points')
+            self.assertEqual([t for t in sma if t.startswith('OUTP ') ][-1], 'OUTP OFF')
+            self.assertFalse(any('[+attenuator]' in a._row(p)[0][1] for p in rf_pts))
+            self.hn.stop(); self.hn = VH.VHarness().start(); A.messagebox = VH.hh.messagebox
+
+    def test_588_ghz_is_set_at_minus_27_dbm_directly(self):
+        a = self.sma_app('53230A')
+        self.connect(a)
+        p = by_ref('6a.5.88GHz.mean')
+        a.execute([p])
+        self.assertTrue(self.hn.pump())
+        sma = [t.upper() for t in self.wire(a, 'SMA100B')]
+        self.assertIn('FREQ 5880000000', sma)
+        self.assertIn('POW -27.00', sma)
+        self.assertEqual(a.results[str(p['id'])]['result'], 'PASS')
+
+    def test_each_source_keeps_its_own_address_and_the_prompts_name_it(self):
+        a = self.app('53220A')
+        self.assertEqual(a.rf_addr.get(), A.DEFAULT_RF_ADDR)
+        a.rf_addr.set('GPIB0::7::INSTR')
+        a.rf_source.set(A.RF_SOURCE_CHOICES[1]); a.on_rf_source()
+        self.assertEqual(a.rf_addr.get(), A.DEFAULT_SMA_ADDR)
+        a.rf_source.set(A.RF_SOURCE_CHOICES[0]); a.on_rf_source()
+        self.assertEqual(a.rf_addr.get(), 'GPIB0::7::INSTR')
+        a.rf_source.set(A.RF_SOURCE_CHOICES[1]); a.on_rf_source()
+        self.assertIn('R&S SMA100B RF output', a.setup_text(by_ref('6b.15GHz.mean')))
+        self.assertEqual(a.stim_state()['source'], 'SMA100B')
+
+    def test_switching_source_after_connecting_reconnects_before_the_run(self):
+        a = self.app('53220A')
+        self.connect(a)
+        self.assertIsInstance(a.io.rf, K.Fluke96270AWide)
+        a.rf_source.set(A.RF_SOURCE_CHOICES[1]); a.on_rf_source()
+        self.assertEqual(a.plan(by_ref('2a.10MHz.mean'))['mode'], 'manual')          # not connected yet: not driven
+        p = by_ref('2a.10MHz.mean')
+        a.execute([p])
+        self.assertTrue(self.hn.pump())
+        self.assertIsInstance(a.io.rf, K.SMA100BSource)
+        self.assertEqual(a.results[str(p['id'])]['stimulus'], 'rf')
+
+    def test_an_internal_reference_is_warned_at_connect(self):
+        import drivers.simulated_53220a as S
+        real = S.make_53220a_bench
+
+        def internal(*k, **kw):
+            res = real(*k, **kw)
+            res[0].sma_transport.ref_source = 'INT'
+            return res
+        S.make_53220a_bench = internal
+        try:
+            self.connect(self.sma_app('53220A'))
+        finally:
+            S.make_53220a_bench = real
+        self.assertIn('INTERNAL reference', ' '.join(str(d) for d in self.hn.boxes()))
+
+
 class Registration(unittest.TestCase):
     def test_launchers_sidecars_and_tunables(self):
         import procscan
