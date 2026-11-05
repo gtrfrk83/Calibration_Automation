@@ -1,7 +1,8 @@
 Hook-up diagrams for the Keysight 53210A / 53220A / 53230A performance verification (supplied by Mike as PNGs in this folder; none has been drawn).
 
 The procedure looks for, in this order:
-    diagrams/hook_53220a_<SRC>_<GROUP>.png      SRC = 96270A (stimulus from the Fluke 96270A) or manual (stimulus from another standard)
+    diagrams/hook_53220a_<SRC>_<GROUP>.png      SRC = 96270A (stimulus from the Fluke 96270A), SMA100B (stimulus from the R&S SMA100B: its one RF output, PC 2.92 mm,
+                                                to the counter input; no Leveling Head, no external attenuator) or manual (stimulus from another standard)
     diagrams/hook_53220a_<GROUP>.png            one picture for either stimulus
 When no file is found the hook-up prompt shows the written steps and names the file it expected.
 
@@ -19,7 +20,7 @@ GROUP names (one picture per wiring group):
     TINT         Test 5: pulse generator, both outputs, to Channel 1 and Channel 2 with equal cable lengths   (manual)
     BURST        Test 7 (53230A with Option 150): pulse-modulated microwave generator to the microwave input   (manual)
 
-Examples:  hook_53220a_96270A_CH1.png   hook_53220a_96270A_CH3_MW.png   hook_53220a_manual_PULSE_CH1.png   hook_53220a_TIMEBASE.png
+Examples:  hook_53220a_96270A_CH1.png   hook_53220a_96270A_CH3_MW.png   hook_53220a_SMA100B_CH3_MW.png   hook_53220a_manual_PULSE_CH1.png   hook_53220a_TIMEBASE.png
 
 The Keysight 53230A and 53210A (same connectors) use the same pictures. For them the procedure looks first for
     diagrams/hook_53230a_<SRC>_<GROUP>.png, then diagrams/hook_53230a_<GROUP>.png     (53210A: hook_53210a_ ...)

@@ -1,0 +1,175 @@
+R&S SMA100B bench record 20261105_084916 GPIB1::28::INSTR
+
+*IDN? Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30  (GPIB1::28::INSTR)
+--- stage 1: read-only queries
+PASS  query *IDN?  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+PASS  query *OPT?  SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+PASS  query SYST:ERR?  0,"No error"
+PASS  query OUTP?  0
+PASS  query FREQ?  1000000000
+PASS  query POW?  -30
+PASS  query POW:LIM?  20
+PASS  query ROSC:SOUR?  EXT
+PASS  query FREQ:MODE?  CW
+PASS  query POW:MODE?  CW
+PASS  query UNIT:POW?  DBM
+PASS  query MOD:ALL:STAT?  0
+PASS  query FREQ:OFFS?  0
+PASS  query FREQ:MULT?  1
+PASS  query POW:OFFS?  0
+--- stage 2: settings with RF OFF (each write asks first)
+PASS  *CLS + RF OFF confirmed  
+PASS  reset_to_defaults (*RST, *CLS, *OPC?, queue, RF OFF, CW set-up)  SMA100B: reset OK
+  ok  reset (*RST)
+  ok  clear status (*CLS)
+  ok  wait for completion (*OPC?)
+  ok  drain error queue: queue empty
+  ok  RF OFF confirmed (OUTP OFF, OUTP?)
+  ok  dBm, CW, modulation off, no offsets
+  ok  reference source and level limit read: EXT / 20 dBm
+PASS  cw_setup (dBm, CW, modulation off, no offsets)  
+PASS  set 1 GHz, -30 dBm (RF stays OFF)  (1000000000.0, -30.0)
+PASS  read back (Hz, dBm, RF on?)  (1000000000.0, -30.0, False)
+PASS  out-of-range frequency 1 THz is refused (error queue)  refused as expected: SMA100B: FREQ 1e+12: set 1000000000000.0, instrument reports '1000000000' (error queue: -222,"Data out of range;:SOURce1:FREQuency:CW 1000000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)")
+PASS  error queue empty  
+--- stage 3: RF ON at -30 dBm, 1 GHz
+PASS  RF ON confirmed (OUTP ON, OUTP?)  
+PASS  read back with RF on  (1000000000.0, -30.0, True)
+PASS  RF OFF confirmed (OUTP OFF, OUTP?)  
+cleanup: RF OFF confirmed
+
+--- command log (every command and exact reply)
+    0.000  SMA100B    >>  *IDN?
+    0.004  SMA100B    <<  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+    0.004  SMA100B    >>  *IDN?
+    0.007  SMA100B    <<  Rohde&Schwarz,SMA100B,1419.8888K02/124249,5.40.102.30
+    0.008  SMA100B    >>  *OPT?
+    0.011  SMA100B    <<  SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+    0.012  SMA100B    >>  SYST:ERR?
+    0.030  SMA100B    <<  0,"No error"
+    0.030  SMA100B    >>  OUTP?
+    0.033  SMA100B    <<  0
+    0.033  SMA100B    >>  FREQ?
+    0.036  SMA100B    <<  1000000000
+    0.036  SMA100B    >>  POW?
+    0.039  SMA100B    <<  -30
+    0.039  SMA100B    >>  POW:LIM?
+    0.042  SMA100B    <<  20
+    0.042  SMA100B    >>  ROSC:SOUR?
+    0.045  SMA100B    <<  EXT
+    0.045  SMA100B    >>  FREQ:MODE?
+    0.048  SMA100B    <<  CW
+    0.048  SMA100B    >>  POW:MODE?
+    0.051  SMA100B    <<  CW
+    0.051  SMA100B    >>  UNIT:POW?
+    0.054  SMA100B    <<  DBM
+    0.054  SMA100B    >>  MOD:ALL:STAT?
+    0.057  SMA100B    <<  0
+    0.057  SMA100B    >>  FREQ:OFFS?
+    0.060  SMA100B    <<  0
+    0.061  SMA100B    >>  FREQ:MULT?
+    0.063  SMA100B    <<  1
+    0.063  SMA100B    >>  POW:OFFS?
+    0.066  SMA100B    <<  0
+    0.066  SMA100B    >>  *CLS
+    5.835  SMA100B    >>  OUTP OFF
+    8.236  SMA100B    >>  OUTP?
+    8.238  SMA100B    <<  0
+    8.238  SMA100B    >>  *RST
+   12.585  SMA100B    >>  *CLS
+   13.709  SMA100B    >>  *OPC?
+   13.710  SMA100B    <<  1
+   13.711  SMA100B    >>  SYST:ERR?
+   13.713  SMA100B    <<  0,"No error"
+   13.713  SMA100B    >>  OUTP OFF
+   16.053  SMA100B    >>  OUTP?
+   16.055  SMA100B    <<  0
+   16.055  SMA100B    >>  UNIT:POW DBM
+   18.104  SMA100B    >>  UNIT:POW?
+   18.106  SMA100B    <<  DBM
+   18.106  SMA100B    >>  FREQ:MODE CW
+   19.221  SMA100B    >>  FREQ:MODE?
+   19.223  SMA100B    <<  CW
+   19.223  SMA100B    >>  POW:MODE CW
+   20.109  SMA100B    >>  POW:MODE?
+   20.110  SMA100B    <<  CW
+   20.110  SMA100B    >>  MOD:ALL:STAT 0
+   21.085  SMA100B    >>  MOD:ALL:STAT?
+   21.087  SMA100B    <<  0
+   21.087  SMA100B    >>  FREQ:OFFS?
+   21.089  SMA100B    <<  0
+   21.089  SMA100B    >>  FREQ:MULT?
+   21.091  SMA100B    <<  1
+   21.091  SMA100B    >>  POW:OFFS?
+   21.110  SMA100B    <<  0
+   21.110  SMA100B    >>  SYST:ERR?
+   21.112  SMA100B    <<  0,"No error"
+   21.112  SMA100B    >>  *OPT?
+   21.114  SMA100B    <<  SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+   21.115  SMA100B    >>  ROSC:SOUR?
+   21.116  SMA100B    <<  EXT
+   21.116  SMA100B    >>  POW:LIM?
+   21.118  SMA100B    <<  20
+   21.118  SMA100B    --  reference EXT, level limit 20 dBm, options SMAB-B35,SMAB-B86,SMAB-B93,SMAB-B131,SMAB-B709,SMAB-K720
+   21.118  SMA100B    >>  UNIT:POW DBM
+   24.829  SMA100B    >>  UNIT:POW?
+   24.830  SMA100B    <<  DBM
+   24.830  SMA100B    >>  FREQ:MODE CW
+   27.125  SMA100B    >>  FREQ:MODE?
+   27.127  SMA100B    <<  CW
+   27.127  SMA100B    >>  POW:MODE CW
+   27.909  SMA100B    >>  POW:MODE?
+   27.911  SMA100B    <<  CW
+   27.911  SMA100B    >>  MOD:ALL:STAT 0
+   28.932  SMA100B    >>  MOD:ALL:STAT?
+   28.934  SMA100B    <<  0
+   28.934  SMA100B    >>  FREQ:OFFS?
+   28.936  SMA100B    <<  0
+   28.936  SMA100B    >>  FREQ:MULT?
+   28.938  SMA100B    <<  1
+   28.938  SMA100B    >>  POW:OFFS?
+   28.939  SMA100B    <<  0
+   28.939  SMA100B    >>  SYST:ERR?
+   28.941  SMA100B    <<  0,"No error"
+   28.941  SMA100B    >>  FREQ 1000000000
+   30.900  SMA100B    >>  FREQ?
+   30.902  SMA100B    <<  1000000000
+   30.902  SMA100B    >>  SYST:ERR?
+   30.903  SMA100B    <<  0,"No error"
+   30.903  SMA100B    >>  POW:LIM?
+   30.905  SMA100B    <<  20
+   30.905  SMA100B    >>  POW -30.00
+   31.837  SMA100B    >>  POW?
+   31.838  SMA100B    <<  -30
+   31.839  SMA100B    >>  SYST:ERR?
+   31.840  SMA100B    <<  0,"No error"
+   31.840  SMA100B    >>  *OPC?
+   31.842  SMA100B    <<  1
+   31.842  SMA100B    >>  FREQ?
+   31.844  SMA100B    <<  1000000000
+   31.845  SMA100B    >>  POW?
+   31.847  SMA100B    <<  -30
+   31.847  SMA100B    >>  OUTP?
+   31.852  SMA100B    <<  0
+   31.852  SMA100B    >>  FREQ 1e+12
+   32.717  SMA100B    >>  FREQ?
+   32.719  SMA100B    <<  1000000000
+   32.719  SMA100B    >>  SYST:ERR?
+   32.721  SMA100B    <<  -222,"Data out of range;:SOURce1:FREQuency:CW 1000000000000 (IdPDbFreq,h:0,c:0,s:0,d:0,g:0,u:0,k:0,l:0)"
+   32.721  SMA100B    >>  SYST:ERR?
+   32.723  SMA100B    <<  0,"No error"
+   42.628  SMA100B    >>  OUTP ON
+   48.397  SMA100B    >>  OUTP?
+   48.400  SMA100B    <<  1
+   49.400  SMA100B    >>  FREQ?
+   49.402  SMA100B    <<  1000000000
+   49.402  SMA100B    >>  POW?
+   49.418  SMA100B    <<  -30
+   49.419  SMA100B    >>  OUTP?
+   49.420  SMA100B    <<  1
+   49.421  SMA100B    >>  OUTP OFF
+   52.300  SMA100B    >>  OUTP?
+   52.303  SMA100B    <<  0
+   52.303  SMA100B    >>  OUTP OFF
+   52.304  SMA100B    >>  OUTP?
+   52.305  SMA100B    <<  0

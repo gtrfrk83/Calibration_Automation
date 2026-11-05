@@ -2179,6 +2179,25 @@ unchanged - UNVERIFIED (the manual prints 5 ns only; the 33250A's own pulse widt
 Test 5 (two outputs 49.9 ns apart) is by hand with either generator (the 33250A has one output). Hook-up pictures for the 33250A are owner-supplied (diagrams/README_53220a.txt).
 
 
+## 53220A family: R&S SMA100B as the RF source (2026-11-05; simulated bench only, never run on hardware with the counter)
+Owner request: "calibrate it with the option of the 96270 and the SMA100B". Owner answers 2026-11-05: the SMA100B options are B35, B86, B93, B131, B709, K720 (the same list the unit
+reports to *OPT?, bench record 2026-11-05); a drawer selector, not a per-test choice.
+- Driver: `drivers/rs_sma100b.py` (merged from `claude/ecstatic-knuth-wufu56`, queries verified on the owner's unit; set / output / reset still verified=False) used AS IS through
+  `k53.SMA100BSource` (drivers/keysight_53220a.py): connect = the driver's connect (RF OFF confirmed, options / reference / POW:LIM read) + `cw_setup()` (dBm, CW, modulation off,
+  no offsets, read back); `set_rf(f, dBm)` refuses a frequency outside 8 kHz..option maximum and a level above POW:LIM? BEFORE sending anything, then `setup()` (each value read back,
+  *OPC?) and the error queue. No command added.
+- Settings drawer: 'RF source' = Fluke 96270A / R&S SMA100B; the address box keeps one address per source (settings `rf_addr`, `sma_addr`; SMA100B default GPIB1::28::INSTR as on
+  the bench). `STIM_CHOICES[0]` is now 'RF source where it can', `REF_CHOICES[1]` 'RF source 10 MHz Ref Out' (old saved texts fall back to the first choice). Changing the source after
+  connecting makes its points manual until Test connections; a run reconnects first.
+- Routing (`plan_stimulus`, source 'SMA100B'): every CW point (Tests 1, 2, 3, 6a, 6b) is route 'SMA', level = printed level + cable loss, NO external attenuator (6a 5.88 GHz is set
+  at -27 dBm directly: B35 has the step attenuator, User Manual pp. 228-230). Pulse (Tests 4, 5) and burst (Test 7) stay on other standards: the bench unit has no K22 / K23.
+  Frequency maximum from the option name (B131 = 31.8 GHz; `SMA100B_MAX_HZ_BY_OPTION`, UNVERIFIED: the specifications document is not on file; every point is at or below 15 GHz).
+  The level range is not gated beyond POW:LIM? and the 10 dBm input guard: the generator's -222 is the final word.
+- Reference: only READ. Connect warns when ROSC:SOUR? is INT (Test 1 compares the counter's internal time base with the stimulus). Settle: new tunable `a53220a.settle.sma` (2 s).
+- Uncertainty unchanged (owner rule 2026-10-26: frequency points use the 'Frequency - Measure' CMC alone; the source does not enter).
+- Hook-up pictures: `diagrams/hook_53220a_SMA100B_<GROUP>.png` (none supplied). Sidecars list `rs_sma100b` and fingerprint `drivers/rs_sma100b.py`.
+- Simulated: `SimSMA100B53220` (drivers/simulated_53220a.py, `bench.sma_transport`) mirrors its RF output into `bench.rf1`. Tests: `SMA100BStimulus`, `SMA100BFlow`.
+
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
 - **Deleted:** every `*_view_tk.py` (30), `Calibration_Procedure_Manager.py`, `ui_theme.py` (the toolkit-free part stays as `ui_theme_core.py`), `ui_shell`, `ui_port_tk`, `branding`, `datasheet_builder_ui`, `datasheet_builder_check_ui`, `specmanager_ui`, `spec_editor_ui`, `labregistry_ui`, `instrument_scan_ui`, `mdd_import_ui`, `packages_ui`, `verified_ui`, `procmods_ui`, `procmods_point_ui`, `run_queue_ui`, `report_dialog`, `report_review` (its flow is `report_review_flow.py`), `manual_grid`, `Start_Calibration_Suite.bat`, `diagnostics.install` (the Tk exception hook).
@@ -2478,3 +2497,18 @@ Tests: tests/test_hp8902a_calfactors.py.
 - RULE for a new procedure: its engine and its `<name>_view_qt.py` go in `Procedures/` (not the suite root) and are listed in `own_files`; a new driver is just a file in `drivers/` (see below). `Procedures/*` files added this way go on the `EDITED_LATER` / `later` lists of the two `tests/test_reprint_review_*` guards.
 - `drivers/__init__.py` finds a driver by name when it is not imported there (`__getattr__`, PEP 562: looks for `class|def <Name>` or `<NAME> =` at the top level of the files in `drivers/`, imports only that file, caches it). A package that carries a new driver file therefore works without an edit to the shared `__init__.py`. The explicit imports stay as the fast path. `tests/test_drivers_autoload.py`.
 - A technician's suite needs ONE full update to get this (the `__init__.py` change and the moved engines); after that, a new procedure with a new driver arrives as a package. A package that replaces a shared file (`drivers/base.py`, `drivers/transport.py` ...) still flips the verified procedures that use it to 'Changed since verification'.
+
+## R&S SMA100B driver (owner request 2026-11-05; `drivers/rs_sma100b.py`; simulated only, never run on a real SMA100B)
+- Source: "R&S SMA100B User Manual" 1178.3834.02-14 (`SMA100B_UserManual_en_14.pdf`, branch 6060a-gidep-uncertainty); printed page = PDF page. Every Cmd cites its page; ALL are verified=False (bench-first: step 1 done, steps 2-3 not).
+- Scope: a CW source. FREQ / POW (dBm), RF on / off (OUTP?, unconfirmed OFF = SafetyError), FREQ:MODE / POW:MODE CW, MOD:ALL:STAT 0, UNIT:POW DBM, ROSC:SOUR INT / EXT, *OPT?, *TST?, SYST:ERR?. No sweep / list / modulation set-up / user correction.
+- Manual facts that shaped it: *RST does NOT reset the reference source (p. 756) or the level limit (p. 746), so both are read at connect() and after reset_to_defaults() and logged. POW? does not show the limit (p. 746): set_level() reads POW:LIM? and refuses a higher level before sending anything. The driver never writes the limit. FREQ? / POW? include the downstream offset / multiplier (p. 704, 752): cw_setup() confirms FREQ:OFFS 0, FREQ:MULT 1, POW:OFFS 0 and refuses otherwise. GPIB factory address 28 (p. 788); SYST:COMM is never sent (cmdreg forbids it).
+- A read-back mismatch reads the error queue once, so the generator's own reason (e.g. -222 Data out of range) is in the message and not left for a later command.
+- UNVERIFIED reply formats: FREQ:MODE? / POW:MODE? (CW or FIX), UNIT:POW?, ROSC:SOUR?, OUTP? / MOD:ALL:STAT? (0 / 1), the number format of FREQ? / POW?, *OPT? text, *TST? duration (120 s timeout is a choice).
+- Bench session: `python -m drivers.sma100b_bench` (read-only queries; nothing changed), then `--settings` (RF OFF; each write asks for a typed y), `--selftest`, `--rf` (RF ON at -30 dBm 1 GHz, typed `RF ON` first; 50 ohm load or sensor on the output). RF OFF is sent and confirmed at the end whatever happened. Each run writes `sma100b_bench_<time>.txt` with every command and reply: that record + a driver_verify pass is what sets verified=True. The simulator (`drivers/simulated_sma100b.py`) is hand-written, NOT recorded replies: replace its reply text with the recorded ones after the bench session.
+Tests: tests/test_driver_rs_sma100b.py; golden fixture tests/golden/rs_sma100b.json (cases in tests/golden_sma100b.py).
+- Bench 2026-11-05 (owner, GPIB1::28, serial 124249, fw 5.40.102.30; records tools/bench/records/2026-11-05_sma100b_*.txt): read-only, settings + self-test, and RF on / off all PASS, first
+  try, no driver change needed. Every reply format the driver matched loosely is now recorded (see the BENCH notes in each Cmd.ref). Confirmed: *RST leaves ROSC (EXT) and POW:LIM (20 dBm)
+  alone; -222 carries device detail after ';' (ERR_CLEAN unaffected). After the bench: the simulator uses the recorded reply texts; the driver_verify sample for rosc.set is EXT (was INT,
+  which would have moved this unit off its external reference). STILL TO DO before verified=True: one Driver verification pass on the unit (rosc.set is the only command never sent).
+- Driver verification 2026-11-05 08:56 (tester mtyler): the 17 queries PASS -> verified=True (`DRIVER_VERIFIED` in the driver). Not yet verified: the 7 set commands, outp.on / outp.off and
+  reset (bench-script records only; a second Driver verification run with those rows ticked finishes it), and status.clear (driver_verify never sends *CLS: stays UNVERIFIED, listed).

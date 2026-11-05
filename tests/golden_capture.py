@@ -235,6 +235,8 @@ from tests import golden_6060a as _g6060a  # noqa: E402  (Fluke 6060A, HP 8902A,
 COVERAGE['fluke_6060a'] = _g6060a.COVERAGE
 from tests import golden_8591a as _g8591a  # noqa: E402  (HP 8591A driver and the 96270A AM method)
 COVERAGE['hp_8591a'] = _g8591a.COVERAGE
+from tests import golden_sma100b as _gsma100b  # noqa: E402  (R&S SMA100B driver cases; simulated replies, not recorded)
+COVERAGE['rs_sma100b'] = _gsma100b.COVERAGE
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
@@ -246,6 +248,7 @@ LINT_FILES.append('keithley_dmm6500')
 LINT_FILES.append('fluke_5700a')
 LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address']
 LINT_FILES.append('hp_8591a')
+LINT_FILES += ['rs_sma100b', 'sma100b_bench']
 LINT_FILES += ['tektronix_tbs1000', 'tektronix_tbs1000c']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
@@ -1814,6 +1817,7 @@ DRIVER_CASES['keithley_dmm6500'] = _gdmm6500.driver_cases
 DRIVER_CASES['fluke_5700a'] = _g5700a.driver_cases
 DRIVER_CASES['fluke_6060a'] = _g6060a.driver_cases
 DRIVER_CASES['hp_8591a'] = _g8591a.driver_cases
+DRIVER_CASES['rs_sma100b'] = _gsma100b.driver_cases
 
 
 # ==== APPEND-ONLY BLOCK, 3 Series MDO (drivers/tektronix_mdo3.py; branch tektronix-mdo3): its own fixtures tektronix_mdo3.json / engine_mdo3.json ======
