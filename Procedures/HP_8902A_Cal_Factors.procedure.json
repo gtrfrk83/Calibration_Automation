@@ -5,6 +5,7 @@
  "manufacturer": "HP",
  "model": "8902A",
  "category": "RF Measuring Receiver Adjustment",
+ "family": "adjustment",
  "kind": "adjustment",
  "version": "1",
  "order": 80,

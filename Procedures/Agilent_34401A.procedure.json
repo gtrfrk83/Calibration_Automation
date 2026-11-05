@@ -5,6 +5,7 @@
  "manufacturer": "Agilent",
  "model": "34401A",
  "category": "Digital Multimeter",
+ "family": "bench-dmm",
  "version": "55",
  "order": 2,
  "description": "Standalone calibration procedure",

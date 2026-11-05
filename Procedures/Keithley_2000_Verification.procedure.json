@@ -5,6 +5,7 @@
  "manufacturer": "Keithley",
  "model": "2000",
  "category": "Digital Multimeter",
+ "family": "bench-dmm",
  "version": "1",
  "order": 30,
  "description": "Standalone calibration procedure",

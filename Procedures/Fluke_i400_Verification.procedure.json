@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "i400",
  "category": "Current Clamp",
+ "family": "clamp-meter",
  "version": "1",
  "order": 60,
  "description": "Standalone calibration procedure",

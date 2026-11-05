@@ -5,6 +5,7 @@
  "manufacturer": "Keithley",
  "model": "DMM6500",
  "category": "Digital Multimeter",
+ "family": "bench-dmm",
  "version": "2",
  "order": 82,
  "description": "Standalone calibration procedure (simulated bench only: no DMM6500 command verified on a real meter)",

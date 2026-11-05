@@ -5,6 +5,7 @@
  "manufacturer": "B&K Precision",
  "model": "5491B",
  "category": "Digital Multimeter",
+ "family": "bench-dmm",
  "version": "1",
  "order": 76,
  "description": "Automated performance verification of the B&K Precision 5491B bench multimeter (55 points from the lab datasheet ATS-1042, cross-checked against the User Manual). Limits: lab datasheet (default) or manufacturer specification. Fluke 5522A / 5560A / 5520A as the source. Remote commands are only partly verified on a real meter.",

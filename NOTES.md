@@ -51,6 +51,57 @@ Tektronix 3 Series MDO (MDO32 / MDO34; own engine mdo3_verification.py, see '3 S
   'Instruments reset to default settings at start'. Because a UUT reset can erase stored settings, a notice is confirmed first (declining touches
   nothing). STANDING-RULE DEVIATION (owner request, Fluke 8808A only): `AppResetMixin.RESET_ONCE_PER_SESSION` (default False = reset on every Run, every other engine unchanged) is True for the 8808A App, so 'reset every instrument to defaults before tests start' is once per session for that procedure; see the 8808A section. Fast demo sends nothing; a virtual-bench demo resets the SIMULATED instruments (see Virtual bench). A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
 
+## Uniformity rules (owner, 2026-11-05; branch `uniformity-rules`)
+Adopted after a review of every procedure category for inconsistencies between procedures (review run on main 0eb6fb8). They sit on top of the
+Standing rules above. Adopting rules 1, 2, 3 and 7 is the owner's request to change safety prompts, instrument command sequences and pass/fail
+logic, which the Standing rules otherwise keep unchanged. Uncertainty rules were left out on purpose.
+
+Enforced by `tests/test_procedure_conformance.py` (one test per rule over every shipped procedure). `tests/fixtures/conformance_allowlist.json`
+holds the violations that existed when the rules were adopted: the cleanup backlog. The test fails on any NEW violation and on any listed one
+that no longer happens (remove it, so it cannot come back). Its `exceptions` block holds findings that are right as they are, each with a reason
+(for example meters that pick AC or DC themselves, V CHEK / AUTO-V LoZ). Regenerate the list only after reviewing the change:
+`python tests/test_procedure_conformance.py --write-allowlist` (keeps reasons and exceptions). Shared values live in `uniformity.py`
+(nothing uses it yet; engines move onto it one at a time).
+
+1. High voltage. One threshold for every procedure, handheld and bench: 30 V AC or DC (`uniformity.HV_THRESHOLD_V`). The operator confirms
+   high voltage once per hook-up group, and every hook-up group with a point at or above 30 V carries a written high-voltage caution.
+   Checked: handheld specs (threshold, once per group, caution text on the group's cable prompt for both calibrator plans); any other launcher
+   or engine that asks a high-voltage question must use `uniformity.HV_THRESHOLD_V`.
+2. Every change of function, AC/DC setting or terminal prompts the operator. Consecutive points that differ in function must have different
+   switch text or their own prompt (`handheld_dmm._prompt_function` skips the prompt when the switch text is unchanged). Checked: handheld specs.
+   Bench engines already prompt on every terminal change (review 2026-11-05); not checked by the test.
+3. Calibrator safeguards live in the shared calibrator driver (5560A / 5522A / 5520A), not in engines: clear old errors before an error check,
+   read back mode and output impedance after setting them, write the impedance only when it changes, confirmed operate. Engines do not call
+   `operate_unverified()` and do not write `OUT_IMP` themselves. Changed command sequences need the golden transcripts updated
+   (`tests/golden_capture.py`) and are flagged for a check on a real 5560A. Checked: engine and launcher source.
+4. Cable prompts and equipment lists that name a calibrator name every calibrator the procedure offers (the 5520A when `calibrator_fit` offers
+   it) and no calibrator it does not offer. Generic wording ('the calibrator') is fine. Checked: handheld cable prompts (hookups.py plans and
+   spec groups).
+5. Every adjustment procedure runs on `adjustment_audit` (As Found gate before unlock, all steps done before constants are saved, error queue
+   checked after the save, Abort, a DEMO kept in memory). A secret placeholder never reaches a transport error message: hidden in the shared
+   driver layer, so no driver has to remember it. Checked: adjustment sidecars and launchers; a probe instrument whose write fails.
+6. Warm-up. Every procedure whose manuals (instrument or standard) give a warm-up asks the operator to confirm it before the first point,
+   showing the time and the page; no timer. Declared in the SIDECAR as `"warmup": {"minutes": n, "ref": "<manual, page>"}` (0 minutes when the
+   manuals state none): the sidecar is the one place every procedure has (several have no spec file) and editing it never changes a
+   fingerprint. Checked: declared, and a procedure with minutes > 0 asks. The first step is a sweep of every manual.
+7. Pass/fail goes through `uniformity.within_limits(reading, low, high)`: exact decimal, limits inclusive (a reading exactly on a limit
+   passes). Checked: every procedure's launcher or engine uses it.
+8. Fingerprints list every procedure module, driver and data file the procedure's launcher and engines import or name. Shared infrastructure
+   (`shared_modules` in the allowlist file) is in NO fingerprint. A module is one or the other: `handheld_unc.py`, `manual_override.py` and
+   `hookups.py` are in some fingerprints and missing from others today, so each needs that decision. Checked: imports and data-file names.
+9. Every spec JSON (`specs/*.json`, `specs/standards/*.json`) has a committed builder with repo-relative paths, and running the builder
+   reproduces the committed file (build timestamps ignored). Checked: the test runs every builder in a temporary copy of the suite. Recorded
+   exceptions until builders exist: the 110-series and Truevolt specs, the reference CMC files, and the 34401A / 8846A / WaveSurfer limits
+   held in their launchers. The MDO4000C builder's /home/claude paths are to be fixed.
+10. Handheld spec options (`hv_threshold_v`, `hv_once_per_group`, `auto_ramp`, `function_prompt`, `report_title`) come from
+    `specs/handheld_defaults.json`; a spec that differs gives the reason in `options.option_reasons[<option>]`. handheld_dmm.py does not read
+    the file yet (its built-in defaults still apply to a spec that leaves an option out). Checked: every handheld spec.
+11. Point counts written in a sidecar description, a launcher docstring or a handheld spec's model note match the spec (all points, or all
+    without the optional-include, functional-check or visual points). Checked.
+12. Every sidecar has a `family` (`uniformity.FAMILIES`: handheld-dmm, clamp-meter, bench-dmm, adjustment, oscilloscope, function-generator,
+    frequency-counter, rf, dacq). A fix to shared behaviour (prompts, safeguards, pass/fail, report text) lists the family's other procedures
+    in the commit message, each as applied or why not. Checked: the field; the commit-message part is a working rule.
+
 ## Frequency band edges (decided 2026-10-25)
 - A2LA scope CMC tables (specs/a2la_1888_03_cmc.json, `uncertainty.Scope`): AC rows are printed '(> lo to hi) Hz', so they are read HALF-OPEN: a frequency on a shared
   edge belongs to the row below (the lowest row of a block includes its lower edge).  AC volts and AC current alike (1d13125).  The MDO flatness rows print the scope's 0.050 dB.

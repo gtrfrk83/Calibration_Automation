@@ -5,6 +5,7 @@
  "manufacturer": "Tektronix",
  "model": "TBS2000B",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "1",
  "order": 41,
  "description": "Tektronix TBS2072B / 2074B / 2102B / 2104B / 2202B / 2204B performance verification (one family spec, model chosen in the window)",

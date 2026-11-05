@@ -5,6 +5,7 @@
  "manufacturer": "Keysight",
  "model": "53210A",
  "category": "Frequency Counter",
+ "family": "frequency-counter",
  "version": "1",
  "order": 75,
  "description": "Automated performance verification of the Keysight 53210A counter (Service Guide chapter 1), 96270A or R&S SMA100B RF stimulus (chosen in the settings drawer); SCPI UNVERIFIED (Programmer's Reference does not cover it). Channel 1 only, no pulse or time tests. Points follow the declared options: 8 (no microwave channel), 12 (Option 106), 14 (Option 115); all in the quick check.",

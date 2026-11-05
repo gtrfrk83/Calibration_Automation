@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "374",
  "category": "Clamp Meter",
+ "family": "clamp-meter",
  "version": "1",
  "order": 36,
  "description": "Fluke 374 / 375 / 376 / 376-II Clamp Meter Performance Verification (family spec): this launcher runs the 374, 28 points",

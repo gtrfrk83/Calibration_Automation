@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "note": "Shared options of every handheld_dmm.py spec (NOTES.md, Uniformity rules, rule 10; owner 2026-11-05). A spec that sets a different value must give the reason in options.option_reasons[<option>]; tests/test_procedure_conformance.py checks it. handheld_dmm.py does not read this file yet: until it does, a spec that leaves an option out gets the engine's built-in default (hv_threshold_v 500, hv_once_per_group off, auto_ramp on, function_prompt off, report title '<model> Performance Verification').",
+ "options": {
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ }
+}

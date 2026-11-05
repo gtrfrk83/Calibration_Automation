@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "101",
  "category": "Digital Multimeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 78,
  "description": "Standalone calibration procedure",

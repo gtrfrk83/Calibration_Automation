@@ -5,6 +5,7 @@
  "manufacturer": "Tektronix",
  "model": "MDO32/MDO34",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "1",
  "order": 45,
  "description": "Standalone calibration procedure",

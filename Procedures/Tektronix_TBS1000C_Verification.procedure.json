@@ -5,6 +5,7 @@
  "manufacturer": "Tektronix",
  "model": "TBS1052C/TBS1072C/TBS1102C/TBS1202C",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "1",
  "order": 39,
  "description": "Standalone calibration procedure",

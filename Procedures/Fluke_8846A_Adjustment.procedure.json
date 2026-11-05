@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "8846A",
  "category": "Digital Multimeter Adjustment",
+ "family": "adjustment",
  "version": "57",
  "order": 4,
  "description": "Standalone calibration procedure",

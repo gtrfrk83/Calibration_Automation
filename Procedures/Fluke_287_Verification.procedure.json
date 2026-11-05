@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "287",
  "category": "Digital Multimeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 24,
  "description": "Standalone calibration procedure",

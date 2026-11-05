@@ -5,6 +5,7 @@
  "manufacturer": "Keithley",
  "model": "2000",
  "category": "Digital Multimeter Adjustment",
+ "family": "adjustment",
  "kind": "adjustment",
  "version": "1",
  "order": 32,

@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "83 Series V",
  "category": "Digital Multimeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 1,
  "description": "Standalone calibration procedure",

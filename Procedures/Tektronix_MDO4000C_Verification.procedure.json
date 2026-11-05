@@ -5,6 +5,7 @@
  "manufacturer": "Tektronix",
  "model": "MDO4024C/4034C/4054C/4104C",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "2",
  "order": 12,
  "description": "Standalone calibration procedure",
