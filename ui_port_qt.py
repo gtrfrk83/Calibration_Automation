@@ -189,6 +189,11 @@ class QtUiPort:
 
     # ---- window and variables -----------------------------------------------------------------------------------------------------------
     def run_app(self, factory):
+        try:
+            import standards_used
+            standards_used.install()               # which standards touched each point (capture only; wraps at run time, no engine / driver file is edited)
+        except Exception:
+            pass
         qapp.run_app(factory)
 
     def set_title(self, win, text):

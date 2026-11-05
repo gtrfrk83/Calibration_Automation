@@ -203,7 +203,7 @@ def install() -> bool:
     manual_override.ManualOverrideMixin.mo_begin (to say which point is current).  The originals run FIRST and unchanged, so the wire, the log text and the evidence
     log are exactly what they were; the wrapper only records.  Done by wrapping at run time - NOT by editing drivers/transport.py or manual_override.py - because
     those files are in the fingerprint of 71 / 3 verified procedures and editing them would flip every one of them to 'Changed since verification'.
-    Idempotent; never raises; called at start-up (qtui.app.create_app) and by the review flow.  A log made before install() has no capture (`observed_for` -> None)."""
+    Idempotent; never raises; called at start-up (ui_port_qt.QtUiPort.run_app) and by the review flow.  A log made before install() has no capture (`observed_for` -> None)."""
     global _installed
     if _installed:
         return True
