@@ -678,3 +678,65 @@ class UncertaintyReviewWindow(GidepBench):
         self.assertEqual(am.cur.status, M.NOT_IN_SCOPE)                   # a starred budget: the scope does not cover it
         self.assertTrue(all(M.offered_standards(r.spec) == [] for r in model.rows))     # nothing to choose
         self.assertEqual(model.record()['changes'] if 'changes' in model.record() else [], [])
+
+
+class DeleteReadingAndInop(GidepBench):
+    """Owner 2026-11-05: "i need a way to delete data in the as found data column and mark a test point inop". Right-click on a point: 'Delete As Found reading...' and
+    'Mark INOP...'."""
+
+    def point(self, ref='4.1 Table 2 100.00000 MHz'):
+        return next(p for p in E.POINTS if p['ref'] == ref)
+
+    def menu(self, p):
+        return {label: (cmd, ok) for label, cmd, ok, _why in self.app.tree_menu_extras(str(p['id']))}
+
+    def test_the_menu_offers_both_entries(self):
+        p = self.point()
+        m = self.menu(p)
+        self.assertFalse(m['Delete As Found reading...'][1])            # nothing to delete yet
+        self.assertTrue(m['Mark INOP...'][1])
+        self.run_points(refs=[p['ref']])
+        self.assertTrue(self.menu(p)['Delete As Found reading...'][1])
+
+    def test_delete_removes_the_reading_and_the_point_is_pending_again(self):
+        p = self.point()
+        self.run_points(refs=[p['ref']])
+        self.assertIn(str(p['id']), self.app.found)
+        with mock.patch.object(E.port, 'ask_yes_no', return_value=True):
+            self.assertTrue(self.app.delete_reading(p))
+        self.assertNotIn(str(p['id']), self.app.found)
+        self.assertEqual(self.app._row(p)[0][6], '')                     # the As Found cell is empty
+
+    def test_delete_also_clears_computed_points_that_used_it(self):
+        ref = next(p for p in E.POINTS if p['meas'] == 'derived')
+        inputs = [q for q in E.POINTS if q['ref'] in ref['derive']['inputs']]
+        self.run_points(refs=[q['ref'] for q in inputs] + [ref['ref']])
+        self.assertIn(str(ref['id']), self.app.found)
+        with mock.patch.object(E.port, 'ask_yes_no', return_value=True):
+            self.app.delete_reading(inputs[0])
+        self.assertNotIn(str(ref['id']), self.app.found)
+
+    def test_inop_is_recorded_shown_and_printed(self):
+        import report_pdf
+        p = self.point()
+        self.assertTrue(self.app.mark_inop(p, reason='no output at 100 MHz'))
+        rec = self.app.found[str(p['id'])]
+        self.assertEqual((rec['result'], rec['reading'], rec['reason']), ('INOP', None, 'no output at 100 MHz'))
+        cells = self.app._row(p)[0]
+        self.assertIn('INOP', cells)                                       # As Found cell and Result column
+        row = self.app.point_row(p, rec)
+        self.assertEqual((row['As Found'], row['OOT'], row['Uncertainty']), ('INOP', '', ''))
+        self.app.on_options(save=False)                                    # a re-judge leaves INOP alone
+        self.assertEqual(self.app.found[str(p['id'])]['result'], 'INOP')
+        self.run_points(refs=['4.1 Table 2 111.11111 MHz'])                # Run All Pending skips it
+        self.assertEqual(self.app.found[str(p['id'])]['result'], 'INOP')
+        rows, _pts = self.app.certificate_rows_and_points()
+        self.assertTrue(any(r.get('As Found') == 'INOP' for r in rows))
+        self.assertTrue(report_pdf)
+
+    def test_marking_a_measured_point_inop_asks_first(self):
+        p = self.point()
+        self.run_points(refs=[p['ref']])
+        with mock.patch.object(E.port, 'ask_yes_no', return_value=False):
+            self.assertFalse(self.app.mark_inop(p, reason='x'))
+        self.assertEqual(self.app.found[str(p['id'])]['result'], 'PASS')

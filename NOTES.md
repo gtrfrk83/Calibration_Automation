@@ -2246,6 +2246,11 @@ T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedu
   ONLY UNCAL reason, logging each wait; it goes on once the loop locks and raises as before if it does not. Any other reason stops at once. Both 6060A procedures. The
   simulator's `pll_settle_reads` (opt-in) models a loop that locks after N IU reads. UNVERIFIED whether the real unlock is transient (if it persists, the approach itself
   needs changing: finer steps, or the 6060A's own step keys).
+- Delete a reading / mark INOP (owner, 2026-11-05: "i need a way to delete data in the as found data column and mark a test point inop"). Right-click on a 6060A
+  point (both 6060A procedures): 'Delete As Found reading...' (As Left in As Left mode; asks first, removes the record and the computed points that used it, the point is
+  pending again) and 'Mark INOP...' (asks an optional reason; a record with result INOP, no reading, never a pass; asks before replacing a measured reading). INOP shows in
+  the As Found and Result cells (datamode.shell_cells now maps INOP), prints 'INOP' with no uncertainty on the report, is skipped by Run All Pending and by the re-judge on
+  an options change, and gives no input to a computed point. Both edits are written to the command log. Tests: DeleteReadingAndInop.
 - Review-uncertainties window (owner, 2026-11-04: "why is the 5560 listed for the uncertainties in this procedure?"; the window showed '0 of 210 points carry an
   uncertainty'). report_review_model.specs_for treated the 6060A like a multimeter engine (it has certificate_rows_and_points): a calibrator drop-down defaulting to the
   first calibrator (5560A) and every row recomputed by the multimeter path = 'No uncertainty required'. New generic hook: an engine with `review_point_specs()` supplies

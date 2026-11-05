@@ -171,7 +171,7 @@ class DataModeMixin:
             e = av - nominal
             err = ('+' + show(e)) if e > 0 else show(e)
         res = rec.get('result', '')
-        shown = {'PASS': '✔ PASS', 'FAIL': '✖ FAIL'}.get(res, '—')
+        shown = {'PASS': '✔ PASS', 'FAIL': '✖ FAIL', 'INOP': 'INOP'}.get(res, '—')          # INOP: a point marked inoperative by the technician (6060A, owner 2026-11-05)
         lo_t = 'N/A' if low is None else show(low)               # one-sided limits
         hi_t = 'N/A' if high is None else show(high)
         limits = lo_t + ' … ' + hi_t if (low is not None and high is not None) else (('≥ ' + lo_t) if high is None else ('≤ ' + hi_t))

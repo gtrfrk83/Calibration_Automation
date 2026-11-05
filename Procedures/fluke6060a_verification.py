@@ -800,6 +800,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.pm_apply(POINTS)
         for records in (self.found, self.left):
             for key, rec in records.items():
+                if rec.get('result') == 'INOP':                    # marked inoperative: no reading to judge
+                    continue
                 rec['result'] = 'PASS' if judge(POINTS[int(key) - 1], rec['reading']) else 'FAIL'
         if save: self._save_settings()
         self.refresh()
@@ -1168,6 +1170,69 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             except Exception: pass
         self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); port.message('error', 'Measurement stopped', str(exc))
 
+    # ---- right-click: delete a reading, mark a point INOP (owner 2026-11-05: "i need a way to delete data in the as found data column and mark a test point inop")
+    def tree_menu_extras(self, pid):
+        out = list(super().tree_menu_extras(pid))
+        p = POINTS[int(pid) - 1]
+        key, busy = str(p['id']), self.busy
+        col = self.mode_label
+        has = key in self.results
+        why_busy = 'A run is in progress.'
+        out.append((f'Delete {col} reading...', lambda: self.delete_reading(p), has and not busy, why_busy if busy else f'No {col} reading to delete.'))
+        out.append(('Mark INOP...', lambda: self.mark_inop(p), not busy and p['meas'] != 'derived', why_busy if busy else 'A computed point follows its inputs.'))
+        return out
+
+    def _dependents(self, p):
+        return [q for q in POINTS if q['meas'] == 'derived' and p['ref'] in q['derive']['inputs']]
+
+    def delete_reading(self, p, confirm=True):
+        """Remove point p's reading from the column being collected (As Found or As Left), and the computed points that used it; the point is pending again. Logged."""
+        key, col = str(p['id']), self.mode_label
+        rec = self.results.get(key)
+        if rec is None:
+            return False
+        shown = 'INOP' if rec.get('result') == 'INOP' else (rec.get('entered') or rec.get('reading'))
+        if confirm and not port.ask_yes_no(f'Delete {col} reading', f'Delete the {col} reading of point {p["id"]} ({shown}, {rec.get("result", "")})?\n'
+                                           f'{p["description"]}\n\nThe point becomes untested; Run All Pending or Rerun Selected measures it again.', parent=self.root):
+            return False
+        del self.results[key]
+        for q in self._dependents(p):
+            self.results.pop(str(q['id']), None)
+            self._update_row(q)
+        self._log_edit(f'{col} reading of point {p["id"]} ({p["ref"]}) DELETED: was {shown} ({rec.get("result", "")})')
+        self._update_row(p); self.save(silent=True)
+        self.status.set(f'Point {p["id"]}: {col} reading deleted.')
+        return True
+
+    def mark_inop(self, p, reason=None):
+        """Record point p as INOP (inoperative) in the column being collected, with the technician's reason: no reading, never a pass; the report prints INOP."""
+        key, col = str(p['id']), self.mode_label
+        if reason is None:
+            reason = port.ask_text('Mark INOP', f'Point {p["id"]}: {p["description"]}\n\nReason the point is inoperative (printed in the log, optional):', parent=self.root)
+            if reason is None:
+                return False
+        old = self.results.get(key)
+        if old is not None and old.get('result') != 'INOP' and not port.ask_yes_no('Mark INOP', f'Point {p["id"]} already has a {col} reading '
+                                                                                    f'({old.get("entered") or old.get("reading")}, {old.get("result", "")}). Replace it with INOP?', parent=self.root):
+            return False
+        self.results[key] = dict(reading=None, entered='INOP', result='INOP', inop=True, reason=str(reason).strip(), synthetic=self.demo, manual=True, ref=p['ref'],
+                                 timestamp=datetime.now().isoformat(timespec='seconds'), data=col, **self.pm_result_fields())
+        for q in self._dependents(p):
+            self.results.pop(str(q['id']), None)
+            self._update_row(q)
+        self._log_edit(f'point {p["id"]} ({p["ref"]}) marked INOP in {col}' + (f': {reason}' if str(reason).strip() else '')
+                       + (f' (replaced {old.get("entered") or old.get("reading")}, {old.get("result", "")})' if old and old.get('result') != 'INOP' else ''))
+        self._update_row(p); self.save(silent=True)
+        self.status.set(f'Point {p["id"]}: marked INOP.')
+        return True
+
+    def _log_edit(self, text):
+        try:
+            if self.io is not None:
+                self.io.log.add('--', text, MODEL)
+        except Exception:
+            pass
+
     def _record(self, p, reading, synthetic, manual=False, extra=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, manual=bool(manual) or self.is_manual(p), ref=p['ref'],
@@ -1177,7 +1242,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     # ---- derived points (4A-5 section errors and their sum)
     def _readings(self):
-        return {q['ref']: self.results[str(q['id'])]['reading'] for q in POINTS if q['meas'] != 'derived' and str(q['id']) in self.results}
+        return {q['ref']: self.results[str(q['id'])]['reading'] for q in POINTS if q['meas'] != 'derived' and str(q['id']) in self.results
+                and self.results[str(q['id'])].get('result') != 'INOP'}                # an INOP point gives no reading to a computed point
 
     def _derive_point(self, p):
         value = derived_value(p, self._readings())
@@ -1289,6 +1355,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         A2LA CMC as the floor where the scope covers the point; a point the scope does not cover prints its budget marked ' *' (report_pdf prints the footnote);
         a point with no budget prints N/A. TUR only for points the scope covers (the printed TUR definition says so)."""
         import report_pdf
+        if r.get('result') == 'INOP':                                   # owner 2026-11-05: a point marked inoperative prints INOP, no reading, no uncertainty
+            row = report_pdf.cert_row(p['description'], p['nominal'], p['low'], p['high'], p['unit'], None, False, section=self.report_section(p))
+            row.update({'As Found': 'INOP', 'As Left': '', 'TAR': '', 'TUR': ''})
+            return row
         note = '' if p['unit'] != '' else ' (1 = passed)'
         unc, tur = point_uncertainty(p, r.get('reading'))
         row = report_pdf.cert_row(p['description'] + note, p['nominal'], p['low'], p['high'], p['unit'], r['reading'], r['result'] == 'FAIL', section=self.report_section(p),
