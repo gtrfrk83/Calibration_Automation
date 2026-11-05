@@ -1035,6 +1035,54 @@ class Flow(unittest.TestCase):
             A.to_visa('12', 'USB', default_gpib=False)
 
 
+class WrongSignal(unittest.TestCase):
+    """Owner 2026-11-05: 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns (the 1 MHz signal was still connected).  A Mean more than 10 % from its
+    nominal now asks 'Wrong signal?' before it is recorded: Yes = set the signal again and measure again, No = record as it is."""
+    setUp, tearDown, app, connect = Flow.setUp, Flow.tearDown, Flow.app, Flow.connect
+    OPTIONS = Flow.OPTIONS
+
+    def run_points(self, answer):
+        a = self.app('53220A', stim_mode=A.STIM_CHOICES[1])                     # other standards: the technician sets the signal (the owner's run)
+        self.connect(a)
+        p = by_ref('3.ch2.250MHz.mean')
+        real, calls = a._prepare_bench, []
+
+        def stale_first(bench, q):
+            real(bench, q)
+            calls.append(q['ref'])
+            if q['ref'] == p['ref'] and calls.count(p['ref']) == 1:            # the first time the 1 MHz of the point before is still connected
+                bench.external_signal = dict(kind='CW', f=1e6, level_dbm=7.0)
+        a._prepare_bench = stale_first
+        orig = VH.hh.messagebox.askyesno
+        VH.hh.messagebox.askyesno = lambda title, text, **k: answer if title == 'Wrong signal?' else orig(title, text, **k)
+        try:
+            a.execute([p, by_ref('3.ch2.250MHz.sdev')])
+            self.assertTrue(self.hn.pump())
+        finally:
+            VH.hh.messagebox.askyesno = orig
+        return a, p, calls
+
+    def test_yes_measures_the_point_again_with_the_right_signal(self):
+        a, p, calls = self.run_points(True)
+        self.assertEqual(calls.count(p['ref']), 2)
+        self.assertEqual(a.results[str(p['id'])]['result'], 'PASS')
+        self.assertAlmostEqual(a.results[str(p['id'])]['reading'], 4e-9, delta=1e-10)
+        self.assertEqual(a.results[str(by_ref('3.ch2.250MHz.sdev')['id'])]['result'], 'PASS')     # its Std Dev from the new readings
+
+    def test_no_records_the_reading_as_it_is(self):
+        a, p, calls = self.run_points(False)
+        self.assertEqual(calls.count(p['ref']), 1)
+        self.assertEqual(a.results[str(p['id'])]['result'], 'FAIL')
+        self.assertAlmostEqual(a.results[str(p['id'])]['reading'], 1e-6, delta=1e-9)
+
+    def test_plausible_readings_and_std_dev_points_are_not_questioned(self):
+        a = self.app('53220A')
+        self.assertEqual(a.wrong_signal_text(by_ref('3.ch1.250MHz.mean'), 4.008e-9), '')
+        self.assertEqual(a.wrong_signal_text(by_ref('3.ch1.1MHz.sdev'), 409e-12), '')               # a large Std Dev is judged, not questioned
+        self.assertEqual(a.wrong_signal_text(by_ref('OV2'), 0.0), '')
+        self.assertIn('a period of 1.000035 MHz', a.wrong_signal_text(by_ref('3.ch2.250MHz.mean'), 999.965e-9))
+
+
 class SMA100BStimulus(unittest.TestCase):
     """Owner 2026-11-05: the R&S SMA100B as the RF source instead of the 96270A (bench unit: B35, B86, B93, B131, B709, K720; POW:LIM 20 dBm; reference EXT)."""
 

@@ -2223,6 +2223,12 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
      connected was the hook-up: step 5 read 10 MHz as 9 999 999.690 Hz (-0.031 ppm, internal Option 010 time base), Std Dev 5.2 mHz, 100 readings. The bench script now asks to disconnect Channel 1 before the no-signal step, checks the counter answers after it,
      and fails stage 3 unless the Mean is within 1 ppm of 10 MHz. Simulator opt-in `open_input_noise_hz`.
 - Bench script: every stage passes on the owner's 53220A (steps 4 and 5). The PROCEDURE has not been rerun since these changes.
+- Wrong-signal check (owner 2026-11-05, "sure", after a run on other standards where 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns because
+  the 1 MHz signal was still connected): before a Mean is recorded, a reading more than 10 % (`App.WRONG_SIGNAL_REL`) from its nominal asks 'Wrong signal?'
+  (what was read, what the point needs, a period shown as its frequency). Yes = the setup prompt again and a new measurement (its Std Dev point then uses the
+  new readings); No = recorded as it is. Std Dev, self-test and typed readings are not questioned. Every Mean point, driven or hand-set. Tests `WrongSignal`.
+- Open (owner's same run): every point showed [other standard] (the SMA100B was not driven; the reason line of a row is asked for) and the 1 MHz single-period
+  Std Dev read 409 ps against 140 ps (a hand check passes; the source and settings of that check are asked for).
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.

@@ -1005,7 +1005,29 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         """The hook-up actions no command can do, done on the simulated bench after the prompt: connect the other standard, the cable loss and the 10 MHz reference."""
         if self._vb: self._prepare_bench(self._vb[0], p)
 
+    WRONG_SIGNAL_REL = 0.10            # a Mean more than 10 % from its nominal is not a counter error: the wrong signal (or none) is at the input
+
+    def wrong_signal_text(self, p, reading):
+        """Owner 2026-11-05: Test 3 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns: the 1 MHz signal of the point before was still connected.
+        A Mean that far from its nominal is the hook-up, not the counter: the technician is asked before it is recorded.  '' when the reading is plausible."""
+        nom = p.get('nominal')
+        if p.get('stat') != 'mean' or p.get('func') == 'TST' or not nom or reading is None:
+            return ''
+        if abs(float(reading) / float(nom) - 1.0) <= self.WRONG_SIGNAL_REL:
+            return ''
+        unit, r = p['unit'], float(reading)
+        got = _tm(r) if unit == 's' else _hz(r) if unit == 'Hz' else f'{r:g} {unit}'
+        want = _tm(float(nom)) if unit == 's' else _hz(float(nom)) if unit == 'Hz' else f'{float(nom):g} {unit}'
+        hint = f' (a period of {_hz(1.0 / r)})' if unit == 's' and r > 0 else ''
+        return (f'{p["description"]}: the counter read {got}{hint}, but this point needs {want} ({self.stim_text(p) or "see the setup"}).\n\n'
+                f'That is more than {self.WRONG_SIGNAL_REL:.0%} from the nominal: the signal at the input is probably not the one this point needs (frequency not '
+                f'changed, wrong channel, cable not moved, no signal).\n\nYes: set the signal again and measure this point again.\nNo: record the reading as it is.')
+
     def _done(self, points, i, p, reading, key, mode):
+        why = self.wrong_signal_text(p, reading) if not self.fast_demo else ''
+        if why and port.ask_yes_no('Wrong signal?', why, icon='warning', parent=self.root):
+            self.status.set(f'{p["description"]}: measuring again after the signal is set.')
+            port.after(self.root, 30, lambda: self._next(points, i, None)); return       # previous=None: the setup prompt is shown again
         self.mo_finish(p, reading, bool(self.demo), lambda: self._record(p, reading, bool(self.demo), mode)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _reading_failed(self, points, i, p, key, exc):
