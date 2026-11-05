@@ -74,7 +74,11 @@ GROUP_TITLE = {'TIMEBASE': 'absolute time base', 'CH1': 'Channel 1', 'CH2': 'Cha
 STIM_NEEDS = {'PULSE': 'Pulse generator: 5 ns pulse width +/- 40 ps, 1 Vpp, period 66.6 ns, two outputs 49.9 ns apart for the time interval test (Keysight 81134A in the manual)',
               'BURST': 'Pulse-modulated microwave signal generator: 100 MHz to 15 GHz, pulse width accuracy +/- 10 %, PRI 1 ms (Keysight E8257D-520-UNW in the manual); the 96270A has no pulse modulation',
               'MW': 'External attenuator after the 96270A Microwave O/P (the Microwave O/P gives -4 dBm at best) and a power meter to verify the level at the counter input, as the manual asks',
-              'LH': 'Signal generator (the manual names an SRS CG635)'}
+              'LH': 'Signal generator (the manual names an SRS CG635; the E8257D-520 is a valid substitute for Tests 1 and 2, pp. 38 and 44)',
+              # Owner 2026-11-05 (bench: Std Dev 409 ps with a 1 MHz sine, 93 with the CG635 by hand): Test 3 names the CG635 output Q, +7 dBm, and NO substitute
+              # (Service Guide p. 50).  Its square edges are what the 140 ps / 28 ps Std Dev limit assumes, so the RF source (a sine) never drives Test 3.
+              'CLOCK': 'SRS CG635 synthesized clock generator, output Q, +7 dBm (square wave, fast edges); the Service Guide lists no substitute for Test 3 (p. 50). '
+                       'A sine generator (the 96270A or the SMA100B) does not meet the 1 MHz Std Dev limit'}
 
 
 def load_spec(path=None):
@@ -273,7 +277,7 @@ def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
             return dict(mode='manual', route=None, level_set=None, atten_db=0.0,
                         reason='No Agilent 33250A is connected (enter its address and press Test connections), or the stimulus is another standard')
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
-    if g == 'BURST':
+    if g in ('BURST', 'CLOCK'):
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
     src = 'R&S SMA100B' if stim.get('source') == 'SMA100B' else '96270A'
     if stim.get('mode') != 'auto' or not stim.get('rf'):
@@ -705,6 +709,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return t + (f', second output delayed {_tm(st["delay_s"])} from the first' if st.get('delay_s') else '')
         if g == 'BURST':
             return f'{_hz(st["frequency"])} at {st["level_dbm"]:g} dBm, pulse modulated: width {_tm(st["burst_width_s"])}, PRI {_tm(st["pri_s"])}'
+        if g == 'CLOCK':
+            return f'{_hz(st["frequency"])} from the CG635 output Q at {st["level_dbm"]:g} dBm (square wave)'
         return f'{_hz(st["frequency"])} sine at {st["level_dbm"]:g} dBm'
 
     def setup_text(self, p):

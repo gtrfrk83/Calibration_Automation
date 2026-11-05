@@ -210,7 +210,7 @@ class SpecTests(unittest.TestCase):
 
     def test_every_point_names_its_stimulus_and_pages(self):
         for p in PTS:
-            self.assertTrue(p['page'] and p['stimulus']['group'] in ('NONE', 'LH', 'MW', 'PULSE', 'BURST'), p['ref'])
+            self.assertTrue(p['page'] and p['stimulus']['group'] in ('NONE', 'LH', 'MW', 'PULSE', 'BURST', 'CLOCK'), p['ref'])
             if p['stimulus']['group'] != 'NONE':
                 self.assertIn(p['timebase'], ('INT', 'EXT'))
 
@@ -919,7 +919,8 @@ class Flow(unittest.TestCase):
         a = self.run_model('53220A')
         self.assertIn('Connect the other standard', self.hn.titles())
         pulse = [p for p in a.active_points() if p['stimulus']['group'] == 'PULSE']
-        self.assertEqual(sum(1 for t in self.hn.titles() if t == 'Connect the other standard'), len({p['ref'] for p in pulse if p['stat'] == 'mean'}))
+        other = [p for p in a.active_points() if p['stimulus']['group'] in ('PULSE', 'CLOCK')]          # Test 3 is on the CG635 (owner 2026-11-05)
+        self.assertEqual(sum(1 for t in self.hn.titles() if t == 'Connect the other standard'), len({p['ref'] for p in other if p['stat'] == 'mean'}))
         self.assertTrue(all(a.results[str(p['id'])]['stimulus'] == 'manual' for p in pulse))
 
     def test_other_standards_for_every_test_connects_no_96270a(self):
@@ -1034,6 +1035,32 @@ class Flow(unittest.TestCase):
         with self.assertRaises(ValueError):
             A.to_visa('12', 'USB', default_gpib=False)
 
+
+class SinglePeriodSource(unittest.TestCase):
+    """Owner 2026-11-05: the procedure's Test 3 Std Dev at 1 MHz read 409 ps (limit 140 ps) with a sine; by hand with the CG635, 93.  Service Guide p. 50: Test 3
+    names the CG635 output Q, +7 dBm, and NO substitute (Tests 1 and 2 accept the E8257D-520, pp. 38 and 44).  So Test 3 is never driven by the RF source."""
+
+    def test_test_3_is_always_on_the_cg635_and_tests_1_and_2_stay_on_the_rf_source(self):
+        for src in ('96270A', 'SMA100B'):
+            stim = dict(mode='auto', rf=True, loss_db=0.0, ext_low=False, source=src)
+            for p in PTS:
+                pl = A.plan_stimulus(p, stim)
+                if p['test_no'] == '3':
+                    self.assertEqual((pl['mode'], p['stimulus']['group']), ('manual', 'CLOCK'), p['ref'])
+                    self.assertIn('CG635', pl['reason'])
+                    self.assertIn('output Q', pl['reason'])
+                elif p['test_no'] in ('1', '2a', '2b'):
+                    self.assertEqual(pl['mode'], 'rf', (src, p['ref']))
+
+    def test_the_prompt_names_the_cg635_square_output(self):
+        A.configure('53220A')
+        hn = VH.VHarness().start()
+        try:
+            a = A.App(hn.root, demo=True)
+            self.assertIn('CG635 output Q at 7 dBm (square wave)', a.stim_text(by_ref('3.ch1.1MHz.mean')))
+            self.assertIn('sine', a.stim_text(by_ref('2a.10MHz.mean')))
+        finally:
+            hn.stop()
 
 class WrongSignal(unittest.TestCase):
     """Owner 2026-11-05: 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns (the 1 MHz signal was still connected).  A Mean more than 10 % from its

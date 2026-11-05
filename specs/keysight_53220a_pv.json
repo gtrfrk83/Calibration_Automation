@@ -718,7 +718,7 @@
    "id": "t3",
    "title": "Test 3: Single period",
    "page": "50-55",
-   "setup": "Source: 1 MHz and 250 MHz at +7 dBm into Channel 1, then Channel 2.  External 10 MHz reference.  Time Interval, Single Period; auto level Off, level 0 V; noise rejection Off; channel DC, 50 ohm, 5 V range, bandwidth limit Off; trigger Manual, 100 readings, delay 0.  53220A and 53230A only.",
+   "setup": "Source: SRS CG635 output Q (square, fast edges), +7 dBm, 1 MHz and 250 MHz into Channel 1, then Channel 2.  The manual lists NO substitute for Test 3 (Tests 1 and 2 accept the E8257D-520): a sine source does not meet the Std Dev limit at 1 MHz.  External 10 MHz reference.  Time Interval, Single Period; auto level Off, level 0 V; noise rejection Off; channel DC, 50 ohm, 5 V range, bandwidth limit Off; trigger Manual, 100 readings, delay 0.  53220A and 53230A only.",
    "points": [
     {
      "test": "3",
@@ -732,7 +732,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 1000000.0,
       "level_dbm": 7.0
      },
@@ -764,7 +764,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 1000000.0,
       "level_dbm": 7.0
      },
@@ -795,7 +795,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 250000000.0,
       "level_dbm": 7.0
      },
@@ -827,7 +827,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 250000000.0,
       "level_dbm": 7.0
      },
@@ -858,7 +858,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 1000000.0,
       "level_dbm": 7.0
      },
@@ -890,7 +890,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 1000000.0,
       "level_dbm": 7.0
      },
@@ -921,7 +921,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 250000000.0,
       "level_dbm": 7.0
      },
@@ -953,7 +953,7 @@
      "timebase": "EXT",
      "gate_s": null,
      "stimulus": {
-      "group": "LH",
+      "group": "CLOCK",
       "frequency": 250000000.0,
       "level_dbm": 7.0
      },

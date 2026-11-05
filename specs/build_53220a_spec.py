@@ -199,9 +199,10 @@ def build():
             label = fmt_si(f, 'Hz').replace(' ', '')
             pts += stat_pair(f'3.ch{ch}.{label}', {m: band(r[0], r[1]) for m, r in row.items()}, {m: smax(r[2]) for m, r in row.items()}, test='3', func='SPER', kind='PERIOD',
                              channel=ch, unit='s', nominal=1.0 / f, quick=False, requires=[], timebase='EXT', gate_s=None,
-                             stimulus=dict(group='LH', frequency=f, level_dbm=7.0), page=DOC_PAGES['3'])
+                             stimulus=dict(group='CLOCK', frequency=f, level_dbm=7.0), page=DOC_PAGES['3'])      # CG635 output Q only (no substitute listed, p. 50)
     sections.append(dict(id='t3', title='Test 3: Single period', page='50-55', setup=(
-        'Source: 1 MHz and 250 MHz at +7 dBm into Channel 1, then Channel 2.  External 10 MHz reference.  Time Interval, Single Period; auto level Off, level 0 V; noise '
+        'Source: SRS CG635 output Q (square, fast edges), +7 dBm, 1 MHz and 250 MHz into Channel 1, then Channel 2.  The manual lists NO substitute for Test 3 '
+        '(Tests 1 and 2 accept the E8257D-520): a sine source does not meet the Std Dev limit at 1 MHz.  External 10 MHz reference.  Time Interval, Single Period; auto level Off, level 0 V; noise '
         'rejection Off; channel DC, 50 ohm, 5 V range, bandwidth limit Off; trigger Manual, 100 readings, delay 0.  53220A and 53230A only.'), points=pts))
 
     # ---------------------------------------------------------------- Test 4
