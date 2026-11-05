@@ -2476,3 +2476,5 @@ Tests: tests/test_driver_rs_sma100b.py; golden fixture tests/golden/rs_sma100b.j
   try, no driver change needed. Every reply format the driver matched loosely is now recorded (see the BENCH notes in each Cmd.ref). Confirmed: *RST leaves ROSC (EXT) and POW:LIM (20 dBm)
   alone; -222 carries device detail after ';' (ERR_CLEAN unaffected). After the bench: the simulator uses the recorded reply texts; the driver_verify sample for rosc.set is EXT (was INT,
   which would have moved this unit off its external reference). STILL TO DO before verified=True: one Driver verification pass on the unit (rosc.set is the only command never sent).
+- Driver verification 2026-11-05 08:56 (tester mtyler): the 17 queries PASS -> verified=True (`DRIVER_VERIFIED` in the driver). Not yet verified: the 7 set commands, outp.on / outp.off and
+  reset (bench-script records only; a second Driver verification run with those rows ticked finishes it), and status.clear (driver_verify never sends *CLS: stays UNVERIFIED, listed).

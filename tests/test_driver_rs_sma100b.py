@@ -30,7 +30,16 @@ class Registry(unittest.TestCase):
         self.assertEqual(cmdreg.lint_registry(COMMANDS), [])
         for key, cmd in COMMANDS.items():
             self.assertRegex(cmd.ref, r'\(p\. \d', key)
-            self.assertFalse(cmd.verified, f'{key}: nothing is verified before a bench session')
+
+    def test_verified_only_with_bench_record_and_driver_verify_pass(self):
+        from drivers.rs_sma100b import DRIVER_VERIFIED
+        self.assertEqual({k for k, c in COMMANDS.items() if c.verified}, set(DRIVER_VERIFIED))
+        for key in DRIVER_VERIFIED:
+            self.assertEqual(COMMANDS[key].kind, 'query', key)              # the 2026-11-05 driver_verify run ticked the queries only
+            self.assertIn('BENCH 2026-11-05', COMMANDS[key].ref, key)
+            self.assertIn('DRIVER_VERIFY 2026-11-05', COMMANDS[key].ref, key)
+        for key in ('freq.set', 'pow.set', 'outp.on', 'outp.off', 'reset', 'rosc.set', 'status.clear'):
+            self.assertFalse(COMMANDS[key].verified, key)
 
     def test_output_and_plumbing_are_not_overridable(self):
         for key in ('outp.on', 'outp.off', 'outp.query', 'reset', 'opc.query', 'status.clear', 'err.query', 'selftest'):

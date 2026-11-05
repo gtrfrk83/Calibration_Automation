@@ -70,3 +70,6 @@ Unit: SMA100B serial 124249, firmware 5.40.102.30, options SMAB-B35, B86, B93, B
 - Step 3 (--settings --rf): OUTP ON -> OUTP? 1; with RF on FREQ? 1000000000, POW? -30; OUTP OFF -> 0; cleanup OFF -> 0.
 Every command of drivers/rs_sma100b.py now has its recorded reply in `ref` (BENCH ...) except rosc.set (not sent: the unit stays on EXT). verified stays False until a
 Driver verification (manager > Driver verification...) pass on this unit.
+- Driver verification 2026-11-05 08:56 (tester mtyler; 2026-11-05_sma100b_driver_verify_queries.txt): queries only (the window's default ticks), 17 passed, 0 failed.
+  Those 17 are now verified=True. Still to run with the set / output / reset rows ticked: mod.off, unit.dbm, freq.mode.cw, pow.mode.cw, freq.set, pow.set, rosc.set
+  (sample EXT), outp.on, outp.off, reset. status.clear (*CLS) is never sent by driver_verify.

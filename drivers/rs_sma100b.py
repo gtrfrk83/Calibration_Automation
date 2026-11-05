@@ -3,6 +3,7 @@
 Source: "R&S SMA100B User Manual" 1178.3834.02 - 14 (SMA100B_UserManual_en_14.pdf on branch 6060a-gidep-uncertainty). The printed page numbers are the PDF page
 numbers. Every Cmd below carries its page. NOTHING has been run on a real SMA100B yet (NOTES.md 'Bench-first driver workflow'), so every command is verified=False
 until a bench session records its reply and driver_verify passes it.
+Status 2026-11-05: the 17 queries are verified (bench records + Driver verification pass); the set / output / reset commands are not yet (see DRIVER_VERIFIED below).
 
 What the driver is for: a CW RF source (reference standard or unit under test). One frequency, one level, RF on / off, modulation off, nothing else. Sweep, list mode,
 modulation set-up, the user correction, the LF generator are left out on purpose.
@@ -139,6 +140,23 @@ _bench({
     'rosc.query': f'{_B} steps 1-3: "EXT" (survives *RST)',
     # rosc.set: NOT sent on the bench (the unit stays on EXT); its driver_verify sample is EXT so a run there does not move the reference.
 })
+
+
+# ---- verified (NOTES.md bench-first step 3: manual page + recorded reply + driver_verify pass). Driver verification 2026-11-05 08:56 (tester mtyler, GPIB1::28,
+# tools/bench/records/2026-11-05_sma100b_driver_verify_queries.txt): 17 passed, 0 failed - the queries only. The set / output / reset commands have bench-script records
+# but no driver_verify pass yet, so they stay verified=False; status.clear (*CLS) is never sent by driver_verify (locked plumbing) and stays False.
+DRIVER_VERIFIED = ('err.query', 'idn.query', 'opt.query', 'selftest', 'outp.query', 'mod.query', 'unit.query', 'freq.mode.query', 'pow.mode.query', 'freq.query',
+                   'pow.query', 'freq.offs.query', 'freq.mult.query', 'pow.offs.query', 'pow.limit.query', 'rosc.query', 'opc.query')
+
+
+def _mark_verified(keys, note):
+    import dataclasses
+    for key in keys:
+        c = COMMANDS[key]
+        COMMANDS[key] = dataclasses.replace(c, verified=True, ref=f'{c.ref}; {note}')
+
+
+_mark_verified(DRIVER_VERIFIED, 'DRIVER_VERIFY 2026-11-05 08:56 pass')
 
 class RSSMA100B(SurpriseMixin, Instrument):
     MODEL = 'R&S SMA100B'
