@@ -2212,7 +2212,17 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   time base; stage 3 100 readings of 10 MHz on Channel 1. Every write asks first (y / a = all / n = stop; `Stop` is a BaseException so a driver step cannot swallow it).
   A failed step records the counter's reply and the session goes on. The reference oscillator settings are restored at the end. Record `k53220a_bench_<time>.txt`.
   Tests `BenchScript` (simulator, every model; the bench CONF? reply; a refused write).
-- NOT run on the bench yet.
+- Bench session 2026-11-05 (owner, records in tools/bench/records/2026-11-05_53220a_*.txt and the README there): every query, *RST, both time bases
+  and every configuration PASS; CONF? lists the channel only for Channel 2 (`(@2)`); SPER / PWID / TINT replies carry no channel (the simulator's
+  `conf_no_channel` now replays exactly these). Two findings:
+  1. NO SIGNAL HANGS THE COUNTER (not 9.91E37): *OPC? never answered and every later command timed out, so the reference could not be restored.
+     `measure_stats` now aborts on the *OPC? timeout: device clear (viClear) + *CLS, a '!!' log line, then InstrumentError 'did not finish N readings ...: no
+     signal' (the procedure's typed-reading offer applies and the counter answers the next point). UNVERIFIED on the bench: that the device clear brings the
+     53220A back. Simulator opt-in `no_signal_hangs`.
+  2. 10 MHz on Channel 1 read Mean 6.23 MHz, Std Dev 92 kHz (and 6.16 MHz in the 'nothing connected' step): the counter is not triggering cleanly; what was
+     connected is being asked of the owner. The bench script now asks to disconnect Channel 1 before the no-signal step, checks the counter answers after it,
+     and fails stage 3 unless the Mean is within 1 ppm of 10 MHz. Simulator opt-in `open_input_noise_hz`.
+- NOT run on the bench yet (the abort and the procedure after these changes).
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.

@@ -308,6 +308,19 @@ class DriverTests(unittest.TestCase):
         with self.assertRaises(InstrumentError):
             d.configure_point(dict(by_ref('2a.10MHz.mean')))
 
+    def test_no_signal_that_hangs_the_counter_is_aborted_and_the_counter_answers_again(self):
+        """Bench 2026-11-05 (k53220a_bench_20261105_110049): with nothing connected *OPC? never answered and every later query timed out (the reference
+        oscillator could not be restored).  The driver now aborts the measurement with a device clear and raises 'no signal'; the counter answers afterwards."""
+        d, b, rft, ct = self.make()
+        ct.no_signal_hangs = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        with self.assertRaises(InstrumentError) as cm:
+            d.measure_stats(10)
+        self.assertIn('no signal', str(cm.exception).lower())
+        self.assertEqual(ct.cleared_while_busy, 1)
+        d.check_errors('after the abort')                                    # the counter answers again
+        self.assertEqual(d.read_reference()['source'], 'EXT')
+
     def test_a_read_back_mismatch_stops_and_the_write_is_not_repeated(self):
         import drivers
         d, b, rft, ct = self.make()
@@ -1186,6 +1199,25 @@ class BenchScript(unittest.TestCase):
         code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
         self.assertEqual(code, 0, record[-3000:])
         self.assertIn('channel is not in the CONF? reply', record)
+
+    def test_a_counter_that_hangs_with_no_signal_is_aborted_and_the_session_goes_on(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        b, _rf, ct = make_53220a_bench('53220A')
+        ct.no_signal_hangs = True
+        code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
+        self.assertEqual(code, 0, record[-3000:])
+        self.assertIn('measurement aborted (device clear, *CLS)', record)
+        self.assertIn('PASS  the counter answers after that', record)
+        self.assertNotIn('NOT restored', record)
+
+    def test_a_signal_that_is_not_10_mhz_fails_stage_3(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        b, _rf, ct = make_53220a_bench('53220A')
+        ct.open_input_noise_hz = 6.23e6                                         # bench 2026-11-05: Mean 6.23 MHz, Std Dev 92 kHz
+        code, record = self.run_bench(['--settings', '--signal', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
+        self.assertEqual(code, 1)
+        self.assertIn('not 10 MHz within 1 ppm', record)
+        self.assertIn('readings with nothing connected were accepted', record)
 
     def test_a_refused_write_stops_the_session_and_nothing_more_is_written(self):
         from drivers.simulated_53220a import make_53220a_bench

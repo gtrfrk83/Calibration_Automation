@@ -127,8 +127,11 @@ def run(ctr, args, out, connect_signal=None):
         for name, p in points_for(ctr):
             step(f'configure {name}', lambda q=p: ctr.configure_point(dict(q)))
             step(f'   CONF? after {name}', lambda: ctr.query_retry('conf.query', attempts=1).strip())
-        step('statistics with no signal connected: 9.91E37 must be refused', lambda: _expect_refused(lambda: (ctr.configure_point(
+        if not args.yes:
+            ctr.t.answer('   DISCONNECT everything from Channel 1 (and Channel 2), then press Enter: ')
+        step('statistics with NOTHING connected must be refused (9.91E37, or no readings: aborted)', lambda: _expect_refused(lambda: (ctr.configure_point(
             dict(func='FREQ', channel=1, nominal=10e6, gate_s=0.01)), ctr.measure_stats(10))))
+        step('the counter answers after that', lambda: (ctr.check_errors('after the no-signal step'), ctr.read_reference())[1])
         if args.selftest:
             step('*TST? self-test (then Factory Reset)', ctr.self_test)
     if args.signal:
@@ -139,9 +142,19 @@ def run(ctr, args, out, connect_signal=None):
             if connect_signal:
                 connect_signal()                              # the simulator: the operator connects 10 MHz now
             step('configure frequency Ch 1, 10 MHz, gate 10 ms', lambda: ctr.configure_point(dict(func='FREQ', channel=1, nominal=10e6, gate_s=0.01)))
-            step('100 readings: Mean / Std Dev / count', ctr.measure_stats)
+            step('100 readings: Mean / Std Dev / count, the Mean within 1 ppm of 10 MHz', lambda: _near_10mhz(ctr.measure_stats()))
             step('error queue after the readings', lambda: ctr.check_errors('stage 3'))
     return rows
+
+
+def _near_10mhz(res, tol=1e-6):
+    """Stage 3 must read the 10 MHz it is given.  Bench 2026-11-05 (k53220a_bench_20261105_110246): Mean 6.23 MHz, Std Dev 92 kHz = the counter is not triggering
+    cleanly on the signal (level / amplitude / waveform / connection), whatever the driver does."""
+    if not abs(res['mean'] - 10e6) <= tol * 10e6:
+        raise InstrumentError(f'Mean {res["mean"]:.6f} Hz, Std Dev {res["sdev"]:.6g} Hz: not 10 MHz within {tol * 1e6:g} ppm. The counter is not triggering cleanly on the '
+                              'signal: check that 10 MHz really reaches Channel 1 (cable, BNC tee), its amplitude (a 0 V level needs a signal centred on 0 V, '
+                              'about 0.1 to 5 Vpp into 50 ohm) and that it is a sine or a square wave without a DC offset.')
+    return res
 
 
 def _reset_ok(text):
@@ -155,7 +168,8 @@ def _expect_refused(fn):
         res = fn()
     except InstrumentError as exc:
         return f'refused as expected: {exc}'
-    raise InstrumentError(f'readings with nothing connected were accepted: {res}')
+    raise InstrumentError(f'readings with nothing connected were accepted: {res}. If Channel 1 really was empty, the counter counted noise at the 0 V level '
+                          '(record this: the procedure would then judge a noise reading instead of reporting no signal)')
 
 
 def main(argv=None, answer=input, transport=None):

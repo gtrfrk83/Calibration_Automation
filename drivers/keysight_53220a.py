@@ -449,9 +449,12 @@ class Keysight53220A(SurpriseMixin, Instrument):
         self.send('init')
         self.send('trg')
         prev = getattr(self.t, 'timeout', None)
-        self.t.set_timeout(max(self.DEFAULT_TIMEOUT, readings * max(self.gate_s, 0.001) * 1.5 + 15.0))
+        wait = max(self.DEFAULT_TIMEOUT, readings * max(self.gate_s, 0.001) * 1.5 + 15.0)
+        self.t.set_timeout(wait)
         try:
             self.ask('opc.query')
+        except TransportError as exc:
+            self._abort_measurement(readings, wait, exc)
         finally:
             self.t.set_timeout(prev if prev is not None else self.DEFAULT_TIMEOUT)
         count = _num(self.ask_checked('calc.count', expect='float'))
@@ -462,6 +465,21 @@ class Keysight53220A(SurpriseMixin, Instrument):
         if int(round(count)) != int(readings):
             raise InstrumentError(f'The {self.SHORT} made {count:g} readings, not {readings}: the statistics are not for a full set.')
         return dict(mean=mean, sdev=sdev, count=int(round(count)))
+
+    def _abort_measurement(self, readings, wait, exc):
+        """The readings did not complete within `wait` s.  Bench 2026-11-05 (owner's 53220A, k53220a_bench_20261105_110049): with no signal the counter does NOT
+        return 9.91E37; it keeps waiting for edges, *OPC? never answers and every later command times out.  A device clear (IEEE 488.2 / VISA viClear) aborts the
+        measurement and empties the output queue; *CLS then clears the status.  Raises InstrumentError ('no signal'), so a procedure offers a typed reading and the
+        counter answers the next point.  UNVERIFIED on the bench: that the device clear brings the 53220A back (the Programmer's Reference is not on file)."""
+        try:
+            self.t.clear()
+            self.send('status.clear')
+            self.log.add('!!', f'readings not complete after {wait:g} s: measurement aborted (device clear, *CLS)', self.label)
+        except Exception as cexc:
+            raise InstrumentError(f'The {self.SHORT} did not finish {readings} readings in {wait:g} s and did not answer the abort (device clear): {cexc}. '
+                                  'Press Local / Preset on the counter, or switch it off and on.') from exc
+        raise InstrumentError(f'The {self.SHORT} did not finish {readings} readings in {wait:g} s: no signal, or no usable signal, at the input (level, frequency or '
+                              'connection). The measurement was aborted.') from exc
 
     def self_test(self):
         """*TST? -> 0 (all tests passed) or 1.  More than 5 seconds; the counter then does a Factory Reset (PR p. 201), so the caller configures again afterwards."""

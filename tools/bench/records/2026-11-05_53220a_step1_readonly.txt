@@ -1,0 +1,127 @@
+Keysight 53220A bench record 20261105_105825 GPIB1::3::INSTR
+
+*IDN? Agilent Technologies,53220A,MY50010466,02.05-1519.666-1.19-4.15-127-155-35  (GPIB1::3::INSTR)
+reference oscillator found: {'source': 'EXT', 'auto': False, 'ext_freq': 10000000.0}
+--- stage 1: read-only queries
+options parsed from *OPT?: {'timebase': '010', 'ch3': None, 'pulse': None, 'unknown': [], 'codes': {'010'}, 'raw': '010,0,0,0,400'}
+PASS  query *OPT?  010,0,0,0,400
+PASS  query SYST:ERR?  +0,"No error"
+PASS  query SENS:ROSC:SOUR?  EXT
+PASS  query SENS:ROSC:SOUR:AUTO?  0
+PASS  query SENS:ROSC:EXT:FREQ?  +1.00000000E+007
+PASS  query SENS:FREQ:MODE?  AUTO
+PASS  query SENS:FREQ:GATE:SOUR?  TIME
+PASS  query SENS:FREQ:GATE:TIME?  +1.00000000000000E-001
+PASS  query SAMP:COUN?  +1
+PASS  query TRIG:COUN?  +1
+PASS  query TRIG:DEL?  +0.00000000000000E+000
+PASS  query TRIG:SOUR?  IMM
+PASS  query CALC:STAT?  0
+PASS  query CALC:AVER:STAT?  0
+PASS  query INP1:COUP?  DC
+PASS  query INP1:IMP?  +5.00000000E+001
+PASS  query INP1:PROB?  +1
+PASS  query INP1:RANG?  +5.00000000E+000
+PASS  query INP1:FILT?  0
+PASS  query INP1:NREJ?  0
+PASS  query INP1:LEV:AUTO?  1
+PASS  query INP1:LEV?  -2.54634710E-004
+PASS  query INP1:SLOP?  POS
+PASS  query INP2:COUP?  AC
+PASS  query INP2:IMP?  +1.00000000E+006
+PASS  query INP2:PROB?  +1
+PASS  query INP2:RANG?  +5.00000000E+000
+PASS  query INP2:FILT?  0
+PASS  query INP2:NREJ?  0
+PASS  query INP2:LEV:AUTO?  1
+PASS  query INP2:LEV?  +0.00000000E+000
+PASS  query INP2:SLOP?  POS
+PASS  error queue after the queries  
+cleanup: reference oscillator now {'source': 'EXT', 'auto': False, 'ext_freq': 10000000.0} (found {'source': 'EXT', 'auto': False, 'ext_freq': 10000000.0})
+
+--- summary: 33 passed, 0 failed
+
+--- command log (every command and exact reply)
+    0.000  53220A     >>  *CLS
+    0.003  53220A     >>  *IDN?
+    0.010  53220A     <<  Agilent Technologies,53220A,MY50010466,02.05-1519.666-1.19-4.15-127-155-35
+    0.010  53220A     >>  *OPT?
+    0.012  53220A     <<  010,0,0,0,400
+    0.012  53220A     >>  SENS:ROSC:SOUR?
+    0.014  53220A     <<  EXT
+    0.014  53220A     >>  SENS:ROSC:SOUR:AUTO?
+    0.016  53220A     <<  0
+    0.016  53220A     >>  SENS:ROSC:EXT:FREQ?
+    0.018  53220A     <<  +1.00000000E+007
+    0.019  53220A     >>  *OPT?
+    0.020  53220A     <<  010,0,0,0,400
+    0.021  53220A     >>  SYST:ERR?
+    0.023  53220A     <<  +0,"No error"
+    0.023  53220A     >>  SENS:ROSC:SOUR?
+    0.040  53220A     <<  EXT
+    0.041  53220A     >>  SENS:ROSC:SOUR:AUTO?
+    0.042  53220A     <<  0
+    0.043  53220A     >>  SENS:ROSC:EXT:FREQ?
+    0.044  53220A     <<  +1.00000000E+007
+    0.045  53220A     >>  SENS:FREQ:MODE?
+    0.046  53220A     <<  AUTO
+    0.046  53220A     >>  SENS:FREQ:GATE:SOUR?
+    0.048  53220A     <<  TIME
+    0.048  53220A     >>  SENS:FREQ:GATE:TIME?
+    0.050  53220A     <<  +1.00000000000000E-001
+    0.050  53220A     >>  SAMP:COUN?
+    0.051  53220A     <<  +1
+    0.052  53220A     >>  TRIG:COUN?
+    0.053  53220A     <<  +1
+    0.053  53220A     >>  TRIG:DEL?
+    0.055  53220A     <<  +0.00000000000000E+000
+    0.055  53220A     >>  TRIG:SOUR?
+    0.072  53220A     <<  IMM
+    0.072  53220A     >>  CALC:STAT?
+    0.074  53220A     <<  0
+    0.075  53220A     >>  CALC:AVER:STAT?
+    0.076  53220A     <<  0
+    0.077  53220A     >>  INP1:COUP?
+    0.079  53220A     <<  DC
+    0.079  53220A     >>  INP1:IMP?
+    0.081  53220A     <<  +5.00000000E+001
+    0.081  53220A     >>  INP1:PROB?
+    0.083  53220A     <<  +1
+    0.083  53220A     >>  INP1:RANG?
+    0.085  53220A     <<  +5.00000000E+000
+    0.085  53220A     >>  INP1:FILT?
+    0.086  53220A     <<  0
+    0.086  53220A     >>  INP1:NREJ?
+    0.088  53220A     <<  0
+    0.088  53220A     >>  INP1:LEV:AUTO?
+    0.090  53220A     <<  1
+    0.090  53220A     >>  INP1:LEV?
+    0.153  53220A     <<  -2.54634710E-004
+    0.153  53220A     >>  INP1:SLOP?
+    0.155  53220A     <<  POS
+    0.155  53220A     >>  INP2:COUP?
+    0.157  53220A     <<  AC
+    0.158  53220A     >>  INP2:IMP?
+    0.160  53220A     <<  +1.00000000E+006
+    0.160  53220A     >>  INP2:PROB?
+    0.162  53220A     <<  +1
+    0.162  53220A     >>  INP2:RANG?
+    0.179  53220A     <<  +5.00000000E+000
+    0.180  53220A     >>  INP2:FILT?
+    0.181  53220A     <<  0
+    0.182  53220A     >>  INP2:NREJ?
+    0.184  53220A     <<  0
+    0.184  53220A     >>  INP2:LEV:AUTO?
+    0.186  53220A     <<  1
+    0.186  53220A     >>  INP2:LEV?
+    0.189  53220A     <<  +0.00000000E+000
+    0.189  53220A     >>  INP2:SLOP?
+    0.191  53220A     <<  POS
+    0.191  53220A     >>  SYST:ERR?
+    0.193  53220A     <<  +0,"No error"
+    0.195  53220A     >>  SENS:ROSC:SOUR?
+    0.197  53220A     <<  EXT
+    0.197  53220A     >>  SENS:ROSC:SOUR:AUTO?
+    0.198  53220A     <<  0
+    0.198  53220A     >>  SENS:ROSC:EXT:FREQ?
+    0.200  53220A     <<  +1.00000000E+007
