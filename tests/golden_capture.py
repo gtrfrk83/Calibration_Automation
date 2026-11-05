@@ -249,6 +249,7 @@ LINT_FILES.append('fluke_5700a')
 LINT_FILES += ['fluke_6060a', 'hp_8902a', 'hp_8563e', 'gpib_address']
 LINT_FILES.append('hp_8591a')
 LINT_FILES += ['rs_sma100b', 'sma100b_bench']
+LINT_FILES += ['k53220a_bench']                 # the 53220A bench session (drivers/k53220a_bench.py, 2026-11-05)
 LINT_FILES += ['tektronix_tbs1000', 'tektronix_tbs1000c']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.

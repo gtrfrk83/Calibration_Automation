@@ -369,14 +369,27 @@ class Keysight53220A(SurpriseMixin, Instrument):
             self._set('inp.lev', 0.0, 'num', ch=ch)
             self._set('inp.slop', 'POS', ch=ch)
 
-    def _confirm_function(self, func, ch):
+    def _confirm_function(self, func, ch, expected=None):
+        """CONF? read back: the function always; the expected frequency (CONF:FREQ) when the reply carries it; the channel list when the reply carries one.
+        Bench 2026-11-05 (owner's 53220A): CONF:FREQ 10000000,DEF,(@1) -> CONF? "FREQ +1.00000000000000E+007,+1.00000000000000E-002": NO channel list (the
+        Programmer's Reference p. 156 example shows one).  A reply without '(@' cannot confirm the channel: that is logged, not a surprise; a reply that names a
+        different channel is still a mismatch."""
         reply = _text(self.ask_checked('conf.query', expect='any'))
         fn = reply.split()[0].strip('"') if reply else ''
         names = CONF_NAMES[func]
         if not any(fn == n or (func == 'BURST' and n in fn) for n in names):
             self._mismatch('conf.query', f'function {func}', reply)
+        if func == 'FREQ' and expected:
+            nums = re.findall(r'[-+]?\d+(?:\.\d*)?(?:[eE][-+]?\d+)?', reply.split('(@')[0][len(fn):])
+            if nums and not math.isclose(float(nums[0]), float(expected), rel_tol=1e-9):
+                self._mismatch('conf.query', f'expected frequency {float(expected):.9g} Hz', reply)
+        if func == 'BURST':
+            return
         want = '(@1),(@2)' if func == 'TINT' else f'(@{ch})'
-        if func != 'BURST' and want.replace(' ', '') not in reply.replace(' ', ''):
+        flat = reply.replace(' ', '')
+        if '(@' not in flat:
+            self.log.add('--', f'channel is not in the CONF? reply ({reply!r}): {want} not confirmed by read-back (the function was)', self.label)
+        elif want not in flat:
             self._mismatch('conf.query', f'channel {want}', reply)
 
     def _mismatch(self, rb, what, reply):
@@ -405,7 +418,7 @@ class Keysight53220A(SurpriseMixin, Instrument):
             self.send('conf.tint')
         elif func == 'BURST':
             self.send('conf.burst', ch=c)
-        self._confirm_function(func, c)
+        self._confirm_function(func, c, point.get('nominal') if func == 'FREQ' else None)
         if func in ('FREQ', 'SPER', 'PWID') and not micro:
             self._level_off([c])
         elif func == 'TINT':

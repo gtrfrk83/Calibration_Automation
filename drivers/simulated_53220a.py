@@ -54,6 +54,7 @@ class Sim53220ATransport(_SimBase):
         self.burst_rel = 1.0e-7              # burst frequency error (relative)
         self.sd_burst_rel = 1.0e-6
         self.selftest_fail = False
+        self.conf_no_channel = False         # opt-in: CONF? as the owner's 53220A answered on the bench 2026-11-05, with no channel list ("FREQ +1.0E+007,+1.0E-002")
         self.nv = dict(src='INT', auto=True, ext_freq=10e6)          # non-volatile: survives *RST
         self._factory()
 
@@ -256,7 +257,11 @@ class Sim53220ATransport(_SimBase):
                 self._err('-221,"Settings conflict"'); return None
             f, ch = self.conf['func'], self.conf['ch']
             if f == 'FREQ':
+                if self.conf_no_channel:
+                    return f'"FREQ {_fmt(self.conf["expected"])},{_fmt(1e-2)}"'
                 return f'"FREQ {_fmt(self.conf["expected"])},{_fmt(1e-3)},(@{ch})"'
+            if self.conf_no_channel:
+                return '"TINT"' if f == 'TINT' else f'"{f}"'
             if f == 'TINT':
                 return '"TINT (@1),(@2)"'
             if f == 'BURST':

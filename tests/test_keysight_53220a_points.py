@@ -282,6 +282,32 @@ class DriverTests(unittest.TestCase):
         self.assertEqual(sent.count('INP1:IMP 50'), 1)
         d.check_errors('test')
 
+    def test_a_conf_reply_without_a_channel_is_accepted_and_logged(self):
+        """Bench 2026-11-05 (owner screenshot): CONF:FREQ 10000000,DEF,(@1) -> CONF? "FREQ +1.00000000000000E+007,+1.00000000000000E-002", no channel list.
+        The function (and the expected value) is still confirmed; the channel cannot be read back from CONF?, which is logged, not a surprise."""
+        d, b, rft, ct = self.make()
+        ct.conf_no_channel = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        self.assertTrue(any('channel is not in the CONF? reply' in line for line in d.log.lines()))
+        d.check_errors('test')
+
+    def test_a_conf_reply_with_the_wrong_function_or_channel_still_stops(self):
+        d, b, rft, ct = self.make()
+        orig = ct.handle
+        ct.handle = lambda cmd: '"FREQ +1.0E+007,+1.0E-002,(@2)"' if cmd.upper() == 'CONF?' else orig(cmd)
+        with self.assertRaises(InstrumentError):
+            d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        ct.handle = lambda cmd: '"PER +1.0E-007,+1.0E-002"' if cmd.upper() == 'CONF?' else orig(cmd)
+        with self.assertRaises(InstrumentError):
+            d.configure_point(dict(by_ref('2a.10MHz.mean')))
+
+    def test_a_conf_reply_with_another_expected_frequency_stops(self):
+        d, b, rft, ct = self.make()
+        orig = ct.handle
+        ct.handle = lambda cmd: '"FREQ +1.15000000000000E+008,+1.00000000000000E-002"' if cmd.upper() == 'CONF?' else orig(cmd)
+        with self.assertRaises(InstrumentError):
+            d.configure_point(dict(by_ref('2a.10MHz.mean')))
+
     def test_a_read_back_mismatch_stops_and_the_write_is_not_repeated(self):
         import drivers
         d, b, rft, ct = self.make()
@@ -1127,6 +1153,49 @@ class SMA100BFlow(unittest.TestCase):
         finally:
             S.make_53220a_bench = real
         self.assertIn('INTERNAL reference', ' '.join(str(d) for d in self.hn.boxes()))
+
+
+class BenchScript(unittest.TestCase):
+    """drivers/k53220a_bench.py: the session that records the counter's real replies before the procedure is run again (owner 2026-11-05)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def run_bench(self, argv, answer=lambda _p: 'y', transport=None):
+        from drivers import k53220a_bench as B
+        import io, contextlib
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = B.main(argv + ['--out', self.tmp.name], answer=answer, transport=transport)
+        record = next(Path(self.tmp.name).glob('k*_bench_*.txt')).read_text(encoding='utf-8')
+        return code, record
+
+    def test_every_stage_passes_on_the_simulator_for_every_model(self):
+        for model in ('53220A', '53230A', '53210A'):
+            code, record = self.run_bench(['--sim', '--yes', '--model', model, '--settings', '--ext-ref', '--signal'])
+            self.assertEqual(code, 0, record[-3000:])
+            self.assertIn('SIMULATED - not evidence', record)
+            self.assertIn('refused as expected', record)                       # nothing connected: 9.91E37 refused
+            for f in Path(self.tmp.name).glob('*.txt'):
+                f.unlink()
+
+    def test_the_bench_conf_reply_without_a_channel_passes_and_is_recorded(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        _b, _rf, ct = make_53220a_bench('53220A')
+        ct.conf_no_channel = True                                               # as the owner's counter answered (2026-11-05)
+        code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
+        self.assertEqual(code, 0, record[-3000:])
+        self.assertIn('channel is not in the CONF? reply', record)
+
+    def test_a_refused_write_stops_the_session_and_nothing_more_is_written(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        _b, _rf, ct = make_53220a_bench('53220A')
+        code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'n', transport=ct)
+        self.assertEqual(code, 1)
+        self.assertIn('STOPPED: not sent: *RST', record)
+        self.assertNotIn('*RST', [c.upper() for c in ct.sent])
+        with self.assertRaises(SystemExit):
+            self.run_bench(['--yes', '--address', 'GPIB0::3::INSTR'])            # --yes only with the simulator
 
 
 class Registration(unittest.TestCase):

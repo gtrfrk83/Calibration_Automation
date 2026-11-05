@@ -2198,6 +2198,22 @@ reports to *OPT?, bench record 2026-11-05); a drawer selector, not a per-test ch
 - Hook-up pictures: `diagrams/hook_53220a_SMA100B_<GROUP>.png` (none supplied). Sidecars list `rs_sma100b` and fingerprint `drivers/rs_sma100b.py`.
 - Simulated: `SimSMA100B53220` (drivers/simulated_53220a.py, `bench.sma_transport`) mirrors its RF output into `bench.rf1`. Tests: `SMA100BStimulus`, `SMA100BFlow`.
 
+## 53220A family: CONF? read back without a channel; bench session script (2026-11-05)
+Owner report 2026-11-05 (screenshot, first bench run of the 53220A): "Stop on surprise - Read-back does not match", `conf.query`: after `CONF:FREQ 10000000,DEF,(@1)` the counter
+answered `CONF?` with `"FREQ +1.00000000000000E+007,+1.00000000000000E-002"`, expected `channel (@1)`. The real reply has NO channel list (the driver assumed the
+Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner question: "would it help to test the driver for the 53220 before running the procedure again".
+- `Keysight53220A._confirm_function`: the function is still confirmed; for CONF:FREQ the expected frequency the reply echoes is now compared too (rel 1e-9); a reply with no
+  `(@` cannot confirm the channel: a log line ('channel is not in the CONF? reply ...'), not a surprise; a reply that names a DIFFERENT channel is still a mismatch.
+  Whether SPER / PWID / TINT / BURST replies carry a channel on the real counter is UNVERIFIED (the bench script below records them).
+- Simulator: opt-in `Sim53220ATransport.conf_no_channel` (default off) replays the bench reply. Golden transcripts unchanged.
+- NEW `drivers/k53220a_bench.py` (bench-first workflow for a driver written before it): `python -m drivers.k53220a_bench --address <VISA> [--model 53230A] [--settings
+  [--ext-ref] [--selftest]] [--signal]`. Stage 1 read-only queries; stage 2 `*RST` and every configuration the procedure sends for the model and the options the counter
+  reports (frequency Ch 1 / Ch 2 / microwave, single period, pulse width, time interval, burst), CONF? recorded after each, the 9.91E37 no-signal refusal, internal / external
+  time base; stage 3 100 readings of 10 MHz on Channel 1. Every write asks first (y / a = all / n = stop; `Stop` is a BaseException so a driver step cannot swallow it).
+  A failed step records the counter's reply and the session goes on. The reference oscillator settings are restored at the end. Record `k53220a_bench_<time>.txt`.
+  Tests `BenchScript` (simulator, every model; the bench CONF? reply; a refused write).
+- NOT run on the bench yet.
+
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
 - **Deleted:** every `*_view_tk.py` (30), `Calibration_Procedure_Manager.py`, `ui_theme.py` (the toolkit-free part stays as `ui_theme_core.py`), `ui_shell`, `ui_port_tk`, `branding`, `datasheet_builder_ui`, `datasheet_builder_check_ui`, `specmanager_ui`, `spec_editor_ui`, `labregistry_ui`, `instrument_scan_ui`, `mdd_import_ui`, `packages_ui`, `verified_ui`, `procmods_ui`, `procmods_point_ui`, `run_queue_ui`, `report_dialog`, `report_review` (its flow is `report_review_flow.py`), `manual_grid`, `Start_Calibration_Suite.bat`, `diagnostics.install` (the Tk exception hook).
