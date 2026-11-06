@@ -327,6 +327,72 @@ def drop_stale_results(app):
     return n
 
 
+# ---- uncertainty of one point (owner decisions 2026-11-06; NOTES.md '53220A uncertainties') -------------------------------------------------------------------------
+#   Mean frequency (Tests 1, 2, 6, 7?): the A2LA 'Frequency - Measure' CMC alone (owner rule 2026-10-26).
+#   Mean single period (Test 3): that CMC relative to the frequency, times the period (the CG635 is locked to the house 10 MHz: its period is as good as its frequency).
+#   Mean time interval (Test 5): the A2LA 'Time Marker' line (specs/a2la_1888_03_time.json): 3 us/s of the interval from 1 ns to 20 ms ('use this for time interval').
+#   Mean pulse width (Test 4): no scope line and no published accuracy of the 33250A / 81134A width: 'Not in scope', no number.
+#   Std Dev and self-test: no uncertainty required.
+TIME_SCOPE_PATH = HERE / 'specs' / 'a2la_1888_03_time.json'
+NO_UNC, IN_SCOPE, NOT_IN_SCOPE = 'none', 'in scope', 'not in scope'
+PWID_REASON = ('The laboratory scope has no pulse-width line and the pulse generator\'s width accuracy is not published (Agilent 33250A User\'s Guide; the 81134A '
+               'data sheet is not on file): no uncertainty is printed (owner decision 2026-11-06).')
+
+
+def time_marker_cmc(t):
+    """The scope's Time Marker CMC (seconds) for a time interval t (seconds), or None outside its bands (1 ns to 20 ms, 50 ms to 5 s)."""
+    try:
+        data = json.loads(TIME_SCOPE_PATH.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    for e in data['entries']:
+        if e['kind'] == 'TIME':
+            for b in e['bands']:
+                if b['lo'] <= t <= b['hi']:
+                    return (b['a_us_per_s'] + b['b_us_per_s2'] * t) * 1e-6 * t
+    return None
+
+
+def tur_text(p, reported):
+    """Half the tolerance band / the reported uncertainty, as the review window prints it ('140.8:1', '>1000:1')."""
+    if not reported or p.get('low') is None or p.get('high') is None:
+        return ''
+    r = (p['high'] - p['low']) / 2.0 / reported
+    return '>1000:1' if r > 1000 else f'{r:.1f}:1'
+
+
+def point_uncertainty(p):
+    """dict(status, text, value, cmc, unit, standard, reason) for one point: the single source the certificate and the review window both read."""
+    import uncertainty
+    out = dict(status=NO_UNC, text='', value=None, cmc=None, unit=p.get('unit', ''), standard='', reason='')
+    if not App.has_uncertainty(p):
+        return out
+    func = p['func']
+    if func == 'PWID':
+        return dict(out, status=NOT_IN_SCOPE, reason=PWID_REASON)
+    if func == 'TINT':
+        cmc = time_marker_cmc(float(p['nominal']))
+        if cmc is None:
+            return dict(out, status=NOT_IN_SCOPE, reason=f'{_tm(p["nominal"])} is outside the scope\'s Time Marker bands (1 ns to 20 ms, 50 ms to 5 s).')
+        value = uncertainty.round_up(cmc)
+        return dict(out, status=IN_SCOPE, text=uncertainty.format_value(value, 's'), value=value, cmc=cmc, standard='Scope: Time Marker')
+    import report_pdf
+    sc = report_pdf.scope()
+    if sc is None:
+        return dict(out, status=NOT_IN_SCOPE, reason='The laboratory scope file (specs/a2la_1888_03_cmc.json) could not be read.')
+    if func == 'FREQ':
+        cmc = sc.dmm('FREQ', p['nominal'], None, None)
+        text = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=p['nominal'], unit='Hz'))
+        return dict(out, status=IN_SCOPE if text else NOT_IN_SCOPE, text=text, value=uncertainty.round_up(cmc) if cmc else None, cmc=cmc, standard='Lab frequency')
+    f = p['stimulus']['frequency']                                                  # SPER: the frequency CMC relative to f, times the period
+    cmc_f = sc.dmm('FREQ', f, None, None)
+    if not cmc_f:
+        return dict(out, status=NOT_IN_SCOPE, reason=f'The scope\'s Frequency - Measure line does not cover {_hz(f)}.')
+    cmc = cmc_f / f * p['nominal']
+    value = uncertainty.round_up(cmc)
+    return dict(out, status=IN_SCOPE, text=uncertainty.format_value(value, 's'), value=value, cmc=cmc, standard='Lab frequency (relative, of the period)')
+
+
 def gen_ok(p, pulse_gen):
     """A point made for one pulse generator exists only with that generator (the 5 ns pulse points: the 81134A or equivalent; the 8 ns ones: the Agilent 33250A, which cannot make 5 ns)."""
     return not p.get('gen') or p['gen'] == pulse_gen
@@ -1114,28 +1180,37 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     @staticmethod
     def has_uncertainty(p):
-        """True for the points that carry an Uncertainty: Mean frequency points (the 'Frequency - Measure' CMC alone, owner rule 2026-10-26) and Mean single-period points (that
-        relative CMC times the period: derived, flagged).  Std Dev, pulse width, time interval, pulse burst and self-test points carry none: the scope has no CMC for them."""
-        return p.get('stat') == 'mean' and p.get('func') in ('FREQ', 'SPER')
+        """True for the points that SHOULD carry an Uncertainty (every Mean of a frequency, period, pulse width or time interval); a pulse width point has no source for one
+        and is shown 'Not in scope' (point_uncertainty).  Std Dev and self-test points carry none (owner 2026-11-06: a statistic of the counter's own readings, judged
+        against a maximum).  The burst frequency (Test 7, 53230A Option 150) is not covered yet."""
+        return p.get('stat') == 'mean' and p.get('func') in ('FREQ', 'SPER', 'PWID', 'TINT')
 
     @staticmethod
     def uncertainty_text(p):
-        import report_pdf
-        if not App.has_uncertainty(p): return ''
-        if p['func'] == 'FREQ':
-            return report_pdf.point_uncertainty(dict(kind='FREQ', nominal=p['nominal'], unit='Hz'))
-        sc = report_pdf.scope()
-        if sc is None: return ''
-        import uncertainty
-        f = p['stimulus']['frequency']
-        value = sc.dmm('FREQ', f, None, None)
-        return uncertainty.format_value(value / f * p['nominal'], 's') if value is not None else ''
+        return point_uncertainty(p)['text']
 
     def standard_for(self, p):
         return None                  # the uncertainty of a frequency point is the CMC alone, never combined with the stimulus (owner rule)
 
     def certificate_rows(self):
         return self.certificate_rows_and_points()[0]
+
+    def review_point_specs(self):
+        """The rows of the 'Review uncertainties' window: one per report row, with this procedure's own figures (point_uncertainty) and no calibrator to choose.
+        Owner 2026-11-06: the window showed the single-period Means 'No uncertainty required' beside a printed number, and the time intervals with none."""
+        import report_review_model as M
+        rows, pts = self.certificate_rows_and_points()
+        specs = []
+        for i, (row, p) in enumerate(zip(rows, pts)):
+            printed = {k: row.get(k, '') for k in ('Uncertainty', 'TAR', 'TUR')}
+            u = point_uncertainty(p)
+            expects = u['status'] != NO_UNC
+            tur = tur_text(p, u['value'])
+            ev = M.make_evaluation(p['unit'], None, printed['Uncertainty'], None, u['cmc'], u['value'], '', tur, expects)
+            specs.append(M.PointSpec(i, str(p['id']), row.get('Section', ''), row.get('Description', ''), row.get('Nominal', ''), p, p, p.get('low'), p.get('high'), p['unit'],
+                                     None, locked='Uncertainty from this procedure (A2LA scope lines; no calibrator to choose)', printed=printed,
+                                     calc=lambda _std, ev=ev: ev, options=[], expects=expects, std_label=u['standard'], hints=[u['reason']] if u['reason'] else []))
+        return specs, None
 
     def _cert_row(self, p, r):
         import report_pdf

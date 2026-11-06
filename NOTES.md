@@ -2344,6 +2344,19 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   point on). Hook-up picture hook_53220a_33250A_TINT.png (none supplied). Simulator: TINT with the stop slope NEG measures the split pulse's width.
   Tests: the Flow 33250A run, `Renumbering`. Bench 2026-11-06, build b82e680: owner "that worked" (readings not reported here).
 
+## 53220A uncertainties (owner decisions 2026-11-06)
+Owner: "there are a bunch of uncertainties not assigned" (review window screenshot). Decisions (asked 2026-11-06): Std Dev points: no uncertainty (a statistic of the counter's
+own readings judged against a maximum); single-period Means: the Frequency - Measure CMC relative, times the period (the CG635 is locked to the house 10 MHz), e.g. 1 us ->
+7.1e-18 s; pulse-width Means: no preference given -> the recommendation: 'Not in scope', no number, the reason on the review page (no scope line; the 33250A User's Guide
+prints no pulse-width accuracy; no 81134A sheet). Time interval: owner "use this for time interval" with the A2LA scope line 'Time Marker: 1 ns to 20 ms 3 us/s; 50 ms to
+5 s (30 + 1000t) us/s' (screenshot; page not recorded: UNVERIFIED against the full scope) -> specs/a2la_1888_03_time.json (builder specs/build_a2la_cmc_time.py, a separate
+file so the Datasheet Builder's kinds are unchanged): 49.9 ns -> 3e-6 x 49.9 ns = 0.1497 ps -> 0.15 ps, TUR >1000:1. CAUTION raised with the owner: that is the lab's
+time-marker capability, not what the 33250A pulse delivers (no width accuracy is published), so it may understate the substitute's uncertainty; owner asked about the
+33250A 'Time [Arb Jitter (rms)] 30 ppm + 2.5 ns' row (arb function, rms jitter, not accuracy; the Pulse function's row is 100 ppm + 50 ps rms) - decision pending.
+Code: `point_uncertainty(p)` (keysight_53220a_verification.py) is the single source of every row's Uncertainty; `App.review_point_specs()` gives the review window the same
+figures (no calibrator to choose), so a single-period Mean no longer shows 'No uncertainty required' beside a printed number. Burst frequency (Test 7) not covered yet.
+Tests: `test_uncertainty_follows_the_owner_decisions_of_2026_11_06`, `test_review_window_rows_match_the_certificate`.
+
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
 - **Deleted:** every `*_view_tk.py` (30), `Calibration_Procedure_Manager.py`, `ui_theme.py` (the toolkit-free part stays as `ui_theme_core.py`), `ui_shell`, `ui_port_tk`, `branding`, `datasheet_builder_ui`, `datasheet_builder_check_ui`, `specmanager_ui`, `spec_editor_ui`, `labregistry_ui`, `instrument_scan_ui`, `mdd_import_ui`, `packages_ui`, `verified_ui`, `procmods_ui`, `procmods_point_ui`, `run_queue_ui`, `report_dialog`, `report_review` (its flow is `report_review_flow.py`), `manual_grid`, `Start_Calibration_Suite.bat`, `diagnostics.install` (the Tk exception hook).
