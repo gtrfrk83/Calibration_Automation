@@ -241,8 +241,25 @@ class Keysight53220A(SurpriseMixin, Instrument):
         if self.bus == 'GPIB':
             self.t.go_local()
 
+    def clear_pending(self, why):
+        """Device clear (IEEE 488.2 / VISA viClear): aborts a measurement still waiting for its readings and empties the I/O buffers.  It changes no setting.
+        Bench 2026-11-06 (owner screenshot): a run started with the counter still busy (a measurement left waiting from before): '*RST' timed out, then every query.
+        The same device clear brought the counter back after the no-signal abort (bench 2026-11-05, steps 4 and 5)."""
+        try:
+            self.t.clear()
+            self.log.add('--', f'device clear ({why}): any measurement still waiting is aborted', self.label)
+        except Exception as exc:
+            self.log.add('!!', f'device clear ({why}) failed: {exc}', self.label)
+
+    def reset_to_defaults(self):
+        """Device clear first (a measurement left waiting would make the counter ignore *RST), then the standard reset sequence."""
+        self.clear_pending('before the reset')
+        return super().reset_to_defaults()
+
     def cleanup(self):
-        """Put the reference oscillator settings back as they were at connect, then local.  Never raises."""
+        """Device clear (a measurement left waiting would block every query), put the reference oscillator settings back as they were at connect, then local.
+        Never raises."""
+        self.clear_pending('before cleanup')
         try:
             self.restore_reference()
         except Exception as exc:

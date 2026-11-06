@@ -321,6 +321,29 @@ class DriverTests(unittest.TestCase):
         d.check_errors('after the abort')                                    # the counter answers again
         self.assertEqual(d.read_reference()['source'], 'EXT')
 
+    def test_a_measurement_left_waiting_is_cleared_before_the_reset(self):
+        """Bench 2026-11-06 (owner screenshot): at the start of a run '*RST' to the counter timed out and SENS:ROSC:SOUR? timed out twice: the counter was still
+        busy with a measurement left waiting from before.  The reset now starts with a device clear, which aborts it (the no-signal abort showed it works)."""
+        d, b, rft, ct = self.make()
+        ct.no_signal_hangs = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        d.send('init'); d.send('trg')                                        # a measurement waiting for edges, nobody waiting for *OPC?
+        self.assertTrue(ct.busy)
+        rep = d.reset_to_defaults()
+        self.assertTrue(rep.ok, rep.text())
+        self.assertFalse(ct.busy)
+        self.assertEqual(d.read_reference()['source'], 'EXT')
+
+    def test_cleanup_clears_a_measurement_left_waiting_so_the_reference_is_restored(self):
+        d, b, rft, ct = self.make()
+        d.set_reference('INT')
+        ct.no_signal_hangs = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        d.send('init'); d.send('trg')
+        d.cleanup()
+        self.assertFalse(any('NOT restored' in line for line in d.log.lines()))
+        self.assertEqual(d.read_reference(), d.saved_ref)                    # the settings found at connect are back
+
     def test_a_read_back_mismatch_stops_and_the_write_is_not_repeated(self):
         import drivers
         d, b, rft, ct = self.make()

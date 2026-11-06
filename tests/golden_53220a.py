@@ -12,7 +12,7 @@ from drivers.simulated_53220a import make_53220a_bench
 COVERAGE = {
     'Keysight53220A': dict(
         covered=['connect', 'read_options', 'local', 'cleanup', 'check_errors', 'read_reference', 'set_reference', 'restore_reference', 'configure_inputs',
-                 'configure_point', 'measure_stats', 'self_test', 'reset_to_defaults'],
+                 'configure_point', 'measure_stats', 'self_test', 'reset_to_defaults', 'clear_pending'],
         no_command=['bus']),                                                # property: derives from the transport
     'Keysight53230A': dict(covered=['connect', 'configure_point'], no_command=[]),         # inherited methods, exercised on the subclass (the burst function is the 53230A's)
     'Keysight53210A': dict(covered=['connect', 'configure_point'], no_command=[]),         # inherited methods on the unverified command set; the microwave input is Channel 2
@@ -35,6 +35,7 @@ def driver_cases(c):
     d = c.inst(Keysight53220A, ct, opened=False, label='53220A')
     c.quiet(d.connect)
     c.run('Keysight53220A.reset_to_defaults', d.reset_to_defaults)
+    c.run('Keysight53220A.clear_pending', d.clear_pending, 'golden')
     c.run('Keysight53220A.read_reference', d.read_reference)
     c.run('Keysight53220A.set_reference[EXT]', d.set_reference, 'EXT')
     c.run('Keysight53220A.set_reference[EXT unchanged]', d.set_reference, 'EXT')

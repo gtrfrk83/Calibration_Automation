@@ -2235,6 +2235,11 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   (spec builder; JSON regenerated): always an other-standard point, the prompt names the CG635 output Q at +7 dBm (square wave). The CG635 has a remote
   interface, but no driver exists here: it is set by hand. Tests `SinglePeriodSource`.
 - Open (owner's same run): every point showed [other standard] (the SMA100B was not driven; the reason line of a row is asked for).
+- Counter busy at the start of a run (owner screenshot 2026-11-06, 'Stop on surprise - Unexpected reply'): after the 33250A reset, '*RST' to the counter
+  timed out (write, 20 s), then SENS:ROSC:SOUR? timed out twice: the same busy state as the no-signal hang, a measurement left waiting from before the run
+  (likely a run or session stopped during a point; not known from the 20 log lines). `Keysight53220A.clear_pending` (device clear, logged '--') now runs
+  first in `reset_to_defaults` and in `cleanup`, so a run starts on a free counter and the reference is always restored. Device clear changes no setting.
+  Simulator: a measurement left waiting (`no_signal_hangs` + INIT / *TRG with nobody on *OPC?). Golden: the device-clear control lines only. NOT run on the bench yet.
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
