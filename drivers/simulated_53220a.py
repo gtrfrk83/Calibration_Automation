@@ -54,6 +54,12 @@ class Sim53220ATransport(_SimBase):
         self.burst_rel = 1.0e-7              # burst frequency error (relative)
         self.sd_burst_rel = 1.0e-6
         self.selftest_fail = False
+        self.conf_no_channel = False
+        self.no_signal_hangs = False         # opt-in: bench 2026-11-05: with no signal the counter never completes the readings; *OPC? and every later query get no
+                                             # answer until a device clear (the driver's abort).  Off = the 9.91E37 'Not a Number' statistics of the manual.
+        self.open_input_noise_hz = None      # opt-in: a frequency the counter "measures" with nothing usable at a 50 ohm input at 0 V level (bench 2026-11-05: about 6.2 MHz)
+        self.busy = False
+        self.cleared_while_busy = 0         # opt-in: CONF? as the owner's 53220A answered on the bench 2026-11-05, with no channel list ("FREQ +1.0E+007,+1.0E-002")
         self.nv = dict(src='INT', auto=True, ext_freq=10e6)          # non-volatile: survives *RST
         self._factory()
 
@@ -133,6 +139,13 @@ class Sim53220ATransport(_SimBase):
         sig = self._signal()
         kind = self.func
         n = self.samp
+        if sig is None and self.open_input_noise_hz and kind == 'FREQ':
+            self.stats = dict(count=n, mean=float(self.open_input_noise_hz), sdev=0.015 * float(self.open_input_noise_hz))
+            return
+        if sig is None and self.no_signal_hangs:
+            self.busy = True                 # waiting for edges that never come
+            self.stats = dict(count=0, mean=0.0, sdev=0.0)
+            return
         if sig is None:
             self.stats = dict(count=n, mean=9.91e37, sdev=9.91e37)
             return
@@ -156,7 +169,10 @@ class Sim53220ATransport(_SimBase):
             if skind != 'PULSE':
                 self.stats = dict(count=n, mean=9.91e37, sdev=9.91e37)
                 return
-            true = ext['width_s'] if kind == 'PWID' else ext.get('delay_s', 0.0)
+            if kind == 'PWID' or (kind == 'TINT' and self.inp[2]['slop'] == 'NEG'):   # TINT stopping on the falling edge of one split pulse = its width
+                true = ext['width_s']
+            else:
+                true = ext.get('delay_s', 0.0)
             self.stats = dict(count=n, mean=true + self.time_offset, sdev=self.sd_time)
         elif kind == 'BURST':
             width = ext.get('burst_width_s', 0.0) if skind == 'BURST' else 0.0
@@ -166,9 +182,18 @@ class Sim53220ATransport(_SimBase):
             self.stats = dict(count=n, mean=f * (1 + self.burst_rel) * (1 + e_tb), sdev=self.sd_burst_rel * f)
 
     # ---- command handling
+    def clear(self):
+        """Device clear (IEEE 488.2 / VISA viClear): aborts a measurement in progress and empties the output queue."""
+        if self.busy:
+            self.busy = False
+            self.cleared_while_busy += 1
+        self._reply = None
+
     def handle(self, cmd):
         u = cmd.strip().upper()
         self.sent.append(cmd.strip())
+        if self.busy:
+            return None                      # still measuring: nothing is answered (the bench timeouts)
         if u == '*IDN?':
             return self.idn_text
         if u == '*OPT?':
@@ -256,7 +281,12 @@ class Sim53220ATransport(_SimBase):
                 self._err('-221,"Settings conflict"'); return None
             f, ch = self.conf['func'], self.conf['ch']
             if f == 'FREQ':
+                if self.conf_no_channel:              # bench: Channel 1 has no channel list, Channel 2 has "(@2)"
+                    tail = f',(@{ch})' if ch != 1 else ''
+                    return f'"FREQ {_fmt(self.conf["expected"])},{_fmt(1e-2)}{tail}"'
                 return f'"FREQ {_fmt(self.conf["expected"])},{_fmt(1e-3)},(@{ch})"'
+            if self.conf_no_channel:                  # bench: "SPER", "PWID +0.00000000000000E+000V", "TINT"
+                return '"PWID +0.00000000000000E+000V"' if f == 'PWID' else f'"{f}"'
             if f == 'TINT':
                 return '"TINT (@1),(@2)"'
             if f == 'BURST':

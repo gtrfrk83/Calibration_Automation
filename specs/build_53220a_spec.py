@@ -199,9 +199,10 @@ def build():
             label = fmt_si(f, 'Hz').replace(' ', '')
             pts += stat_pair(f'3.ch{ch}.{label}', {m: band(r[0], r[1]) for m, r in row.items()}, {m: smax(r[2]) for m, r in row.items()}, test='3', func='SPER', kind='PERIOD',
                              channel=ch, unit='s', nominal=1.0 / f, quick=False, requires=[], timebase='EXT', gate_s=None,
-                             stimulus=dict(group='LH', frequency=f, level_dbm=7.0), page=DOC_PAGES['3'])
+                             stimulus=dict(group='CLOCK', frequency=f, level_dbm=7.0), page=DOC_PAGES['3'])      # CG635 output Q only (no substitute listed, p. 50)
     sections.append(dict(id='t3', title='Test 3: Single period', page='50-55', setup=(
-        'Source: 1 MHz and 250 MHz at +7 dBm into Channel 1, then Channel 2.  External 10 MHz reference.  Time Interval, Single Period; auto level Off, level 0 V; noise '
+        'Source: SRS CG635 output Q (square, fast edges), +7 dBm, 1 MHz and 250 MHz into Channel 1, then Channel 2.  The manual lists NO substitute for Test 3 '
+        '(Tests 1 and 2 accept the E8257D-520): a sine source does not meet the Std Dev limit at 1 MHz.  External 10 MHz reference.  Time Interval, Single Period; auto level Off, level 0 V; noise '
         'rejection Off; channel DC, 50 ohm, 5 V range, bandwidth limit Off; trigger Manual, 100 readings, delay 0.  53220A and 53230A only.'), points=pts))
 
     # ---------------------------------------------------------------- Test 4
@@ -222,12 +223,24 @@ def build():
 
     # ---------------------------------------------------------------- Test 5
     pts = stat_pair('5.ch1-ch2.49.9ns', {m: band(r[0], r[1]) for m, r in T5.items()}, {m: smax(r[2]) for m, r in T5.items()}, test='5', func='TINT', kind='TINT', channel=12, unit='s',
-                    nominal=49.9e-9, quick=True, requires=[], timebase='EXT', gate_s=None,
+                    nominal=49.9e-9, quick=True, requires=[], timebase='EXT', gate_s=None, gen='81134A',
                     stimulus=dict(group='PULSE', width_s=5e-9, period_s=66.6e-9, delay_s=49.9e-9, vpp=1.0), page=DOC_PAGES['5'],
                     flags=['Printed: step 4 says "Record the Median", step 2 and the record page say Mean.  The Mean is judged.'])
+    # Owner 2026-11-06 ("add the 33250A option"): the Agilent 33250A has ONE output, so it cannot make the two outputs 49.9 ns apart.  Substitute: ONE 49.9 ns wide pulse,
+    # split to Channel 1 and Channel 2 by a resistive power splitter with equal cables; the counter starts on the Channel 1 RISING edge and stops on the Channel 2
+    # FALLING edge, so it measures the pulse width across both channels.  The reference is the 33250A's SET width: its accuracy is not specified in its User's Guide.
+    pts += stat_pair('5.ch1-ch2.49.9ns.33250A', {m: band(r[0], r[1]) for m, r in T5.items()}, {m: smax(r[2]) for m, r in T5.items()}, test='5', func='TINT', kind='TINT',
+                     channel=12, unit='s', nominal=49.9e-9, quick=True, requires=[], timebase='EXT', gate_s=None, gen='33250A', stop_slope='NEG',
+                     stimulus=dict(group='PULSE', width_s=49.9e-9, period_s=200e-9, vpp=2.0, split=True), page=DOC_PAGES['5'],
+                     flags=['SUBSTITUTE (owner decision 2026-11-06): the Agilent 33250A has one output, so instead of two outputs 49.9 ns apart ONE 49.9 ns pulse is split to '
+                            'Channel 1 and Channel 2 (equal cables) and the counter measures Channel 1 rising to Channel 2 falling.  The reference is the 33250A SET pulse '
+                            'width, whose accuracy its User\'s Guide does not specify: a PASS means the counter agrees with the 33250A, not a traceable 49.9 ns.  '
+                            'Limits as printed for the manual\'s setup.'])
     sections.append(dict(id='t5', title='Test 5: Time interval', page='61-65', setup=(
         'Source: pulse generator, both channels 1 Vpp, period 66.6 ns, pulse width 5 ns, Channel 2 delayed 49.9 ns; the two 3.5 mm cables must be exactly the same length.  External 10 MHz '
-        'reference.  Time Interval 1-2; start and stop slope Positive, auto level Off, level 0 V, noise rejection Off; trigger Manual, 100 readings, delay 0.  53220A and 53230A only.'),
+        'reference.  Time Interval 1-2; start and stop slope Positive, auto level Off, level 0 V, noise rejection Off; trigger Manual, 100 readings, delay 0.  53220A and 53230A only.  '
+        'With the Agilent 33250A (one output, a substitute): one 49.9 ns pulse, 2 Vpp, period 200 ns, through a resistive power splitter and two equal cables to Channel 1 and '
+        'Channel 2; stop slope Negative, so the counter measures Channel 1 rising to Channel 2 falling.'),
         points=pts))
 
     # ---------------------------------------------------------------- Test 6a / 6b

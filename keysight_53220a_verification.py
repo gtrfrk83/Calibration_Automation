@@ -74,7 +74,11 @@ GROUP_TITLE = {'TIMEBASE': 'absolute time base', 'CH1': 'Channel 1', 'CH2': 'Cha
 STIM_NEEDS = {'PULSE': 'Pulse generator: 5 ns pulse width +/- 40 ps, 1 Vpp, period 66.6 ns, two outputs 49.9 ns apart for the time interval test (Keysight 81134A in the manual)',
               'BURST': 'Pulse-modulated microwave signal generator: 100 MHz to 15 GHz, pulse width accuracy +/- 10 %, PRI 1 ms (Keysight E8257D-520-UNW in the manual); the 96270A has no pulse modulation',
               'MW': 'External attenuator after the 96270A Microwave O/P (the Microwave O/P gives -4 dBm at best) and a power meter to verify the level at the counter input, as the manual asks',
-              'LH': 'Signal generator (the manual names an SRS CG635)'}
+              'LH': 'Signal generator (the manual names an SRS CG635; the E8257D-520 is a valid substitute for Tests 1 and 2, pp. 38 and 44)',
+              # Owner 2026-11-05 (bench: Std Dev 409 ps with a 1 MHz sine, 93 with the CG635 by hand): Test 3 names the CG635 output Q, +7 dBm, and NO substitute
+              # (Service Guide p. 50).  Its square edges are what the 140 ps / 28 ps Std Dev limit assumes, so the RF source (a sine) never drives Test 3.
+              'CLOCK': 'SRS CG635 synthesized clock generator, output Q, +7 dBm (square wave, fast edges); the Service Guide lists no substitute for Test 3 (p. 50). '
+                       'A sine generator (the 96270A or the SMA100B) does not meet the 1 MHz Std Dev limit'}
 
 
 def load_spec(path=None):
@@ -273,7 +277,7 @@ def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
             return dict(mode='manual', route=None, level_set=None, atten_db=0.0,
                         reason='No Agilent 33250A is connected (enter its address and press Test connections), or the stimulus is another standard')
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
-    if g == 'BURST':
+    if g in ('BURST', 'CLOCK'):
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
     src = 'R&S SMA100B' if stim.get('source') == 'SMA100B' else '96270A'
     if stim.get('mode') != 'auto' or not stim.get('rf'):
@@ -301,6 +305,26 @@ def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
     atten = floor - level        # the Microwave O/P is set to its floor; the difference is the attenuation needed between it and the cable to the counter (arithmetic only, not a manual value)
     return dict(mode='rf', route='MW', level_set=floor, atten_db=atten,
                 reason=f'The 96270A Microwave O/P cannot make {level:g} dBm (its floor is {floor:g} dBm): it is set to {floor:g} dBm and {atten:g} dB of external attenuation is needed before the counter input')
+
+
+# Point numbers moved on 2026-11-06: the two 33250A Test 5 points were inserted after the two-output pair, so Tests 6a to 7d moved up by two.  Results saved
+# since then carry their point's ref; an older file's result at or after the first inserted point cannot be matched and is left out.
+RENUMBERED_FROM_REF = '5.ch1-ch2.49.9ns.33250A.mean'
+
+
+def drop_stale_results(app):
+    """Remove loaded results that do not belong to the point now at their number.  Returns how many were removed."""
+    first = next((p['id'] for p in POINTS if p['ref'] == RENUMBERED_FROM_REF), None)
+    by_id = {str(p['id']): p for p in POINTS}
+    n = 0
+    for store in (app._found, app._left):
+        for key in list(store):
+            rec, p = store[key], by_id.get(str(key))
+            ref = rec.get('ref') if isinstance(rec, dict) else None
+            if p is None or (ref is not None and ref != p['ref']) or (ref is None and first is not None and int(key) >= first):
+                del store[key]
+                n += 1
+    return n
 
 
 def gen_ok(p, pulse_gen):
@@ -372,7 +396,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def enable_surprise(self, handler, force=False):
         """Stop on surprise (surprise.py, opt-in).  The counter's set-and-read-back mismatch and statistics replies, and the 96270A's error queue, are Stop-only surprises.  A virtual (demo)
         command log is left alone unless force=True (tests)."""
-        self.guards = [g for g in (surprise.attach_guard(self.ctr, handler, force, expect={'calc.mean': 'float', 'calc.sdev': 'float', 'calc.count': 'float'}, stop_only=True),
+        self.guards = [g for g in (surprise.attach_guard(self.ctr, handler, force, expect={'calc.mean': 'float', 'calc.sdev': 'float', 'calc.count': 'float'}, stop_only=True,
+                                                         skip=('opc.query',)),     # *OPC? timeout = no signal: the driver aborts it (bench 2026-11-06)
                                    surprise.attach_guard(self.rf, handler, force, stop_only=True) if self.rf else None,
                                    surprise.attach_guard(self.gen, handler, force, stop_only=True) if self.gen else None) if g]
         return self.guards
@@ -702,9 +727,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g == 'NONE': return ''
         if g == 'PULSE':
             t = f'pulse width {_tm(st["width_s"])}, period {_tm(st["period_s"])}, {st["vpp"]:g} Vpp'
+            if st.get('split'):
+                return t + ', 0 V offset, through a resistive power splitter to Channel 1 and Channel 2 (equal cables; about half the amplitude at each input)'
             return t + (f', second output delayed {_tm(st["delay_s"])} from the first' if st.get('delay_s') else '')
         if g == 'BURST':
             return f'{_hz(st["frequency"])} at {st["level_dbm"]:g} dBm, pulse modulated: width {_tm(st["burst_width_s"])}, PRI {_tm(st["pri_s"])}'
+        if g == 'CLOCK':
+            return f'{_hz(st["frequency"])} from the CG635 output Q at {st["level_dbm"]:g} dBm (square wave)'
         return f'{_hz(st["frequency"])} sine at {st["level_dbm"]:g} dBm'
 
     def setup_text(self, p):
@@ -725,6 +754,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return base + f'{self.stim_text(p)} from {mw} to the microwave input ({chan_name(p)}); {ref}.' + rear
         if g in ('PULSE_CH1', 'PULSE_CH2'):
             return base + f'{"Agilent 33250A" if p.get("gen") == "33250A" else "Pulse generator"} output to Channel {1 if g == "PULSE_CH1" else 2}: {self.stim_text(p)}; {ref}.' + rear
+        if g == 'TINT' and p['stimulus'].get('split'):
+            return (base + f'Agilent 33250A Output to a resistive power splitter, its two outputs to Channel 1 and Channel 2 with equal cable lengths: {self.stim_text(p)}. '
+                    f'The counter measures Channel 1 rising to Channel 2 falling (a substitute for the two-output test: the reference is the 33250A set width); {ref}.' + rear)
         if g == 'TINT':
             return base + f'Pulse generator: both outputs to Channel 1 and Channel 2 with equal cable lengths: {self.stim_text(p)}; {ref}.' + rear
         return base + f'Pulse-modulated microwave generator to the microwave input: {self.stim_text(p)}; {ref}.' + rear
@@ -944,7 +976,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if plan['mode'] == 'pulse':
             return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
                 [('Output off', 'The Agilent 33250A output is switched off before you rewire.'), ('Wiring', self.setup_text(p)),
-                 ('33250A', 'Its Output connector goes to the counter input (50 ohm). The program sets the pulse (' + self.stim_text(p) + ', edge time 5 ns), reads every setting back and switches the output on for the measurement only.')],
+                 ('33250A', ('Its Output goes through a resistive power splitter and two EQUAL cables to Channel 1 and Channel 2. ' if p['stimulus'].get('split') else
+                             'Its Output connector goes to the counter input (50 ohm). ')
+                  + 'The program sets the pulse (' + self.stim_text(p) + ', edge time 5 ns), reads every setting back and switches the output on for the measurement only.')],
                 facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
         steps = [('Output off', f'The {self.rf_name()} output is {"switched off" if plan.get("route") == "SMA" else "put in standby"} before you rewire.'), ('Wiring', self.setup_text(p))]
         if plan.get('atten_db'):
@@ -1005,7 +1039,29 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         """The hook-up actions no command can do, done on the simulated bench after the prompt: connect the other standard, the cable loss and the 10 MHz reference."""
         if self._vb: self._prepare_bench(self._vb[0], p)
 
+    WRONG_SIGNAL_REL = 0.10            # a Mean more than 10 % from its nominal is not a counter error: the wrong signal (or none) is at the input
+
+    def wrong_signal_text(self, p, reading):
+        """Owner 2026-11-05: Test 3 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns: the 1 MHz signal of the point before was still connected.
+        A Mean that far from its nominal is the hook-up, not the counter: the technician is asked before it is recorded.  '' when the reading is plausible."""
+        nom = p.get('nominal')
+        if p.get('stat') != 'mean' or p.get('func') == 'TST' or not nom or reading is None:
+            return ''
+        if abs(float(reading) / float(nom) - 1.0) <= self.WRONG_SIGNAL_REL:
+            return ''
+        unit, r = p['unit'], float(reading)
+        got = _tm(r) if unit == 's' else _hz(r) if unit == 'Hz' else f'{r:g} {unit}'
+        want = _tm(float(nom)) if unit == 's' else _hz(float(nom)) if unit == 'Hz' else f'{float(nom):g} {unit}'
+        hint = f' (a period of {_hz(1.0 / r)})' if unit == 's' and r > 0 else ''
+        return (f'{p["description"]}: the counter read {got}{hint}, but this point needs {want} ({self.stim_text(p) or "see the setup"}).\n\n'
+                f'That is more than {self.WRONG_SIGNAL_REL:.0%} from the nominal: the signal at the input is probably not the one this point needs (frequency not '
+                f'changed, wrong channel, cable not moved, no signal).\n\nYes: set the signal again and measure this point again.\nNo: record the reading as it is.')
+
     def _done(self, points, i, p, reading, key, mode):
+        why = self.wrong_signal_text(p, reading) if not self.fast_demo else ''
+        if why and port.ask_yes_no('Wrong signal?', why, icon='warning', parent=self.root):
+            self.status.set(f'{p["description"]}: measuring again after the signal is set.')
+            port.after(self.root, 30, lambda: self._next(points, i, None)); return       # previous=None: the setup prompt is shown again
         self.mo_finish(p, reading, bool(self.demo), lambda: self._record(p, reading, bool(self.demo), mode)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _reading_failed(self, points, i, p, key, exc):
@@ -1019,7 +1075,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _record(self, p, reading, synthetic, mode='rf', extra=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
-        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode, atten_db=self.atten.get(p['id'], 0.0),
+        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode, atten_db=self.atten.get(p['id'], 0.0), ref=p['ref'],
                                           timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
 
@@ -1047,8 +1103,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.pulse_opt.set(bool(data.get('pulse_opt', self.pulse_opt.get()))); self.rear_opt.set(bool(data.get('rear_opt', self.rear_opt.get())))
         self.opts_declared = True                                    # the results in the file were taken with these options
         self.load_results(data)
+        dropped = drop_stale_results(self)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
-        self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+        self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.'
+                                                    + (f' {dropped} result(s) from an older point numbering were left out: run those points again.' if dropped else ''))
 
     @staticmethod
     def report_section(p):

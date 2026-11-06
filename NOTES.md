@@ -2238,7 +2238,7 @@ Owner request: standards sheets for the 34461A and 34465A as MEASURING standards
   | 53220A | 28 / 20 | 32 / 24 | 34 / 26 | 32 / 24 (150 ignored) | 34 / 26 (150 ignored) |
   | 53230A | 28 / 20 | 32 / 24 | 34 / 26 | 36 / 26 | 38 / 28 |
   Per test (points): OV2 1, T1 1, 2a 6, 2b 6 (not 53210A), 3 8 (not 53210A), 4a 2, 4b 2, 5 2 (53220A / 53230A), 6a 4, 6b 6, 7a 2, 7b 2, 7c 2, 7d 2. Tests: `OptionCombinations` in tests/test_keysight_53220a_points.py (every combination of model x 010 x microwave x 150 x 201 x test set against a table typed from the record pages).
-- Stimulus: the Fluke 96270A through the existing `Fluke96270A` commands (`Fluke96270AWide` only raises MAX_HZ to 27 GHz; no command added). Owner 2026-10-27: this 96270A has NO Extended Low Level (the checkbox stays off). Automatic: Tests 1, 2, 3, 6a at 100 MHz, 6b at 300 MHz / 3.1 GHz (Leveling Head, up to 4.024 GHz); everything above 4 GHz comes from the Microwave O/P. 6b at 15 GHz is -4 dBm plus the cable loss. 6a at 5.88 GHz needs -27 dBm +/- 0.5 dBm at the counter but the Microwave O/P cannot go below -4 dBm: the point keeps the printed -27 dBm, the 96270A is set to -4 dBm and the prompt tells the technician to fit the external attenuation (23 dB less the cable loss: arithmetic only, the manual lists no attenuator) and to verify the level with a power meter, as the manual's note asks (p. 66). The row is marked `[+attenuator]` and the report row `[n dB external attenuator]`. Always another standard: Tests 4 / 5 (pulse generator), Test 7 (pulse-modulated microwave generator).
+- Stimulus: the Fluke 96270A through the existing `Fluke96270A` commands (`Fluke96270AWide` only raises MAX_HZ to 27 GHz; no command added). Owner 2026-10-27: this 96270A has NO Extended Low Level (the checkbox stays off). Automatic: Tests 1, 2, 6a (Test 3: the CG635 by hand since 2026-11-05, see below) at 100 MHz, 6b at 300 MHz / 3.1 GHz (Leveling Head, up to 4.024 GHz); everything above 4 GHz comes from the Microwave O/P. 6b at 15 GHz is -4 dBm plus the cable loss. 6a at 5.88 GHz needs -27 dBm +/- 0.5 dBm at the counter but the Microwave O/P cannot go below -4 dBm: the point keeps the printed -27 dBm, the 96270A is set to -4 dBm and the prompt tells the technician to fit the external attenuation (23 dB less the cable loss: arithmetic only, the manual lists no attenuator) and to verify the level with a power meter, as the manual's note asks (p. 66). The row is marked `[+attenuator]` and the report row `[n dB external attenuator]`. Always another standard: Tests 4 / 5 (pulse generator), Test 7 (pulse-modulated microwave generator).
 - Pulse generator for Tests 4a, 4b and 5 (owner 2026-10-27): selectable `Agilent 33250A` or `81134A or equivalent` ('Pulse tests 4 and 5' in the drawer). The 33250A limits are from the Agilent 33250A User's Guide read as page images (printed pages): pulse width 8 ns minimum (p. 167, specifications p. 320), edge time 5 ns minimum (p. 168), pulse width at least 1.6 x edge time (p. 167), period 20 ns to 2000 s (p. 166), 10 mVpp to 10 Vpp into 50 ohm (p. 320), ONE Output connector plus a Sync output that is a 50 % duty square wave for pulse waveforms (p. 62); no PULSe:DCYCle and no delayed second output exist. Against the chapter's settings (5 ns pulse, 1 Vpp, period 66.6 ns, Test 5: two outputs 49.9 ns apart) the 33250A MEETS the period (66.6 ns) and the amplitude (1 Vpp) but CANNOT make the 5 ns pulse (8 ns minimum; and 5 ns would also need an edge time of at most 3.1 ns) so Tests 4a and 4b cannot be met, and Test 5 cannot be met either (5 ns pulses and one output). Every pulse point therefore stays a manual-entry point on another pulse generator (81134A or equivalent); with the 33250A selected the prompt says plainly which settings it cannot meet (`pulse_shortfalls`, built on `drivers.keysight_53220a.PULSE_LIMITS`). The driver class `AgilentAFGPulse` (drivers/keysight_53220a.py, subclass of `AgilentAFG`; sine() / square() and the MDO procedures are untouched) has `pulse(period, width, edge, vpp)`: 50 ohm, FUNC PULS, VOLT:UNIT VPP, 0 V offset, then period / width / edge in an order that never breaks the manual's relations, VOLT, each written once and read back, the error queue read at the end, output OFF until `output(True)` (confirmed with OUTP?); it refuses (sends nothing) a pulse the limits forbid. Its 24 commands are `verified=True` with the printed page; NOT run on hardware, and the generator's behaviour exactly AT the 8 ns / 5 ns boundary (width = 1.6 x edge, edge = 0.625 x width) is UNVERIFIED. The simulated twin (`SimGen` in drivers/simulated_fgen.py) models the relations and the -221 / -222 errors. `test_33250a_cannot_meet_any_pulse_point` fails if a pulse point becomes feasible: the engine does not route any point to the driver yet. The counter is always configured and read automatically; the prompt for an other-standard point names the standard and the settings. The output route (Leveling Head / Microwave O/P) and the reference in / out are front-panel only (no remote command documented: UNVERIFIED).
 - Reference oscillator: the settings are non-volatile and survive `*RST`; the driver records them at connect, writes them only when they change (set / read back / compare, `ROSC:EXT:CHEC ONCE`, +2009 when no 10 MHz is present) and restores them at cleanup. Test 1 uses the INTERNAL time base; every other test the external 10 MHz.
 - Measurement: inputs first (CONF does not touch them), then CONF, level / slope / gate / mode, then SAMP:COUN 100, TRIG:COUN 1, TRIG:DEL 0, TRIG:SOUR BUS, CALC:STAT ON, CALC:AVER:STAT ON, INIT, *TRG, *OPC? and the counter's own Mean / Std Dev / count (9.91E37 = no signal; the count must be 100). The Std Dev point reuses the 100 readings of the Mean point just measured; run alone it measures again. Gate Out (OUTP:STAT) is deliberately not sent.
@@ -2277,7 +2277,7 @@ reports to *OPT?, bench record 2026-11-05); a drawer selector, not a per-test ch
 - Settings drawer: 'RF source' = Fluke 96270A / R&S SMA100B; the address box keeps one address per source (settings `rf_addr`, `sma_addr`; SMA100B default GPIB1::28::INSTR as on
   the bench). `STIM_CHOICES[0]` is now 'RF source where it can', `REF_CHOICES[1]` 'RF source 10 MHz Ref Out' (old saved texts fall back to the first choice). Changing the source after
   connecting makes its points manual until Test connections; a run reconnects first.
-- Routing (`plan_stimulus`, source 'SMA100B'): every CW point (Tests 1, 2, 3, 6a, 6b) is route 'SMA', level = printed level + cable loss, NO external attenuator (6a 5.88 GHz is set
+- Routing (`plan_stimulus`, source 'SMA100B'): every CW point (Tests 1, 2, 6a, 6b; Test 3 is on the CG635 since 2026-11-05) is route 'SMA', level = printed level + cable loss, NO external attenuator (6a 5.88 GHz is set
   at -27 dBm directly: B35 has the step attenuator, User Manual pp. 228-230). Pulse (Tests 4, 5) and burst (Test 7) stay on other standards: the bench unit has no K22 / K23.
   Frequency maximum from the option name (B131 = 31.8 GHz; `SMA100B_MAX_HZ_BY_OPTION`, UNVERIFIED: the specifications document is not on file; every point is at or below 15 GHz).
   The level range is not gated beyond POW:LIM? and the 10 dBm input guard: the generator's -222 is the final word.
@@ -2285,6 +2285,64 @@ reports to *OPT?, bench record 2026-11-05); a drawer selector, not a per-test ch
 - Uncertainty unchanged (owner rule 2026-10-26: frequency points use the 'Frequency - Measure' CMC alone; the source does not enter).
 - Hook-up pictures: `diagrams/hook_53220a_SMA100B_<GROUP>.png` (none supplied). Sidecars list `rs_sma100b` and fingerprint `drivers/rs_sma100b.py`.
 - Simulated: `SimSMA100B53220` (drivers/simulated_53220a.py, `bench.sma_transport`) mirrors its RF output into `bench.rf1`. Tests: `SMA100BStimulus`, `SMA100BFlow`.
+
+## 53220A family: CONF? read back without a channel; bench session script (2026-11-05)
+Owner report 2026-11-05 (screenshot, first bench run of the 53220A): "Stop on surprise - Read-back does not match", `conf.query`: after `CONF:FREQ 10000000,DEF,(@1)` the counter
+answered `CONF?` with `"FREQ +1.00000000000000E+007,+1.00000000000000E-002"`, expected `channel (@1)`. The real reply has NO channel list (the driver assumed the
+Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner question: "would it help to test the driver for the 53220 before running the procedure again".
+- `Keysight53220A._confirm_function`: the function is still confirmed; for CONF:FREQ the expected frequency the reply echoes is now compared too (rel 1e-9); a reply with no
+  `(@` cannot confirm the channel: a log line ('channel is not in the CONF? reply ...'), not a surprise; a reply that names a DIFFERENT channel is still a mismatch.
+  Whether SPER / PWID / TINT / BURST replies carry a channel on the real counter is UNVERIFIED (the bench script below records them).
+- Simulator: opt-in `Sim53220ATransport.conf_no_channel` (default off) replays the bench reply. Golden transcripts unchanged.
+- NEW `drivers/k53220a_bench.py` (bench-first workflow for a driver written before it): `python -m drivers.k53220a_bench --address <VISA> [--model 53230A] [--settings
+  [--ext-ref] [--selftest]] [--signal]`. Stage 1 read-only queries; stage 2 `*RST` and every configuration the procedure sends for the model and the options the counter
+  reports (frequency Ch 1 / Ch 2 / microwave, single period, pulse width, time interval, burst), CONF? recorded after each, the 9.91E37 no-signal refusal, internal / external
+  time base; stage 3 100 readings of 10 MHz on Channel 1. Every write asks first (y / a = all / n = stop; `Stop` is a BaseException so a driver step cannot swallow it).
+  A failed step records the counter's reply and the session goes on. The reference oscillator settings are restored at the end. Record `k53220a_bench_<time>.txt`.
+  Tests `BenchScript` (simulator, every model; the bench CONF? reply; a refused write).
+- Bench session 2026-11-05 (owner, records in tools/bench/records/2026-11-05_53220a_*.txt and the README there): every query, *RST, both time bases
+  and every configuration PASS; CONF? lists the channel only for Channel 2 (`(@2)`); SPER / PWID / TINT replies carry no channel (the simulator's
+  `conf_no_channel` now replays exactly these). Two findings:
+  1. NO SIGNAL HANGS THE COUNTER (not 9.91E37): *OPC? never answered and every later command timed out, so the reference could not be restored.
+     `measure_stats` now aborts on the *OPC? timeout: device clear (viClear) + *CLS, a '!!' log line, then InstrumentError 'did not finish N readings ...: no
+     signal' (the procedure's typed-reading offer applies and the counter answers the next point). CONFIRMED on the bench 2026-11-05 (steps 4 and 5,
+     build b24b268): after the abort the counter answered at once and the reference was restored. Simulator opt-in `no_signal_hangs`.
+  2. 10 MHz on Channel 1 read Mean 6.23 MHz, Std Dev 92 kHz (and 6.16 MHz in the 'nothing connected' step): the counter is not triggering cleanly; what was
+     connected was the hook-up: step 5 read 10 MHz as 9 999 999.690 Hz (-0.031 ppm, internal Option 010 time base), Std Dev 5.2 mHz, 100 readings. The bench script now asks to disconnect Channel 1 before the no-signal step, checks the counter answers after it,
+     and fails stage 3 unless the Mean is within 1 ppm of 10 MHz. Simulator opt-in `open_input_noise_hz`.
+- Bench script: every stage passes on the owner's 53220A (steps 4 and 5). The PROCEDURE has not been rerun since these changes.
+- Wrong-signal check (owner 2026-11-05, "sure", after a run on other standards where 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns because
+  the 1 MHz signal was still connected): before a Mean is recorded, a reading more than 10 % (`App.WRONG_SIGNAL_REL`) from its nominal asks 'Wrong signal?'
+  (what was read, what the point needs, a period shown as its frequency). Yes = the setup prompt again and a new measurement (its Std Dev point then uses the
+  new readings); No = recorded as it is. Std Dev, self-test and typed readings are not questioned. Every Mean point, driven or hand-set. Tests `WrongSignal`.
+- Test 3 single period is on the SRS CG635, never the RF source (owner 2026-11-05: "i followed the procedure and it passes when ran manually by myself ...
+  i was getting a std dev at 1MHz of 93"; the procedure's run read 409 ps against 140 ps). The Service Guide (53220-90010.pdf, branch 6060a-gidep-uncertainty,
+  p. 50) names for Test 3 the CG635 output Q, +7 dBm, and NO substitute; Tests 1 and 2 (pp. 38, 44) say "E8257D-520 is a valid substitute" (a sine generator).
+  The CG635 Q output is a square wave: its fast edges are what the 140 ps / 28 ps Std Dev limit assumes; a 1 MHz sine crosses 0 V about 100 x slower, so its
+  trigger jitter is about 100 x larger. The procedure had Test 3 as '1 MHz sine at 7 dBm' on the 96270A / SMA100B: that was WRONG. Now stimulus group 'CLOCK'
+  (spec builder; JSON regenerated): always an other-standard point, the prompt names the CG635 output Q at +7 dBm (square wave). The CG635 has a remote
+  interface, but no driver exists here: it is set by hand. Tests `SinglePeriodSource`.
+- Open (owner's same run): every point showed [other standard] (the SMA100B was not driven; the reason line of a row is asked for).
+- Counter busy at the start of a run (owner screenshot 2026-11-06, 'Stop on surprise - Unexpected reply'): after the 33250A reset, '*RST' to the counter
+  timed out (write, 20 s), then SENS:ROSC:SOUR? timed out twice: the same busy state as the no-signal hang, a measurement left waiting from before the run
+  (likely a run or session stopped during a point; not known from the 20 log lines). `Keysight53220A.clear_pending` (device clear, logged '--') now runs
+  first in `reset_to_defaults` and in `cleanup`, so a run starts on a free counter and the reference is always restored. Device clear changes no setting.
+  Simulator: a measurement left waiting (`no_signal_hangs` + INIT / *TRG with nobody on *OPC?). Golden: the device-clear control lines only. NOT run on the bench yet.
+- No signal in a REAL run (owner screenshot 2026-11-06: 24 / 28 pass, then Test 5 time interval stopped with 'Unexpected reply', *OPC? 'timeout twice'):
+  the stop-on-surprise guard (`IO.enable_surprise`) wraps the counter's ask(): it caught the *OPC? timeout, retried *OPC? and stopped the run, so
+  `measure_stats` never reached its abort (the bench script runs without the guard, which is why steps 4 and 5 passed). The guard now skips 'opc.query'
+  (`skip=`): the driver aborts (device clear + *CLS) and raises 'no signal', the procedure offers a typed reading, the run goes on. Tests
+  `NoSignalWithStopOnSurprise`. Same run: Tests 2a / 2b ran on the SMA100B (no [other standard]), Test 3 on the CG635 and 4a / 4b at 8 ns on the 33250A all PASS.
+- Test 5 with the Agilent 33250A (owner 2026-11-06: "is there a way to just use the 33250?" ... "add the 33250A option"). The 33250A has ONE output (its Sync
+  delay is neither settable nor specified), so the manual's two outputs 49.9 ns apart cannot be made. SUBSTITUTE: one 49.9 ns pulse, 2 Vpp, 0 V offset, period
+  200 ns, edge 5 ns, through a resistive power splitter and two equal cables to Channel 1 and Channel 2; TINT 1-2 with the Channel 2 STOP slope NEGATIVE
+  (`stop_slope='NEG'` -> INP2:SLOP NEG after the levels), so the counter measures Channel 1 rising to Channel 2 falling. The reference is the 33250A SET
+  width, whose accuracy its User's Guide does not specify: a PASS means the counter agrees with the 33250A, not a traceable 49.9 ns (flagged SUBSTITUTE on the
+  point; limits as printed). Points '5.ch1-ch2.49.9ns.33250A.mean/.sdev' (gen '33250A', driven when its address is entered, else set by hand); the two-output
+  points are now gen '81134A' (shown with that choice only), as Test 4. 52 points in the spec. Point numbers: Tests 6a to 7d moved up by two; results now
+  store their ref and `drop_stale_results` leaves out a loaded result that does not match its point (an older file: every result from the first inserted
+  point on). Hook-up picture hook_53220a_33250A_TINT.png (none supplied). Simulator: TINT with the stop slope NEG measures the split pulse's width.
+  Tests: the Flow 33250A run, `Renumbering`. Bench 2026-11-06, build b82e680: owner "that worked" (readings not reported here).
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
@@ -2595,3 +2653,11 @@ Tests: tests/test_driver_rs_sma100b.py; golden fixture tests/golden/rs_sma100b.j
   which would have moved this unit off its external reference). STILL TO DO before verified=True: one Driver verification pass on the unit (rosc.set is the only command never sent).
 - Driver verification 2026-11-05 08:56 (tester mtyler): the 17 queries PASS -> verified=True (`DRIVER_VERIFIED` in the driver). Not yet verified: the 7 set commands, outp.on / outp.off and
   reset (bench-script records only; a second Driver verification run with those rows ticked finishes it), and status.clear (driver_verify never sends *CLS: stays UNVERIFIED, listed).
+
+## Reference manuals folder (2026-11-05)
+Owner request: "move the manuals into a separate folder that won't be included in the build package but still available for you to reference".
+- `96000__rpmeng0100.pdf` and `SMA100B_UserManual_en_14.pdf` moved from the repository root to `reference_manuals/` (file names unchanged, so every citation by
+  file name still holds; the driver files were NOT edited, to keep the procedure fingerprints unchanged).
+- `.gitattributes`: `reference_manuals/ export-ignore`, so the build (`git archive`) and GitHub "Download ZIP" leave the folder out (about 17.8 MB smaller).
+- Not the app's `manuals/` folder (`manuals.py`, the operator's manual viewer); nothing in `reference_manuals/` is shown in the app. New source manuals go here; see
+  `reference_manuals/README.md`.

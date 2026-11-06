@@ -73,3 +73,19 @@ Driver verification (manager > Driver verification...) pass on this unit.
 - Driver verification 2026-11-05 08:56 (tester mtyler; 2026-11-05_sma100b_driver_verify_queries.txt): queries only (the window's default ticks), 17 passed, 0 failed.
   Those 17 are now verified=True. Still to run with the set / output / reset rows ticked: mod.off, unit.dbm, freq.mode.cw, pow.mode.cw, freq.set, pow.set, rosc.set
   (sample EXT), outp.on, outp.off, reset. status.clear (*CLS) is never sent by driver_verify.
+
+## 2026-11-05 Keysight 53220A (drivers/k53220a_bench.py; serial MY50010466, firmware 02.05-1519.666-1.19-4.15-127-155-35, GPIB1::3)
+`*OPT?` "010,0,0,0,400" (Option 010, no microwave channel, no Option 150). Replies: numbers `+1.00000000E+007` (8 digits) for INP / ROSC, `+1.00000000000000E-001`
+(14 digits) for GATE / TRIG; INP1:PROB? "+1"; booleans "0" / "1"; words "DC", "POS", "TIME", "AUTO", "IMM", "BUS", "EXT", "INT".
+- step 1 read-only (2026-11-05_53220a_step1_readonly.txt): 33 / 33 pass.
+- step 2 --settings --ext-ref (…_step2_settings_ext_ref.txt): *RST (5.2 s before the next command), INT / EXT time base and SENS:ROSC:EXT:CHEC ONCE, every
+  configuration pass. CONF? replies: `"FREQ +1.00000000000000E+007,+1.00000000000000E-002"` (Channel 1: NO channel list), `"FREQ +1.15000000000000E+008,
+  +1.15000000000000E-001,(@2)"` (Channel 2: the channel IS listed), `"SPER"`, `"PWID +0.00000000000000E+000V"`, `"TINT"`. With nothing connected the 10
+  readings never completed: *OPC? timed out (20 s), then SYST:ERR? three times and SENS:ROSC:SOUR? (reference NOT restored) - the counter stays busy.
+- step 3 --settings --signal (…_step3_settings_signal.txt): internal time base; "nothing connected" step: 10 readings, Mean 6.162 653 MHz, Std Dev 85.2 kHz;
+  stage 3 (10 MHz on Channel 1 per the prompt): Mean 6.233 285 MHz, Std Dev 91.7 kHz, count 100. NOT 10 MHz: not triggering cleanly (what was connected
+  is being asked). Error queue empty; reference restored.
+- step 4 --settings --ext-ref, build b24b268 (…_step4_settings_ext_ref_abort.txt): 48 / 48 pass. Nothing connected: *OPC? timed out after 20 s, the driver
+  sent device clear + *CLS, and the counter answered at once (SYST:ERR? "+0,"No error"", reference queries); the reference was restored. The abort WORKS.
+- step 5 --settings --signal (…_step5_settings_signal_10mhz.txt): 50 / 50 pass. The no-signal abort again; then 10 MHz on Channel 1, internal time base
+  (Option 010): count 100, Mean 9 999 999.690 35 Hz (-0.031 ppm), Std Dev 5.18 mHz. The 6.2 MHz of step 3 was the hook-up, not the counter.

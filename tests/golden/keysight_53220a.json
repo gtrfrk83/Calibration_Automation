@@ -91,10 +91,17 @@
   {
    "call": "",
    "case": "Keysight53220A.cleanup[USB]",
-   "log": [],
+   "log": [
+    "53220A|--|device clear (before cleanup): any measurement still waiting is aborted"
+   ],
    "method": "Keysight53220A.cleanup",
    "result": "returned None",
-   "wire": []
+   "wire": [
+    [
+     "ctl",
+     "clear"
+    ]
+   ]
   },
   {
    "call": "",
@@ -192,10 +199,16 @@
   {
    "call": "",
    "case": "Keysight53220A.cleanup[GPIB]",
-   "log": [],
+   "log": [
+    "53220A|--|device clear (before cleanup): any measurement still waiting is aborted"
+   ],
    "method": "Keysight53220A.cleanup",
    "result": "returned None",
    "wire": [
+    [
+     "ctl",
+     "clear"
+    ],
     [
      "ctl",
      "go_local"
@@ -206,6 +219,7 @@
    "call": "",
    "case": "Keysight53220A.reset_to_defaults",
    "log": [
+    "53220A|--|device clear (before the reset): any measurement still waiting is aborted",
     "53220A|>>|*RST",
     "53220A|>>|*CLS",
     "53220A|>>|*OPC?",
@@ -216,6 +230,10 @@
    "method": "Keysight53220A.reset_to_defaults",
    "result": "returned ResetReport(instrument='53220A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='inputs, level and trigger known (the next point sets them again)', ok=True, detail='Factory reset state; the reference oscillator is set per test')], warnings=[])",
    "wire": [
+    [
+     "ctl",
+     "clear"
+    ],
     [
      "W",
      "*RST"
@@ -243,6 +261,21 @@
      "Q",
      "SYST:ERR?",
      "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'golden'",
+   "case": "Keysight53220A.clear_pending",
+   "log": [
+    "53220A|--|device clear (golden): any measurement still waiting is aborted"
+   ],
+   "method": "Keysight53220A.clear_pending",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "clear"
     ]
    ]
   },

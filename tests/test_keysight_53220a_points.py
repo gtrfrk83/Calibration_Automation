@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 A = VH = SPEC = PTS = K = None
 InstrumentError = SafetyError = None
 SCALE = {'mHz': D('0.001'), 'Hz': D(1), 'kHz': D(1000), 'MHz': D(1000000), 'GHz': D(1000000000), 'ns': D('0.000000001'), 'us': D('0.000001')}
-SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 8, 't5': 2, 't6a': 4, 't6b': 6, 't7': 8}
+SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 8, 't5': 4, 't6a': 4, 't6b': 6, 't7': 8}
 
 
 def V(text):
@@ -103,10 +103,10 @@ def by_ref(ref):
 class SpecTests(unittest.TestCase):
     def test_counts(self):
         self.assertEqual({s['id']: len(s['points']) for s in SPEC['sections']}, SECTION_SIZES)
-        self.assertEqual(len(PTS), 50)                                # 46 + the four 8 ns pulse points of the Agilent 33250A (2026-10-27)
+        self.assertEqual(len(PTS), 52)                                # 46 + four 8 ns pulse points (2026-10-27) + two Test 5 points (2026-11-06), all for the Agilent 33250A
         self.assertEqual(SPEC['default_period'], '1y')
         self.assertEqual(set(SPEC['models']), {'53210A', '53220A', '53230A'})
-        self.assertEqual(len({p['ref'] for p in PTS}), 50)
+        self.assertEqual(len({p['ref'] for p in PTS}), 52)
 
     def test_every_mean_limit_matches_the_second_typing(self):
         for table in (MEAN2, OTHER_MEAN):
@@ -210,7 +210,7 @@ class SpecTests(unittest.TestCase):
 
     def test_every_point_names_its_stimulus_and_pages(self):
         for p in PTS:
-            self.assertTrue(p['page'] and p['stimulus']['group'] in ('NONE', 'LH', 'MW', 'PULSE', 'BURST'), p['ref'])
+            self.assertTrue(p['page'] and p['stimulus']['group'] in ('NONE', 'LH', 'MW', 'PULSE', 'BURST', 'CLOCK'), p['ref'])
             if p['stimulus']['group'] != 'NONE':
                 self.assertIn(p['timebase'], ('INT', 'EXT'))
 
@@ -281,6 +281,68 @@ class DriverTests(unittest.TestCase):
         self.assertIn('CONF:FREQ 10000000,DEF,(@1)', sent)
         self.assertEqual(sent.count('INP1:IMP 50'), 1)
         d.check_errors('test')
+
+    def test_a_conf_reply_without_a_channel_is_accepted_and_logged(self):
+        """Bench 2026-11-05 (owner screenshot): CONF:FREQ 10000000,DEF,(@1) -> CONF? "FREQ +1.00000000000000E+007,+1.00000000000000E-002", no channel list.
+        The function (and the expected value) is still confirmed; the channel cannot be read back from CONF?, which is logged, not a surprise."""
+        d, b, rft, ct = self.make()
+        ct.conf_no_channel = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        self.assertTrue(any('channel is not in the CONF? reply' in line for line in d.log.lines()))
+        d.check_errors('test')
+
+    def test_a_conf_reply_with_the_wrong_function_or_channel_still_stops(self):
+        d, b, rft, ct = self.make()
+        orig = ct.handle
+        ct.handle = lambda cmd: '"FREQ +1.0E+007,+1.0E-002,(@2)"' if cmd.upper() == 'CONF?' else orig(cmd)
+        with self.assertRaises(InstrumentError):
+            d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        ct.handle = lambda cmd: '"PER +1.0E-007,+1.0E-002"' if cmd.upper() == 'CONF?' else orig(cmd)
+        with self.assertRaises(InstrumentError):
+            d.configure_point(dict(by_ref('2a.10MHz.mean')))
+
+    def test_a_conf_reply_with_another_expected_frequency_stops(self):
+        d, b, rft, ct = self.make()
+        orig = ct.handle
+        ct.handle = lambda cmd: '"FREQ +1.15000000000000E+008,+1.00000000000000E-002"' if cmd.upper() == 'CONF?' else orig(cmd)
+        with self.assertRaises(InstrumentError):
+            d.configure_point(dict(by_ref('2a.10MHz.mean')))
+
+    def test_no_signal_that_hangs_the_counter_is_aborted_and_the_counter_answers_again(self):
+        """Bench 2026-11-05 (k53220a_bench_20261105_110049): with nothing connected *OPC? never answered and every later query timed out (the reference
+        oscillator could not be restored).  The driver now aborts the measurement with a device clear and raises 'no signal'; the counter answers afterwards."""
+        d, b, rft, ct = self.make()
+        ct.no_signal_hangs = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        with self.assertRaises(InstrumentError) as cm:
+            d.measure_stats(10)
+        self.assertIn('no signal', str(cm.exception).lower())
+        self.assertEqual(ct.cleared_while_busy, 1)
+        d.check_errors('after the abort')                                    # the counter answers again
+        self.assertEqual(d.read_reference()['source'], 'EXT')
+
+    def test_a_measurement_left_waiting_is_cleared_before_the_reset(self):
+        """Bench 2026-11-06 (owner screenshot): at the start of a run '*RST' to the counter timed out and SENS:ROSC:SOUR? timed out twice: the counter was still
+        busy with a measurement left waiting from before.  The reset now starts with a device clear, which aborts it (the no-signal abort showed it works)."""
+        d, b, rft, ct = self.make()
+        ct.no_signal_hangs = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        d.send('init'); d.send('trg')                                        # a measurement waiting for edges, nobody waiting for *OPC?
+        self.assertTrue(ct.busy)
+        rep = d.reset_to_defaults()
+        self.assertTrue(rep.ok, rep.text())
+        self.assertFalse(ct.busy)
+        self.assertEqual(d.read_reference()['source'], 'EXT')
+
+    def test_cleanup_clears_a_measurement_left_waiting_so_the_reference_is_restored(self):
+        d, b, rft, ct = self.make()
+        d.set_reference('INT')
+        ct.no_signal_hangs = True
+        d.configure_point(dict(by_ref('2a.10MHz.mean')))
+        d.send('init'); d.send('trg')
+        d.cleanup()
+        self.assertFalse(any('NOT restored' in line for line in d.log.lines()))
+        self.assertEqual(d.read_reference(), d.saved_ref)                    # the settings found at connect are back
 
     def test_a_read_back_mismatch_stops_and_the_write_is_not_repeated(self):
         import drivers
@@ -428,7 +490,7 @@ class StimulusRouting(unittest.TestCase):
             short = A.pulse_shortfalls(p['stimulus'])
             if p.get('gen') == '33250A':
                 self.assertEqual(short, [], p['ref'])
-                self.assertEqual(p['nominal'], 8e-9)
+                self.assertEqual(p['nominal'], 49.9e-9 if p['test_no'] == '5' else 8e-9)
                 pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=True))
                 self.assertEqual(pl['mode'], 'pulse', p['ref'])
                 pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=False))                         # no 33250A connected: by hand, and it says why
@@ -443,7 +505,9 @@ class StimulusRouting(unittest.TestCase):
             self.assertIn('81134A', pl['reason'])
         tint = A.plan_stimulus(by_ref('5.ch1-ch2.49.9ns.mean'), self.stim(pulse_gen='33250A', gen=True))
         self.assertEqual(tint['mode'], 'manual')
-        self.assertIn('two outputs', tint['reason'])                                                       # one output: Test 5 is run by hand
+        self.assertIn('two outputs', tint['reason'])                                                       # the manual's two-output setup: not the 33250A
+        sub = A.plan_stimulus(by_ref('5.ch1-ch2.49.9ns.33250A.mean'), self.stim(pulse_gen='33250A', gen=True))
+        self.assertEqual(sub['mode'], 'pulse')                                                             # the one-output substitute (owner 2026-11-06)
         self.assertFalse(any('two outputs' in t for t in A.pulse_shortfalls(by_ref('4a.ch1.8ns.mean')['stimulus'])))
         self.assertFalse(A.pulse_shortfalls(dict(width_s=20e-9, period_s=66.6e-9, vpp=1.0)))     # the capability check is not a blanket refusal
         self.assertEqual(A.plan_stimulus(by_ref('4a.ch1.5ns.mean'), self.stim(pulse_gen='81134A'))['reason'], A.STIM_NEEDS['PULSE'])
@@ -456,8 +520,10 @@ class StimulusRouting(unittest.TestCase):
             self.assertEqual(sum(1 for p in b if p['test_no'] in ('4a', '4b')), 4)
             self.assertTrue(all(p['nominal'] == 5e-9 for p in a if p['test_no'] in ('4a', '4b')))
             self.assertTrue(all(p['nominal'] == 8e-9 for p in b if p['test_no'] in ('4a', '4b')))
-            self.assertEqual(len(a), len(b))                                                                 # Test 5 is in both
-            self.assertIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in b])
+            self.assertEqual(len(a), len(b))                                                                 # Test 5 in both: the two-output pair or the 33250A pair
+            self.assertIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in a])
+            self.assertIn('5.ch1-ch2.49.9ns.33250A.mean', [p['ref'] for p in b])
+            self.assertNotIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in b])
         self.assertEqual([p for p in A.points_for('53210A', set(), pulse_gen='33250A') if p['test_no'] in ('4a', '4b')], [])
 
     def test_the_8ns_limits_are_the_5ns_half_widths_centred_on_8ns_and_flagged_unverified(self):
@@ -778,14 +844,19 @@ class Flow(unittest.TestCase):
         for p in pulse:
             r = a.results[str(p['id'])]
             self.assertEqual((r['stimulus'], r['result']), ('pulse', 'PASS'), p['ref'])
-        tint = next(p for p in a.active_points() if p['test_no'] == '5' and p['stat'] == 'mean')
-        self.assertEqual(a.results[str(tint['id'])]['stimulus'], 'manual')                      # two outputs: by hand
+        tint = [p for p in a.active_points() if p['test_no'] == '5']
+        self.assertEqual([p['ref'] for p in tint], ['5.ch1-ch2.49.9ns.33250A.mean', '5.ch1-ch2.49.9ns.33250A.sdev'])
+        for p in tint:                                                                            # the one-output substitute, driven (owner 2026-11-06)
+            self.assertEqual((a.results[str(p['id'])]['stimulus'], a.results[str(p['id'])]['result']), ('pulse', 'PASS'), p['ref'])
+        self.assertAlmostEqual(a.results[str(tint[0]['id'])]['reading'], 49.9e-9, delta=1e-10)
+        self.assertIn('INP2:SLOP NEG', self.wire(a, '53220A'))                                    # stop on the Channel 2 falling edge
         w = [t.upper() for t in self.wire(a, '33250A')]
         widths = [t for t in w if t.startswith('PULSE:WIDTH ') or t.startswith('PULS:WIDT ')]
-        self.assertTrue(widths and all('8E-09' in t or '8.0E-09' in t or '8E-9' in t for t in widths), widths)      # the width is written (and read back by the driver) at 8 ns
+        self.assertTrue(widths and all(('8E-09' in t or '8.0E-09' in t or '8E-9' in t or '4.99E-08' in t) for t in widths), widths)   # 8 ns (Test 4), 49.9 ns (Test 5)
+        self.assertTrue(any('4.99E-08' in t for t in widths), widths)
         outs = [t for t in w if t.startswith('OUTPUT') and not t.endswith('?')]
         self.assertEqual(outs[-1], 'OUTPUT OFF')                                                  # the generator is left switched off
-        self.assertEqual(outs.count('OUTPUT ON'), 4 // 2)                                         # on for each Mean point only; the Std Dev point reuses its readings (4a, 4b)
+        self.assertEqual(outs.count('OUTPUT ON'), 3)                                              # on for each Mean point only (4a, 4b, 5); the Std Dev point reuses its readings
 
     def test_with_the_81134a_nothing_is_sent_to_a_33250a_and_the_5ns_points_are_by_hand(self):
         a = self.app('53220A')
@@ -880,7 +951,8 @@ class Flow(unittest.TestCase):
         a = self.run_model('53220A')
         self.assertIn('Connect the other standard', self.hn.titles())
         pulse = [p for p in a.active_points() if p['stimulus']['group'] == 'PULSE']
-        self.assertEqual(sum(1 for t in self.hn.titles() if t == 'Connect the other standard'), len({p['ref'] for p in pulse if p['stat'] == 'mean'}))
+        other = [p for p in a.active_points() if p['stimulus']['group'] in ('PULSE', 'CLOCK')]          # Test 3 is on the CG635 (owner 2026-11-05)
+        self.assertEqual(sum(1 for t in self.hn.titles() if t == 'Connect the other standard'), len({p['ref'] for p in other if p['stat'] == 'mean'}))
         self.assertTrue(all(a.results[str(p['id'])]['stimulus'] == 'manual' for p in pulse))
 
     def test_other_standards_for_every_test_connects_no_96270a(self):
@@ -994,6 +1066,116 @@ class Flow(unittest.TestCase):
         self.assertEqual(A.to_visa('TCPIP0::10.0.0.5::inst0::INSTR', 'LAN'), 'TCPIP0::10.0.0.5::inst0::INSTR')
         with self.assertRaises(ValueError):
             A.to_visa('12', 'USB', default_gpib=False)
+
+
+class SinglePeriodSource(unittest.TestCase):
+    """Owner 2026-11-05: the procedure's Test 3 Std Dev at 1 MHz read 409 ps (limit 140 ps) with a sine; by hand with the CG635, 93.  Service Guide p. 50: Test 3
+    names the CG635 output Q, +7 dBm, and NO substitute (Tests 1 and 2 accept the E8257D-520, pp. 38 and 44).  So Test 3 is never driven by the RF source."""
+
+    def test_test_3_is_always_on_the_cg635_and_tests_1_and_2_stay_on_the_rf_source(self):
+        for src in ('96270A', 'SMA100B'):
+            stim = dict(mode='auto', rf=True, loss_db=0.0, ext_low=False, source=src)
+            for p in PTS:
+                pl = A.plan_stimulus(p, stim)
+                if p['test_no'] == '3':
+                    self.assertEqual((pl['mode'], p['stimulus']['group']), ('manual', 'CLOCK'), p['ref'])
+                    self.assertIn('CG635', pl['reason'])
+                    self.assertIn('output Q', pl['reason'])
+                elif p['test_no'] in ('1', '2a', '2b'):
+                    self.assertEqual(pl['mode'], 'rf', (src, p['ref']))
+
+    def test_the_prompt_names_the_cg635_square_output(self):
+        A.configure('53220A')
+        hn = VH.VHarness().start()
+        try:
+            a = A.App(hn.root, demo=True)
+            self.assertIn('CG635 output Q at 7 dBm (square wave)', a.stim_text(by_ref('3.ch1.1MHz.mean')))
+            self.assertIn('sine', a.stim_text(by_ref('2a.10MHz.mean')))
+        finally:
+            hn.stop()
+
+class NoSignalWithStopOnSurprise(unittest.TestCase):
+    """Bench 2026-11-06 (owner screenshot, Test 5 time interval with no usable signal): in a real run the stop-on-surprise guard caught the *OPC? timeout,
+    retried it and stopped the run, so the driver's no-signal abort never ran.  *OPC? is now left to the driver: abort, 'no signal', a typed reading offered."""
+
+    def test_the_opc_timeout_reaches_the_driver_abort_not_the_surprise_dialog(self):
+        import manual_override
+        b, rft, ct = bench('53220A')
+        ct.no_signal_hangs = True
+        seen = []
+        io = A.IO('sim', 'sim', 'USB', transports=(ct, rft), stim=dict(mode='manual', loss_db=0.0, ext_low=False))
+        io.enable_surprise(lambda *a, **k: (seen.append(a), False)[1], force=True)
+        with self.assertRaises(manual_override.ReadingUnavailable) as cm:
+            io.measure(by_ref('5.ch1-ch2.49.9ns.mean'))
+        self.assertIn('no signal', str(cm.exception).lower())
+        self.assertEqual(seen, [])                                           # no surprise dialog
+        self.assertEqual(ct.cleared_while_busy, 1)
+        io.ctr.check_errors('after')                                         # the counter answers the next point
+
+class Renumbering(unittest.TestCase):
+    """2026-11-06: two Test 5 points for the 33250A were inserted, so Tests 6a to 7d moved up by two.  Results now carry their ref; a loaded result that does not
+    match its point (or an older file's result at or after the inserted points) is left out instead of landing on the wrong point."""
+
+    def test_old_and_mismatched_results_are_dropped_and_matching_ones_kept(self):
+        class Store:                                                         # the two result sets of datamode
+            pass
+        first = by_ref(A.RENUMBERED_FROM_REF)['id']
+        self.assertEqual(first, by_ref('5.ch1-ch2.49.9ns.mean')['id'] + 2)
+        app = Store()
+        app._found = {'31': dict(reading=1.0), str(first): dict(reading=2.0), str(first + 2): dict(reading=3.0),                 # an older file: no ref
+                      '3': dict(reading=4.0, ref='2a.10MHz.mean'), '4': dict(reading=5.0, ref='2a.115MHz.mean')}             # new file: '4' names another point
+        app._left = {str(first): dict(reading=6.0, ref=A.RENUMBERED_FROM_REF)}
+        self.assertEqual(A.drop_stale_results(app), 3)
+        self.assertEqual(sorted(app._found), ['3', '31'])
+        self.assertEqual(sorted(app._left), [str(first)])
+
+
+class WrongSignal(unittest.TestCase):
+    """Owner 2026-11-05: 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns (the 1 MHz signal was still connected).  A Mean more than 10 % from its
+    nominal now asks 'Wrong signal?' before it is recorded: Yes = set the signal again and measure again, No = record as it is."""
+    setUp, tearDown, app, connect = Flow.setUp, Flow.tearDown, Flow.app, Flow.connect
+    OPTIONS = Flow.OPTIONS
+
+    def run_points(self, answer):
+        a = self.app('53220A', stim_mode=A.STIM_CHOICES[1])                     # other standards: the technician sets the signal (the owner's run)
+        self.connect(a)
+        p = by_ref('3.ch2.250MHz.mean')
+        real, calls = a._prepare_bench, []
+
+        def stale_first(bench, q):
+            real(bench, q)
+            calls.append(q['ref'])
+            if q['ref'] == p['ref'] and calls.count(p['ref']) == 1:            # the first time the 1 MHz of the point before is still connected
+                bench.external_signal = dict(kind='CW', f=1e6, level_dbm=7.0)
+        a._prepare_bench = stale_first
+        orig = VH.hh.messagebox.askyesno
+        VH.hh.messagebox.askyesno = lambda title, text, **k: answer if title == 'Wrong signal?' else orig(title, text, **k)
+        try:
+            a.execute([p, by_ref('3.ch2.250MHz.sdev')])
+            self.assertTrue(self.hn.pump())
+        finally:
+            VH.hh.messagebox.askyesno = orig
+        return a, p, calls
+
+    def test_yes_measures_the_point_again_with_the_right_signal(self):
+        a, p, calls = self.run_points(True)
+        self.assertEqual(calls.count(p['ref']), 2)
+        self.assertEqual(a.results[str(p['id'])]['result'], 'PASS')
+        self.assertAlmostEqual(a.results[str(p['id'])]['reading'], 4e-9, delta=1e-10)
+        self.assertEqual(a.results[str(by_ref('3.ch2.250MHz.sdev')['id'])]['result'], 'PASS')     # its Std Dev from the new readings
+
+    def test_no_records_the_reading_as_it_is(self):
+        a, p, calls = self.run_points(False)
+        self.assertEqual(calls.count(p['ref']), 1)
+        self.assertEqual(a.results[str(p['id'])]['result'], 'FAIL')
+        self.assertAlmostEqual(a.results[str(p['id'])]['reading'], 1e-6, delta=1e-9)
+
+    def test_plausible_readings_and_std_dev_points_are_not_questioned(self):
+        a = self.app('53220A')
+        self.assertEqual(a.wrong_signal_text(by_ref('3.ch1.250MHz.mean'), 4.008e-9), '')
+        self.assertEqual(a.wrong_signal_text(by_ref('3.ch1.1MHz.sdev'), 409e-12), '')               # a large Std Dev is judged, not questioned
+        self.assertEqual(a.wrong_signal_text(by_ref('OV2'), 0.0), '')
+        self.assertIn('a period of 1.000035 MHz', a.wrong_signal_text(by_ref('3.ch2.250MHz.mean'), 999.965e-9))
 
 
 class SMA100BStimulus(unittest.TestCase):
@@ -1127,6 +1309,68 @@ class SMA100BFlow(unittest.TestCase):
         finally:
             S.make_53220a_bench = real
         self.assertIn('INTERNAL reference', ' '.join(str(d) for d in self.hn.boxes()))
+
+
+class BenchScript(unittest.TestCase):
+    """drivers/k53220a_bench.py: the session that records the counter's real replies before the procedure is run again (owner 2026-11-05)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def run_bench(self, argv, answer=lambda _p: 'y', transport=None):
+        from drivers import k53220a_bench as B
+        import io, contextlib
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = B.main(argv + ['--out', self.tmp.name], answer=answer, transport=transport)
+        record = next(Path(self.tmp.name).glob('k*_bench_*.txt')).read_text(encoding='utf-8')
+        return code, record
+
+    def test_every_stage_passes_on_the_simulator_for_every_model(self):
+        for model in ('53220A', '53230A', '53210A'):
+            code, record = self.run_bench(['--sim', '--yes', '--model', model, '--settings', '--ext-ref', '--signal'])
+            self.assertEqual(code, 0, record[-3000:])
+            self.assertIn('SIMULATED - not evidence', record)
+            self.assertIn('refused as expected', record)                       # nothing connected: 9.91E37 refused
+            for f in Path(self.tmp.name).glob('*.txt'):
+                f.unlink()
+
+    def test_the_bench_conf_reply_without_a_channel_passes_and_is_recorded(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        _b, _rf, ct = make_53220a_bench('53220A')
+        ct.conf_no_channel = True                                               # as the owner's counter answered (2026-11-05)
+        code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
+        self.assertEqual(code, 0, record[-3000:])
+        self.assertIn('channel is not in the CONF? reply', record)
+
+    def test_a_counter_that_hangs_with_no_signal_is_aborted_and_the_session_goes_on(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        b, _rf, ct = make_53220a_bench('53220A')
+        ct.no_signal_hangs = True
+        code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
+        self.assertEqual(code, 0, record[-3000:])
+        self.assertIn('measurement aborted (device clear, *CLS)', record)
+        self.assertIn('PASS  the counter answers after that', record)
+        self.assertNotIn('NOT restored', record)
+
+    def test_a_signal_that_is_not_10_mhz_fails_stage_3(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        b, _rf, ct = make_53220a_bench('53220A')
+        ct.open_input_noise_hz = 6.23e6                                         # bench 2026-11-05: Mean 6.23 MHz, Std Dev 92 kHz
+        code, record = self.run_bench(['--settings', '--signal', '--model', '53220A'], answer=lambda _p: 'a', transport=ct)
+        self.assertEqual(code, 1)
+        self.assertIn('not 10 MHz within 1 ppm', record)
+        self.assertIn('readings with nothing connected were accepted', record)
+
+    def test_a_refused_write_stops_the_session_and_nothing_more_is_written(self):
+        from drivers.simulated_53220a import make_53220a_bench
+        _b, _rf, ct = make_53220a_bench('53220A')
+        code, record = self.run_bench(['--settings', '--model', '53220A'], answer=lambda _p: 'n', transport=ct)
+        self.assertEqual(code, 1)
+        self.assertIn('STOPPED: not sent: *RST', record)
+        self.assertNotIn('*RST', [c.upper() for c in ct.sent])
+        with self.assertRaises(SystemExit):
+            self.run_bench(['--yes', '--address', 'GPIB0::3::INSTR'])            # --yes only with the simulator
 
 
 class Registration(unittest.TestCase):

@@ -241,8 +241,25 @@ class Keysight53220A(SurpriseMixin, Instrument):
         if self.bus == 'GPIB':
             self.t.go_local()
 
+    def clear_pending(self, why):
+        """Device clear (IEEE 488.2 / VISA viClear): aborts a measurement still waiting for its readings and empties the I/O buffers.  It changes no setting.
+        Bench 2026-11-06 (owner screenshot): a run started with the counter still busy (a measurement left waiting from before): '*RST' timed out, then every query.
+        The same device clear brought the counter back after the no-signal abort (bench 2026-11-05, steps 4 and 5)."""
+        try:
+            self.t.clear()
+            self.log.add('--', f'device clear ({why}): any measurement still waiting is aborted', self.label)
+        except Exception as exc:
+            self.log.add('!!', f'device clear ({why}) failed: {exc}', self.label)
+
+    def reset_to_defaults(self):
+        """Device clear first (a measurement left waiting would make the counter ignore *RST), then the standard reset sequence."""
+        self.clear_pending('before the reset')
+        return super().reset_to_defaults()
+
     def cleanup(self):
-        """Put the reference oscillator settings back as they were at connect, then local.  Never raises."""
+        """Device clear (a measurement left waiting would block every query), put the reference oscillator settings back as they were at connect, then local.
+        Never raises."""
+        self.clear_pending('before cleanup')
         try:
             self.restore_reference()
         except Exception as exc:
@@ -369,14 +386,27 @@ class Keysight53220A(SurpriseMixin, Instrument):
             self._set('inp.lev', 0.0, 'num', ch=ch)
             self._set('inp.slop', 'POS', ch=ch)
 
-    def _confirm_function(self, func, ch):
+    def _confirm_function(self, func, ch, expected=None):
+        """CONF? read back: the function always; the expected frequency (CONF:FREQ) when the reply carries it; the channel list when the reply carries one.
+        Bench 2026-11-05 (owner's 53220A): CONF:FREQ 10000000,DEF,(@1) -> CONF? "FREQ +1.00000000000000E+007,+1.00000000000000E-002": NO channel list (the
+        Programmer's Reference p. 156 example shows one).  A reply without '(@' cannot confirm the channel: that is logged, not a surprise; a reply that names a
+        different channel is still a mismatch."""
         reply = _text(self.ask_checked('conf.query', expect='any'))
         fn = reply.split()[0].strip('"') if reply else ''
         names = CONF_NAMES[func]
         if not any(fn == n or (func == 'BURST' and n in fn) for n in names):
             self._mismatch('conf.query', f'function {func}', reply)
+        if func == 'FREQ' and expected:
+            nums = re.findall(r'[-+]?\d+(?:\.\d*)?(?:[eE][-+]?\d+)?', reply.split('(@')[0][len(fn):])
+            if nums and not math.isclose(float(nums[0]), float(expected), rel_tol=1e-9):
+                self._mismatch('conf.query', f'expected frequency {float(expected):.9g} Hz', reply)
+        if func == 'BURST':
+            return
         want = '(@1),(@2)' if func == 'TINT' else f'(@{ch})'
-        if func != 'BURST' and want.replace(' ', '') not in reply.replace(' ', ''):
+        flat = reply.replace(' ', '')
+        if '(@' not in flat:
+            self.log.add('--', f'channel is not in the CONF? reply ({reply!r}): {want} not confirmed by read-back (the function was)', self.label)
+        elif want not in flat:
             self._mismatch('conf.query', f'channel {want}', reply)
 
     def _mismatch(self, rb, what, reply):
@@ -405,11 +435,13 @@ class Keysight53220A(SurpriseMixin, Instrument):
             self.send('conf.tint')
         elif func == 'BURST':
             self.send('conf.burst', ch=c)
-        self._confirm_function(func, c)
+        self._confirm_function(func, c, point.get('nominal') if func == 'FREQ' else None)
         if func in ('FREQ', 'SPER', 'PWID') and not micro:
             self._level_off([c])
         elif func == 'TINT':
             self._level_off([1, 2])
+            if point.get('stop_slope') == 'NEG':           # the 33250A substitute for Test 5 (one split pulse: Channel 1 rising to Channel 2 falling, owner 2026-11-06)
+                self._set('inp.slop', 'NEG', ch=2)
         if func == 'FREQ':
             self._set('freq.mode', 'AUTO')
             self._set('gate.src', 'TIME')
@@ -436,9 +468,12 @@ class Keysight53220A(SurpriseMixin, Instrument):
         self.send('init')
         self.send('trg')
         prev = getattr(self.t, 'timeout', None)
-        self.t.set_timeout(max(self.DEFAULT_TIMEOUT, readings * max(self.gate_s, 0.001) * 1.5 + 15.0))
+        wait = max(self.DEFAULT_TIMEOUT, readings * max(self.gate_s, 0.001) * 1.5 + 15.0)
+        self.t.set_timeout(wait)
         try:
             self.ask('opc.query')
+        except TransportError as exc:
+            self._abort_measurement(readings, wait, exc)
         finally:
             self.t.set_timeout(prev if prev is not None else self.DEFAULT_TIMEOUT)
         count = _num(self.ask_checked('calc.count', expect='float'))
@@ -449,6 +484,21 @@ class Keysight53220A(SurpriseMixin, Instrument):
         if int(round(count)) != int(readings):
             raise InstrumentError(f'The {self.SHORT} made {count:g} readings, not {readings}: the statistics are not for a full set.')
         return dict(mean=mean, sdev=sdev, count=int(round(count)))
+
+    def _abort_measurement(self, readings, wait, exc):
+        """The readings did not complete within `wait` s.  Bench 2026-11-05 (owner's 53220A, k53220a_bench_20261105_110049): with no signal the counter does NOT
+        return 9.91E37; it keeps waiting for edges, *OPC? never answers and every later command times out.  A device clear (IEEE 488.2 / VISA viClear) aborts the
+        measurement and empties the output queue; *CLS then clears the status.  Raises InstrumentError ('no signal'), so a procedure offers a typed reading and the
+        counter answers the next point.  Bench 2026-11-05 (k53220a_bench steps 4 and 5, build b24b268): after the abort the counter answered at once."""
+        try:
+            self.t.clear()
+            self.send('status.clear')
+            self.log.add('!!', f'readings not complete after {wait:g} s: measurement aborted (device clear, *CLS)', self.label)
+        except Exception as cexc:
+            raise InstrumentError(f'The {self.SHORT} did not finish {readings} readings in {wait:g} s and did not answer the abort (device clear): {cexc}. '
+                                  'Press Local / Preset on the counter, or switch it off and on.') from exc
+        raise InstrumentError(f'The {self.SHORT} did not finish {readings} readings in {wait:g} s: no signal, or no usable signal, at the input (level, frequency or '
+                              'connection). The measurement was aborted.') from exc
 
     def self_test(self):
         """*TST? -> 0 (all tests passed) or 1.  More than 5 seconds; the counter then does a Factory Reset (PR p. 201), so the caller configures again afterwards."""
