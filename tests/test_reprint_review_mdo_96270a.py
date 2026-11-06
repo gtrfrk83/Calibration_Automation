@@ -181,6 +181,7 @@ class Wiring(unittest.TestCase):
                   'specs/analyze_dmm6500_tar.py', 'specs/dmm6500_tar_below_4.md', 'specs/build_5700a_standard.py', 'specs/standards/fluke_5700a_standard.json')          # the Keithley DMM6500 procedure and the 5700A standards sheet (2026-11-03, branch keithley-dmm6500)
         later += ('specs/analyze_34410a_suitability.py', 'specs/analyze_8808a_adjustment_standards.py', 'specs/analyze_k2000_adjustment_standards.py')    # the Tk removal (2026-10-27): they import ui_theme_core
         later += ('Procedures/BK_5491B_Verification.procedure.json', 'Procedures/Fluke_101_Verification.procedure.json', 'specs/handheld_defaults.json')   # uniformity rules (2026-11-05): 'family' in every sidecar, shared handheld defaults; not this work
+        later += ('specs/build_170_spec.py', 'specs/build_77_spec.py', 'specs/build_mm325.py', 'specs/fluke_110_series_pv.json', 'specs/fluke_170_series_pv.json', 'specs/fluke_77iv_pv.json', 'specs/klein_mm325_pv.json')   # uniformity rules batch 1 (2026-11-06): handheld HV / prompts / calibrator names / counts; not this work
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):

@@ -231,7 +231,7 @@ class Prompts(unittest.TestCase):
         hv = [p['n'] for p in f.app.points if f.app._high_voltage(p)]
         self.assertEqual(hv, [11, 12, 13, 14, 15, 16, 19, 20, 21])    # 30 V and above (the manual's caution level for AC, p. 2)
         texts = [e[1] for e in f.events if e[0] == 'hv']
-        self.assertEqual(len(texts), len(hv))
+        self.assertEqual(len(texts), 1)                      # uniformity rule 1 (2026-11-05): asked once per hook-up group; every HV point is in VOHM
         self.assertFalse([t for t in texts if 'ramp' in t])
 
     def test_direct_high_voltage_one_out_command(self):
@@ -379,7 +379,7 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(titles.count('Change the cables'), 5)
         self.assertEqual(titles.count('Change the function'), 11)
         hv = [d for d in self.hn.dialogs if d[0] == 'box' and d[2] == 'HIGH VOLTAGE']
-        self.assertEqual(len(hv), 9)
+        self.assertEqual(len(hv), 1)                         # once per hook-up group (uniformity rule 1)
         self.assertFalse([d for d in hv if 'ramp' in d[3]])
         beeps = [d for d in self.hn.dialogs if d[0] == 'reading' and d[2] == 'yesno']
         self.assertEqual([d[1] for d in beeps], ['2-6', '2-7'])

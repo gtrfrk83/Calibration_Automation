@@ -455,9 +455,10 @@ class EndToEnd(unittest.TestCase):
                 self.assertIn('NOT multiplied by 20', p['note'])
         self.assertFalse(set(PTS) - {p['n'] for p in app.points})
 
-    def test_other_specs_keep_the_per_point_high_voltage_question(self):
+    def test_every_handheld_spec_asks_high_voltage_once_per_group(self):
+        """Uniformity rule 1 (owner, 2026-11-05): the 77 IV, 170 and 110 specs, which asked every point, now ask once per hook-up group too."""
         for name in ('fluke_77iv_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json'):
-            self.assertNotIn('hv_once_per_group', json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8')).get('options', {}), name)
+            self.assertIs(json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8')).get('options', {}).get('hv_once_per_group'), True, name)
         self.assertIs(SPEC['options']['hv_once_per_group'], True)
 
     def test_demo_never_produces_real_looking_evidence(self):

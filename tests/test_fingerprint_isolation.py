@@ -88,7 +88,7 @@ class Isolation(unittest.TestCase):
         self.assert_only(['Fluke_87V_Verification'])
 
     def test_hookup_code_unlocks_every_meter_that_uses_it_but_not_the_meterless_ones(self):
-        self.edit('hookups.py', lambda t: t.replace("return '5522A' if ('5522' in t", "return '5522A' if ('5522' in t or 'x' in t", 1))
+        self.edit('hookups.py', lambda t: t.replace("return '5520A' if '5520' in t", "return '5520A' if '5520' in t or 'x' in t", 1))
         self.assert_only(['Fluke_117_Verification', 'Fluke_113_Verification', 'Fluke_87V_Verification'])
 
     def test_another_procedures_launcher_driver_and_spec_do_not_unlock(self):
