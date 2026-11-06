@@ -990,15 +990,47 @@ class Flow(unittest.TestCase):
         a._record(p, p['nominal'] + 1.0, False)
         self.assertEqual(a.results[str(p['id'])]['result'], 'FAIL')
 
-    def test_uncertainty_only_where_the_scope_has_a_cmc(self):
+    def test_uncertainty_follows_the_owner_decisions_of_2026_11_06(self):
+        """Std Dev / self-test: none.  Frequency Means: the Frequency - Measure CMC.  Single period: that CMC relative, times the period.  Time interval: the A2LA
+        'Time Marker' line (3 us/s from 1 ns to 20 ms).  Pulse width: 'Not in scope' (no scope line, no published generator accuracy), no number."""
         for p in PTS:
-            self.assertEqual(A.App.has_uncertainty(p), p['stat'] == 'mean' and p['func'] in ('FREQ', 'SPER'), p['ref'])
-        for ref in ('2a.10MHz.mean', '6b.15GHz.mean', '1.10MHz.mean'):
-            self.assertTrue(A.App.uncertainty_text(by_ref(ref)), ref)
-        sper = A.App.uncertainty_text(by_ref('3.ch1.1MHz.mean'))
-        self.assertTrue(sper.endswith('s'), sper)
-        for ref in ('2a.10MHz.sdev', '4a.ch1.5ns.mean', '5.ch1-ch2.49.9ns.mean', '7a.6GHz.200ns.mean', 'OV2'):
-            self.assertEqual(A.App.uncertainty_text(by_ref(ref)), '', ref)
+            self.assertEqual(A.App.has_uncertainty(p), p['stat'] == 'mean' and p['func'] in ('FREQ', 'SPER', 'PWID', 'TINT'), p['ref'])
+        u = A.point_uncertainty(by_ref('5.ch1-ch2.49.9ns.33250A.mean'))                       # 3e-6 x 49.9 ns = 0.1497 ps, rounded up to 2 figures
+        self.assertEqual((u['status'], u['text'], u['standard']), (A.IN_SCOPE, '0.15 ps', 'Scope: Time Marker'))
+        self.assertAlmostEqual(u['cmc'], 1.497e-13, delta=1e-17)
+        self.assertEqual(A.tur_text(by_ref('5.ch1-ch2.49.9ns.33250A.mean'), u['value']), '>1000:1')
+        self.assertEqual(A.point_uncertainty(by_ref('5.ch1-ch2.49.9ns.mean'))['text'], '0.15 ps')
+        u = A.point_uncertainty(by_ref('3.ch1.1MHz.mean'))                                     # 7.1e-12 x 1 us = 7.1e-18 s
+        self.assertEqual(u['status'], A.IN_SCOPE)
+        self.assertAlmostEqual(u['value'], 7.1e-18, delta=1e-21)
+        u = A.point_uncertainty(by_ref('2a.10MHz.mean'))                                       # 7.1e-12 x 10 MHz = 71 uHz
+        self.assertEqual((u['status'], u['standard']), (A.IN_SCOPE, 'Lab frequency'))
+        self.assertAlmostEqual(u['value'], 71e-6, delta=1e-9)
+        self.assertEqual(A.tur_text(by_ref('2a.10MHz.mean'), u['value']), '140.8:1')
+        for ref in ('4a.ch1.5ns.mean', '4a.ch1.8ns.mean'):
+            u = A.point_uncertainty(by_ref(ref))
+            self.assertEqual((u['status'], u['text']), (A.NOT_IN_SCOPE, ''), ref)
+            self.assertIn('pulse-width', u['reason'])
+        for ref in ('2a.10MHz.sdev', '3.ch1.1MHz.sdev', '5.ch1-ch2.49.9ns.33250A.sdev', 'OV2'):
+            self.assertEqual(A.point_uncertainty(by_ref(ref))['status'], A.NO_UNC, ref)
+        self.assertIsNone(A.time_marker_cmc(30e-3))                                             # 20 ms to 50 ms: no line
+        self.assertAlmostEqual(A.time_marker_cmc(1.0), 1030e-6, delta=1e-12)                    # (30 + 1000 x 1) us/s x 1 s
+
+    def test_review_window_rows_match_the_certificate(self):
+        import report_review_model as M
+        a = self.run_model('53220A')
+        a.pulse_gen.set(A.PULSE_GEN_CHOICES[1]); a.on_pulse_gen()
+        specs, default = M.specs_for(a)
+        self.assertIsNone(default)
+        rows, pts = a.certificate_rows_and_points()
+        status = {}
+        for spec, row, p in zip(specs, rows, pts):
+            ev = spec.calc(None)
+            self.assertEqual(ev.unc_text, row['Uncertainty'], p['ref'])
+            status[p['ref']] = ev.status
+        self.assertEqual(status['2a.10MHz.mean'], M.AS_BUDGETED)
+        self.assertEqual(status['3.ch1.1MHz.mean'], M.AS_BUDGETED)                 # was 'No uncertainty required' beside a printed number
+        self.assertEqual(status['2a.10MHz.sdev'], M.NO_UNC)
 
     def test_report_rows(self):
         a = self.run_model('53220A')
@@ -1006,8 +1038,9 @@ class Flow(unittest.TestCase):
         self.assertEqual(len(rows), len(a.active_points()))
         self.assertTrue(all(r['Section'] for r in rows))
         self.assertFalse([r for r in rows if r['OOT']])
-        self.assertEqual([bool(r['Uncertainty']) for r in rows], [A.App.has_uncertainty(p) for p in pts])
-        self.assertTrue(any('[other standard]' in r['Description'] for r in rows))
+        self.assertEqual([bool(r['Uncertainty']) for r in rows], [A.point_uncertainty(p)['status'] == A.IN_SCOPE for p in pts])
+        self.assertFalse(any('[other standard]' in r['Description'] for r in rows))          # owner 2026-11-06: not on the report
+        self.assertTrue(any('[other standard]' in a._row(p)[0][1] for p in pts if a.is_manual(p)))   # the on-screen table keeps it
         self.assertIsNone(a.standard_for(PTS[0]))
 
     def test_report_file_name_is_asset_date(self):

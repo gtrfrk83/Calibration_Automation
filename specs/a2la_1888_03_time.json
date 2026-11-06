@@ -1,0 +1,31 @@
+{
+ "schema": 1,
+ "lab": "Applied Technical Services",
+ "accreditor": "A2LA",
+ "certificate": "1888.03",
+ "source": "Owner's screenshot of the scope's 'Time Marker' line, 2026-11-06 (page number not recorded: UNVERIFIED against the full scope)",
+ "entries": [
+  {
+   "parameter": "Time Marker",
+   "kind": "TIME",
+   "unit": "s",
+   "cmc_note": "CMC = (a + b * t) us/s of the time t (t in seconds)",
+   "bands": [
+    {
+     "lo": 1e-09,
+     "hi": 0.02,
+     "a_us_per_s": 3.0,
+     "b_us_per_s2": 0.0,
+     "printed": "3 us/s"
+    },
+    {
+     "lo": 0.05,
+     "hi": 5.0,
+     "a_us_per_s": 30.0,
+     "b_us_per_s2": 1000.0,
+     "printed": "(30 + 1000t) us/s"
+    }
+   ]
+  }
+ ]
+}
