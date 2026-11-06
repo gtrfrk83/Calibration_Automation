@@ -2254,7 +2254,7 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   points are now gen '81134A' (shown with that choice only), as Test 4. 52 points in the spec. Point numbers: Tests 6a to 7d moved up by two; results now
   store their ref and `drop_stale_results` leaves out a loaded result that does not match its point (an older file: every result from the first inserted
   point on). Hook-up picture hook_53220a_33250A_TINT.png (none supplied). Simulator: TINT with the stop slope NEG measures the split pulse's width.
-  Tests: the Flow 33250A run, `Renumbering`. NOT run on the bench yet.
+  Tests: the Flow 33250A run, `Renumbering`. Bench 2026-11-06, build b82e680: owner "that worked" (readings not reported here).
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
