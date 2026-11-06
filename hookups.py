@@ -24,7 +24,10 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DIAGRAMS = HERE / 'diagrams'
 
-CAL_LABEL = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A'}
+CAL_LABEL = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A'}
+# a calibrator with the front panel of another: the 5520A has the 5522A's output terminals (NORMAL, AUX, 20 A, TC; UNVERIFIED on a real 5520A),
+# so its prompts use the 5522A terminals and pictures but name the 5520A (uniformity rule 4: the prompt names the calibrator in use)
+SAME_PANEL = {'5520A': '5522A'}
 GROUP_TITLE = {'VOHM': 'voltage, resistance and capacitance', 'UAMP': 'µA / mA current', 'AMP10': '10 A current',
                'TEMP': 'temperature (thermocouple)', 'VOLTALERT': 'VoltAlert'}
 
@@ -137,6 +140,14 @@ EXTRA = {
     ('u1251b', 'UAMP'): dict(caution='The µA mA input is fused (440 mA fast-acting, Table 1-10): never apply more than the point being tested. The meter beeps and shows A-Err if a lead is in the A jack with the dial not on mA·A (Basic Operating Test, printed p. 150).'),
     ('u1251b', 'AMP10'): dict(caution='Connect the calibrator to the meter A and COM terminals BEFORE applying 5 A and 10 A (the Caution band of Table 6-2, printed p. 160). The A input is fused at 11 A (Table 1-10); 10 A continuous only from 2.5 A to 10 A (notes [j], [l]). '
                                      'Use leads rated for 10 A.'),
+    ('fluke110', 'VOHM'): dict(caution='Up to 600 V ac or dc is applied to the VΩ and COM jacks. Use leads rated for at least 600 V with the finger guards, connect COM before the live lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. '
+                                       '(Added under uniformity rule 1, 2026-11-05: wording not yet checked against the meter manual safety section.)'),
+    ('fluke170', 'VOHM'): dict(caution='Up to 1000 V ac or dc is applied to the VΩ and COM jacks. Use leads rated for at least 1000 V with the finger guards, connect COM before the live lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. '
+                                       '(Added under uniformity rule 1, 2026-11-05: wording not yet checked against the meter manual safety section.)'),
+    ('fluke77', 'VOHM'): dict(caution='Up to 1000 V ac or dc is applied to the VΩ and COM jacks. Use leads rated for at least 1000 V with the finger guards, connect COM before the live lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. '
+                                       '(Added under uniformity rule 1, 2026-11-05: wording not yet checked against the meter manual safety section.)'),
+    ('fluke87v', 'VOHM'): dict(caution='Up to 1000 V ac or dc is applied to the VΩ and COM jacks. Use leads rated for at least 1000 V with the finger guards, connect COM before the live lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. '
+                                       '(Added under uniformity rule 1, 2026-11-05: wording not yet checked against the meter manual safety section.)'),
     ('fluke170', 'TEMP'): dict(caution='Use the correct cable (Table 3 note 3). The meter and the thermocouple adapter must be at the same temperature: allow 20 minutes before the temperature points (Table 3 note 4).'),
 }
 GENERIC_CAUTION = {
@@ -146,14 +157,22 @@ GENERIC_CAUTION = {
 
 
 def calibrator_key(text: str) -> str:
-    """'5560A' or '5522A' from the calibrator selector text (the 5560A when it cannot be told)."""
+    """'5560A', '5522A' or '5520A' from the calibrator selector text (the 5560A when it cannot be told)."""
     t = (text or '').upper()
-    return '5522A' if ('5522' in t or '5520' in t) else '5560A'
+    return '5520A' if '5520' in t else ('5522A' if '5522' in t else '5560A')
+
+
+def terms(cal: str) -> dict:
+    """The output terminals of `cal` ({group: (HI, LO, colour)}): a SAME_PANEL calibrator uses those of the model it copies."""
+    return CAL_TERMS[SAME_PANEL.get(cal, cal)]
 
 
 def image_path(meter: str, cal: str, group: str):
-    path = DIAGRAMS / f'hook_{meter}_{cal}_{group}.png'
-    return path if path.is_file() else None
+    for key in (cal, SAME_PANEL.get(cal)):
+        path = DIAGRAMS / f'hook_{meter}_{key}_{group}.png' if key else None
+        if path is not None and path.is_file():
+            return path
+    return None
 
 
 PANEL_PICTURES = {'34401A': 'keysight34401a_panel.png', '34460A': 'keysight34460a_panel.png', '34461A': 'keysight34461a_34465a_panel.png',
@@ -209,7 +228,7 @@ def lit_note(cal, color):
 
 def summary(meter, cal, group) -> str:
     """One line for the point-detail panel."""
-    hi, lo, _ = CAL_TERMS[cal][group]
+    hi, lo, _ = terms(cal)[group]
     m = METERS[meter]
     if group in ('TEMP',):
         return f'{CAL_LABEL[cal]} TC connector -> thermocouple cable -> 80AK adapter in the meter {m["jacks"]["vohm"]} and COM jacks.'
@@ -222,7 +241,7 @@ def plan(meter: str, cal: str, group: str, manual: bool = False):
     """dict(title, steps, caution, image) for a cable change, or None when this meter/group has no hook-up."""
     if not has(meter, group):
         return None
-    hi, lo, color = CAL_TERMS[cal][group]
+    hi, lo, color = terms(cal)[group]
     m = METERS[meter]
     extra = EXTRA.get((meter, group), {})
     steps = [('Meter dial', 'Turn the meter dial to OFF before you move any lead.'),

@@ -6,7 +6,10 @@
   "hv_once_per_group": true,
   "auto_ramp": false,
   "function_prompt": false,
-  "report_title": "Calibration Data"
+  "report_title": "Calibration Data",
+  "option_reasons": {
+   "function_prompt": "The 485 has range pushbuttons, not a rotary function switch: the one setup prompt per range (groups R4..R10) already tells the operator the range (NOTES.md, Keithley 485)."
+  }
  },
  "source": {
   "document": "Keithley Model 485 Autoranging Picoammeter - Instruction Manual (485-901-01 Rev. F)",

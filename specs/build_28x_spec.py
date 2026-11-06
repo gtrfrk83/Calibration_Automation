@@ -80,6 +80,7 @@ add(7, 'DC mV', 'DCMV', '500.00 mV', 'DCV', -0.25, 'mV', '-250.08', '-249.92', i
 add(8, 'DC mV, DC/AC', 'DCMV', '500.00 mV', 'DCV', 50e-3, 'mV', '49.97', '50.03', ir=dict(unit=DCV),
     note='Select the DC/AC display (DC reading in the primary display, AC in the secondary). Input: 50 mV DC (0 Hz).')
 add(9, 'DC mV, AC/DC', 'DCMV', '500.00 mV', 'ACV', 0.25, 'mV', '237.10', '262.90', freq=35e3, ir=dict(unit=ACV),
+    prompt='The dial stays at the mV position: select the AC/DC display (AC reading in the primary display) before this point.',
     note='Select the AC/DC display (AC reading in the primary display). Input: 250 mV at 35 kHz.')
 
 # ---- Ohms (p. 18): 2-wire COMP, 4-wire connection for steps 10-14 -------------------------------------------------------------------
@@ -133,6 +134,7 @@ add(38, 'DC volts', 'DCV', '1000.0 V', 'DCV', 600.0, 'V', '599.6', '600.4', ir=d
 add(39, 'DC volts, DC/AC', 'DCV', '5.0000 V', 'DCV', 0.2, 'V', '0.1977', '0.2023', ir=dict(unit=DCV),
     note='Select the DC/AC display (DC reading in the primary display). Input: 200 mV DC (0 Hz).')
 add(40, 'DC volts, AC/DC', 'DCV', '5.0000 V', 'ACV', 2.0, 'V', '1.9640', '2.0360', freq=5e3, ir=dict(unit=ACV),
+    prompt='The dial stays at the V DC position: select the AC/DC display (AC reading in the primary display) before this point.',
     note='Select the AC/DC display (AC reading in the primary display). Input: 2 V at 5 kHz.')
 add(41, 'AC volts, Peak', 'ACV', '5.000 V', 'NONE', None, 'V', '1.863', '2.137', nominal=2.0, ir=dict(unit=ACV),
     setup='Set the calibrator by hand: 4 V p-p square wave with a +1 V DC offset at 2 kHz, to the meter V and COM inputs, and press '
@@ -162,20 +164,23 @@ G5 = 'Footnote 5: limit mathematically guard banded to ensure performance at 20 
 add(48, 'µA AC', 'UA', '500.00 µA', 'ACI', 500e-6, 'µA', '496.80', '503.20', freq=60, group='UAMP', ir=dict(unit=AAC))
 add(49, 'µA AC', 'UA', '500.00 µA', 'ACI', 500e-6, 'µA', '492.85', '507.15', freq=30e3, group='UAMP', ir=dict(unit=AAC), note=G5)
 add(50, 'µA AC', 'UA', '5000.0 µA', 'ACI', 5000e-6, 'µA', '4928.5', '5071.5', freq=30e3, group='UAMP', ir=dict(unit=AAC), note=G5)
-add(51, 'µA DC', 'UA', '500.00 µA', 'DCI', 500e-6, 'µA', '499.42', '500.58', group='UAMP', ir=dict(unit=ADC))
+add(51, 'µA DC', 'UA', '500.00 µA', 'DCI', 500e-6, 'µA', '499.42', '500.58', group='UAMP', ir=dict(unit=ADC),
+    prompt='The dial stays at the µA position: change the meter from AC to DC current before this point.')
 add(52, 'µA DC', 'UA', '5000.0 µA', 'DCI', 5000e-6, 'µA', '4996.0', '5004.0', group='UAMP', ir=dict(unit=ADC))
 add(53, 'mA AC', 'MA', '50.000 mA', 'ACI', 4e-3, 'mA', '3.940', '4.060', freq=20, group='UAMP', ir=dict(unit=AAC))
 add(54, 'mA AC', 'MA', '50.000 mA', 'ACI', 30e-3, 'mA', '29.375', '30.625', freq=30e3, group='UAMP', ir=dict(unit=AAC), note=G5)
 add(55, 'mA AC', 'MA', '400.00 mA', 'ACI', 0.3, 'mA', '284.60', '315.40', freq=30e3, group='UAMP', ir=dict(unit=AAC))
 add(56, 'mA AC', 'MA', '400.00 mA', 'ACI', 0.4, 'mA', '397.55', '402.45', freq=60, group='UAMP', ir=dict(unit=AAC))
-add(57, 'mA DC', 'MA', '50.000 mA', 'DCI', 0.1e-3, 'mA', '0.090', '0.110', group='UAMP', ir=dict(unit=ADC))
+add(57, 'mA DC', 'MA', '50.000 mA', 'DCI', 0.1e-3, 'mA', '0.090', '0.110', group='UAMP', ir=dict(unit=ADC),
+    prompt='The dial stays at the mA / A position: change the meter from AC to DC current before this point.')
 add(58, 'mA DC', 'MA', '50.000 mA', 'DCI', 50e-3, 'mA', '49.965', '50.035', group='UAMP', ir=dict(unit=ADC))
 add(59, 'mA DC', 'MA', '400.00 mA', 'DCI', 0.4, 'mA', '399.38', '400.62', group='UAMP', ir=dict(unit=ADC))
 
 # ---- A (p. 20) -----------------------------------------------------------------------------------------------------------------------------
 add(60, 'A AC', 'A', '5.0000 A', 'ACI', 5.0, 'A', '4.9580', '5.0420', freq=1e3, group='AMP10', ir=dict(unit=AAC), settle=5)
 add(61, 'A AC', 'A', '10.000 A', 'ACI', 5.0, 'A', '4.955', '5.045', freq=1e3, group='AMP10', ir=dict(unit=AAC), settle=5)
-add(62, 'A DC', 'A', '5.0000 A', 'DCI', 5.0, 'A', '4.9840', '5.0160', group='AMP10', ir=dict(unit=ADC), settle=5)
+add(62, 'A DC', 'A', '5.0000 A', 'DCI', 5.0, 'A', '4.9840', '5.0160', group='AMP10', ir=dict(unit=ADC), settle=5,
+    prompt='The dial stays at the mA / A position: change the meter from AC to DC current before this point.')
 add(63, 'A DC', 'A', '10.000 A', 'DCI', 10.0, 'A', '9.968', '10.032', group='AMP10', ir=dict(unit=ADC), settle=5)
 
 # ---- LoZ (289, p. 20): 120 V reached through 60 V (footnote 7) --------------------------------------------------------------------------
@@ -216,10 +221,13 @@ for n, (title, setup, q) in enumerate(F, 1):
 PANEL_PICTURE = 'diagrams/fluke28x_panel.png'       # the owner's photo of the 287 / 289 front panel (jack layout: A, mA uA, COM, V Ohm); every cable-change prompt shows it
 GROUPS = {
     'VOHM': dict(title='Connect for voltage, resistance (2-wire) and capacitance',
-                 summary='Calibrator NORMAL HI / LO (5560A: OUTPUT V/Ω) to the meter V and COM inputs.',
+                 summary='Fluke 5522A / 5520A NORMAL HI / LO (Fluke 5560A: OUTPUT V/Ω) to the meter V and COM inputs.',
                  steps=[['Standby', 'The calibrator is in STANDBY while you rewire.'],
-                        ['Connect', 'Calibrator NORMAL HI / LO (5560A: OUTPUT V/Ω HI / LO) to the meter V (red) and COM (black) inputs.'],
-                        ['Calibrator', 'Ohms compensation OFF (COMP off) and the auxiliary cable removed (manual, before step 15).']]),
+                        ['Connect', 'Fluke 5522A / 5520A NORMAL HI / LO (Fluke 5560A: OUTPUT V/Ω HI / LO) to the meter V (red) and COM (black) inputs.'],
+                        ['Calibrator', 'Ohms compensation OFF (COMP off) and the auxiliary cable removed (manual, before step 15).']],
+                 caution='Up to 1000 V ac or dc is applied to the V and COM inputs. Use leads rated for at least 1000 V with the finger guards, connect COM before the live lead '
+                         'and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. '
+                         '(Added under uniformity rule 1, 2026-11-05: wording not yet checked against the meter manual safety section.)'),
     'OHM4': dict(title='Ohms: 2-wire COMP, 4-wire connection',
                  summary='Calibrator 2-wire COMP; NORMAL HI/LO and AUX HI/LO (sense) leads to the meter V and COM inputs.',
                  steps=[['Standby', 'The calibrator is in STANDBY while you rewire.'],
@@ -228,14 +236,14 @@ GROUPS = {
                                     '(the calibrator senses at the meter terminals).']],
                  caution='Ohms compensation is set by you, not by the program: check it before continuing.'),
     'UAMP': dict(title='Connect for µA / mA',
-                 summary='Calibrator AUX output (5560A: VI AUX) to the meter mA/µA and COM inputs; COMP off.',
+                 summary='Fluke 5522A / 5520A AUX output (Fluke 5560A: VI AUX) to the meter mA/µA and COM inputs; COMP off.',
                  steps=[['Standby', 'The calibrator is in STANDBY while you rewire.'],
-                        ['Connect', 'Calibrator AUX HI / LO (5560A: VI AUX and OUTPUT LO) to the meter mA/µA (red) and COM inputs.']],
+                        ['Connect', 'Fluke 5522A / 5520A AUX HI / LO (Fluke 5560A: VI AUX and OUTPUT LO) to the meter mA/µA (red) and COM inputs.']],
                  caution='The mA/µA input is fused at 0.44 A: do not exceed the point being tested.'),
     'AMP10': dict(title='Connect for A',
-                  summary='Calibrator 20 A output (5560A: 30A) to the meter A and COM inputs.',
+                  summary='Fluke 5522A / 5520A 20 A output (Fluke 5560A: 30A) to the meter A and COM inputs.',
                   steps=[['Standby', 'The calibrator is in STANDBY while you rewire.'],
-                         ['Connect', 'Calibrator 20 A output and AUX LO (5560A: 30A and OUTPUT LO) to the meter A (red) and COM inputs, '
+                         ['Connect', 'Fluke 5522A / 5520A 20 A output and AUX LO (Fluke 5560A: 30A and OUTPUT LO) to the meter A (red) and COM inputs, '
                                      'with leads rated for 10 A.']],
                   caution='The A input is fused at 11 A.'),
     'TEMP': dict(title='Connect the thermocouple', summary=TEMP_SETUP,
@@ -246,7 +254,7 @@ GROUPS = {
 spec = {
     'schema': 2,
     'kind': 'manual-reading',
-    'options': {'hv_threshold_v': 60, 'auto_ramp': False, 'function_prompt': True, 'ir': 'fluke28x', 'reset_after_hand_set': True, 'hookup_images': 'fluke28x', 'table_order': {'F': 0, '3': 1, '4': 2}},
+    'options': {'hv_threshold_v': 30, 'hv_once_per_group': True, 'report_title': 'Calibration Data', 'auto_ramp': False, 'function_prompt': True, 'ir': 'fluke28x', 'reset_after_hand_set': True, 'hookup_images': 'fluke28x', 'table_order': {'F': 0, '3': 1, '4': 2}},
     'source': {'document': 'Fluke 287/289 True-rms Digital Multimeters Calibration Manual',
                'pages': '14-20 (printed): functional checks pp. 15-16, Table 3 p. 17, Table 4 pp. 17-20',
                'cite': 'Fluke 287/289 Calibration Manual, Performance Tests, pp. 14-20 (Tables 3 and 4)',

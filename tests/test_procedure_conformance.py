@@ -106,13 +106,24 @@ def effective(spec, key):
     return options(spec).get(key, ENGINE_DEFAULTS[key])
 
 
+def offered_calibrators(p):
+    """The calibrators the operator can pick for a handheld procedure: the 5560A and 5522A always, the 5520A when calibrator_fit offers it."""
+    import calibrator_fit
+    try:
+        extra = {'5520A'} if calibrator_fit.make_offer('5520A', calibrator_fit.handheld_requests(handheld_points(p.id))).offered else set()
+    except Exception:                                           # rule 4 reports a broken fit; the other rules check the two standing calibrators
+        extra = set()
+    return ('5560A', '5522A', *sorted(extra))
+
+
 def group_prompts(p, spec, group):
-    """[(calibrator key, title + steps + caution text, caution)] the operator sees for a cable change to `group`."""
+    """[(calibrator key, title + steps + caution text, caution)] the operator sees for a cable change to `group`: one entry per offered
+    calibrator when hookups.py draws the prompt (it follows the calibrator choice), one ('spec', ...) entry for a spec's own group text."""
     import hookups
     meter = options(spec).get('hookup_meter') or p.hookup_meter
     out = []
     if meter and hookups.has(meter, group):
-        for cal in ('5560A', '5522A'):
+        for cal in offered_calibrators(p):
             plan = hookups.plan(meter, cal, group) or {}
             body = ' '.join([plan.get('title') or ''] + [' '.join(map(str, s)) for s in plan.get('steps') or ()] + [plan.get('caution') or ''])
             out.append((cal, body, plan.get('caution')))
@@ -216,7 +227,8 @@ def rule3_calibrator_safeguards():
 
 
 def rule4_calibrators_named():
-    """Cable prompts that name a calibrator name every calibrator the procedure offers, and no other (handheld_dmm procedures)."""
+    """Cable prompts that name a calibrator name the one in use (hookups.py prompts, per calibrator) or every calibrator the procedure offers
+    (a spec's own group text), and no calibrator it does not offer (handheld_dmm procedures)."""
     import calibrator_fit
     out = set()
     for p in procs():
@@ -224,22 +236,22 @@ def rule4_calibrators_named():
             continue
         _, spec, _ = handheld_spec(p)
         pts = handheld_points(p.id)
-        offered = {'5560A', '5522A'}
         try:
-            if calibrator_fit.make_offer('5520A', calibrator_fit.handheld_requests(pts)).offered:
-                offered.add('5520A')
+            calibrator_fit.make_offer('5520A', calibrator_fit.handheld_requests(pts))
         except Exception as exc:                                # a broken fit is its own problem; say so instead of hiding it
             out.add(f'{p.id}: 5520A offer could not be worked out ({type(exc).__name__})')
+        offered = set(offered_calibrators(p))
         for g in sorted({pt['group'] for pt in pts if pt['group'] != 'NONE'}):
-            body = ' '.join(b for _, b, _ in group_prompts(p, spec, g))
-            if not any(cal in body for cal in CALIBRATORS):      # generic wording ('the calibrator') names none, which is fine
-                continue
-            for cal in sorted(offered):
-                if cal not in body:
-                    out.add(f'{p.id}: group {g} does not name the {cal}')
-            for cal in CALIBRATORS:
-                if cal not in offered and cal in body:
-                    out.add(f'{p.id}: group {g} names the {cal}, which it does not offer')
+            for cal, body, _ in group_prompts(p, spec, g):
+                if not any(c in body for c in CALIBRATORS):      # generic wording ('the calibrator') names none, which is fine
+                    continue
+                want = {cal} if cal != 'spec' else offered
+                for c in sorted(want):
+                    if c not in body:
+                        out.add(f'{p.id}: group {g} does not name the {c}' + (f' (prompt for the {cal})' if cal != 'spec' else ''))
+                for c in CALIBRATORS:
+                    if c not in offered and c in body:
+                        out.add(f'{p.id}: group {g} names the {c}, which it does not offer')
     return out
 
 

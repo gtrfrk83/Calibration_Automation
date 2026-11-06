@@ -133,7 +133,7 @@
     ],
     [
      "Wire",
-     "Table 3 footnote [1]: connect a SINGLE WIRE from the calibrator AUX HI to AUX LO (5560A: VI AUX to OUTPUT LO). Remove the 50-turn coil from the calibrator terminals for this point."
+     "Table 3 footnote [1]: connect a SINGLE WIRE from the calibrator AUX HI to AUX LO (Fluke 5522A / 5520A; Fluke 5560A: VI AUX to OUTPUT LO). Remove the 50-turn coil from the calibrator terminals for this point."
     ],
     [
      "Jaw",

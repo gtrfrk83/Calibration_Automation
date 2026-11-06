@@ -2,7 +2,11 @@
  "schema": 2,
  "options": {
   "hookup_meter": "fluke110",
-  "function_prompt": true
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
  },
  "kind": "manual-reading",
  "source": {
@@ -1016,7 +1020,8 @@
    "nominal": 0.0006,
    "group": "UAMP",
    "note": "The manual labels this step \"DC µAmps\" but the applied signal is 600 µA AC at 45 Hz; select AC on the meter.",
-   "id": "3-34"
+   "id": "3-34",
+   "prompt": "The dial stays at the µA position: change the meter from DC to AC current before this point."
   },
   {
    "table": "3",
@@ -1162,7 +1167,19 @@
     "frequency": 500
    },
    "nominal": 500,
-   "id": "3-40"
+   "id": "3-40",
+   "ramp": [
+    50,
+    100,
+    150,
+    200,
+    250,
+    300,
+    350,
+    400,
+    450,
+    500
+   ]
   },
   {
    "table": "3",
