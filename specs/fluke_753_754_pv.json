@@ -74,7 +74,7 @@
     ],
     [
      "Calibrator",
-     "Calibrator current output (5522A AUX HI / AUX LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; here the Keysight 3458A (dc current: calibrator AUX HI to the 3458A I terminal, the 3458A LO terminal to the UUT mA jack; terminals UNVERIFIED) is in series and its reading is typed."
+     "Calibrator current output (Fluke 5522A / 5520A AUX HI / AUX LO; Fluke 5560A VI AUX / OUTPUT LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; here the Keysight 3458A (dc current: calibrator AUX HI to the 3458A I terminal, the 3458A LO terminal to the UUT mA jack; terminals UNVERIFIED) is in series and its reading is typed."
     ],
     [
      "UUT",
@@ -242,7 +242,7 @@
     ],
     [
      "Calibrator",
-     "The 5522A supplies 8 V dc (the program sets it); its value is not critical (printed p. 19)."
+     "The calibrator supplies 8 V dc (Fluke 5522A / 5520A NORMAL HI / LO; Fluke 5560A OUTPUT V/Ω HI / LO; the program sets it); its value is not critical (printed p. 19)."
     ],
     [
      "Meter",

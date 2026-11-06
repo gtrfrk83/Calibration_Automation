@@ -31,12 +31,12 @@
   "374": {
    "name": "Fluke 374",
    "brand": "Fluke",
-   "model_note": "Fluke 374 FC true-rms clamp meter (600.0 A jaw, 1000 V, 6000 ohm, no mV): Table 1, 28 points (19 without the iFlex tests)"
+   "model_note": "Fluke 374 FC true-rms clamp meter (600.0 A jaw, 1000 V, 6000 ohm, no mV): Table 1, 28 points (24 without the iFlex-with-coil tests)"
   },
   "375": {
    "name": "Fluke 375",
    "brand": "Fluke",
-   "model_note": "Fluke 375 FC true-rms clamp meter (600.0 A jaw, 1000 V, 60 kohm, mV): Table 1, 34 points (25 without the iFlex tests)"
+   "model_note": "Fluke 375 FC true-rms clamp meter (600.0 A jaw, 1000 V, 60 kohm, mV): Table 1, 34 points (30 without the iFlex-with-coil tests)"
   },
   "376": {
    "name": "Fluke 376",
@@ -68,7 +68,7 @@
     ],
     [
      "Coil",
-     "The wired coil is 50 turns (Table 2, printed p. 4: 55XXA/COIL). Connect its two ends to the calibrator: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current."
+     "The wired coil is 50 turns (Table 2, printed p. 4: 55XXA/COIL). Connect its two ends to the calibrator: Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current."
     ],
     [
      "Jaw",
@@ -76,7 +76,7 @@
     ],
     [
      "LCOMP",
-     "Fluke 5522A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed."
+     "Fluke 5522A / 5520A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed."
     ],
     [
      "Check",
@@ -104,7 +104,7 @@
     ],
     [
      "Coil",
-     "Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (the lab's coil and calibrator can do 6 A at 440 Hz and 18 A: owner-confirmed)."
+     "Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (the lab's coil and calibrator can do 6 A at 440 Hz and 18 A: owner-confirmed)."
     ],
     [
      "Jaw",
@@ -112,7 +112,7 @@
     ],
     [
      "LCOMP",
-     "Fluke 5522A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points."
+     "Fluke 5522A / 5520A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points."
     ],
     [
      "Check",
@@ -136,7 +136,7 @@
     ],
     [
      "Calibrator",
-     "Fluke 5522A: NORMAL HI and NORMAL LO; Fluke 5560A: OUTPUT V/Ω HI and OUTPUT V/Ω LO (the voltage output, as for the volts points)."
+     "Fluke 5522A / 5520A: NORMAL HI and NORMAL LO; Fluke 5560A: OUTPUT V/Ω HI and OUTPUT V/Ω LO (the voltage output, as for the volts points)."
     ],
     [
      "iFlex input",
@@ -168,7 +168,7 @@
     ],
     [
      "Coil",
-     "Coil on the calibrator low-current output as for the jaw points: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO."
+     "Coil on the calibrator low-current output as for the jaw points: Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO."
     ],
     [
      "iFlex",
@@ -200,7 +200,7 @@
     ],
     [
      "Coil",
-     "Move the two ends of the coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (owner-confirmed)."
+     "Move the two ends of the coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (owner-confirmed)."
     ],
     [
      "iFlex",

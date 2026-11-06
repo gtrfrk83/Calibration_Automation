@@ -43,7 +43,7 @@
     ],
     [
      "Coil",
-     "The wired coil is 20 turns (Table 3, printed p. 8). Connect its two ends to the calibrator: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use wire and plugs rated for the current."
+     "The wired coil is 20 turns (Table 3, printed p. 8). Connect its two ends to the calibrator: Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use wire and plugs rated for the current."
     ],
     [
      "Jaw",
@@ -51,7 +51,7 @@
     ],
     [
      "LCOMP",
-     "Fluke 5522A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed."
+     "Fluke 5522A / 5520A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed."
     ],
     [
      "Check",
@@ -79,7 +79,7 @@
     ],
     [
      "Coil",
-     "Move the two ends of the 20-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil wire, plugs and leads must carry up to 9.5 A."
+     "Move the two ends of the 20-turn coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil wire, plugs and leads must carry up to 9.5 A."
     ],
     [
      "Jaw",
@@ -87,7 +87,7 @@
     ],
     [
      "LCOMP",
-     "Fluke 5522A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points (the 20-turn coil: LCOMP ON for it is UNVERIFIED)."
+     "Fluke 5522A / 5520A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points (the 20-turn coil: LCOMP ON for it is UNVERIFIED)."
     ],
     [
      "Check",

@@ -344,7 +344,7 @@ def build_spec():
         raise SystemExit('The tables disagree with the published accuracy:\n  ' + '\n  '.join(problems))
     return dict(
         schema=2, kind='manual-reading',
-        options=dict(hookup_meter='fluke170', hv_threshold_v=30, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
+        options=dict(hookup_meter='fluke170', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
         source=dict(document=DOCUMENT,
                     pages='8-13 (printed): Table 1 p. 8, procedure p. 9, Table 2 pp. 10-11, Table 3 pp. 12-13',
                     cite='Fluke 175, 177, 179 Calibration Information, Table 2 (175) pp. 10-11 and Table 3 (177 / 179) pp. 12-13; three printed values corrected (see Source)',

@@ -193,7 +193,11 @@ class EngineBase(unittest.TestCase):
         self.hn.stop()
 
     def spec(self):
-        return h.load_spec(self.SPEC) if self.SPEC else None
+        spec = h.load_spec(self.SPEC or h.SPEC_PATH)       # None meant the engine default spec (the 110 series)
+        for p in (spec or {}).get('steps', ()):              # no ramps in these queue tests (as io.auto_ramp = False below): the 110-series 3-40
+            if len(p.get('ramp') or ()) > 1:                 # ramp became an explicit list (uniformity rule 10, 2026-11-06); a ramp sends OUT while on
+                p['ramp'] = [p['ramp'][-1]]
+        return spec
 
     def real(self, assets=('4412', '4413', '4415'), mode=RQ.POINT_BY_POINT, model=None, spec=None, hv=None):
         """A REAL (not demo) run on the simulated calibrator, typed readings."""

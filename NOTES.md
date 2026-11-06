@@ -102,6 +102,28 @@ that no longer happens (remove it, so it cannot come back). Its `exceptions` blo
     frequency-counter, rf, dacq). A fix to shared behaviour (prompts, safeguards, pass/fail, report text) lists the family's other procedures
     in the commit message, each as applied or why not. Checked: the field; the commit-message part is a working rule.
 
+### Uniformity rules, batch 1 (branch `uniformity-batch1`, 2026-11-06; simulated bench only, never run on hardware)
+Rules 2, 4, 10 and 11 are now clear for every procedure; rule 1 is clear for every handheld procedure (the 15 left are bench and other engines
+with their own threshold: a later batch).
+- Rule 1: every handheld spec is at 30 V, asked once per hook-up group (110-series was 500 V per point, 287/289 and MM325 60 V per point,
+  170 and 77 IV per point). New VOHM cautions in `hookups.py` EXTRA for fluke110 (600 V), fluke170, fluke77, fluke87v (1000 V) and in the
+  287/289 VOHM group: their wording is general practice, NOT yet checked against each meter's manual safety section (said in the caution).
+  110-series point 3-40 (AUTO-V LoZ, 500 V) keeps its 50 V ramp as an explicit `ramp` list (50 ... 500 V) now that `auto_ramp` is off; the
+  HIGH VOLTAGE question names an explicit ramp (it named only the automatic one before).
+- Rule 2: own `prompt` on the points whose function changes with the same dial position: 116 3-34 (DC to AC µA), 287/289 4-9 and 4-40 (AC/DC
+  display), 4-51, 4-57, 4-62 (AC to DC current). The prompt text says what to change, not which button (UNVERIFIED on the meters).
+- Rule 4: `hookups.calibrator_key` now returns '5520A' for a 5520A selection; its prompts use the 5522A terminals and pictures
+  (`hookups.SAME_PANEL`) but name the Fluke 5520A (before, a 5520A operator was told 'Fluke 5522A'). Spec group texts of the 287/289, 365,
+  374-376-II, 381 (WIRE_0A) and 753/754 (MEAS_MA, SRC_SIM) name every offered calibrator. Exception: the 325 shares the 323 family's coil
+  text that names the 5520A, which the 325 does not offer.
+- Rule 10: every shipped handheld spec now states each shared option; the Keithley 485 gives its reason for `function_prompt` off.
+  handheld_dmm.py still does not read `specs/handheld_defaults.json`: with every shipped spec explicit it would change only user-built
+  Datasheet Builder sheets that leave options out, which the rules did not ask for.
+- Rule 11: 374 / 375 counts without the iFlex-with-coil points are 24 / 30 (were 19 / 25); GIDEP is 210 points (was 220).
+- Report title: the 110-series, 287/289 and MM325 reports are now titled 'Calibration Data' (were '<model> Performance Verification').
+- Verified-on-hardware: edits to hookups.py, handheld_dmm.py, the specs and two launchers change the fingerprint of the handheld and clamp
+  procedures: they show 'Changed since verification' until re-marked.
+
 ## Frequency band edges (decided 2026-10-25)
 - A2LA scope CMC tables (specs/a2la_1888_03_cmc.json, `uncertainty.Scope`): AC rows are printed '(> lo to hi) Hz', so they are read HALF-OPEN: a frequency on a shared
   edge belongs to the row below (the lowest row of a block includes its lower edge).  AC volts and AC current alike (1d13125).  The MDO flatness rows print the scope's 0.050 dB.
@@ -2306,7 +2328,7 @@ Owner decision: the Tk build is gone; the suite is Qt only.
 - Shared-file touches (no behavior change to any other engine): `drivers/__init__.py` (exports), `procmods_engine.py` (`MODEL_IDS['f6060a']` + four settle tunables), `drivers/simulated_8902a.py` (`sc_held`), `tests/golden_capture.py` (registration + `read_stb` pass-through on `RecordingTransport`), `tests/test_driver_commands_gen.py` (96270A command counts), `tests/test_reset_startup.py`, `tests/test_procmods_engines.py`, `tests/test_8808a_manual_override.py` and `tests/test_dsb_runtime_rules.py` (the MANUAL_OVERRIDE scan lists), `tests/fixtures/legacy_registry.json`, `tests/golden/fstring_lint_baseline.json`.
 
 ### Fluke 6060A/AN from the GIDEP document (added 2026-11-02; `Procedures/Fluke_6060A_GIDEP_Verification.py`)
-T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedure, own spec `specs/fluke_6060a_gidep_pv.json` (builder `specs/build_fluke_6060a_gidep_spec.py`, 220 points), own settings / progress / procmods key `6060A-gidep` (engine `main(spec_path, state_key, variant_label)`).
+T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedure, own spec `specs/fluke_6060a_gidep_pv.json` (builder `specs/build_fluke_6060a_gidep_spec.py`, 210 points; '220' corrected 2026-11-06, uniformity rule 11), own settings / progress / procmods key `6060A-gidep` (engine `main(spec_path, state_key, variant_label)`).
 - New engine point kinds: `manual` (typed reading, no RF): the 10 MHz reference (counter) and the three sub-kHz spurs; `devmeter` (Tables 9, 10): the 96270A FM instrument (`Fluke96270A.setup_fm`, commands `FM_COMMANDS`, Remote Programmers Manual pp. 32, 35, 36, 38, 59; NOT run on hardware, the unit of the FM:DEV? / FM:INT:FREQ? replies is UNVERIFIED) sends carrier / rate / deviation at +7 dBm to the 6060A DEVIATION METER INPUT, the technician types the 6060A display in kHz, limit = deviation +/- 3 kHz (Table 9) or +/- 30 kHz (Table 10). The 96270A goes back to the leveled sine afterwards. Six points (370 kHz at 30 and 250 MHz) exceed the 96270A's FM limit (Operator Manual Table 3-26) and are listed NOT TESTED.
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.

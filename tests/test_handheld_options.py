@@ -46,8 +46,11 @@ class DirectHighVoltage(unittest.TestCase):
             o = h.load_spec(SPECS[model]).get('options', {})
             self.assertIs(o.get('auto_ramp'), False, model)
             self.assertIs(o.get('function_prompt'), True, model)
-        o110 = h.load_spec(SPECS['113'])['options']
-        self.assertTrue(o110.get('auto_ramp', True))            # 3-40 (AUTO-V LoZ) must still ramp
+        spec110 = h.load_spec(SPECS['113'])
+        o110 = spec110['options']
+        self.assertIs(o110.get('auto_ramp'), False)             # uniformity rule 10 (2026-11-06): the shared default; 3-40 (AUTO-V LoZ) still ramps
+        p340 = next(s for s in spec110['steps'] if s['id'] == '3-40')
+        self.assertEqual(p340['ramp'], [50 * i for i in range(1, 11)])   # by an explicit list: 50 V steps to 500 V, as auto_ramp did
         self.assertIs(o110.get('function_prompt'), True)
 
     def test_every_point_above_100v_is_one_out_command_unless_ramp_list(self):
@@ -212,7 +215,8 @@ class FunctionPrompt(unittest.TestCase):
             self.assertEqual(len(hv_texts), len(hv_points), model)
             texts[model] = dict(zip([p['id'] for p in hv_points], hv_texts))
         self.assertFalse([i for i, t in texts['87V'].items() if 'ramp' in t])
-        self.assertFalse([i for i, t in texts['289'].items() if 'ramp' in t])
+        self.assertEqual([i for i, t in texts['289'].items() if 'ramp' in t], ['4-64'])     # the manual's own ramp (60 V then 120 V) is named
+        self.assertIn('60, 120 V', texts['289']['4-64'])
         self.assertFalse([i for i, t in texts['77IV'].items() if 'ramp' in t])
         self.assertFalse([i for i, t in texts['117'].items() if 'ramp' in t and i != '3-40'])      # explicit one-step lists: no ramp
         self.assertIn('ramped', texts['117']['3-40'])

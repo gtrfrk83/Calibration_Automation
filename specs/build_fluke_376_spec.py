@@ -335,10 +335,10 @@ GROUPS = {
         title='Change the cables: 50-turn coil on the calibrator low-current output',
         summary='Calibrator low-current output (5522A AUX HI / AUX LO; 5560A VI AUX / OUTPUT LO) -> 50-turn coil (55XXA/COIL) -> the meter jaw closed around the coil. No test leads in the meter jacks.',
         steps=COIL_JAW + [
-            ('Coil', 'The wired coil is 50 turns (Table 2, printed p. 4: 55XXA/COIL). Connect its two ends to the calibrator: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current.'),
+            ('Coil', 'The wired coil is 50 turns (Table 2, printed p. 4: 55XXA/COIL). Connect its two ends to the calibrator: Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current.'),
             ('Jaw', 'Close the detachable jaw around the coil, jaw fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 50 x the calibrator current: '
                     '0.2 A reads 10 A. (How the jaw sits on the 55XXA/COIL is not described in either manual: UNVERIFIED.)'),
-            ('LCOMP', 'Fluke 5522A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed.'),
+            ('LCOMP', 'Fluke 5522A / 5520A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='This point drives current through a coil. Keep the calibrator in STANDBY whenever you touch the coil or leads. The jaw is marked 1000 A, CAT III 1000 V (Figure 1).',
         diagram='diagrams/hook_fluke376_COIL_AUX.png'),
@@ -346,9 +346,9 @@ GROUPS = {
         title='Change the cables: 50-turn coil on the calibrator high-current output',
         summary='Calibrator high-current output (5522A 20 A / AUX LO; 5560A 30A / OUTPUT LO) -> 50-turn coil (55XXA/COIL) -> the meter jaw closed around the coil. No test leads in the meter jacks.',
         steps=COIL_JAW + [
-            ('Coil', 'Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (the lab\'s coil and calibrator can do 6 A at 440 Hz and 18 A: owner-confirmed).'),
+            ('Coil', 'Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (the lab\'s coil and calibrator can do 6 A at 440 Hz and 18 A: owner-confirmed).'),
             ('Jaw', 'The detachable jaw stays closed around the coil (centred, jaw fully closed, leads away from the meter body). The meter reads 50 x the calibrator current: 10 A reads 500 A, 18 A reads 900 A, 6 A reads 300 A.'),
-            ('LCOMP', 'Fluke 5522A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points.'),
+            ('LCOMP', 'Fluke 5522A / 5520A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='Up to 18 A flows in the coil. Duty cycle: the 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest); not confirmed for this coil (UNVERIFIED). '
                 'Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run.',
@@ -359,7 +359,7 @@ GROUPS = {
         steps=[
             ('Meter dial', 'Turn the meter dial to OFF before you move any lead.'),
             ('Standby', 'The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself).'),
-            ('Calibrator', 'Fluke 5522A: NORMAL HI and NORMAL LO; Fluke 5560A: OUTPUT V/Ω HI and OUTPUT V/Ω LO (the voltage output, as for the volts points).'),
+            ('Calibrator', 'Fluke 5522A / 5520A: NORMAL HI and NORMAL LO; Fluke 5560A: OUTPUT V/Ω HI and OUTPUT V/Ω LO (the voltage output, as for the volts points).'),
             ('iFlex input', 'Calibrator HI to the iFlex 2 mm jack on the far left of the meter, calibrator LO to the black COM jack (Performance Tests, printed p. 3). Use the test probe for iFlex (2 mm to 4 mm Slim Reach probe, PN 6508922) '
                             'and the test lead with retractable sheath (6358, PN 1903307) from the equipment list. No iFlex loop is connected. The far-left 2 mm jack is the iFlex input (owner-confirmed).'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
@@ -369,7 +369,7 @@ GROUPS = {
         title='Change the cables: iFlex loop on the 50-turn coil, calibrator low-current output',
         summary='Calibrator low-current output (5522A AUX HI / AUX LO; 5560A VI AUX / OUTPUT LO) -> 50-turn coil (55XXA/COIL) -> the iFlex loop around the coil, plugged into the meter. No test leads in the meter jacks.',
         steps=COIL_IFLEX + [
-            ('Coil', 'Coil on the calibrator low-current output as for the jaw points: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO.'),
+            ('Coil', 'Coil on the calibrator low-current output as for the jaw points: Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO.'),
             ('iFlex', 'Remove the jaw from the coil. Plug the iFlex probe into the meter (Users Manual p. 9: lock the probe cable connector, then dial on iFlex A~) and place its loop around the coil (Table 1, printed p. 4: iFlex Current Probe with 50-turn coil). '
                       'The meter reads 50 x the calibrator current: 0.2 A reads 10 A. The Users Manual p. 9 shows the loop closed and locked; its error is 0.5 % / 1.0 % / 2.0 % by the distance of the conductor from the optimum position (p. 23). '
                       'How the loop sits on the 55XXA/COIL is not described in either manual: UNVERIFIED.'),
@@ -380,7 +380,7 @@ GROUPS = {
         title='Change the cables: iFlex loop on the 50-turn coil, calibrator high-current output',
         summary='Calibrator high-current output (5522A 20 A / AUX LO; 5560A 30A / OUTPUT LO) -> 50-turn coil (55XXA/COIL) -> the iFlex loop around the coil, plugged into the meter. No test leads in the meter jacks.',
         steps=COIL_IFLEX + [
-            ('Coil', 'Move the two ends of the coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (owner-confirmed).'),
+            ('Coil', 'Move the two ends of the coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (owner-confirmed).'),
             ('iFlex', 'The iFlex loop stays around the coil, the probe plugged into the meter. The meter reads 50 x the calibrator current: 10 A reads 500 A, 18 A reads 900 A, 6 A reads 300 A.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='Up to 18 A flows in the coil. Duty cycle: the 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest); not confirmed for this coil (UNVERIFIED). '
@@ -416,8 +416,8 @@ def build_spec():
                     cite='Fluke 374 / 375 / 376 / 376-II Calibration Manual, Table 1 Performance Tests, printed pp. 3-4; limits unchanged, rows flagged against the accuracy printed in the 374 FC / 375 FC / 376 FC Users Manual (pp. 20-26)',
                     limits='Manufacturer limits, Table 1, as printed',
                     report_note=REPORT_NOTE, note=SOURCE_NOTE),
-        models={'374': dict(name='Fluke 374', brand='Fluke', model_note='Fluke 374 FC true-rms clamp meter (600.0 A jaw, 1000 V, 6000 ohm, no mV): Table 1, 28 points (19 without the iFlex tests)'),
-                '375': dict(name='Fluke 375', brand='Fluke', model_note='Fluke 375 FC true-rms clamp meter (600.0 A jaw, 1000 V, 60 kohm, mV): Table 1, 34 points (25 without the iFlex tests)'),
+        models={'374': dict(name='Fluke 374', brand='Fluke', model_note='Fluke 374 FC true-rms clamp meter (600.0 A jaw, 1000 V, 6000 ohm, no mV): Table 1, 28 points (24 without the iFlex-with-coil tests)'),
+                '375': dict(name='Fluke 375', brand='Fluke', model_note='Fluke 375 FC true-rms clamp meter (600.0 A jaw, 1000 V, 60 kohm, mV): Table 1, 34 points (30 without the iFlex-with-coil tests)'),
                 '376': dict(name='Fluke 376', brand='Fluke', model_note='Fluke 376 FC true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points (34 without the iFlex-with-coil tests)'),
                 '376-II': dict(name='Fluke 376-II', brand='Fluke', model_note='Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (34 without the iFlex-with-coil tests); not in the Users Manual: 376 FC figures assumed')},
         groups=GROUPS,

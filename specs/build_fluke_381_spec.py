@@ -349,7 +349,7 @@ GROUPS = {
         title='Change the cables: single wire for the 0 A dc point (no coil)',
         summary='Calibrator AUX HI -> a single wire -> AUX LO (5522A / 5520A; 5560A VI AUX -> OUTPUT LO); the meter jaw closed around the wire.',
         steps=common('jaw') + [
-            ('Wire', 'Table 3 footnote [1]: connect a SINGLE WIRE from the calibrator AUX HI to AUX LO (5560A: VI AUX to OUTPUT LO). Remove the 50-turn coil from the calibrator terminals for this point.'),
+            ('Wire', 'Table 3 footnote [1]: connect a SINGLE WIRE from the calibrator AUX HI to AUX LO (Fluke 5522A / 5520A; Fluke 5560A: VI AUX to OUTPUT LO). Remove the 50-turn coil from the calibrator terminals for this point.'),
             ('Jaw', 'Clamp the meter jaw around the wire only (Figure 3, printed p. 8). The calibrator outputs 0 A dc: the meter should read 0.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='The calibrator output is 0 A, but the wire is a closed current loop on the calibrator terminals: keep the output in STANDBY while you connect the wire and keep clear of the terminals.',

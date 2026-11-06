@@ -1066,7 +1066,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return
         if self._high_voltage(p) and not self._q_hv_seen(p) and not self._hv_group_seen(key):
             if not port.ask_yes_no('HIGH VOLTAGE', self._q_hv_text(f'This point outputs {abs(p["applied"]["value"]):g} V'
-                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
+                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '')
+                                       + (f' (the voltage is ramped up: {", ".join(f"{abs(float(x)):g}" for x in p["ramp"])} V, 5 s apart)'
+                                          if not self.manual_cal and len(p.get('ramp') or ()) > 1 else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?')):
                 self.busy = False
                 self.status.set('Stopped before a high-voltage point.')
