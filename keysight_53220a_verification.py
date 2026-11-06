@@ -1216,7 +1216,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         import report_pdf
         low, high = p['low'], p['high']
         text = {'mean': None, 'sdev': 'Std Dev (limit is a maximum)', 'pass': 'Self-test result (0 = pass)'}[p['stat']]
-        suffix = ' [other standard]' if r.get('stimulus') == 'manual' else (f' [{r["atten_db"]:g} dB external attenuator]' if r.get('atten_db') else '')
+        suffix = f' [{r["atten_db"]:g} dB external attenuator]' if r.get('atten_db') else ''      # owner 2026-11-06: no '[other standard]' on the report (the table keeps it)
         return report_pdf.cert_row(p['description'] + suffix, p['nominal'] if p['stat'] == 'mean' else 0.0, low, high, p['unit'], r['reading'], r['result'] == 'FAIL',
                                    section=self.report_section(p), nominal_text=text, uncertainty=self.uncertainty_text(p))
 

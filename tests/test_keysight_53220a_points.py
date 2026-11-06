@@ -1039,7 +1039,8 @@ class Flow(unittest.TestCase):
         self.assertTrue(all(r['Section'] for r in rows))
         self.assertFalse([r for r in rows if r['OOT']])
         self.assertEqual([bool(r['Uncertainty']) for r in rows], [A.point_uncertainty(p)['status'] == A.IN_SCOPE for p in pts])
-        self.assertTrue(any('[other standard]' in r['Description'] for r in rows))
+        self.assertFalse(any('[other standard]' in r['Description'] for r in rows))          # owner 2026-11-06: not on the report
+        self.assertTrue(any('[other standard]' in a._row(p)[0][1] for p in pts if a.is_manual(p)))   # the on-screen table keeps it
         self.assertIsNone(a.standard_for(PTS[0]))
 
     def test_report_file_name_is_asset_date(self):

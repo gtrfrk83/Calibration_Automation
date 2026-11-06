@@ -2355,6 +2355,8 @@ time-marker capability, not what the 33250A pulse delivers (no width accuracy is
 33250A 'Time [Arb Jitter (rms)] 30 ppm + 2.5 ns' row (arb function, rms jitter, not accuracy; the Pulse function's row is 100 ppm + 50 ps rms) and whether it can come
 from the frequency uncertainty (only if the interval is one PERIOD of a reference-locked signal: a 49.9 ns period split to both channels with a stop hold-off, which
 needs the Programmer's Reference, not on file). OWNER DECISION 2026-11-06: "lets keep what we have" - the Time Marker CMC alone (0.15 ps) stays.
+- Report descriptions (owner 2026-11-06, PDF screenshot: "can we remove the 'other standard' text in the descriptions?"): `_cert_row` no longer appends
+  ' [other standard]'; the on-screen point table still shows it (it tells the technician the signal is set by hand). The '[n dB external attenuator]' note stays.
 Code: `point_uncertainty(p)` (keysight_53220a_verification.py) is the single source of every row's Uncertainty; `App.review_point_specs()` gives the review window the same
 figures (no calibrator to choose), so a single-period Mean no longer shows 'No uncertainty required' beside a printed number. Burst frequency (Test 7) not covered yet.
 Tests: `test_uncertainty_follows_the_owner_decisions_of_2026_11_06`, `test_review_window_rows_match_the_certificate`.
