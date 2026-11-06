@@ -25,7 +25,7 @@ except Exception:
     HAVE_RL = False
 HAVE_PDFTOTEXT = Path('/usr/bin/pdftotext').exists()
 
-POINT_ROW_ENGINES = {'truevolt_verification.py': "'5560A'", 'dacq_verification.py': 'self.cal_key', 'Procedures/Agilent_34401A.py': "'5560A'",
+POINT_ROW_ENGINES = {'truevolt_verification.py': 'self.standard_for(p)',      # the applying standard per point (2026-11-06; was '5560A' for every row) 'dacq_verification.py': 'self.cal_key', 'Procedures/Agilent_34401A.py': "'5560A'",
                      'Procedures/Fluke_8846A_Verification.py': "'5560A'"}
 
 
