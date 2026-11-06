@@ -1085,6 +1085,24 @@ class SinglePeriodSource(unittest.TestCase):
         finally:
             hn.stop()
 
+class NoSignalWithStopOnSurprise(unittest.TestCase):
+    """Bench 2026-11-06 (owner screenshot, Test 5 time interval with no usable signal): in a real run the stop-on-surprise guard caught the *OPC? timeout,
+    retried it and stopped the run, so the driver's no-signal abort never ran.  *OPC? is now left to the driver: abort, 'no signal', a typed reading offered."""
+
+    def test_the_opc_timeout_reaches_the_driver_abort_not_the_surprise_dialog(self):
+        import manual_override
+        b, rft, ct = bench('53220A')
+        ct.no_signal_hangs = True
+        seen = []
+        io = A.IO('sim', 'sim', 'USB', transports=(ct, rft), stim=dict(mode='manual', loss_db=0.0, ext_low=False))
+        io.enable_surprise(lambda *a, **k: (seen.append(a), False)[1], force=True)
+        with self.assertRaises(manual_override.ReadingUnavailable) as cm:
+            io.measure(by_ref('5.ch1-ch2.49.9ns.mean'))
+        self.assertIn('no signal', str(cm.exception).lower())
+        self.assertEqual(seen, [])                                           # no surprise dialog
+        self.assertEqual(ct.cleared_while_busy, 1)
+        io.ctr.check_errors('after')                                         # the counter answers the next point
+
 class WrongSignal(unittest.TestCase):
     """Owner 2026-11-05: 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns (the 1 MHz signal was still connected).  A Mean more than 10 % from its
     nominal now asks 'Wrong signal?' before it is recorded: Yes = set the signal again and measure again, No = record as it is."""

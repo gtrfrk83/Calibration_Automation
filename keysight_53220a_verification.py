@@ -376,7 +376,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def enable_surprise(self, handler, force=False):
         """Stop on surprise (surprise.py, opt-in).  The counter's set-and-read-back mismatch and statistics replies, and the 96270A's error queue, are Stop-only surprises.  A virtual (demo)
         command log is left alone unless force=True (tests)."""
-        self.guards = [g for g in (surprise.attach_guard(self.ctr, handler, force, expect={'calc.mean': 'float', 'calc.sdev': 'float', 'calc.count': 'float'}, stop_only=True),
+        self.guards = [g for g in (surprise.attach_guard(self.ctr, handler, force, expect={'calc.mean': 'float', 'calc.sdev': 'float', 'calc.count': 'float'}, stop_only=True,
+                                                         skip=('opc.query',)),     # *OPC? timeout = no signal: the driver aborts it (bench 2026-11-06)
                                    surprise.attach_guard(self.rf, handler, force, stop_only=True) if self.rf else None,
                                    surprise.attach_guard(self.gen, handler, force, stop_only=True) if self.gen else None) if g]
         return self.guards

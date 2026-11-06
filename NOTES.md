@@ -2240,6 +2240,11 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   (likely a run or session stopped during a point; not known from the 20 log lines). `Keysight53220A.clear_pending` (device clear, logged '--') now runs
   first in `reset_to_defaults` and in `cleanup`, so a run starts on a free counter and the reference is always restored. Device clear changes no setting.
   Simulator: a measurement left waiting (`no_signal_hangs` + INIT / *TRG with nobody on *OPC?). Golden: the device-clear control lines only. NOT run on the bench yet.
+- No signal in a REAL run (owner screenshot 2026-11-06: 24 / 28 pass, then Test 5 time interval stopped with 'Unexpected reply', *OPC? 'timeout twice'):
+  the stop-on-surprise guard (`IO.enable_surprise`) wraps the counter's ask(): it caught the *OPC? timeout, retried *OPC? and stopped the run, so
+  `measure_stats` never reached its abort (the bench script runs without the guard, which is why steps 4 and 5 passed). The guard now skips 'opc.query'
+  (`skip=`): the driver aborts (device clear + *CLS) and raises 'no signal', the procedure offers a typed reading, the run goes on. Tests
+  `NoSignalWithStopOnSurprise`. Same run: Tests 2a / 2b ran on the SMA100B (no [other standard]), Test 3 on the CG635 and 4a / 4b at 8 ns on the 33250A all PASS.
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.
