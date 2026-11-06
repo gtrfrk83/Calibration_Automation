@@ -505,6 +505,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     @staticmethod
     def report_mixed(p):
         return p['section'] in ('hi',)
+    @staticmethod
+    def standard_for(p):
+        """The standard that applied a point, for the Uncertainty / TAR / TUR: the 5560A for a calibrator point, None otherwise (a zero-offset point, the
+        technician's capacitance standard, the generator's frequency), so the scope CMC alone applies, as in the 34410A engine (fixed 2026-11-06: every
+        point used the 5560A before, which put the 5560A capacitance specification on the manual capacitance points)."""
+        return '5560A' if p.get('source') == 'calibrator' else None
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
         return self.certificate_rows_and_points()[0]
@@ -513,7 +519,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         import report_pdf
         rows=[];pts=[]
         for p in POINTS:
-            row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
+            row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard=self.standard_for(p)))
             if row:rows.append(row);pts.append(p)
         return rows,pts
     def export_pdf(self):
@@ -530,7 +536,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try:
             if details.get('show_tar_tur'):
                 import tartur_wiring
-                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
+                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,self.standard_for(p)) for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument',f'Keysight {MODEL}'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Limits applied',self.period.get()),('Source',f'Keysight Truevolt Operating and Service Guide, pp. 501-520 ({MODEL} tables)')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'),snapshot_context=report_pdf.context_for(self))
         except ImportError:
             port.message('error', 'PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return

@@ -176,7 +176,9 @@ def build_spec():
     steps, groups = build_steps()
     return dict(
         schema=3, kind='manual-reading',
-        options=dict(hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=False, report_title='Calibration Data'),
+        options=dict(hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=False, report_title='Calibration Data',
+                     option_reasons=dict(function_prompt='The 485 has range pushbuttons, not a rotary function switch: the one setup prompt per range (groups R4..R10) '
+                                                         'already tells the operator the range (NOTES.md, Keithley 485).')),
         source=dict(document=DOCUMENT,
                     pages='Verification procedure p. 3-1; Table 3-1, Figure 3-1 and Table 3-2 p. 3-2; Zero Check p. 2-4; Specifications (front of the manual)',
                     cite='Keithley 485 Instruction Manual, Table 3-2 Range Accuracy, p. 3-2',

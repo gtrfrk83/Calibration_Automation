@@ -51,6 +51,94 @@ Tektronix 3 Series MDO (MDO32 / MDO34; own engine mdo3_verification.py, see '3 S
   'Instruments reset to default settings at start'. Because a UUT reset can erase stored settings, a notice is confirmed first (declining touches
   nothing). STANDING-RULE DEVIATION (owner request, Fluke 8808A only): `AppResetMixin.RESET_ONCE_PER_SESSION` (default False = reset on every Run, every other engine unchanged) is True for the 8808A App, so 'reset every instrument to defaults before tests start' is once per session for that procedure; see the 8808A section. Fast demo sends nothing; a virtual-bench demo resets the SIMULATED instruments (see Virtual bench). A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
 
+## Certificate uncertainty fixes (branch `certificate-uncertainty-fixes`, 2026-11-06; simulated only)
+Three report bugs found by the 2026-11-05 cross-category review. Limits, pass / fail, commands and prompts are unchanged; only the printed
+Uncertainty (and TAR / TUR where noted) changes.
+- Fluke i400: the rows are in the clamp's OUTPUT amps (1 mA/A: 100 A read = 0.1 A), but the uncertainty was printed in clamp amps, 1000 x too
+  large ('1.5 A' beside a +/-2.06 mA limit). `certificate_row` now refers it to the output (x `OUTPUT_A_PER_A` = 0.001): 1.5 mA at 100 A,
+  4.1 mA at 400 A. TAR / TUR were already worked out in clamp amps and do not change. Test: test_fluke_i400_points.
+- Keysight U1251B / U1252B conductance (2-82, 2-83): `unc_kind CONDUCTANCE`, as the 80 Series V point 3-30 (handheld_unc: the 20 MOhm budget
+  as a relative uncertainty on 50 nS), so the Uncertainty is in siemens like the row (27 pS; was '11 kOhm' on an nS row) and TAR / TUR are
+  given (they were blank). Builder `specs/build_keysight_u1251b_spec.py`. Test: test_keysight_u1251b_points.
+- Keysight Truevolt 34460A / 61A / 65A / 70A: the report passed `standard='5560A'` for every row, so the two capacitance points, made with the
+  technician's own capacitance standard (`source: manual`), printed the 5560A capacitance figure (2.2 nF). `App.standard_for(p)` gives the
+  5560A for calibrator points only, as the 34410A engine does: those points now print the scope CMC (5.0 nF). No other row changes (checked on all
+  four models). Test: test_truevolt_report_standard.
+- Verified-on-hardware: the i400 engine, the Truevolt engine and the U1251B / U1252B spec slices change their fingerprints.
+
+## Uniformity rules (owner, 2026-11-05; branch `uniformity-rules`)
+Adopted after a review of every procedure category for inconsistencies between procedures (review run on main 0eb6fb8). They sit on top of the
+Standing rules above. Adopting rules 1, 2, 3 and 7 is the owner's request to change safety prompts, instrument command sequences and pass/fail
+logic, which the Standing rules otherwise keep unchanged. Uncertainty rules were left out on purpose.
+
+Enforced by `tests/test_procedure_conformance.py` (one test per rule over every shipped procedure). `tests/fixtures/conformance_allowlist.json`
+holds the violations that existed when the rules were adopted: the cleanup backlog. The test fails on any NEW violation and on any listed one
+that no longer happens (remove it, so it cannot come back). Its `exceptions` block holds findings that are right as they are, each with a reason
+(for example meters that pick AC or DC themselves, V CHEK / AUTO-V LoZ). Regenerate the list only after reviewing the change:
+`python tests/test_procedure_conformance.py --write-allowlist` (keeps reasons and exceptions). Shared values live in `uniformity.py`
+(nothing uses it yet; engines move onto it one at a time).
+
+1. High voltage. One threshold for every procedure, handheld and bench: 30 V AC or DC (`uniformity.HV_THRESHOLD_V`). The operator confirms
+   high voltage once per hook-up group, and every hook-up group with a point at or above 30 V carries a written high-voltage caution.
+   Checked: handheld specs (threshold, once per group, caution text on the group's cable prompt for both calibrator plans); any other launcher
+   or engine that asks a high-voltage question must use `uniformity.HV_THRESHOLD_V`.
+2. Every change of function, AC/DC setting or terminal prompts the operator. Consecutive points that differ in function must have different
+   switch text or their own prompt (`handheld_dmm._prompt_function` skips the prompt when the switch text is unchanged). Checked: handheld specs.
+   Bench engines already prompt on every terminal change (review 2026-11-05); not checked by the test.
+3. Calibrator safeguards live in the shared calibrator driver (5560A / 5522A / 5520A), not in engines: clear old errors before an error check,
+   read back mode and output impedance after setting them, write the impedance only when it changes, confirmed operate. Engines do not call
+   `operate_unverified()` and do not write `OUT_IMP` themselves. Changed command sequences need the golden transcripts updated
+   (`tests/golden_capture.py`) and are flagged for a check on a real 5560A. Checked: engine and launcher source.
+4. Cable prompts and equipment lists that name a calibrator name every calibrator the procedure offers (the 5520A when `calibrator_fit` offers
+   it) and no calibrator it does not offer. Generic wording ('the calibrator') is fine. Checked: handheld cable prompts (hookups.py plans and
+   spec groups).
+5. Every adjustment procedure runs on `adjustment_audit` (As Found gate before unlock, all steps done before constants are saved, error queue
+   checked after the save, Abort, a DEMO kept in memory). A secret placeholder never reaches a transport error message: hidden in the shared
+   driver layer, so no driver has to remember it. Checked: adjustment sidecars and launchers; a probe instrument whose write fails.
+6. Warm-up. Every procedure whose manuals (instrument or standard) give a warm-up asks the operator to confirm it before the first point,
+   showing the time and the page; no timer. Declared in the SIDECAR as `"warmup": {"minutes": n, "ref": "<manual, page>"}` (0 minutes when the
+   manuals state none): the sidecar is the one place every procedure has (several have no spec file) and editing it never changes a
+   fingerprint. Checked: declared, and a procedure with minutes > 0 asks. The first step is a sweep of every manual.
+7. Pass/fail goes through `uniformity.within_limits(reading, low, high)`: exact decimal, limits inclusive (a reading exactly on a limit
+   passes). Checked: every procedure's launcher or engine uses it.
+8. Fingerprints list every procedure module, driver and data file the procedure's launcher and engines import or name. Shared infrastructure
+   (`shared_modules` in the allowlist file) is in NO fingerprint. A module is one or the other: `handheld_unc.py`, `manual_override.py` and
+   `hookups.py` are in some fingerprints and missing from others today, so each needs that decision. Checked: imports and data-file names.
+9. Every spec JSON (`specs/*.json`, `specs/standards/*.json`) has a committed builder with repo-relative paths, and running the builder
+   reproduces the committed file (build timestamps ignored). Checked: the test runs every builder in a temporary copy of the suite. Recorded
+   exceptions until builders exist: the 110-series and Truevolt specs, the reference CMC files, and the 34401A / 8846A / WaveSurfer limits
+   held in their launchers. The MDO4000C builder's /home/claude paths are to be fixed.
+10. Handheld spec options (`hv_threshold_v`, `hv_once_per_group`, `auto_ramp`, `function_prompt`, `report_title`) come from
+    `specs/handheld_defaults.json`; a spec that differs gives the reason in `options.option_reasons[<option>]`. handheld_dmm.py does not read
+    the file yet (its built-in defaults still apply to a spec that leaves an option out). Checked: every handheld spec.
+11. Point counts written in a sidecar description, a launcher docstring or a handheld spec's model note match the spec (all points, or all
+    without the optional-include, functional-check or visual points). Checked.
+12. Every sidecar has a `family` (`uniformity.FAMILIES`: handheld-dmm, clamp-meter, bench-dmm, adjustment, oscilloscope, function-generator,
+    frequency-counter, rf, dacq). A fix to shared behaviour (prompts, safeguards, pass/fail, report text) lists the family's other procedures
+    in the commit message, each as applied or why not. Checked: the field; the commit-message part is a working rule.
+
+### Uniformity rules, batch 1 (branch `uniformity-batch1`, 2026-11-06; simulated bench only, never run on hardware)
+Rules 2, 4, 10 and 11 are now clear for every procedure; rule 1 is clear for every handheld procedure (the 15 left are bench and other engines
+with their own threshold: a later batch).
+- Rule 1: every handheld spec is at 30 V, asked once per hook-up group (110-series was 500 V per point, 287/289 and MM325 60 V per point,
+  170 and 77 IV per point). New VOHM cautions in `hookups.py` EXTRA for fluke110 (600 V), fluke170, fluke77, fluke87v (1000 V) and in the
+  287/289 VOHM group: their wording is general practice, NOT yet checked against each meter's manual safety section (said in the caution).
+  110-series point 3-40 (AUTO-V LoZ, 500 V) keeps its 50 V ramp as an explicit `ramp` list (50 ... 500 V) now that `auto_ramp` is off; the
+  HIGH VOLTAGE question names an explicit ramp (it named only the automatic one before).
+- Rule 2: own `prompt` on the points whose function changes with the same dial position: 116 3-34 (DC to AC µA), 287/289 4-9 and 4-40 (AC/DC
+  display), 4-51, 4-57, 4-62 (AC to DC current). The prompt text says what to change, not which button (UNVERIFIED on the meters).
+- Rule 4: `hookups.calibrator_key` now returns '5520A' for a 5520A selection; its prompts use the 5522A terminals and pictures
+  (`hookups.SAME_PANEL`) but name the Fluke 5520A (before, a 5520A operator was told 'Fluke 5522A'). Spec group texts of the 287/289, 365,
+  374-376-II, 381 (WIRE_0A) and 753/754 (MEAS_MA, SRC_SIM) name every offered calibrator. Exception: the 325 shares the 323 family's coil
+  text that names the 5520A, which the 325 does not offer.
+- Rule 10: every shipped handheld spec now states each shared option; the Keithley 485 gives its reason for `function_prompt` off.
+  handheld_dmm.py still does not read `specs/handheld_defaults.json`: with every shipped spec explicit it would change only user-built
+  Datasheet Builder sheets that leave options out, which the rules did not ask for.
+- Rule 11: 374 / 375 counts without the iFlex-with-coil points are 24 / 30 (were 19 / 25); GIDEP is 210 points (was 220).
+- Report title: the 110-series, 287/289 and MM325 reports are now titled 'Calibration Data' (were '<model> Performance Verification').
+- Verified-on-hardware: edits to hookups.py, handheld_dmm.py, the specs and two launchers change the fingerprint of the handheld and clamp
+  procedures: they show 'Changed since verification' until re-marked.
+
 ## Frequency band edges (decided 2026-10-25)
 - A2LA scope CMC tables (specs/a2la_1888_03_cmc.json, `uncertainty.Scope`): AC rows are printed '(> lo to hi) Hz', so they are read HALF-OPEN: a frequency on a shared
   edge belongs to the row below (the lowest row of a block includes its lower edge).  AC volts and AC current alike (1d13125).  The MDO flatness rows print the scope's 0.050 dB.
@@ -2313,7 +2401,7 @@ Owner decision: the Tk build is gone; the suite is Qt only.
 - Shared-file touches (no behavior change to any other engine): `drivers/__init__.py` (exports), `procmods_engine.py` (`MODEL_IDS['f6060a']` + four settle tunables), `drivers/simulated_8902a.py` (`sc_held`), `tests/golden_capture.py` (registration + `read_stb` pass-through on `RecordingTransport`), `tests/test_driver_commands_gen.py` (96270A command counts), `tests/test_reset_startup.py`, `tests/test_procmods_engines.py`, `tests/test_8808a_manual_override.py` and `tests/test_dsb_runtime_rules.py` (the MANUAL_OVERRIDE scan lists), `tests/fixtures/legacy_registry.json`, `tests/golden/fstring_lint_baseline.json`.
 
 ### Fluke 6060A/AN from the GIDEP document (added 2026-11-02; `Procedures/Fluke_6060A_GIDEP_Verification.py`)
-T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedure, own spec `specs/fluke_6060a_gidep_pv.json` (builder `specs/build_fluke_6060a_gidep_spec.py`, 220 points), own settings / progress / procmods key `6060A-gidep` (engine `main(spec_path, state_key, variant_label)`).
+T.O. 33K3-4-911-1 (30 April 2017). Same engine as the Instruction Manual procedure, own spec `specs/fluke_6060a_gidep_pv.json` (builder `specs/build_fluke_6060a_gidep_spec.py`, 210 points; '220' corrected 2026-11-06, uniformity rule 11), own settings / progress / procmods key `6060A-gidep` (engine `main(spec_path, state_key, variant_label)`).
 - New engine point kinds: `manual` (typed reading, no RF): the 10 MHz reference (counter) and the three sub-kHz spurs; `devmeter` (Tables 9, 10): the 96270A FM instrument (`Fluke96270A.setup_fm`, commands `FM_COMMANDS`, Remote Programmers Manual pp. 32, 35, 36, 38, 59; NOT run on hardware, the unit of the FM:DEV? / FM:INT:FREQ? replies is UNVERIFIED) sends carrier / rate / deviation at +7 dBm to the 6060A DEVIATION METER INPUT, the technician types the 6060A display in kHz, limit = deviation +/- 3 kHz (Table 9) or +/- 30 kHz (Table 10). The 96270A goes back to the leveled sine afterwards. Six points (370 kHz at 30 and 250 MHz) exceed the 96270A's FM limit (Operator Manual Table 3-26) and are listed NOT TESTED.
 - Table 5 is relative to the 0 dBm reading: record-only level rows plus derived `LEVEL_REL` rows (+/-2.5 dB).
 - Points the 6060A driver cannot program are listed NOT TESTED: frequency below 0.1 MHz (10 kHz harmonics). FM deviation above the manual's 99.9 kHz (Table 8, 100/250/380 kHz) is allowed by the spec option `fm_max_khz` 500 (owner, 2026-11-02; UNVERIFIED on a real unit, the read-back stops the point if the unit refuses); the Instruction Manual procedure still stops at 99.9 kHz.

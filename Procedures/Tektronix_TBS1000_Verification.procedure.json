@@ -5,6 +5,7 @@
  "manufacturer": "Tektronix",
  "model": "TBS1022/1042/1062/1064/1102/1104/1152/1154",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "1",
  "order": 40,
  "description": "Standalone calibration procedure",

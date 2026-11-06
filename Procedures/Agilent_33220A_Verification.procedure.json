@@ -5,6 +5,7 @@
  "manufacturer": "Agilent",
  "model": "33220A",
  "category": "Function Generator",
+ "family": "function-generator",
  "version": "2",
  "order": 22,
  "description": "Standalone calibration procedure",

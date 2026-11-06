@@ -948,7 +948,7 @@
    ]
   },
   {
-   "call": "{'applied': {'frequency': 45, 'value': 0.0006}, 'base_unit': 'A', 'display_unit': 'µA', 'factor': 1e-06, 'group': 'UAMP', 'high': '609.3', 'id': '3-34', 'kind': 'ACI', 'low': '590.7', 'models': ['116'], 'n': 35, 'nominal': 0.0006, 'note': 'The manual labels this step \"DC µAmps\" but the applied signal is 600 µA AC at 45 Hz; select AC on the meter.', 'range': '600.0 µA', 'section': 'AC µA', 'step': 34, 'switch': 'µA', 'table': '3', 'test': 'numeric'}",
+   "call": "{'applied': {'frequency': 45, 'value': 0.0006}, 'base_unit': 'A', 'display_unit': 'µA', 'factor': 1e-06, 'group': 'UAMP', 'high': '609.3', 'id': '3-34', 'kind': 'ACI', 'low': '590.7', 'models': ['116'], 'n': 35, 'nominal': 0.0006, 'note': 'The manual labels this step \"DC µAmps\" but the applied signal is 600 µA AC at 45 Hz; select AC on the meter.', 'prompt': 'The dial stays at the µA position: change the meter from DC to AC current before this point.', 'range': '600.0 µA', 'section': 'AC µA', 'step': 34, 'switch': 'µA', 'table': '3', 'test': 'numeric'}",
    "case": "handheld_dmm.IO.apply[116 ACI#35]",
    "log": [
     "Fluke 5522A|>>|STBY",
@@ -3582,7 +3582,7 @@
    ]
   },
   {
-   "call": "{'applied': {'frequency': 35000.0, 'value': 0.25}, 'base_unit': 'V', 'display_unit': 'mV', 'factor': 0.001, 'group': 'VOHM', 'high': '262.90', 'id': '4-9', 'ir': {'range': [500, -3], 'rel': False, 'unit': 'VAC'}, 'kind': 'ACV', 'low': '237.10', 'models': ['287', '289'], 'n': 18, 'nominal': 0.25, 'note': 'Select the AC/DC display (AC reading in the primary display). Input: 250 mV at 35 kHz.', 'range': '500.00 mV', 'section': 'DC mV, AC/DC', 'step': 9, 'switch': 'mV ⎓ / temperature position (DC millivolts)', 'table': '4', 'test': 'numeric'}",
+   "call": "{'applied': {'frequency': 35000.0, 'value': 0.25}, 'base_unit': 'V', 'display_unit': 'mV', 'factor': 0.001, 'group': 'VOHM', 'high': '262.90', 'id': '4-9', 'ir': {'range': [500, -3], 'rel': False, 'unit': 'VAC'}, 'kind': 'ACV', 'low': '237.10', 'models': ['287', '289'], 'n': 18, 'nominal': 0.25, 'note': 'Select the AC/DC display (AC reading in the primary display). Input: 250 mV at 35 kHz.', 'prompt': 'The dial stays at the mV position: select the AC/DC display (AC reading in the primary display) before this point.', 'range': '500.00 mV', 'section': 'DC mV, AC/DC', 'step': 9, 'switch': 'mV ⎓ / temperature position (DC millivolts)', 'table': '4', 'test': 'numeric'}",
    "case": "handheld_dmm.IO.apply[289 ACV#18]",
    "log": [
     "Fluke 5522A|>>|STBY",
@@ -3742,7 +3742,7 @@
    ]
   },
   {
-   "call": "{'applied': {'frequency': None, 'value': 0.0005}, 'base_unit': 'A', 'display_unit': 'µA', 'factor': 1e-06, 'group': 'UAMP', 'high': '500.58', 'id': '4-51', 'ir': {'range': [500, -6], 'rel': False, 'unit': 'ADC'}, 'kind': 'DCI', 'low': '499.42', 'models': ['287', '289'], 'n': 59, 'nominal': 0.0005, 'range': '500.00 µA', 'section': 'µA DC', 'step': 51, 'switch': 'µA position (current)', 'table': '4', 'test': 'numeric'}",
+   "call": "{'applied': {'frequency': None, 'value': 0.0005}, 'base_unit': 'A', 'display_unit': 'µA', 'factor': 1e-06, 'group': 'UAMP', 'high': '500.58', 'id': '4-51', 'ir': {'range': [500, -6], 'rel': False, 'unit': 'ADC'}, 'kind': 'DCI', 'low': '499.42', 'models': ['287', '289'], 'n': 59, 'nominal': 0.0005, 'prompt': 'The dial stays at the µA position: change the meter from AC to DC current before this point.', 'range': '500.00 µA', 'section': 'µA DC', 'step': 51, 'switch': 'µA position (current)', 'table': '4', 'test': 'numeric'}",
    "case": "handheld_dmm.IO.apply[289 DCI#59]",
    "log": [
     "Fluke 5522A|>>|STBY",
@@ -5149,7 +5149,7 @@
    ]
   },
   {
-   "call": "<Fluke28x>, {'applied': {'frequency': 35000.0, 'value': 0.25}, 'base_unit': 'V', 'display_unit': 'mV', 'factor': 0.001, 'group': 'VOHM', 'high': '262.90', 'id': '4-9', 'ir': {'range': [500, -3], 'rel': False, 'unit': 'VAC'}, 'kind': 'ACV', 'low': '237.10', 'models': ['287', '289'], 'n': 18, 'nominal': 0.25, 'note': 'Select the AC/DC display (AC reading in the primary display). Input: 250 mV at 35 kHz.', 'range': '500.00 mV', 'section': 'DC mV, AC/DC', 'step': 9, 'switch': 'mV ⎓ / temperature position (DC millivolts)', 'table': '4', 'test': 'numeric'}",
+   "call": "<Fluke28x>, {'applied': {'frequency': 35000.0, 'value': 0.25}, 'base_unit': 'V', 'display_unit': 'mV', 'factor': 0.001, 'group': 'VOHM', 'high': '262.90', 'id': '4-9', 'ir': {'range': [500, -3], 'rel': False, 'unit': 'VAC'}, 'kind': 'ACV', 'low': '237.10', 'models': ['287', '289'], 'n': 18, 'nominal': 0.25, 'note': 'Select the AC/DC display (AC reading in the primary display). Input: 250 mV at 35 kHz.', 'prompt': 'The dial stays at the mV position: select the AC/DC display (AC reading in the primary display) before this point.', 'range': '500.00 mV', 'section': 'DC mV, AC/DC', 'step': 9, 'switch': 'mV ⎓ / temperature position (DC millivolts)', 'table': '4', 'test': 'numeric'}",
    "case": "handheld_dmm.ir_read[ACV#18]",
    "log": [
     "Fluke289|>>|QDDA",

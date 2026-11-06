@@ -299,7 +299,7 @@ def stimulus(fn, p, strict_sensor=False):
     if k == 'CAP':
         return Stim('CAP', nom, None, out_dir)
     if k in LIGHT_KINDS:                                       # light meters: the reference light level in the point's own unit (A2LA-LIGHT / T-10A rows; nothing converted)
-        return Stim(k, nom, None, out_dir)
+        return Stim(k, nom, None, 'input')                     # both light standards MEASURE the light the UUT reads (scope 'Light - Measure'): their rows are 'input'
     if k in ('FREQ', 'PERIOD'):
         freq = nom if k == 'FREQ' else (D(1) / nom)
         cov = [Stim('ACV', p.amplitude, freq, out_dir)] if p.amplitude else []

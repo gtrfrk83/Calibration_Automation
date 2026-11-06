@@ -5,6 +5,7 @@
  "manufacturer": "Tektronix",
  "model": "TDS2000C/TDS1000C-EDU",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "1",
  "order": 13,
  "description": "Standalone calibration procedure",

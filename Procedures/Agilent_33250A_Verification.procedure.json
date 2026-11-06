@@ -5,6 +5,7 @@
  "manufacturer": "Agilent",
  "model": "33250A",
  "category": "Function Generator",
+ "family": "function-generator",
  "version": "1",
  "order": 23,
  "description": "Standalone calibration procedure",

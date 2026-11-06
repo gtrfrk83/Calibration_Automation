@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "6060A",
  "category": "RF Signal Generator",
+ "family": "rf",
  "version": "1",
  "order": 77,
  "description": "Automated performance verification of the Fluke 6060A / 6060A-AF synthesized signal generator (Instruction Manual Section 4A): power-on, synthesis, high / mid / low / alternate level, harmonics and spurs, and the eight modulation tests. HP 8902A, Fluke 96270A power meter (NRP40T, unverified), HP 8563E and an LF function generator as the measuring equipment. Output leakage (4A-9, 4A-10) is not included. Remote commands, analyzer settings and several limits' wording are flagged unverified in the point details.",

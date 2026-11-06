@@ -5,6 +5,7 @@
  "manufacturer": "Keysight",
  "model": "33210A",
  "category": "Function Generator",
+ "family": "function-generator",
  "version": "2",
  "order": 21,
  "description": "Standalone calibration procedure",

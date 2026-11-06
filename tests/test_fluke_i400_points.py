@@ -163,6 +163,20 @@ class Flow(unittest.TestCase):
         q, std = a._unc_point(PTS[1])
         self.assertEqual(q['frequency'], 400.0)
 
+    def test_uncertainty_is_in_the_rows_output_unit(self):
+        """The rows are in the clamp's OUTPUT amps (1 mA/A); the uncertainty printed beside them is too (2026-11-06: it was in clamp amps, 1000 x too large)."""
+        import report_pdf
+        a = self.app(cal='Fluke 5522A')
+        self.assertTrue(self.hn.run_all())
+        rows, pts = a.certificate_rows_and_points()
+        for row, p in zip(rows, pts):
+            q, std = a._unc_point(p)
+            in_clamp_amps = report_pdf.point_uncertainty(q, std)
+            self.assertEqual(row['Uncertainty'], report_pdf.point_uncertainty(dict(q, scale=float(q.get('scale') or 1.0) * A.OUTPUT_A_PER_A), std))
+            self.assertNotEqual(row['Uncertainty'], in_clamp_amps)
+        by_id = {p['id']: row for row, p in zip(rows, pts)}
+        self.assertEqual(by_id[2]['Uncertainty'], '1.5 mA')            # 100 A read = 100 mA output, limits +/-2.06 mA (was printed '1.5 A')
+
     def test_adapters_over_fake_transport(self):
         for cls in (A.Reading8846A, A.Reading34401A):
             sent = []

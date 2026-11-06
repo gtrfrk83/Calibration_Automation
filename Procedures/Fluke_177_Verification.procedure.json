@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "177",
  "category": "Digital Multimeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 28,
  "description": "Standalone calibration procedure",

@@ -171,7 +171,7 @@ def build_spec():
         raise SystemExit('Table 2 limits disagree with the specification table (p. 5):\n  ' + '\n  '.join(problems))
     return dict(
         schema=2, kind='manual-reading',
-        options=dict(hookup_meter='fluke77', hv_threshold_v=30, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
+        options=dict(hookup_meter='fluke77', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
         source=dict(document='Fluke Model 77 Series IV Digital Multimeter - Calibration Information',
                     pages='11-13 (printed): Table 1 p. 11, Table 2 Performance Tests pp. 12-13; specifications pp. 4-6',
                     cite='Fluke Model 77 Series IV Calibration Information, Table 2, pp. 12-13 (step 8 limits corrected from the printed 0.47 / 0.53 V ac to 0.047 / 0.053 V ac)',

@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "8846A",
  "category": "Digital Multimeter",
+ "family": "bench-dmm",
  "version": "60",
  "order": 3,
  "description": "Standalone calibration procedure",

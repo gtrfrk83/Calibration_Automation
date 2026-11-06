@@ -284,7 +284,10 @@ class BuildOneWay(Fix):
 
     def test_readiness_check_runs_on_the_generated_procedure(self):
         res = self.build()
-        r = subprocess.run([sys.executable, str(ROOT / 'tools' / 'readiness_check.py'), res.uid, '--verbose', '--json', str(self.d / 'r.json')], capture_output=True, text=True,
+        # --base HEAD: this test is about the generated procedure, not about the branch it runs on (a branch that edits a shared engine makes the
+        # 'shared' check FAIL against origin/main on purpose; that is the readiness check's job on the branch, not this test's)
+        r = subprocess.run([sys.executable, str(ROOT / 'tools' / 'readiness_check.py'), res.uid, '--verbose', '--json', str(self.d / 'r.json'), '--base', 'HEAD'],
+                           capture_output=True, text=True,
                            env=dict(os.environ), cwd=str(ROOT))
         self.assertEqual(r.returncode, 0, r.stdout[-3000:] + r.stderr[-1500:])
         self.assertIn('PASS run', r.stdout)

@@ -99,6 +99,8 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
         if kind == 'TEMP':        # thermocouple simulation (Type K): the calibrator's degC specification, never the magnitude lookup
             hit = standard.lookup_temperature(nominal, tc=tc, variant=variant) if (tc != 'K' or variant) else standard.lookup_temperature(nominal)
         else:
+            if kind in LIGHT_KINDS:       # Light - Measure: the light standards (A2LA-LIGHT, T-10A) only MEASURE, so their rows are 'input'
+                direction = 'input'
             hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency, direction=direction)
         b.hit = hit
         if getattr(standard, 'model', '') == COIL_MODEL:       # the 50-turn coil: its own scope lines ARE the floor; the larger overlapping amplifier / calibrator lines of the table are other equipment
@@ -143,7 +145,7 @@ def light_cmc(kind, nominal):
         if std is None:
             sm.seed()
             std = sm.standard(LIGHT_MODEL)
-        hit = std.lookup(kind, nominal, direction='output') if std is not None else None
+        hit = std.lookup(kind, nominal, direction='input') if std is not None else None      # Light - Measure: the sheet's rows are 'input' (the standard measures)
         return float(hit.limit) if hit is not None else None
     except Exception:
         return None

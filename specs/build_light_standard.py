@@ -68,8 +68,8 @@ NOTES = {
     '6': 'UNITS (as listed on the scope, each its own unit, nothing converted): FC, lux, La, uW/cm2 (printed with the micro sign and a superscript 2; the stored unit is ASCII "uW/cm2"). '
          'For information only, never used in a calculation: 1 FC = 10.763910416709722 lux (lux is the SI unit of illuminance); 1 La = 10000/pi cd/m2 (a luminance unit, not an illuminance). '
          'The three white-light rows are the same CMC (2.9 %) on three different scales, so a lux value is never looked up in the FC or La rows.',
-    '7': 'DIRECTION AND PERIOD: the scope parameter is "Measure"; the sheet stores direction "output" (the light level the lab\'s standard establishes at the unit under test), which is what the default '
-         'lookup (specmanager, tartur.standard_accuracy) asks for. A CMC has no 90 day / 1 yr column: it is stored once, under the period "1 yr" (the default period of every standard).',
+    '7': 'DIRECTION AND PERIOD: the scope parameter is "Measure"; the sheet stores direction "input" (the standard MEASURES: the lab\'s radiometer reads the light level the unit under test also reads). '
+         'Lookups pass direction="input" (uncertainty_budget.light_cmc, the Datasheet Builder light stimulus); the default lookup (direction="output") does not find these rows. A CMC has no 90 day / 1 yr column: it is stored once, under the period "1 yr" (the default period of every standard).',
     '8': 'NOT STORED: stability, non-uniformity, spectral mismatch or distance-dependent terms of the radiometer standard, and the unit under test (resolution, repeatability, drift). '
          'The CMC excludes the unit under test; a certificate value may be larger. No other wavelength, no spectral irradiance and no radiometric unit other than uW/cm2 at 365 nm is on the scope.',
 }
@@ -115,7 +115,7 @@ def problems_for(data):
 
 
 def build():
-    functions = [dict(name=name, direction='output', page=PDF_PAGE, ranges=[make_row(name, *rest)]) for name, *rest in ROWS]
+    functions = [dict(name=name, direction='input', page=PDF_PAGE, ranges=[make_row(name, *rest)]) for name, *rest in ROWS]
     data = dict(schema=1, standard=dict(
         manufacturer='Applied Technical Services, LLC. (A2LA 1888.03)', model='A2LA-LIGHT',
         description='Light measurement (A2LA scope CMC, radiometer standards)',

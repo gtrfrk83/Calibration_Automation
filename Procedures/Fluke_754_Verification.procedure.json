@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "754",
  "category": "Process Calibrator",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 65,
  "description": "Fluke 753 / 754 Documenting Process Calibrator Performance Verification (family spec): this launcher runs the 754, 90 points",

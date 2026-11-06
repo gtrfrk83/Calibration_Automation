@@ -5,6 +5,7 @@
  "manufacturer": "Keysight",
  "model": "34465A",
  "category": "Digital Multimeter",
+ "family": "bench-dmm",
  "version": "3",
  "order": 6,
  "description": "Standalone calibration procedure",

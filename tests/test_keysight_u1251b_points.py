@@ -630,8 +630,14 @@ class EndToEnd(unittest.TestCase):
         fr = [p for p in app.points if p.get('unc_kind') == 'FREQ'][0]
         self.assertEqual(rows[fr['id']]['Uncertainty'], report_pdf.point_uncertainty(dict(kind='FREQ', nominal=1000.0, frequency=None, unit='Hz', range=None, use_standard=True), standard=app.calibrator_model()))
         cond = [p for p in app.points if p['section'] == 'Conductance'][0]
-        self.assertEqual(rows[cond['id']]['Uncertainty'], report_pdf.point_uncertainty(dict(kind='OHM2', nominal=20000000.0, frequency=None, unit='ohm', range=None), standard=app.calibrator_model()))
-        self.assertEqual((app.certificate_fields(cond)['TAR'], app.certificate_fields(cond)['TUR']), ('', ''))          # siemens against ohms: no ratio is invented
+        self.assertEqual(cond['unc_kind'], 'CONDUCTANCE')                       # 2026-11-06: in siemens like the row (as the 80 Series V), no longer ohms
+        import handheld_unc, uncertainty
+        u, _acc, unit = handheld_unc.evaluate(cond, app.calibrator_model())
+        self.assertEqual(unit, 'S')
+        self.assertEqual(rows[cond['id']]['Uncertainty'], uncertainty.format_value(u, 'S'))
+        self.assertTrue(rows[cond['id']]['Uncertainty'].endswith('S'), rows[cond['id']]['Uncertainty'])
+        self.assertLess(u, 0.6e-9)                                              # well inside the +/-0.6 nS limit: a real ratio, not 11 kOhm on an nS row
+        self.assertNotEqual(app.certificate_fields(cond)['TUR'], '')
         for p in app.points:
             if p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP', 'TEMP') and p.get('applied') and not p.get('unc_kind') and p['section'] != 'Conductance':
                 q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'], frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)

@@ -2493,12 +2493,12 @@
     "frequency": null
    },
    "report_desc": "500 nS range (20 MΩ applied = 50 nS)",
-   "unc_unit": "ohm",
+   "unc_kind": "CONDUCTANCE",
    "group": "VOHM",
    "prompt": "Before the first reading of this function: Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead.",
    "settle": 0,
    "tol_text": "Table 6-2: 49.3 to 50.7 nS (±0.7 nS from the nominal, 1 year)",
-   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.7 nS for the U1251B. 50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator's uncertainty at 20 MΩ in ohms; TAR / TUR are blank (siemens vs ohms). Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.7 nS for the U1251B. 50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator's relative uncertainty at 20 MΩ applied to the conductance (handheld_unc CONDUCTANCE, as the 80 Series V), in siemens like the limits, so TAR / TUR are given. Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
    "check": {
     "U1251B": {
      "verdict": "same",
@@ -2531,12 +2531,12 @@
     "frequency": null
    },
    "report_desc": "500 nS range (20 MΩ applied = 50 nS)",
-   "unc_unit": "ohm",
+   "unc_kind": "CONDUCTANCE",
    "group": "VOHM",
    "prompt": "Before the first reading of this function: Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead.",
    "settle": 0,
    "tol_text": "Table 6-2: 49.4 to 50.6 nS (±0.6 nS from the nominal, 1 year)",
-   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.6 nS for the U1252B. 50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator's uncertainty at 20 MΩ in ohms; TAR / TUR are blank (siemens vs ohms). Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.6 nS for the U1252B. 50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator's relative uncertainty at 20 MΩ applied to the conductance (handheld_unc CONDUCTANCE, as the 80 Series V), in siemens like the limits, so TAR / TUR are given. Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
    "check": {
     "U1252B": {
      "verdict": "same",
