@@ -2352,7 +2352,9 @@ prints no pulse-width accuracy; no 81134A sheet). Time interval: owner "use this
 5 s (30 + 1000t) us/s' (screenshot; page not recorded: UNVERIFIED against the full scope) -> specs/a2la_1888_03_time.json (builder specs/build_a2la_cmc_time.py, a separate
 file so the Datasheet Builder's kinds are unchanged): 49.9 ns -> 3e-6 x 49.9 ns = 0.1497 ps -> 0.15 ps, TUR >1000:1. CAUTION raised with the owner: that is the lab's
 time-marker capability, not what the 33250A pulse delivers (no width accuracy is published), so it may understate the substitute's uncertainty; owner asked about the
-33250A 'Time [Arb Jitter (rms)] 30 ppm + 2.5 ns' row (arb function, rms jitter, not accuracy; the Pulse function's row is 100 ppm + 50 ps rms) - decision pending.
+33250A 'Time [Arb Jitter (rms)] 30 ppm + 2.5 ns' row (arb function, rms jitter, not accuracy; the Pulse function's row is 100 ppm + 50 ps rms) and whether it can come
+from the frequency uncertainty (only if the interval is one PERIOD of a reference-locked signal: a 49.9 ns period split to both channels with a stop hold-off, which
+needs the Programmer's Reference, not on file). OWNER DECISION 2026-11-06: "lets keep what we have" - the Time Marker CMC alone (0.15 ps) stays.
 Code: `point_uncertainty(p)` (keysight_53220a_verification.py) is the single source of every row's Uncertainty; `App.review_point_specs()` gives the review window the same
 figures (no calibrator to choose), so a single-period Mean no longer shows 'No uncertainty required' beside a printed number. Burst frequency (Test 7) not covered yet.
 Tests: `test_uncertainty_follows_the_owner_decisions_of_2026_11_06`, `test_review_window_rows_match_the_certificate`.
