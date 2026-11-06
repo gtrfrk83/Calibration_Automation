@@ -45,6 +45,7 @@ TITLE = 'Fluke i400 AC Current Clamp'
 SPEC_PATH = HERE / 'specs' / 'fluke_i400_pv.json'
 SPEC = procspec.load(SPEC_PATH)
 POINTS = procspec.flatten(SPEC)
+OUTPUT_A_PER_A = 0.001          # the clamp's output: 1 mA per ampere it reads (report rows are in output amps, the budget in clamp amps)
 procspec.apply_period(POINTS, SPEC['default_period'])
 PERIODS = {'Limits printed in the manual': 'printed'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
@@ -831,8 +832,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return q, (std or self.standard_for(p))
 
     def certificate_row(self, p, r):
+        """The report row, in the clamp's OUTPUT amps (nominal 0.1 A = 100 A read).  The uncertainty is worked out in clamp amps (_unc_point) and
+        referred to the output (x OUTPUT_A_PER_A), so it is in the same unit as the nominal and limits it is printed beside."""
         import report_pdf
         q, std = self._unc_point(p)
+        q = dict(q, scale=float(q.get('scale') or 1.0) * OUTPUT_A_PER_A)
         return report_pdf.cert_row(p['description'], p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'], r['reading'], r['result'] == 'FAIL',
                                    section=self.report_section(p), frequency=p['applied']['frequency'], uncertainty=report_pdf.point_uncertainty(q, std))
 
@@ -841,7 +845,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try:
             import tartur
             q, std = self._unc_point(p)
-            half = float(f'{p["error"] / 0.001:.9g}')                       # clamp amps: the output is 1 mA/A
+            half = float(f'{p["error"] / OUTPUT_A_PER_A:.9g}')              # clamp amps: the output is 1 mA/A
             c = p['clamp_amps']
             return tartur.row_fields(q, float(f'{c - half:.9g}'), float(f'{c + half:.9g}'), standard=std)
         except Exception:

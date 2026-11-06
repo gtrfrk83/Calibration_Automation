@@ -51,6 +51,21 @@ Tektronix 3 Series MDO (MDO32 / MDO34; own engine mdo3_verification.py, see '3 S
   'Instruments reset to default settings at start'. Because a UUT reset can erase stored settings, a notice is confirmed first (declining touches
   nothing). STANDING-RULE DEVIATION (owner request, Fluke 8808A only): `AppResetMixin.RESET_ONCE_PER_SESSION` (default False = reset on every Run, every other engine unchanged) is True for the 8808A App, so 'reset every instrument to defaults before tests start' is once per session for that procedure; see the 8808A section. Fast demo sends nothing; a virtual-bench demo resets the SIMULATED instruments (see Virtual bench). A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
 
+## Certificate uncertainty fixes (branch `certificate-uncertainty-fixes`, 2026-11-06; simulated only)
+Three report bugs found by the 2026-11-05 cross-category review. Limits, pass / fail, commands and prompts are unchanged; only the printed
+Uncertainty (and TAR / TUR where noted) changes.
+- Fluke i400: the rows are in the clamp's OUTPUT amps (1 mA/A: 100 A read = 0.1 A), but the uncertainty was printed in clamp amps, 1000 x too
+  large ('1.5 A' beside a +/-2.06 mA limit). `certificate_row` now refers it to the output (x `OUTPUT_A_PER_A` = 0.001): 1.5 mA at 100 A,
+  4.1 mA at 400 A. TAR / TUR were already worked out in clamp amps and do not change. Test: test_fluke_i400_points.
+- Keysight U1251B / U1252B conductance (2-82, 2-83): `unc_kind CONDUCTANCE`, as the 80 Series V point 3-30 (handheld_unc: the 20 MOhm budget
+  as a relative uncertainty on 50 nS), so the Uncertainty is in siemens like the row (27 pS; was '11 kOhm' on an nS row) and TAR / TUR are
+  given (they were blank). Builder `specs/build_keysight_u1251b_spec.py`. Test: test_keysight_u1251b_points.
+- Keysight Truevolt 34460A / 61A / 65A / 70A: the report passed `standard='5560A'` for every row, so the two capacitance points, made with the
+  technician's own capacitance standard (`source: manual`), printed the 5560A capacitance figure (2.2 nF). `App.standard_for(p)` gives the
+  5560A for calibrator points only, as the 34410A engine does: those points now print the scope CMC (5.0 nF). No other row changes (checked on all
+  four models). Test: test_truevolt_report_standard.
+- Verified-on-hardware: the i400 engine, the Truevolt engine and the U1251B / U1252B spec slices change their fingerprints.
+
 ## Uniformity rules (owner, 2026-11-05; branch `uniformity-rules`)
 Adopted after a review of every procedure category for inconsistencies between procedures (review run on main 0eb6fb8). They sit on top of the
 Standing rules above. Adopting rules 1, 2, 3 and 7 is the owner's request to change safety prompts, instrument command sequences and pass/fail

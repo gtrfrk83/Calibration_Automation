@@ -393,8 +393,9 @@ def build_rows():
                 elif kind == 'COND':
                     step['applied'] = dict(value=clean(D(1) / out_value * 1), frequency=None)
                     step['report_desc'] = f'{rng} range (20 MΩ applied = 50 nS)'
-                    step['unc_unit'] = 'ohm'
-                    notes.append('50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator\'s uncertainty at 20 MΩ in ohms; TAR / TUR are blank (siemens vs ohms).')
+                    step['unc_kind'] = 'CONDUCTANCE'             # as the 80 Series V conductance point: the uncertainty is in siemens, like the row (2026-11-06)
+                    notes.append('50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator\'s relative uncertainty at 20 MΩ '
+                                 'applied to the conductance (handheld_unc CONDUCTANCE, as the 80 Series V), in siemens like the limits, so TAR / TUR are given.')
                 elif kind == 'FREQ':
                     step['applied'] = dict(value=clean(out_value), frequency=clean(out_freq))
                     step['unc_kind'] = 'FREQ'
