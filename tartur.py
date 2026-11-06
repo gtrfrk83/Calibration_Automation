@@ -218,6 +218,8 @@ def standard_accuracy(model, kind, value, frequency=None, direction='output'):
             std = sm.standard(model)
         if std is None:
             return None, None
+        if kind in ('FC', 'LUX', 'LAMBERT', 'UVIRR'):       # Light - Measure: the light standards only MEASURE, so their rows are 'input'
+            direction = 'input'
         hit = std.lookup(kind, value, frequency=frequency, direction=direction)
         if hit is None:
             return None, None

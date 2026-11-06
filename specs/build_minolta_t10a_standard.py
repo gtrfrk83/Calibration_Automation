@@ -66,8 +66,8 @@ def make_black():
 
 
 def build():
-    functions = [dict(name=name, direction='output', page=0, ranges=[make_range(name, unit, *r) for r in rows]) for name, unit, rows in WHITE]
-    functions.append(dict(name=BLACK[0], direction='output', page=0, ranges=[make_black()]))
+    functions = [dict(name=name, direction='input', page=0, ranges=[make_range(name, unit, *r) for r in rows]) for name, unit, rows in WHITE]
+    functions.append(dict(name=BLACK[0], direction='input', page=0, ranges=[make_black()]))
     data = dict(schema=1, standard=dict(
         manufacturer='Minolta', model='T-10A', description='Illuminance meter (white light) and black light, working standard ATS-04959',
         confidence_text='no confidence level printed (divisor 2, laboratory convention)', confidence_pct=None,

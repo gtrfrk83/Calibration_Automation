@@ -13,7 +13,7 @@
   "approve_date": "",
   "source_pdf": "1888-03.pdf",
   "sheet_generated": "",
-  "built": "2026-10-23T10:28:44"
+  "built": "2026-11-05T21:09:56"
  },
  "notes": {
   "1": "SOURCE: the laboratory's own A2LA scope of accreditation, certificate 1888.03 (revised 07/07/2026), printed p. 45 of 47, section X. Optical Quantities, parameter \"Light - Measure\": White (0 to 3000) FC, (0 to 35 000) lux, (0 to 100 000) La, each CMC 2.9 %; Black @ 365 nm (0 to 3000) uW/cm2, CMC 5.0 %. Comments: \"Radiometer standards.\" Page 45 of 47 is the scope's own page numbering. Built by specs/build_light_standard.py.",
@@ -22,7 +22,7 @@
   "4": "PERCENTAGE: footnote 5 of the scope: the first percentage is a percentage of the READING unless otherwise noted. Each row is +/-(CMC % I.V.) with no fixed term and no full-scale term, so the uncertainty is CMC x |reading| (2.9 % of 10 000 lux = 290 lux). The figure is not a floor-limited value: nothing is added at the bottom of a range.",
   "5": "INSTRUMENT TYPE: footnote 12 of the scope: the parameter defines the type of instrument calibrated (light meters / radiometers). The scope comment is \"Radiometer standards\": the laboratory's reference is a radiometer-based standard, so this CMC is the uncertainty of the lab's standard for the light level it applies to the unit under test.",
   "6": "UNITS (as listed on the scope, each its own unit, nothing converted): FC, lux, La, uW/cm2 (printed with the micro sign and a superscript 2; the stored unit is ASCII \"uW/cm2\"). For information only, never used in a calculation: 1 FC = 10.763910416709722 lux (lux is the SI unit of illuminance); 1 La = 10000/pi cd/m2 (a luminance unit, not an illuminance). The three white-light rows are the same CMC (2.9 %) on three different scales, so a lux value is never looked up in the FC or La rows.",
-  "7": "DIRECTION AND PERIOD: the scope parameter is \"Measure\"; the sheet stores direction \"output\" (the light level the lab's standard establishes at the unit under test), which is what the default lookup (specmanager, tartur.standard_accuracy) asks for. A CMC has no 90 day / 1 yr column: it is stored once, under the period \"1 yr\" (the default period of every standard).",
+  "7": "DIRECTION AND PERIOD: the scope parameter is \"Measure\"; the sheet stores direction \"input\" (the standard MEASURES: the lab's radiometer reads the light level the unit under test also reads). Lookups pass direction=\"input\" (uncertainty_budget.light_cmc, the Datasheet Builder light stimulus); the default lookup (direction=\"output\") does not find these rows. A CMC has no 90 day / 1 yr column: it is stored once, under the period \"1 yr\" (the default period of every standard).",
   "8": "NOT STORED: stability, non-uniformity, spectral mismatch or distance-dependent terms of the radiometer standard, and the unit under test (resolution, repeatability, drift). The CMC excludes the unit under test; a certificate value may be larger. No other wavelength, no spectral irradiance and no radiometric unit other than uW/cm2 at 365 nm is on the scope."
  },
  "limits": [
@@ -40,7 +40,7 @@
  "functions": [
   {
    "name": "Light [White] (FC)",
-   "direction": "output",
+   "direction": "input",
    "page": 45,
    "ranges": [
     {
@@ -87,7 +87,7 @@
   },
   {
    "name": "Light [White] (lux)",
-   "direction": "output",
+   "direction": "input",
    "page": 45,
    "ranges": [
     {
@@ -134,7 +134,7 @@
   },
   {
    "name": "Light [White] (La)",
-   "direction": "output",
+   "direction": "input",
    "page": 45,
    "ranges": [
     {
@@ -181,7 +181,7 @@
   },
   {
    "name": "Light [Black @ 365 nm] (uW/cm2)",
-   "direction": "output",
+   "direction": "input",
    "page": 45,
    "ranges": [
     {
