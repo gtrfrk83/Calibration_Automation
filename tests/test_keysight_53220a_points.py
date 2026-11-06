@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 A = VH = SPEC = PTS = K = None
 InstrumentError = SafetyError = None
 SCALE = {'mHz': D('0.001'), 'Hz': D(1), 'kHz': D(1000), 'MHz': D(1000000), 'GHz': D(1000000000), 'ns': D('0.000000001'), 'us': D('0.000001')}
-SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 8, 't5': 2, 't6a': 4, 't6b': 6, 't7': 8}
+SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 8, 't5': 4, 't6a': 4, 't6b': 6, 't7': 8}
 
 
 def V(text):
@@ -103,10 +103,10 @@ def by_ref(ref):
 class SpecTests(unittest.TestCase):
     def test_counts(self):
         self.assertEqual({s['id']: len(s['points']) for s in SPEC['sections']}, SECTION_SIZES)
-        self.assertEqual(len(PTS), 50)                                # 46 + the four 8 ns pulse points of the Agilent 33250A (2026-10-27)
+        self.assertEqual(len(PTS), 52)                                # 46 + four 8 ns pulse points (2026-10-27) + two Test 5 points (2026-11-06), all for the Agilent 33250A
         self.assertEqual(SPEC['default_period'], '1y')
         self.assertEqual(set(SPEC['models']), {'53210A', '53220A', '53230A'})
-        self.assertEqual(len({p['ref'] for p in PTS}), 50)
+        self.assertEqual(len({p['ref'] for p in PTS}), 52)
 
     def test_every_mean_limit_matches_the_second_typing(self):
         for table in (MEAN2, OTHER_MEAN):
@@ -490,7 +490,7 @@ class StimulusRouting(unittest.TestCase):
             short = A.pulse_shortfalls(p['stimulus'])
             if p.get('gen') == '33250A':
                 self.assertEqual(short, [], p['ref'])
-                self.assertEqual(p['nominal'], 8e-9)
+                self.assertEqual(p['nominal'], 49.9e-9 if p['test_no'] == '5' else 8e-9)
                 pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=True))
                 self.assertEqual(pl['mode'], 'pulse', p['ref'])
                 pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=False))                         # no 33250A connected: by hand, and it says why
@@ -505,7 +505,9 @@ class StimulusRouting(unittest.TestCase):
             self.assertIn('81134A', pl['reason'])
         tint = A.plan_stimulus(by_ref('5.ch1-ch2.49.9ns.mean'), self.stim(pulse_gen='33250A', gen=True))
         self.assertEqual(tint['mode'], 'manual')
-        self.assertIn('two outputs', tint['reason'])                                                       # one output: Test 5 is run by hand
+        self.assertIn('two outputs', tint['reason'])                                                       # the manual's two-output setup: not the 33250A
+        sub = A.plan_stimulus(by_ref('5.ch1-ch2.49.9ns.33250A.mean'), self.stim(pulse_gen='33250A', gen=True))
+        self.assertEqual(sub['mode'], 'pulse')                                                             # the one-output substitute (owner 2026-11-06)
         self.assertFalse(any('two outputs' in t for t in A.pulse_shortfalls(by_ref('4a.ch1.8ns.mean')['stimulus'])))
         self.assertFalse(A.pulse_shortfalls(dict(width_s=20e-9, period_s=66.6e-9, vpp=1.0)))     # the capability check is not a blanket refusal
         self.assertEqual(A.plan_stimulus(by_ref('4a.ch1.5ns.mean'), self.stim(pulse_gen='81134A'))['reason'], A.STIM_NEEDS['PULSE'])
@@ -518,8 +520,10 @@ class StimulusRouting(unittest.TestCase):
             self.assertEqual(sum(1 for p in b if p['test_no'] in ('4a', '4b')), 4)
             self.assertTrue(all(p['nominal'] == 5e-9 for p in a if p['test_no'] in ('4a', '4b')))
             self.assertTrue(all(p['nominal'] == 8e-9 for p in b if p['test_no'] in ('4a', '4b')))
-            self.assertEqual(len(a), len(b))                                                                 # Test 5 is in both
-            self.assertIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in b])
+            self.assertEqual(len(a), len(b))                                                                 # Test 5 in both: the two-output pair or the 33250A pair
+            self.assertIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in a])
+            self.assertIn('5.ch1-ch2.49.9ns.33250A.mean', [p['ref'] for p in b])
+            self.assertNotIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in b])
         self.assertEqual([p for p in A.points_for('53210A', set(), pulse_gen='33250A') if p['test_no'] in ('4a', '4b')], [])
 
     def test_the_8ns_limits_are_the_5ns_half_widths_centred_on_8ns_and_flagged_unverified(self):
@@ -840,14 +844,19 @@ class Flow(unittest.TestCase):
         for p in pulse:
             r = a.results[str(p['id'])]
             self.assertEqual((r['stimulus'], r['result']), ('pulse', 'PASS'), p['ref'])
-        tint = next(p for p in a.active_points() if p['test_no'] == '5' and p['stat'] == 'mean')
-        self.assertEqual(a.results[str(tint['id'])]['stimulus'], 'manual')                      # two outputs: by hand
+        tint = [p for p in a.active_points() if p['test_no'] == '5']
+        self.assertEqual([p['ref'] for p in tint], ['5.ch1-ch2.49.9ns.33250A.mean', '5.ch1-ch2.49.9ns.33250A.sdev'])
+        for p in tint:                                                                            # the one-output substitute, driven (owner 2026-11-06)
+            self.assertEqual((a.results[str(p['id'])]['stimulus'], a.results[str(p['id'])]['result']), ('pulse', 'PASS'), p['ref'])
+        self.assertAlmostEqual(a.results[str(tint[0]['id'])]['reading'], 49.9e-9, delta=1e-10)
+        self.assertIn('INP2:SLOP NEG', self.wire(a, '53220A'))                                    # stop on the Channel 2 falling edge
         w = [t.upper() for t in self.wire(a, '33250A')]
         widths = [t for t in w if t.startswith('PULSE:WIDTH ') or t.startswith('PULS:WIDT ')]
-        self.assertTrue(widths and all('8E-09' in t or '8.0E-09' in t or '8E-9' in t for t in widths), widths)      # the width is written (and read back by the driver) at 8 ns
+        self.assertTrue(widths and all(('8E-09' in t or '8.0E-09' in t or '8E-9' in t or '4.99E-08' in t) for t in widths), widths)   # 8 ns (Test 4), 49.9 ns (Test 5)
+        self.assertTrue(any('4.99E-08' in t for t in widths), widths)
         outs = [t for t in w if t.startswith('OUTPUT') and not t.endswith('?')]
         self.assertEqual(outs[-1], 'OUTPUT OFF')                                                  # the generator is left switched off
-        self.assertEqual(outs.count('OUTPUT ON'), 4 // 2)                                         # on for each Mean point only; the Std Dev point reuses its readings (4a, 4b)
+        self.assertEqual(outs.count('OUTPUT ON'), 3)                                              # on for each Mean point only (4a, 4b, 5); the Std Dev point reuses its readings
 
     def test_with_the_81134a_nothing_is_sent_to_a_33250a_and_the_5ns_points_are_by_hand(self):
         a = self.app('53220A')
@@ -1102,6 +1111,24 @@ class NoSignalWithStopOnSurprise(unittest.TestCase):
         self.assertEqual(seen, [])                                           # no surprise dialog
         self.assertEqual(ct.cleared_while_busy, 1)
         io.ctr.check_errors('after')                                         # the counter answers the next point
+
+class Renumbering(unittest.TestCase):
+    """2026-11-06: two Test 5 points for the 33250A were inserted, so Tests 6a to 7d moved up by two.  Results now carry their ref; a loaded result that does not
+    match its point (or an older file's result at or after the inserted points) is left out instead of landing on the wrong point."""
+
+    def test_old_and_mismatched_results_are_dropped_and_matching_ones_kept(self):
+        class Store:                                                         # the two result sets of datamode
+            pass
+        first = by_ref(A.RENUMBERED_FROM_REF)['id']
+        self.assertEqual(first, by_ref('5.ch1-ch2.49.9ns.mean')['id'] + 2)
+        app = Store()
+        app._found = {'31': dict(reading=1.0), str(first): dict(reading=2.0), str(first + 2): dict(reading=3.0),                 # an older file: no ref
+                      '3': dict(reading=4.0, ref='2a.10MHz.mean'), '4': dict(reading=5.0, ref='2a.115MHz.mean')}             # new file: '4' names another point
+        app._left = {str(first): dict(reading=6.0, ref=A.RENUMBERED_FROM_REF)}
+        self.assertEqual(A.drop_stale_results(app), 3)
+        self.assertEqual(sorted(app._found), ['3', '31'])
+        self.assertEqual(sorted(app._left), [str(first)])
+
 
 class WrongSignal(unittest.TestCase):
     """Owner 2026-11-05: 'Single period 4 ns (250 MHz), Ch 2, Mean' recorded 999.965 ns (the 1 MHz signal was still connected).  A Mean more than 10 % from its

@@ -2245,6 +2245,16 @@ Programmer's Reference p. 156 shape `"FREQ +1.0E+7,+1.0E-3,(@1)"`). Owner questi
   `measure_stats` never reached its abort (the bench script runs without the guard, which is why steps 4 and 5 passed). The guard now skips 'opc.query'
   (`skip=`): the driver aborts (device clear + *CLS) and raises 'no signal', the procedure offers a typed reading, the run goes on. Tests
   `NoSignalWithStopOnSurprise`. Same run: Tests 2a / 2b ran on the SMA100B (no [other standard]), Test 3 on the CG635 and 4a / 4b at 8 ns on the 33250A all PASS.
+- Test 5 with the Agilent 33250A (owner 2026-11-06: "is there a way to just use the 33250?" ... "add the 33250A option"). The 33250A has ONE output (its Sync
+  delay is neither settable nor specified), so the manual's two outputs 49.9 ns apart cannot be made. SUBSTITUTE: one 49.9 ns pulse, 2 Vpp, 0 V offset, period
+  200 ns, edge 5 ns, through a resistive power splitter and two equal cables to Channel 1 and Channel 2; TINT 1-2 with the Channel 2 STOP slope NEGATIVE
+  (`stop_slope='NEG'` -> INP2:SLOP NEG after the levels), so the counter measures Channel 1 rising to Channel 2 falling. The reference is the 33250A SET
+  width, whose accuracy its User's Guide does not specify: a PASS means the counter agrees with the 33250A, not a traceable 49.9 ns (flagged SUBSTITUTE on the
+  point; limits as printed). Points '5.ch1-ch2.49.9ns.33250A.mean/.sdev' (gen '33250A', driven when its address is entered, else set by hand); the two-output
+  points are now gen '81134A' (shown with that choice only), as Test 4. 52 points in the spec. Point numbers: Tests 6a to 7d moved up by two; results now
+  store their ref and `drop_stale_results` leaves out a loaded result that does not match its point (an older file: every result from the first inserted
+  point on). Hook-up picture hook_53220a_33250A_TINT.png (none supplied). Simulator: TINT with the stop slope NEG measures the split pulse's width.
+  Tests: the Flow 33250A run, `Renumbering`. NOT run on the bench yet.
 
 ## Tk build removed (branch `remove-tkinter`, 2026-10-27)
 Owner decision: the Tk build is gone; the suite is Qt only.

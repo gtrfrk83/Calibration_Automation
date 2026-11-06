@@ -169,7 +169,10 @@ class Sim53220ATransport(_SimBase):
             if skind != 'PULSE':
                 self.stats = dict(count=n, mean=9.91e37, sdev=9.91e37)
                 return
-            true = ext['width_s'] if kind == 'PWID' else ext.get('delay_s', 0.0)
+            if kind == 'PWID' or (kind == 'TINT' and self.inp[2]['slop'] == 'NEG'):   # TINT stopping on the falling edge of one split pulse = its width
+                true = ext['width_s']
+            else:
+                true = ext.get('delay_s', 0.0)
             self.stats = dict(count=n, mean=true + self.time_offset, sdev=self.sd_time)
         elif kind == 'BURST':
             width = ext.get('burst_width_s', 0.0) if skind == 'BURST' else 0.0

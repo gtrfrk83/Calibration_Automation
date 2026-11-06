@@ -18,6 +18,8 @@ GROUP names (one picture per wiring group):
                  With the Agilent 33250A (driven by the program, Tests 4a / 4b at 8 ns) the picture is hook_53220a_33250A_PULSE_CH1.png / hook_53220a_33250A_PULSE_CH2.png
                  (its Output connector to the counter channel, 50 ohm); if absent the manual-pulse picture is shown.
     TINT         Test 5: pulse generator, both outputs, to Channel 1 and Channel 2 with equal cable lengths   (manual)
+                 With the Agilent 33250A (one output, a substitute, 2026-11-06): hook_53220a_33250A_TINT.png - its Output to a resistive power splitter, the two splitter
+                 outputs to Channel 1 and Channel 2 with equal cables; if absent the manual picture is shown.
     BURST        Test 7 (53230A with Option 150): pulse-modulated microwave generator to the microwave input   (manual)
 
 Examples:  hook_53220a_96270A_CH1.png   hook_53220a_96270A_CH3_MW.png   hook_53220a_SMA100B_CH3_MW.png   hook_53220a_manual_PULSE_CH1.png   hook_53220a_TIMEBASE.png

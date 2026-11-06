@@ -307,6 +307,26 @@ def plan_stimulus(p: dict[str, Any], stim: dict[str, Any]) -> dict[str, Any]:
                 reason=f'The 96270A Microwave O/P cannot make {level:g} dBm (its floor is {floor:g} dBm): it is set to {floor:g} dBm and {atten:g} dB of external attenuation is needed before the counter input')
 
 
+# Point numbers moved on 2026-11-06: the two 33250A Test 5 points were inserted after the two-output pair, so Tests 6a to 7d moved up by two.  Results saved
+# since then carry their point's ref; an older file's result at or after the first inserted point cannot be matched and is left out.
+RENUMBERED_FROM_REF = '5.ch1-ch2.49.9ns.33250A.mean'
+
+
+def drop_stale_results(app):
+    """Remove loaded results that do not belong to the point now at their number.  Returns how many were removed."""
+    first = next((p['id'] for p in POINTS if p['ref'] == RENUMBERED_FROM_REF), None)
+    by_id = {str(p['id']): p for p in POINTS}
+    n = 0
+    for store in (app._found, app._left):
+        for key in list(store):
+            rec, p = store[key], by_id.get(str(key))
+            ref = rec.get('ref') if isinstance(rec, dict) else None
+            if p is None or (ref is not None and ref != p['ref']) or (ref is None and first is not None and int(key) >= first):
+                del store[key]
+                n += 1
+    return n
+
+
 def gen_ok(p, pulse_gen):
     """A point made for one pulse generator exists only with that generator (the 5 ns pulse points: the 81134A or equivalent; the 8 ns ones: the Agilent 33250A, which cannot make 5 ns)."""
     return not p.get('gen') or p['gen'] == pulse_gen
@@ -707,6 +727,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g == 'NONE': return ''
         if g == 'PULSE':
             t = f'pulse width {_tm(st["width_s"])}, period {_tm(st["period_s"])}, {st["vpp"]:g} Vpp'
+            if st.get('split'):
+                return t + ', 0 V offset, through a resistive power splitter to Channel 1 and Channel 2 (equal cables; about half the amplitude at each input)'
             return t + (f', second output delayed {_tm(st["delay_s"])} from the first' if st.get('delay_s') else '')
         if g == 'BURST':
             return f'{_hz(st["frequency"])} at {st["level_dbm"]:g} dBm, pulse modulated: width {_tm(st["burst_width_s"])}, PRI {_tm(st["pri_s"])}'
@@ -732,6 +754,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return base + f'{self.stim_text(p)} from {mw} to the microwave input ({chan_name(p)}); {ref}.' + rear
         if g in ('PULSE_CH1', 'PULSE_CH2'):
             return base + f'{"Agilent 33250A" if p.get("gen") == "33250A" else "Pulse generator"} output to Channel {1 if g == "PULSE_CH1" else 2}: {self.stim_text(p)}; {ref}.' + rear
+        if g == 'TINT' and p['stimulus'].get('split'):
+            return (base + f'Agilent 33250A Output to a resistive power splitter, its two outputs to Channel 1 and Channel 2 with equal cable lengths: {self.stim_text(p)}. '
+                    f'The counter measures Channel 1 rising to Channel 2 falling (a substitute for the two-output test: the reference is the 33250A set width); {ref}.' + rear)
         if g == 'TINT':
             return base + f'Pulse generator: both outputs to Channel 1 and Channel 2 with equal cable lengths: {self.stim_text(p)}; {ref}.' + rear
         return base + f'Pulse-modulated microwave generator to the microwave input: {self.stim_text(p)}; {ref}.' + rear
@@ -951,7 +976,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if plan['mode'] == 'pulse':
             return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
                 [('Output off', 'The Agilent 33250A output is switched off before you rewire.'), ('Wiring', self.setup_text(p)),
-                 ('33250A', 'Its Output connector goes to the counter input (50 ohm). The program sets the pulse (' + self.stim_text(p) + ', edge time 5 ns), reads every setting back and switches the output on for the measurement only.')],
+                 ('33250A', ('Its Output goes through a resistive power splitter and two EQUAL cables to Channel 1 and Channel 2. ' if p['stimulus'].get('split') else
+                             'Its Output connector goes to the counter input (50 ohm). ')
+                  + 'The program sets the pulse (' + self.stim_text(p) + ', edge time 5 ns), reads every setting back and switches the output on for the measurement only.')],
                 facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
         steps = [('Output off', f'The {self.rf_name()} output is {"switched off" if plan.get("route") == "SMA" else "put in standby"} before you rewire.'), ('Wiring', self.setup_text(p))]
         if plan.get('atten_db'):
@@ -1048,7 +1075,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _record(self, p, reading, synthetic, mode='rf', extra=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
-        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode, atten_db=self.atten.get(p['id'], 0.0),
+        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode, atten_db=self.atten.get(p['id'], 0.0), ref=p['ref'],
                                           timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
 
@@ -1076,8 +1103,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.pulse_opt.set(bool(data.get('pulse_opt', self.pulse_opt.get()))); self.rear_opt.set(bool(data.get('rear_opt', self.rear_opt.get())))
         self.opts_declared = True                                    # the results in the file were taken with these options
         self.load_results(data)
+        dropped = drop_stale_results(self)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
-        self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+        self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.'
+                                                    + (f' {dropped} result(s) from an older point numbering were left out: run those points again.' if dropped else ''))
 
     @staticmethod
     def report_section(p):

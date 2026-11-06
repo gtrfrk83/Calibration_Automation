@@ -440,6 +440,8 @@ class Keysight53220A(SurpriseMixin, Instrument):
             self._level_off([c])
         elif func == 'TINT':
             self._level_off([1, 2])
+            if point.get('stop_slope') == 'NEG':           # the 33250A substitute for Test 5 (one split pulse: Channel 1 rising to Channel 2 falling, owner 2026-11-06)
+                self._set('inp.slop', 'NEG', ch=2)
         if func == 'FREQ':
             self._set('freq.mode', 'AUTO')
             self._set('gate.src', 'TIME')
