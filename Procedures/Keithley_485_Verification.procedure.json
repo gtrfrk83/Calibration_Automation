@@ -5,6 +5,7 @@
  "manufacturer": "Keithley",
  "model": "485",
  "category": "Picoammeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 82,
  "description": "Standalone calibration procedure",

@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "325",
  "category": "Clamp Meter",
+ "family": "clamp-meter",
  "version": "1",
  "order": 63,
  "description": "Fluke 323 / 324 / 325 Clamp Meter Performance Verification (family spec): this launcher runs the 325, 30 points",

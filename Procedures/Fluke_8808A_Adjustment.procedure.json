@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "8808A",
  "category": "Digital Multimeter Adjustment",
+ "family": "adjustment",
  "kind": "adjustment",
  "version": "1",
  "order": 33,

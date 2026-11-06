@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "77 Series IV",
  "category": "Digital Multimeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 26,
  "description": "Standalone calibration procedure",

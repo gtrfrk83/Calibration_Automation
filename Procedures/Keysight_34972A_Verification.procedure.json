@@ -5,6 +5,7 @@
  "manufacturer": "Keysight",
  "model": "34972A",
  "category": "Data Acquisition / Switch Unit",
+ "family": "dacq",
  "version": "1",
  "order": 11,
  "description": "Standalone calibration procedure",

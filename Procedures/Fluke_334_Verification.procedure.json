@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "334",
  "category": "Clamp Meter",
+ "family": "clamp-meter",
  "version": "1",
  "order": 67,
  "description": "Fluke 333 / 334 / 335 / 336 / 337 Clamp Meter Performance Verification (family spec): this launcher runs the 334, 16 points (Table 2 plus the display / backlight / keypad checks)",

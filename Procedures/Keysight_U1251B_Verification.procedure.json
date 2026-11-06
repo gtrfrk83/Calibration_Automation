@@ -5,6 +5,7 @@
  "manufacturer": "Keysight",
  "model": "U1251B",
  "category": "Digital Multimeter",
+ "family": "handheld-dmm",
  "version": "1",
  "order": 71,
  "description": "Keysight U1251B / U1252B Handheld Digital Multimeter Performance Verification (family spec): this launcher runs the U1251B, 63 points (Table 6-2 plus the Basic Operating Test checks)",

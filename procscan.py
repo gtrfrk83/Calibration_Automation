@@ -31,6 +31,8 @@ Sidecar fields (schema 1):
     own_files     the files that belong to this procedure alone (what tools/make_package.py ships; shared files are listed in fingerprint but
                   not shipped, the target suite must already have them)
     tests         optional list of test files
+    family        optional text: the group of procedures that share behaviour and must get the same fixes (uniformity rule 12, NOTES.md;
+                  one of uniformity.FAMILIES for the shipped procedures, checked by tests/test_procedure_conformance.py).  Changes no behaviour.
 
 Nothing here is executed: a sidecar is data, read with json.
 """
@@ -107,6 +109,7 @@ class Proc:
     tests: tuple = ()
     sidecar: str = ''                                    # 'Procedures/<id>.procedure.json'
     kind: str = ''                                       # '' (derive, see classify), 'verification', 'adjustment' or 'manual'
+    family: str = ''                                     # uniformity rule 12 (information only)
 
     @property
     def effective_kind(self) -> str:
@@ -169,7 +172,7 @@ def parse_sidecar(doc, stem: str) -> Proc:
     if launcher != f'Procedures/{pid}.py':
         raise ScanProblem(f'"launcher" must be Procedures/{pid}.py')
     text = {}
-    for k in ('manufacturer', 'model', 'category', 'description', 'version'):
+    for k in ('manufacturer', 'model', 'category', 'description', 'version', 'family'):
         v = doc.get(k, '')
         if not isinstance(v, str):
             raise ScanProblem(f'"{k}" must be text')
@@ -208,7 +211,8 @@ def parse_sidecar(doc, stem: str) -> Proc:
     return Proc(id=pid, name=name.strip(), manufacturer=text['manufacturer'], model=text['model'], category=text['category'],
                 description=text['description'], version=text['version'], order=order, launcher=launcher, engine=engine, drivers=tuple(drivers),
                 specs=specs, fingerprint_code=fp_code, fingerprint_spec=fp_spec, hookup_meter=meter, diagram_prefixes=prefixes,
-                seed_verified=bool(doc.get('seed_verified', False)), seed_order=int(doc.get('seed_order', DEFAULT_ORDER)), own_files=own, tests=tests, sidecar=f'Procedures/{stem}{SIDECAR_SUFFIX}', kind=kind)
+                seed_verified=bool(doc.get('seed_verified', False)), seed_order=int(doc.get('seed_order', DEFAULT_ORDER)), own_files=own, tests=tests, sidecar=f'Procedures/{stem}{SIDECAR_SUFFIX}', kind=kind,
+                family=text['family'])
 
 
 def scan_folder(folder) -> ScanResult:

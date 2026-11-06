@@ -5,6 +5,7 @@
  "manufacturer": "Fluke",
  "model": "365",
  "category": "Clamp Meter",
+ "family": "clamp-meter",
  "version": "1",
  "order": 34,
  "description": "Standalone calibration procedure",

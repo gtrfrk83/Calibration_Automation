@@ -5,6 +5,7 @@
  "manufacturer": "Teledyne LeCroy",
  "model": "WS4104HD",
  "category": "Oscilloscope",
+ "family": "oscilloscope",
  "version": "51",
  "order": 0,
  "description": "Standalone calibration procedure",
